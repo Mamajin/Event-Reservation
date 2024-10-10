@@ -39,11 +39,46 @@ function Form({ route, method }) {
                 navigate("/login");
             }
         } catch (error) {
-            alert(error.response?.data?.detail || "An error occurred");
+            let errorMessage;
+    
+            // Check if the error response exists
+            if (error.response) {
+                // Get the specific status and detail from the error response
+                const status = error.response.status;
+                const data = error.response.data;
+    
+                // Provide specific messages based on status codes
+                switch (status) {
+                    case 400: // Bad Request
+                        if (data.detail) {
+                            errorMessage = data.detail; // Use the specific detail message
+                        } else {
+                            errorMessage = "There was an issue with your registration. Please check your inputs.";
+                        }
+                        break;
+                    case 409: // Conflict
+                        if (data.detail && data.detail.includes("unique constraint")) {
+                            errorMessage = "This username is already taken. Please choose a different one."; // Message for already taken username
+                        } else {
+                            errorMessage = "There was a conflict with your request. Please try again.";
+                        }
+                        break;
+                    case 500: // Internal Server Error
+                        errorMessage = "Server error. Please try again later.";
+                        break;
+                    default:
+                        errorMessage = "An unexpected error occurred. Please try again.";
+                        break;
+                }
+            } else {
+                errorMessage = "Network error. Please check your connection and try again.";
+            }
+    
+            alert(errorMessage); // Show the appropriate error message
         } finally {
             setLoading(false); // Reset loading state
         }
-    };
+    }
 
     return (
         <form onSubmit={handleSubmit} className="form-container">
