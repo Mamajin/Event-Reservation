@@ -152,8 +152,6 @@ class Ticket(models.Model):
     attendee = models.ForeignKey(Attendee, on_delete= models.CASCADE)
     register_date = models.DateTimeField('Date registered', default= timezone.now)
     
-    def __str__(self) -> str:
-        return f"Event: {self.event.event_name}, Attendee: {self.attendee.user.username}"
         
     def add_event(self, event) -> None:
         """
@@ -172,9 +170,13 @@ class Ticket(models.Model):
         self.event_list.remove(event)
 
 
+
     def cancel_ticket(self) -> None:
         """
         Cancels the ticket by deleting the Ticket instance.
         """
         self.delete()
 
+
+    def __str__(self) -> str:
+        return f"Event: {self.event.event_name}, Attendee: {self.attendee.user.username}"
