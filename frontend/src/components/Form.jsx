@@ -2,12 +2,12 @@ import { useState } from "react";
 import api from "../api";
 import { useNavigate } from "react-router-dom";
 import { ACCESS_TOKEN, REFRESH_TOKEN } from "../constants";
-import "../styles/Form.css"
 import LoadingIndicator from "./LoadingIndicator";
 
 function Form({ route, method }) {
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
+    const [confirmPassword, setConfirmPassword] = useState(""); // New state for second password
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
 
@@ -16,6 +16,12 @@ function Form({ route, method }) {
     const handleSubmit = async (e) => {
         setLoading(true);
         e.preventDefault();
+
+        if (method === "register" && password !== confirmPassword) {
+            alert("Passwords do not match!"); // Alert if passwords do not match
+            setLoading(false);
+            return; // Stop the submission if passwords do not match
+        }
 
         try {
             const res = await api.post(route, { username, password })
@@ -50,7 +56,15 @@ function Form({ route, method }) {
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="Password"
             />
-            {loading && <LoadingIndicator />}
+            {method === "register" && ( // Conditionally render the confirm password input
+                <input
+                    className="form-input"
+                    type="password"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    placeholder="Confirm Password"
+                />
+            )}
             <button className="form-button" type="submit">
                 {name}
             </button>
@@ -58,4 +72,4 @@ function Form({ route, method }) {
     );
 }
 
-export default Form
+export default Form;
