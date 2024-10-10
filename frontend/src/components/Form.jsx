@@ -74,7 +74,7 @@ function Form({ route, method }) {
                     required
                 />
             )}
-            <button className="form-button" type="submit" disabled={loading}> // Prevents Duplicate Submissions
+            <button className="form-button" type="submit" disabled={loading}>
                 {name}
             </button>
         </form>
