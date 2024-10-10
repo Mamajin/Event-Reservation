@@ -22,5 +22,5 @@ class UserSerializer(serializers.ModelSerializer):
         """
         Create a new user with the provided validated data.
         """
-        validated_data('password2')
+        validated_data.pop('password2')
         return User.objects.create_user(**validated_data)
