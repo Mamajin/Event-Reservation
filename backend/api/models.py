@@ -27,10 +27,12 @@ class Organizer(models.Model):
     """
     organizer_name = models.CharField(max_length=100)
     email = models.EmailField()
-    event_list = models.ManyToManyField(Event, on_delete=models.CASCADE, related_name='events')
+    event_list = models.ManyToManyField(Event, related_name='events')
 
     def __str__(self):
         return self.user.first_name
+    
+    
     
 class Ticket(models.Model):
     event = models.ForeignKey(Event, on_delete= models.CASCADE)
