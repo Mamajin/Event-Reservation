@@ -8,10 +8,17 @@ class Organizer(models.Model):
     email = models.EmailField()
     
     def show_event(self):
+        """
+        Returns all events an Organizer has ever organized both active and closed
+        events
+
+        Returns:
+            query_set: List of events an organizer have organized
+        """
         return Organizer.event_set.all()
     
     
-    def __str__(self):
+    def __str__(self) -> str:
         return self.organizer_name
 
 
@@ -45,7 +52,13 @@ class Event(models.Model):
     def current_number_attendee(self):
         return self.ticket_set.count()
     
-    def get_event_status(self):
+    def get_event_status(self) -> str:
+        """
+        Get current event Status
+
+        Returns:
+            str: String of the current status of the event
+        """
         now = timezone.now()
         if now < self.start_date_event:
             return "Upcoming"
@@ -54,28 +67,59 @@ class Event(models.Model):
         else:
             return "Finished"
 
-    def available_spot(self):
+    def available_spot(self) -> int:
+        """
+        Get availble spots left in an event
+
+        Return:
+            int: Number of slots available for the event
+        """
         return self.max_attendee - self.current_number_attendee
     
     
-    def is_max_attendee(self):
+    def is_max_attendee(self) -> bool:
+        """
+        Check if event is slots are full
+
+        Return:
+            bool: True if event is full on slots, False if event is not full
+        """
         if self.current_number_attendee == self.max_attendee:
             return True
         return False
     
-    def is_event_published(self):
+    def is_event_published(self) -> bool:
+        """
+        Check if event is published
+
+        Return:
+            bool: True if event is published  if not return False
+        """
         now = timezone.now()
         return self.event_create_date <= now
     
-    def is_end_date_register_lte_start_date_event(self):
+    def is_end_date_register_lte_start_date_event(self) -> bool:
+        """
+        Check if event date is valid. If event end date is before event start date
+        then event is not valid.
+
+        Return:
+            bool: True if event is valid, False if event is not valid
+        """
         return self.end_date_register < self.start_date_event
         
-    def can_register(self):
+    def can_register(self) -> bool:
+        """
+        Check if registered within register period.
+
+        Return:
+            bool: True if can register, False if cannot register
+        """
         now = timezone.now()
         return self.start_date_register <= now < self.end_date_register
     
         
-    def __str__(self):
+    def __str__(self) -> str:
         return f"Event: {self.event_name}"
     
     
@@ -86,12 +130,18 @@ class Attendee(models.Model):
     
     
     def show_event_registered(self):
+        """
+        Get all events an attendee has joined
+
+        Return:
+            query_set: List of events an attendee has joined
+        """
         return self.event_list.all()
     
     
     
     
-    def __str__(self):
+    def __str__(self) -> str:
         return f"Name: {self.user.username}"
     
 
@@ -101,17 +151,17 @@ class Ticket(models.Model):
     attendee = models.ForeignKey(Attendee, on_delete= models.CASCADE)
     register_date = models.DateTimeField('Date registered', default= timezone.now)
     
-    def __str__(self):
+    def __str__(self) -> str:
         return f"Event: {self.event.event_name}, Attendee: {self.attendee.user.username}"
         
-    def add_event(self, event):
+    def add_event(self, event) -> None:
         """
         Args:
             event (Event): The event to be added.
         """
         self.event_list.add(event)
 
-    def remove_event(self, event):
+    def remove_event(self, event) -> None:
         """
         Removes an event from the organizer's event list.
 
@@ -136,7 +186,7 @@ class Ticket(models.Model):
     attendee = models.ForeignKey(Attendee, on_delete=models.CASCADE)
     register_date = models.DateTimeField('Date registered', default=timezone.now)
 
-    def __str__(self):
+    def __str__(self) -> str:
         """
         Return a string representation of the Ticket object.
         
@@ -145,7 +195,7 @@ class Ticket(models.Model):
         """
         return f"Ticket for {self.event.event_name}"
     
-    def cancel_ticket(self):
+    def cancel_ticket(self) -> None:
         """
         Cancels the ticket by deleting the Ticket instance.
         """
