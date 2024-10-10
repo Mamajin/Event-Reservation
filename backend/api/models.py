@@ -31,3 +31,11 @@ class Organizer(models.Model):
 
     def __str__(self):
         return self.user.first_name
+    
+class Ticket(models.Model):
+    event = models.ForeignKey(Event, on_delete= models.CASCADE)
+    attendee = models.ForeignKey(Attendee, on_delete= models.CASCADE)
+    register_date = models.DateTimeField('Date registered', default= timezone.now)
+
+    
+    
