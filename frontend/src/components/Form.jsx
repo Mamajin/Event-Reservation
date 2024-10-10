@@ -14,29 +14,34 @@ function Form({ route, method }) {
     const name = method === "login" ? "Login" : "Register";
 
     const handleSubmit = async (e) => {
-        setLoading(true);
         e.preventDefault();
+        setLoading(true);
 
         // Check if passwords match
         if (method === "register" && password !== password2) {
-            alert("Passwords do not match!");
-            setLoading(false);
-            return;
+            alert("Passwords do not match!"); // Alert user if passwords don't match
+            setLoading(false); // Reset loading state
+            return; // Exit the function early
         }
 
         try {
-            const res = await api.post(route, { username, password });
+            const payload = { username, password };
+            if (method === "register") {
+                payload.password2 = password2; // Include password2 only for registration
+            }
+
+            const res = await api.post(route, payload); // Make API call
             if (method === "login") {
-                localStorage.setItem(ACCESS_TOKEN, res.data.access);
-                localStorage.setItem(REFRESH_TOKEN, res.data.refresh);
+                localStorage.setItem(ACCESS_TOKEN, res.data.access); // Store access token
+                localStorage.setItem(REFRESH_TOKEN, res.data.refresh); // Store refresh token
                 navigate("/");
             } else {
                 navigate("/login");
             }
         } catch (error) {
-            alert(error);
+            alert(error.response?.data?.detail || "An error occurred");
         } finally {
-            setLoading(false);
+            setLoading(false); // Reset loading state
         }
     };
 
@@ -56,6 +61,7 @@ function Form({ route, method }) {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="Password"
+                required
             />
             {/* Second password input for verification */}
             {method === "register" && (
@@ -65,9 +71,10 @@ function Form({ route, method }) {
                     value={password2}
                     onChange={(e) => setPassword2(e.target.value)}
                     placeholder="Confirm Password"
+                    required
                 />
             )}
-            <button className="form-button" type="submit">
+            <button className="form-button" type="submit" disabled={loading}> // Prevents Duplicate Submissions
                 {name}
             </button>
         </form>
