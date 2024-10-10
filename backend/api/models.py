@@ -7,6 +7,7 @@ from django.core.validators import MinValueValidator
 class Organizer(models.Model):
     organizer_name = models.CharField(max_length=100)
     email = models.EmailField()
+    # user = models.ForeignKey(User, on_delete=models.CASCADE)
     
     def show_event(self):
         """
@@ -46,7 +47,6 @@ class Event(models.Model):
     end_date_register = models.DateTimeField('Registration End Date', null=False, blank=False)
     description = models.TextField(max_length=400)
     max_attendee = models.IntegerField(default=0, validators = [MinValueValidator(0)])
-
 
     
     @property
@@ -118,11 +118,9 @@ class Event(models.Model):
         """
         now = timezone.now()
         return self.start_date_register <= now < self.end_date_register
-    
         
     def __str__(self) -> str:
         return f"Event: {self.event_name}"
-    
     
     
 class Attendee(models.Model):
@@ -138,14 +136,11 @@ class Attendee(models.Model):
             query_set: List of events an attendee has joined
         """
         return self.event_list.all()
-    
-    
-    
+
     
     def __str__(self) -> str:
         return f"Name: {self.user.username}"
     
-
     
 class Ticket(models.Model):
     event = models.ForeignKey(Event, on_delete= models.CASCADE)
@@ -155,6 +150,8 @@ class Ticket(models.Model):
         
     def add_event(self, event) -> None:
         """
+        Adds an event to the attendee's event list.
+
         Args:
             event (Event): The event to be added.
         """
@@ -169,14 +166,11 @@ class Ticket(models.Model):
         """
         self.event_list.remove(event)
 
-
-
     def cancel_ticket(self) -> None:
         """
         Cancels the ticket by deleting the Ticket instance.
         """
         self.delete()
-
 
     def __str__(self) -> str:
         return f"Event: {self.event.event_name}, Attendee: {self.attendee.user.username}"
