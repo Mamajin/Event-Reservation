@@ -172,30 +172,6 @@ class Ticket(models.Model):
         self.event_list.remove(event)
 
 
-
-class Ticket(models.Model):
-    """
-    Represents a ticket that connects an Attendee to an Event. 
-    Tracks the date of registration for the event.
-
-    Attributes:
-        event (ForeignKey): The event the ticket is for.
-        attendee (ForeignKey): The attendee who registered for the event.
-        register_date (datetime): The date the attendee registered for the event.
-    """
-    event = models.ForeignKey(Event, on_delete=models.CASCADE)
-    attendee = models.ForeignKey(Attendee, on_delete=models.CASCADE)
-    register_date = models.DateTimeField('Date registered', default=timezone.now)
-
-    def __str__(self) -> str:
-        """
-        Return a string representation of the Ticket object.
-        
-        Returns:
-            str: A string indicating the event name for the ticket.
-        """
-        return f"Ticket for {self.event.event_name}"
-    
     def cancel_ticket(self) -> None:
         """
         Cancels the ticket by deleting the Ticket instance.
