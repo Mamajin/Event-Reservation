@@ -1,3 +1,4 @@
+from django.db import IntegrityError
 from django.contrib.auth.models import User
 from rest_framework import serializers
 
@@ -13,6 +14,9 @@ class UserSerializer(serializers.ModelSerializer):
     def validate(self, data):
         """
         Check that the two passwords match.
+
+        Returns:
+            data: The data of user.
         """
         if data['password'] != data['password2']:
             raise serializers.ValidationError("Passwords do not match.")
@@ -20,7 +24,17 @@ class UserSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         """
-        Create a new user with the provided validated data.
+        Create a new user with the provided validated data.  
+
+        Returns:
+            User: The created User instance.
+
+        Raises:
+            serializers.ValidationError: If the username is already taken or any other integrity constraint is violated.
         """
-        validated_data('password2')
-        return User.objects.create_user(**validated_data)
+        validated_data.pop('password2')  # Assuming password2 is only for confirmation and not saved
+        try:
+            user = User.objects.create_user(**validated_data)
+        except IntegrityError:
+            raise serializers.ValidationError({"detail": "This username is already taken."})
+        return user
