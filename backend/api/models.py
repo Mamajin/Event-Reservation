@@ -7,6 +7,10 @@ class Organizer(models.Model):
     organizer_name = models.CharField(max_length=100)
     email = models.EmailField()
     
+    def show_event(self):
+        return Organizer.event_set.all()
+    
+    
     def __str__(self):
         return self.organizer_name
 
@@ -35,10 +39,23 @@ class Event(models.Model):
     description = models.TextField(max_length=400)
     max_attendee = models.IntegerField(default=0)
 
+
     
     @property
     def current_number_attendee(self):
         return self.ticket_set.count()
+    
+    def get_event_status(self):
+        now = timezone.now()
+        if now < self.start_date_event:
+            return "Upcoming"
+        elif self.start_date_event <= now <= self.end_date_event:
+            return "Ongoing"
+        else:
+            return "Finished"
+
+    def available_spot(self):
+        return self.max_attendee - self.current_number_attendee
     
     
     def is_max_attendee(self):
@@ -66,6 +83,13 @@ class Event(models.Model):
 class Attendee(models.Model):
     user = models.ForeignKey(User, on_delete= models.CASCADE)
     event_list = models.ManyToManyField(Event, through= 'Ticket')
+    
+    
+    def show_event_registered(self):
+        return self.event_list.all()
+    
+    
+    
     
     def __str__(self):
         return f"Name: {self.user.username}"
