@@ -5,9 +5,10 @@ from django.core.validators import MinValueValidator
 
 
 class Organizer(models.Model):
+    user = models.ForeignKey(User, on_delete= models.CASCADE)
     organizer_name = models.CharField(max_length=100)
     email = models.EmailField()
-    # user = models.ForeignKey(User, on_delete=models.CASCADE)
+
     
     def show_event(self):
         """
@@ -21,7 +22,7 @@ class Organizer(models.Model):
     
     
     def __str__(self) -> str:
-        return self.organizer_name
+        return f"Organizer name: {self.organizer_name}"
 
 
 class Event(models.Model):
