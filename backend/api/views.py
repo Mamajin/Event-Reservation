@@ -12,8 +12,7 @@ class CreateUserView(generics.CreateAPIView):
     permission_classes = [AllowAny]
 
 
-class CreateOrganizerView(generics.CreateAPIView):
+class OrganizerDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Organizer.objects.all()
     serializer_class = OrganizerSerializer
-    permission_classes = [IsAuthenticated]
     

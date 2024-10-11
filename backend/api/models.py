@@ -127,7 +127,7 @@ class Event(models.Model):
     
 class Attendee(models.Model):
     user = models.ForeignKey(User, on_delete= models.CASCADE)
-    event_list = models.ManyToManyField(Event, through= 'Ticket')
+    event_list = models.ManyToManyField(Event, through='Ticket')
     
     
     def show_event_registered(self):
@@ -152,6 +152,9 @@ class Ticket(models.Model):
     attendee = models.ForeignKey(Attendee, on_delete= models.CASCADE)
     register_date = models.DateTimeField('Date registered', default= timezone.now)
     
+    class Meta:
+        db_table = 'custom_ticket_table_name'
+
     def __str__(self) -> str:
         return f"Event: {self.event.event_name}, Attendee: {self.attendee.user.username}"
         
