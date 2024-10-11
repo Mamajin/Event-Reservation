@@ -5,8 +5,10 @@ from django.core.validators import MinValueValidator
 
 
 class Organizer(models.Model):
+    user = models.ForeignKey(User, on_delete= models.CASCADE)
     organizer_name = models.CharField(max_length=100)
     email = models.EmailField()
+
     
     def show_event(self):
         """
@@ -20,7 +22,7 @@ class Organizer(models.Model):
     
     
     def __str__(self) -> str:
-        return self.organizer_name
+        return f"Organizer name: {self.organizer_name}"
 
 
 class Event(models.Model):
@@ -46,7 +48,6 @@ class Event(models.Model):
     end_date_register = models.DateTimeField('Registration End Date', null=False, blank=False)
     description = models.TextField(max_length=400)
     max_attendee = models.IntegerField(default=0, validators = [MinValueValidator(0)])
-
 
     
     @property
@@ -118,11 +119,9 @@ class Event(models.Model):
         """
         now = timezone.now()
         return self.start_date_register <= now < self.end_date_register
-    
         
     def __str__(self) -> str:
         return f"Event: {self.event_name}"
-    
     
     
 class Attendee(models.Model):
@@ -138,25 +137,22 @@ class Attendee(models.Model):
             query_set: List of events an attendee has joined
         """
         return self.event_list.all()
-    
-    
-    
+
     
     def __str__(self) -> str:
         return f"Name: {self.user.username}"
     
-
     
 class Ticket(models.Model):
     event = models.ForeignKey(Event, on_delete= models.CASCADE)
     attendee = models.ForeignKey(Attendee, on_delete= models.CASCADE)
     register_date = models.DateTimeField('Date registered', default= timezone.now)
     
-    def __str__(self) -> str:
-        return f"Event: {self.event.event_name}, Attendee: {self.attendee.user.username}"
         
     def add_event(self, event) -> None:
         """
+        Adds an event to the attendee's event list.
+
         Args:
             event (Event): The event to be added.
         """
@@ -171,34 +167,11 @@ class Ticket(models.Model):
         """
         self.event_list.remove(event)
 
-
-
-class Ticket(models.Model):
-    """
-    Represents a ticket that connects an Attendee to an Event. 
-    Tracks the date of registration for the event.
-
-    Attributes:
-        event (ForeignKey): The event the ticket is for.
-        attendee (ForeignKey): The attendee who registered for the event.
-        register_date (datetime): The date the attendee registered for the event.
-    """
-    event = models.ForeignKey(Event, on_delete=models.CASCADE)
-    attendee = models.ForeignKey(Attendee, on_delete=models.CASCADE)
-    register_date = models.DateTimeField('Date registered', default=timezone.now)
-
-    def __str__(self) -> str:
-        """
-        Return a string representation of the Ticket object.
-        
-        Returns:
-            str: A string indicating the event name for the ticket.
-        """
-        return f"Ticket for {self.event.event_name}"
-    
     def cancel_ticket(self) -> None:
         """
         Cancels the ticket by deleting the Ticket instance.
         """
         self.delete()
 
+    def __str__(self) -> str:
+        return f"Event: {self.event.event_name}, Attendee: {self.attendee.user.username}"
