@@ -45,6 +45,8 @@ INSTALLED_APPS = [
     "api",
     "rest_framework",
     "corsheaders",
+    "ninja",
+    "stub_api",
 ]
 
 MIDDLEWARE = [
