@@ -1,9 +1,14 @@
 from django.db import IntegrityError
 from django.contrib.auth.models import User
 from rest_framework import serializers
+from api.models import Organizer, Event, Attendee, Ticket
 
 
 class UserSerializer(serializers.ModelSerializer):
+    """
+    Serializer for User model, handling user creation and validation, 
+    including password confirmation.
+    """
     password2 = serializers.CharField(write_only=True)
 
     class Meta:
@@ -38,3 +43,48 @@ class UserSerializer(serializers.ModelSerializer):
         except IntegrityError:
             raise serializers.ValidationError({"detail": "This username is already taken."})
         return user
+    
+
+class OrganizerSerializer(serializers.ModelSerializer):
+    """
+    Serializer for Organizer model, converting Organizer model instances 
+    into JSON and vice versa.
+    """
+    class Meta:
+        model = Organizer
+        fields = '__all__'
+
+
+class EventSerializer(serializers.ModelSerializer):
+    """
+    Serializer for Event model, converting Event instances to JSON and 
+    managing event-related data.
+    """
+    organizer = OrganizerSerializer(read_only=True)
+
+    class Meta:
+        model = Event
+        fields = '__all__'
+
+
+class AttendeeSerializer(serializers.ModelSerializer):
+    """
+    Serializer for Attendee model, handling the conversion of Attendee 
+    model instances into JSON format.
+    """
+    class Meta:
+        model = Attendee
+        fields = '__all__'
+
+
+class TicketSerializer(serializers.ModelSerializer):
+    """
+    Serializer for Ticket model, handling ticket-related data, including 
+    events and attendees, in a JSON-compatible format.
+    """
+    event = EventSerializer(read_only=True)
+    attendee = AttendeeSerializer(read_only=True)
+
+    class Meta:
+        model = Ticket
+        fields = '__all__'
