@@ -1,6 +1,6 @@
 from django.urls import path,include
-from .views import stub_api
+from stub_api.views import stub_api
 
 urlpatterns = [
-    path('stub_api/', stub_api.urls)
+    path('', stub_api.urls)
 ]
