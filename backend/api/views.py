@@ -8,14 +8,25 @@ from api.models import Organizer, Event, Attendee, Ticket
 
 
 class CreateUserView(generics.CreateAPIView):
+    """
+    
+    """
     queryset = User.objects.all()
     serializer_class = UserSerializer
     permission_classes = [AllowAny]
 
 
-class OrganizerDetailView(generics.RetrieveUpdateDestroyAPIView):
+class CreateOrganizerView(generics.CreateAPIView):
+    """
+    
+    """
     queryset = Organizer.objects.all()
     serializer_class = OrganizerSerializer
+    permission_classes = [IsAuthenticated]
+
+    def perform_create(self, serializer):
+        user = serializer.save()
+        Organizer.objects.create(user=user, organizer_name=user.username, email=user.email)
 
 
 class CreateEventView(generics.CreateAPIView):
@@ -24,7 +35,7 @@ class CreateEventView(generics.CreateAPIView):
     """
     queryset = Event.objects.all()
     serializer_class = EventSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [AllowAny] # AllowAny for implementation.
 
     def perform_create(self, serializer):
         """

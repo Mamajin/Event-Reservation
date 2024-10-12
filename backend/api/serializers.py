@@ -74,8 +74,11 @@ class EventSerializer(serializers.ModelSerializer):
         """
         request = self.context.get('request', None)
         if request and hasattr(request, 'user'):
-            organizer = Organizer.objects.get(user=request.user)
-            validated_data['organizer'] = organizer
+            try:
+                organizer = Organizer.objects.get(user=request.user)
+                validated_data['organizer'] = organizer
+            except Organizer.DoesNotExist:
+                raise serializers.ValidationError("The authenticated user is not associated with any organizer.")
         return super().create(validated_data)
 
 
