@@ -18,7 +18,7 @@ class Organizer(models.Model):
         Returns:
             query_set: List of events an organizer have organized
         """
-        return Organizer.event_set.all()
+        return Organizer.events.all()
     
     
     def __str__(self) -> str:

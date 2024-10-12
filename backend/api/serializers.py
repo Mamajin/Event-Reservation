@@ -74,7 +74,7 @@ class EventSerializer(serializers.ModelSerializer):
         """
         request = self.context.get('request', None)
         if request and hasattr(request, 'user'):
-            organizer = Organizer.objects.get(use=request.user)
+            organizer = Organizer.objects.get(user=request.user)
             validated_data['organizer'] = organizer
         return super().create(validated_data)
 
