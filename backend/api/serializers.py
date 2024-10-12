@@ -64,7 +64,19 @@ class EventSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Event
-        fields = '__all__'
+        fields = ['id', 'event_name', 'organizer', 'event_create_date', 'start_date_event', 
+                  'end_date_event', 'start_date_register', 'end_date_register', 
+                  'description', 'max_attendee']
+
+    def create(self, validated_data):
+        """
+        Assign the authenticated organizer to the event.
+        """
+        request = self.context.get('request', None)
+        if request and hasattr(request, 'user'):
+            organizer = Organizer.objects.get(use=request.user)
+            validated_data['organizer'] = organizer
+        return super().create(validated_data)
 
 
 class AttendeeSerializer(serializers.ModelSerializer):
