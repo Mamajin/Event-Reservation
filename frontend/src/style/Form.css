@@ -1,3 +1,6 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 .form-container {
     display: flex;
     flex-direction: column;
