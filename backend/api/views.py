@@ -1,4 +1,5 @@
 from ninja import Router, Schema, NinjaAPI, Field
+from django.contrib.auth import authenticate, login
 from django.contrib.auth.models import User
 from ninja import NinjaAPI, Router, Schema, ModelSchema, Form
 from typing import List, Optional
@@ -6,7 +7,9 @@ from api.models import *
 from django.contrib.auth.hashers import make_password
 from pydantic import field_validator
 from rest_framework_simplejwt.tokens import RefreshToken
-import datetime
+from datetime import datetime
+from ninja.responses import Response
+from rest_framework import status
 
 
 api = NinjaAPI(version ="2.0.0")
@@ -26,6 +29,10 @@ class UserSchema(Schema):
         if "password" in values.data and values.data["password"] != password2:
             raise ValueError("Passwords do not match")
         return password2
+    
+class LoginSchema(Schema):
+    username: str
+    password: str
 
 class UserResponseSchema(Schema):
     username: str
@@ -58,19 +65,6 @@ class EventSchema(ModelSchema):
                          'start_date_register', 'end_date_register',
                            'description', 'max_attendee']
         
-    # @validator("end_date_event")
-    # def check_end_date_event(cls, end_date_event, values):
-    #     if "start_date_event" in values and datetime.fromisoformat(end_date_event) < datetime.fromisoformat(values["start_date_event"]):
-    #         raise ValueError("End date of the event must be after the start date.")
-    #     return end_date_event
-    
-
-    # @validator("end_date_register")
-    # def check_end_date_register(cls, end_date_register, values):
-    #     if "start_date_event" in values and datetime.fromisoformat(end_date_register) > datetime.fromisoformat(values["start_date_event"]):
-    #         raise ValueError("End date of registration must be before the event start date.")
-    #     return end_date_register
-
 
 class EventResponseSchema(ModelSchema):
     class Config:
@@ -101,6 +95,23 @@ class UserAPI:
         user = User.objects.create(username = form.username, password =make_password(form.password))
         refresh = RefreshToken.for_user(user)
         return {"username":user.username, "access_token": str(refresh.access_token), "refresh_token": str(refresh)}
+    
+    
+    
+    @router.post('/login', response = LoginSchema)
+    def login(request, form: LoginSchema = Form(...)):
+        user = authenticate(request, username = form.username, password = form.password)
+            
+        if user is not None:
+            login(request,user)
+            return {"success": True, "message": "Login successful", "username": user.username, "password": user.password}
+        else:
+            return Response(
+            {"success": False, "message": "Invalid username or password"},
+            status=status.HTTP_403_FORBIDDEN
+        )
+        
+    
     
 
 class EventAPI:
