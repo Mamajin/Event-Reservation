@@ -1,7 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ACCESS_TOKEN } from '../constants';
-
+import { StarIcon } from '@heroicons/react/24/solid';
 
 export default function Navbar() {
   const navigate = useNavigate();
@@ -23,6 +23,7 @@ export default function Navbar() {
 
   return (
     <div className="navbar bg-dark-purple">
+      <StarIcon className="bg-amber-300 text-xl h-8 w-9 text-dark-purple rounded cursor-pointer mr-2" />
       <div className="navbar-start">
         <a className="btn btn-ghost text-xl p-0">EventEase</a>
       </div>
