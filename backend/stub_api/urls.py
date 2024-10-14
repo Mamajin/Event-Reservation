@@ -1,4 +1,4 @@
-from django.urls import path,include
+from django.urls import path, include
 from stub_api.views import stub_api
 
 urlpatterns = [

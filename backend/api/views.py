@@ -111,7 +111,27 @@ class UserAPI:
             status=status.HTTP_403_FORBIDDEN
         )
         
-    
+    @router.get('/profile', response=UserResponseSchema)
+    def view_profile(request):
+        """
+        Retrieve the profile details of the currently logged-in user.
+
+        Returns:
+            The user's profile information including username and tokens.
+        """
+        user = request.user
+        if not user.is_authenticated:
+            return Response(
+                {"error": "User is not authenticated"},
+                status=status.HTTP_403_FORBIDDEN
+            )
+        
+        refresh = RefreshToken.for_user(user)
+        return {
+            "username": user.username,
+            "access_token": str(refresh.access_token),
+            "refresh_token": str(refresh)
+        }
     
 
 class EventAPI:
@@ -140,3 +160,27 @@ class EventAPI:
             return {'error': str(e)}, 400
 
         return event
+    
+
+    @router.get('/events', response=List[EventResponseSchema])
+    def list_events(request, status: Optional[str] = None):
+        """
+        List all events with an optional filter for event status.
+
+        Args:
+            status (str, optional): Filter events by status ('upcoming', 'ongoing', 'finished').
+
+        Returns:
+            List of events based on the given status.
+        """
+        now = timezone.now()
+        events = Event.objects.all()
+
+        if status == "upcoming":
+            events = events.filter(start_date_event__gt=now)
+        elif status == "ongoing":
+            events = events.filter(start_date_event__lte=now, end_date_event__gte=now)
+        elif status == "finished":
+            events = events.filter(end_date_event__lt=now)
+
+        return events
