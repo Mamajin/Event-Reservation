@@ -33,6 +33,8 @@ DEBUG = True
 ALLOWED_HOSTS = ['*']
 
 
+
+
 # Application definition
 
 INSTALLED_APPS = [
@@ -48,6 +50,9 @@ INSTALLED_APPS = [
     "ninja",
     "stub_api",
 ]
+
+
+
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",

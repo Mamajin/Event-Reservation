@@ -5,10 +5,16 @@ from typing import List
 from api.models import *
 from django.contrib.auth.hashers import make_password
 from pydantic import field_validator
+from django.contrib.auth import get_user_model
+from rest_framework_simplejwt.tokens import RefreshToken, AccessToken
+
+
 
 api = NinjaAPI(version ="2.0.0")
 router = Router()
-api.add_router("api/", router)
+
+
+api.add_router("", router)
 
 
 
@@ -25,6 +31,8 @@ class UserSchema(Schema):
 
 class UserResponseSchema(Schema):
     username: str
+    access_token: str
+    refresh_token: str
 
 
 class OrganizerSchema(ModelSchema):
@@ -55,6 +63,9 @@ class UserAPI:
     def create_user(request, form : UserSchema = Form(...)):
         if form.password != form.password2:
             return {"error": "Passwords do not match"}
+        if User.objects.filter(username = form.username).exists():
+            return {"error": "Username already taken"}
         user = User.objects.create(username = form.username, password =make_password(form.password))
-        return user
+        refresh = RefreshToken.for_user(user)
+        return {"username":user.username, "access_token": str(refresh.access_token), "refresh_token": str(refresh)}
     

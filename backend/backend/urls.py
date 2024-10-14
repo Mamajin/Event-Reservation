@@ -22,9 +22,7 @@ import api.urls
 
 urlpatterns = [
     path("admin/", admin.site.urls),
-    path("api/token/", TokenObtainPairView.as_view(), name="get_token"),
-    path("api/token/refresh/", TokenRefreshView.as_view(), name="refresh"),
     path("api-auth", include("rest_framework.urls")),
     path("stub_api/", include(stub_api.urls)),
-    path("",include(api.urls))
+    path("api/",include(api.urls))
 ]
