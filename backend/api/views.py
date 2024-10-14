@@ -1,8 +1,5 @@
-from django.shortcuts import render
+from ninja import Router, Schema, NinjaAPI, Field
 from django.contrib.auth.models import User
-from rest_framework import generics
-from api.serializers import UserSerializer
-from rest_framework.permissions import IsAuthenticated, AllowAny
 from ninja import NinjaAPI, Router, Schema, ModelSchema, Form
 from typing import List
 from api.models import *
@@ -12,6 +9,7 @@ from pydantic import field_validator
 api = NinjaAPI(version ="2.0.0")
 router = Router()
 api.add_router("api/", router)
+
 
 
 class UserSchema(Schema):
