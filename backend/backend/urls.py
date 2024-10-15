@@ -19,6 +19,7 @@ from django.urls import path, include
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 import stub_api.urls
 import api.urls
+<<<<<<< HEAD
 
 
 urlpatterns = [
@@ -28,4 +29,12 @@ urlpatterns = [
     path("api-auth", include("rest_framework.urls")),
     path("stub_api/", include(stub_api.urls)),
     path("", include(api.urls)),
+=======
+
+urlpatterns = [
+    path("admin/", admin.site.urls),
+    path("api-auth", include("rest_framework.urls")),
+    path("stub_api/", include(stub_api.urls)),
+    path("api/",include(api.urls))
+>>>>>>> ef1db1d455e6a45baa7ca3ce2e4a3e509f8f2337
 ]
