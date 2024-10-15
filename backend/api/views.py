@@ -43,8 +43,6 @@ class LoginResponseSchema(Schema):
 
 class UserResponseSchema(Schema):
     username: str
-    access_token: str
-    refresh_token: str
 
 
 class OrganizerSchema(ModelSchema):
@@ -100,8 +98,7 @@ class UserAPI:
         if User.objects.filter(username = form.username).exists():
             return {"error": "Username already taken"}
         user = User.objects.create(username = form.username, password =make_password(form.password))
-        refresh = RefreshToken.for_user(user)
-        return {"username":user.username, "access_token": str(refresh.access_token), "refresh_token": str(refresh)}
+        return {"username":user.username}
     
     
     
