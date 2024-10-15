@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import EventCard from '../components/EventCard'; // Import the new component
+import EventCard from '../components/EventCard';
 
 function Home() {
   const [events, setEvents] = useState([]);
@@ -10,7 +10,7 @@ function Home() {
   useEffect(() => {
     const fetchEvents = async () => {
       try {
-        const response = await axios.get('http://localhost:8000/stub_api/mock_api/event_actual/');
+        const response = await axios.get('http://localhost:8000/stub_api/mock_api/event/');
         setEvents(response.data);
       } catch (err) {
         setError(err);
@@ -34,7 +34,7 @@ function Home() {
     <div className="bg-white min-h-screen p-6">
       <div className="card lg:card-side bg-base-100 shadow-xl">
         {events.map((event) => (
-          <EventCard key={event.organizer.user.id} event={event} /> // Use the EventCard component
+          <EventCard key={event.organizer.user.id} event={event} />
         ))}
       </div>
     </div>
