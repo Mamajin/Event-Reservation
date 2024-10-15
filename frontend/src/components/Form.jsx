@@ -1,7 +1,8 @@
 import { useState } from "react";
 import api from "../api";
 import { useNavigate } from "react-router-dom";
-import { ACCESS_TOKEN, REFRESH_TOKEN } from "../constants";
+import { ACCESS_TOKEN, REFRESH_TOKEN, USER_NAME } from "../constants";
+import qs from "qs"
 import "../style/Form.css";
 
 function Form({ route, method }) {
@@ -29,11 +30,14 @@ function Form({ route, method }) {
             if (method === "register") {
                 payload.password2 = password2; // Include password2 only for registration
             }
-
-            const res = await api.post(route, payload); // Make API call
+            const formData = qs.stringify(payload);
+            const res = await api.post(route, formData,{
+               headers:{"Content-Type": "application/x-www-form-urlencoded"
+               },     
+            }); // Make API call
             if (method === "login") {
-                localStorage.setItem(ACCESS_TOKEN, res.data.access); // Store access token
-                localStorage.setItem(REFRESH_TOKEN, res.data.refresh); // Store refresh token
+                localStorage.setItem(ACCESS_TOKEN, res.data.access_token); // Store access token
+                localStorage.setItem(REFRESH_TOKEN, res.data.refresh_token); // Store refresh token
                 navigate("/");
             } else {
                 navigate("/login");
