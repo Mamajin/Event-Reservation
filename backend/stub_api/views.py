@@ -7,7 +7,7 @@ from django.utils import timezone
 from django.contrib.auth.models import User
 import datetime
 
-stub_api = NinjaAPI()
+stub_api = NinjaAPI(version='1.0.0')
 router = Router()
 fake = Faker()
 
@@ -110,7 +110,6 @@ def create_event(request):
             'email': organizer_data['email'],
         }
     )
-    now = timezone.now()
 
     event_data = {
         'event_name': fake.catch_phrase(),
