@@ -34,6 +34,13 @@ class LoginSchema(Schema):
     username: str
     password: str
 
+class LoginResponseSchema(Schema):
+    username: str
+    password: str
+    access_token: str
+    refresh_token: str
+    
+
 class UserResponseSchema(Schema):
     username: str
     access_token: str
@@ -98,13 +105,21 @@ class UserAPI:
     
     
     
-    @router.post('/login', response = LoginSchema)
+    @router.post('/login', response = LoginResponseSchema)
     def login(request, form: LoginSchema = Form(...)):
         user = authenticate(request, username = form.username, password = form.password)
             
         if user is not None:
             login(request,user)
-            return {"success": True, "message": "Login successful", "username": user.username, "password": user.password}
+            refresh = RefreshToken.for_user(user)
+            return {
+                "success": True,
+                "message": "Login successful",
+                "access_token": str(refresh.access_token),
+                "refresh_token": str(refresh),
+                "username": user.username,
+                "password": user.password,
+            }
         else:
             return Response(
             {"success": False, "message": "Invalid username or password"},
