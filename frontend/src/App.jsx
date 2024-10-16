@@ -22,7 +22,7 @@ function App() {
           <Route
             path="/"
             element={
-              <ProtectedRoute>
+              <div>
                 <div className="flex flex-1">
                   <Sidebar />
                   <main className="flex-1">
@@ -30,7 +30,7 @@ function App() {
                   </main>
                 </div>
                 <Footer />
-              </ProtectedRoute>
+              </div>
             }
           />
           <Route path="/login" element={<Login />} />

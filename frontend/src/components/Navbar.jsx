@@ -10,7 +10,9 @@ export default function Navbar() {
     localStorage.clear();
     navigate('/login');
   };
-
+  const handleHome = () => {
+    navigate('')
+  }
   const handleLogin = () => {
     navigate('/login');
   };
@@ -25,7 +27,7 @@ export default function Navbar() {
     <div className="navbar bg-dark-purple">
       <StarIcon className="bg-amber-300 text-xl h-8 w-9 text-dark-purple rounded cursor-pointer mr-2" />
       <div className="navbar-start">
-        <a className="btn btn-ghost text-xl p-0">EventEase</a>
+        <a className="btn btn-ghost text-xl p-0" onClick={handleHome}>EventEase </a>
       </div>
       <div className="navbar-end">
         {isLoggedIn ? (
