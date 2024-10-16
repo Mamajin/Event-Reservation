@@ -7,7 +7,7 @@ from api.models import *
 from django.contrib.auth.hashers import make_password
 from pydantic import field_validator
 from rest_framework_simplejwt.tokens import RefreshToken
-from datetime import datetime
+from datetime import datetime, date
 from ninja.responses import Response
 from rest_framework import status
 
@@ -19,6 +19,7 @@ class UserSchema(Schema):
     username: str
     password: str
     password2: str
+    birth_date: date 
     
     @field_validator("password2")
     def passwords_match(cls, password2, values, **kwargs):
@@ -47,9 +48,9 @@ class UserAPI:
     def create_user(request, form: UserSchema = Form(...)):
         if form.password != form.password2:
             return {"error": "Passwords do not match"}
-        if User.objects.filter(username = form.username).exists():
+        if AttendeeUser.objects.filter(username = form.username).exists():
             return {"error": "Username already taken"}
-        user = User.objects.create(username = form.username, password =make_password(form.password))
+        user = AttendeeUser.objects.create(username = form.username, password =make_password(form.password), birth_date = form.birth_date)
         return {"username":user.username}
     
     
