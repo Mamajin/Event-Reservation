@@ -19,7 +19,11 @@ class UserSchema(Schema):
     username: str
     password: str
     password2: str
-    birth_date: date 
+    first_name: str
+    last_name : str
+    birth_date: date
+    phone_number: str
+    email: str
     
     @field_validator("password2")
     def passwords_match(cls, password2, values, **kwargs):
@@ -50,7 +54,8 @@ class UserAPI:
             return {"error": "Passwords do not match"}
         if AttendeeUser.objects.filter(username = form.username).exists():
             return {"error": "Username already taken"}
-        user = AttendeeUser.objects.create(username = form.username, password =make_password(form.password), birth_date = form.birth_date)
+        user = AttendeeUser.objects.create(username = form.username, password =make_password(form.password), birth_date = form.birth_date, 
+                                           phone_number = form.phone_number, email = form.email, first_name = form.first_name, last_name = form.last_name)
         return {"username":user.username}
     
     

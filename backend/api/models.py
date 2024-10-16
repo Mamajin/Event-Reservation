@@ -5,10 +5,10 @@ from django.core.validators import MinValueValidator
 
 
 class AttendeeUser(AbstractUser):
-    first_name = models.CharField(max_length= 100)
-    last_name = models.CharField
+    first_name = models.CharField(max_length= 100, null = False, blank= False)
+    last_name = models.CharField(max_length= 100, null = False , blank = False)
     birth_date = models.DateField('Birth Date', null=False, blank=False)
-    phone_number = models.CharField(max_length=50)
+    phone_number = models.CharField(max_length=50, null = False, blank= False)
     groups = models.ManyToManyField(
         'auth.Group',
         related_name='attendeeuser_set',  # Change this to your desired name
