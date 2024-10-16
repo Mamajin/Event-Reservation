@@ -18,8 +18,8 @@ fake = Faker()
  
 class UserSchema(ModelSchema):
     class Meta:
-        model = User
-        fields = ['id', 'username', 'password','email'] 
+        model = AttendeeUser
+        fields = ['id', 'username', 'password','email', "phone_number", "first_name", "last_name"] 
         
  
 class OrganizerSchema(ModelSchema):
