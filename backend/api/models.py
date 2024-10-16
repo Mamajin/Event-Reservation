@@ -124,28 +124,9 @@ class Event(models.Model):
         return f"Event: {self.event_name}"
     
     
-class Attendee(models.Model):
-    user = models.ForeignKey(User, on_delete= models.CASCADE)
-    event_list = models.ManyToManyField(Event, through= 'Ticket')
-    
-    
-    def show_event_registered(self):
-        """
-        Get all events an attendee has joined
-
-        Return:
-            query_set: List of events an attendee has joined
-        """
-        return self.event_list.all()
-
-    
-    def __str__(self) -> str:
-        return f"Name: {self.user.username}"
-    
-    
 class Ticket(models.Model):
     event = models.ForeignKey(Event, on_delete= models.CASCADE)
-    attendee = models.ForeignKey(Attendee, on_delete= models.CASCADE)
+    attendee = models.ForeignKey(User, on_delete= models.CASCADE)
     register_date = models.DateTimeField('Date registered', default= timezone.now)
     
         
