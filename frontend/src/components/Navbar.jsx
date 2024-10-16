@@ -16,6 +16,9 @@ export default function Navbar() {
   const handleLogin = () => {
     navigate('/login');
   };
+  const handleCreateEvent = () => {
+    navigate('/create-event');
+  }
 
   const handleRegister = () => {
     navigate('/register');
@@ -30,16 +33,19 @@ export default function Navbar() {
         <a className="btn btn-ghost text-xl p-0" onClick={handleHome}>EventEase </a>
       </div>
       <div className="navbar-end">
+      <button className="btn ml-2 bg-amber-300 text-dark-purple" onClick={handleCreateEvent}>
+            Create Event
+          </button>
         {isLoggedIn ? (
-          <button className="btn" onClick={onLogout}>
+          <button className="btn ml-2 bg-amber-300 text-dark-purple " onClick={onLogout}>
             Logout
           </button>
         ) : (
           <>
-            <button className="btn" onClick={handleLogin}>
+            <button className="btn ml-2 bg-amber-300 text-dark-purple" onClick={handleLogin}>
               Login
             </button>
-            <button className="btn ml-2" onClick={handleRegister}>
+            <button className="btn ml-2 bg-amber-300 text-dark-purple" onClick={handleRegister}>
               Sign Up
             </button>
           </>
