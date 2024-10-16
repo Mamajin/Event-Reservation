@@ -1,7 +1,7 @@
 import { useState } from "react";
 import api from "../api";
 import { useNavigate } from "react-router-dom";
-import { ACCESS_TOKEN, REFRESH_TOKEN} from "../constants";
+import { ACCESS_TOKEN, REFRESH_TOKEN, USER_NAME} from "../constants";
 import qs from "qs"
 import "../style/Form.css";
 
@@ -38,6 +38,7 @@ function Form({ route, method }) {
             if (method === "login") {
                 localStorage.setItem(ACCESS_TOKEN, res.data.access_token); // Store access token
                 localStorage.setItem(REFRESH_TOKEN, res.data.refresh_token); // Store refresh token
+                localStorage.setItem(USER_NAME, res.data.username); // Store username
                 navigate("/");
             } else {
                 navigate("/login");
