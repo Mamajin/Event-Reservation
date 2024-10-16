@@ -1,11 +1,33 @@
 from django.db import models
-from django.contrib.auth.models import User
+from django.contrib.auth.models import AbstractUser, Group, Permission
 from django.utils import timezone
 from django.core.validators import MinValueValidator
 
 
+class AttendeeUser(AbstractUser):
+    first_name = models.CharField(max_length=100)
+    last_name = models.CharField(max_length=100)
+    birth_date = models.DateField('Birth Date', null=False, blank=False)
+    phone_number = models.CharField(max_length=50)
+
+    groups = models.ManyToManyField(
+        Group,
+        related_name='attendeeuser_groups',  # Add a custom related_name here
+        blank=True,
+        help_text='The groups this user belongs to. A user will get all permissions granted to each of their groups.',
+        verbose_name='groups',
+    )
+    user_permissions = models.ManyToManyField(
+        Permission,
+        related_name='attendeeuser_user_permissions',  # Add a custom related_name here
+        blank=True,
+        help_text='Specific permissions for this user.',
+        verbose_name='user permissions',
+    )
+
+
 class Organizer(models.Model):
-    user = models.ForeignKey(User, on_delete= models.CASCADE)
+    user = models.ForeignKey(AttendeeUser, on_delete= models.CASCADE)
     organizer_name = models.CharField(max_length=100)
     email = models.EmailField()
 
@@ -126,7 +148,7 @@ class Event(models.Model):
     
 class Ticket(models.Model):
     event = models.ForeignKey(Event, on_delete= models.CASCADE)
-    attendee = models.ForeignKey(User, on_delete= models.CASCADE)
+    attendee = models.ForeignKey(AttendeeUser, on_delete= models.CASCADE)
     register_date = models.DateTimeField('Date registered', default= timezone.now)
     
         
@@ -155,4 +177,4 @@ class Ticket(models.Model):
         self.delete()
 
     def __str__(self) -> str:
-        return f"Event: {self.event.event_name}, Attendee: {self.attendee.user.username}"
+        return f"Event: {self.event.event_name}, Attendee: {self.attendee.first_name}"
