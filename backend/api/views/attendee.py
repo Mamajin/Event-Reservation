@@ -17,5 +17,5 @@ router = Router()
 
 class AttendeeSchema(ModelSchema):
     class Config:
-        model = Attendee
+        model = AttendeeUser
         model_fields = '__all__'
