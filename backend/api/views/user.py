@@ -41,6 +41,7 @@ class LoginResponseSchema(Schema):
     password: str
     access_token: str
     refresh_token: str
+    id : int
     
 
 class UserResponseSchema(Schema):
@@ -80,6 +81,7 @@ class UserAPI:
                 "refresh_token": str(refresh),
                 "username": user.username,
                 "password": user.password,
+                "id" : user.id
             }
         else:
             return Response(
