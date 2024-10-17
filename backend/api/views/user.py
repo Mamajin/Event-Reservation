@@ -10,6 +10,7 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from datetime import datetime, date
 from ninja.responses import Response
 from rest_framework import status
+from django.shortcuts import get_object_or_404
 
 
 router = Router()
@@ -44,11 +45,16 @@ class LoginResponseSchema(Schema):
 
 class UserResponseSchema(Schema):
     username: str
+    firstname: str
+    lastname: str
+    birth_date: date 
+    phonenumber: str
+    status: str
 
 
 class UserAPI:
             
-    @router.post('/register', response=UserResponseSchema)
+    @router.post('/register')
     def create_user(request, form: UserSchema = Form(...)):
         if form.password != form.password2:
             return {"error": "Passwords do not match"}
@@ -96,9 +102,24 @@ class UserAPI:
                 status=status.HTTP_403_FORBIDDEN
             )
         
-        refresh = RefreshToken.for_user(user)
-        return {
-            "username": user.username,
-            "access_token": str(refresh.access_token),
-            "refresh_token": str(refresh)
+        if Organizer.objects.filter(user = user).exists():
+            status = "Organizer"
+        else:
+            status = "Attendee"
+            
+        try:
+            profile_user = get_object_or_404(AttendeeUser, username = user.username)
+        except AttendeeUser.DoesNotExist:
+            return Response({"error": "This user does not exist."}, status = status.HTTP_403_FORBIDDEN)
+        
+        profile_data = {
+            "username" : profile_user.username,
+            "firstname": profile_user.first_name,
+            "lastname": profile_user.last_name,
+            "birth_date": profile_user.birth_date,
+            "phonenumber": profile_user.phone_number,
+            "status": status,
         }
+        return profile_data
+    
+
