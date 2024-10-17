@@ -32,12 +32,10 @@ class OrganizerSchema(ModelSchema):
 
 
 class EventSchema(ModelSchema):
-    organizer: OrganizerSchema
     class Meta:
         model = Event
         fields = [
             'event_name',
-            'organizer',
             'event_create_date',
             'start_date_event',
             'end_date_event',
@@ -46,7 +44,7 @@ class EventSchema(ModelSchema):
             'description',
             'max_attendee',
         ]
-        
+                
 
 class EventAPI:
 
