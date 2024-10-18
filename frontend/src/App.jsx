@@ -8,6 +8,7 @@ import ProtectedRoute from './components/ProtectedRoute';
 import Navbar from './components/Navbar';
 import CreateEvent from './pages/CreateEvent';
 import AccountInfo from './pages/AccountInfo';
+import AppliedEvents from './pages/AppliedEvents';
 
 
 function App() {
@@ -22,6 +23,7 @@ function App() {
         <Routes>
           <Route path="/" element={<Home />}/>
           <Route path="/accountinfo" element={<AccountInfo />}/>
+          <Route path="/appliedevents" element={<AppliedEvents />}/>
           <Route path="/login" element={<Login />} />
           <Route path="/logout" element={<Navigate to="/" onEnter={handleLogout} />} />
           <Route path="/register" element={<Register />} />
@@ -30,6 +32,7 @@ function App() {
             element={
               <ProtectedRoute>
                   <AccountInfo />
+                  <AppliedEvents/>
                   <CreateEvent />
               </ProtectedRoute>
             }
