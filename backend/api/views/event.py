@@ -12,7 +12,11 @@ from ninja.responses import Response
 from rest_framework import status
 from ninja.security import django_auth
 from ninja.errors import HttpError
+from rest_framework_simplejwt.authentication import JWTAuthentication
+import logging
+from rest_framework.exceptions import AuthenticationFailed
 
+logger = logging.getLogger(__name__)
 
 router = Router()
 
@@ -48,17 +52,20 @@ class EventSchema(ModelSchema):
 
 class EventAPI:
 
+
+
     @router.post('/create-event', response=EventSchema)
     def create_event(request, data: EventSchema):
-        this_user = request.user
-        
-        # Ensure the user is authenticated
-        if not this_user.is_authenticated:
+        auth = JWTAuthentication()
+        # Authenticate user
+        try:
+            user, _ = auth.authenticate(request)  # Use authenticate instead of get_user
+        except AuthenticationFailed:
             raise HttpError(status_code=403, message="You must be logged in to create an event.")
-        
+        # Now, `user` will be the authenticated user.
         try:
             # Get the organizer associated with the current user
-            organizer = Organizer.objects.get(user=this_user)
+            organizer = Organizer.objects.get(user=user)
         except Organizer.DoesNotExist:
             raise HttpError(status_code=403, message="You are not an organizer.")
         

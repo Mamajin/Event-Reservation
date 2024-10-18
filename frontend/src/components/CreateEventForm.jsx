@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import api from "../api";
 import { useNavigate } from "react-router-dom";
-import qs from 'qs';
+import { ACCESS_TOKEN } from "../constants";
 
 function CreateEventForm() {
 
@@ -37,11 +37,15 @@ function CreateEventForm() {
                 end_date_event: formatDateTime(formData.end_date_event),
                 max_attendee: parseInt(formData.max_attendee, 10), // Convert max attendees to integer
             };
-            console.log(payload)
-            const formDataString = qs.stringify(payload); // Convert payload to URL-encoded string
-
-            const res = await api.post("/api/events/create-event", formDataString, {
-                headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    
+            console.log("Payload being sent to API:", payload); // Log payload for debugging
+            console.log("Payload being sent to API:", JSON.stringify(payload, null, 2));
+            const token = localStorage.getItem(ACCESS_TOKEN);
+            const response = await api.post('/api/events/create-event', payload, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                    'Content-Type': 'application/json',
+                },
             });
             alert("Event created successfully!");
             navigate("/");
