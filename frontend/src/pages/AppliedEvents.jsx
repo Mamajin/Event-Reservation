@@ -11,8 +11,9 @@ function AppliedEvents() {
   useEffect(() => {
     const fetchAppliedEvents = async () => {
       try {
-        const response = await axios.get('http://localhost:8000/stub_api/mock_api/applied_events/');
-        setAppliedEvents(response.data);
+        // Call the Ninja API to fetch events
+        const response = await axios.get('http://localhost:8000/mock_api/event/');
+        setAppliedEvents(response.data); // Assuming data is an array of events
       } catch (err) {
         setError(err);
       } finally {
@@ -43,8 +44,8 @@ function AppliedEvents() {
             ) : (
               <ul>
                 {appliedEvents.map((event) => (
-                  <li key={event.id}>
-                    <strong>{event.name}</strong> - {event.date}
+                  <li key={event.event_name}>
+                    <strong>{event.event_name}</strong> - {event.start_date_event}
                   </li>
                 ))}
               </ul>
