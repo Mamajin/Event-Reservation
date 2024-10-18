@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import EventCard from '../components/EventCard';
+import Sidebar from '../components/Sidebar';
+import Footer from '../components/Footer';
 
 function Home() {
   const [events, setEvents] = useState([]);
@@ -31,13 +33,21 @@ function Home() {
   }
 
   return (
-    <div className="bg-white min-h-screen p-6">
-      <div className="card lg:card-side bg-base-100 shadow-xl">
-        {events.map((event) => (
-          <EventCard key={event.organizer.user.id} event={event} />
-        ))}
+<div className="flex flex-col min-h-screen">
+  <div className="flex flex-1">
+    <Sidebar />
+    <main className="flex-1">
+      <div className="bg-white min-h-screen p-6">
+        <div className="card lg:card-side bg-base-100 shadow-xl">
+          {events.map((event) => (
+            <EventCard key={event.organizer.user.id} event={event} />
+          ))}
+        </div>
       </div>
-    </div>
+    </main>
+  </div>
+  <Footer />
+</div>
   );
 }
 
