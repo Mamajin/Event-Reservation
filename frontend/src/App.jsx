@@ -7,6 +7,7 @@ import NotFound from './pages/NotFound';
 import ProtectedRoute from './components/ProtectedRoute';
 import Navbar from './components/Navbar';
 import CreateEvent from './pages/CreateEvent';
+import AccountInfo from './pages/AccountInfo';
 
 
 function App() {
@@ -20,6 +21,7 @@ function App() {
         <Navbar />
         <Routes>
           <Route path="/" element={<Home />}/>
+          <Route path="/accountinfo" element={<AccountInfo />}/>
           <Route path="/login" element={<Login />} />
           <Route path="/logout" element={<Navigate to="/" onEnter={handleLogout} />} />
           <Route path="/register" element={<Register />} />
@@ -27,6 +29,7 @@ function App() {
             path="/create-event" 
             element={
               <ProtectedRoute>
+                  <AccountInfo />
                   <CreateEvent />
               </ProtectedRoute>
             }
