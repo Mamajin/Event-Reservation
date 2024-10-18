@@ -1,8 +1,11 @@
 from ninja import Router, Schema, NinjaAPI, Field
 from django.contrib.auth import authenticate, login
 from ninja import NinjaAPI, Router, Schema, ModelSchema, Form
+from typing import Optional
 from ninja.security import django_auth
 from api.models import *
+from ninja.errors import HttpError
+from django.http import HttpRequest
 from ninja.responses import Response
 from rest_framework import status
 import logging
@@ -13,8 +16,8 @@ router = Router()
 
 
 class OrganizerSchema(Schema):
-    organizer_name: str
-    email: str
+    organizer_name: Optional[str]
+    email: Optional[str]
 
 
 class OrganizerResponseSchema(Schema):
@@ -104,8 +107,8 @@ class OrganizerAPI:
             return Response({'error': 'User is not an organizer'}, status=status.HTTP_404_NOT_FOUND)
 
     # Still can't use.
-    @router.put('/update-organizer', response=OrganizerResponseSchema)
-    def update_organizer(request, form: OrganizerSchema = Form(...)):
+    @router.put('/update-organizer', response={200: OrganizerResponseSchema, 401: ErrorResponseSchema, 404: ErrorResponseSchema})
+    def update_organizer(request: HttpRequest, form: OrganizerSchema):
         """
         Update the profile information of the authenticated organizer.
         """
@@ -115,23 +118,32 @@ class OrganizerAPI:
         
         try:
             organizer = Organizer.objects.get(user=request.user)
-            organizer.organizer_name = form.organizer_name
-            organizer.email = form.email
+            
+            # Update only the fields provided in the form
+            if form.organizer_name is not None:
+                organizer.organizer_name = form.organizer_name
+            else:
+                organizer.organizer_name = organizer.organizer_name
+            if form.email is not None:
+                organizer.email = form.email
+            else:
+                organizer.email = organizer.email
+            
             organizer.save()
             logger.info(f"User {request.user.id} updated their organizer profile.")
             
-            return OrganizerResponseSchema(
+            return Response(OrganizerResponseSchema(
                 id=organizer.id,
                 organizer_name=organizer.organizer_name,
                 email=organizer.email
-            )
+            ).dict())
         except Organizer.DoesNotExist:
             logger.error(f"User {request.user.username} tried to update an organizer profile but is not an organizer.")
             return Response({'error': 'User is not an organizer'}, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
             logger.error(f"Error while updating organizer for user {request.user.id}: {str(e)}")
             return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
-
+            
 @router.delete('/revoke-organizer', response={204: None, 403: ErrorResponseSchema, 404: ErrorResponseSchema})
 def revoke_organizer(request):
     """
