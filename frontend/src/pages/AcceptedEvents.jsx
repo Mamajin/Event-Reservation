@@ -13,6 +13,7 @@ function AcceptedEvents() {
       try {
         // Call the API to fetch accepted events
         const response = await axios.get('http://localhost:8000/mock_api/event/');
+        // Please consult me before merging we might need more stub data
         // Filter events to include only those that are accepted (assuming we created a way to mark them as accepted)
         const accepted = response.data.filter((event) => event.is_accepted);
         setAcceptedEvents(accepted);
