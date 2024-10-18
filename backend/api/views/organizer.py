@@ -1,8 +1,8 @@
 from ninja import Router, Schema, NinjaAPI, Field
 from django.contrib.auth import authenticate, login
 from ninja import NinjaAPI, Router, Schema, ModelSchema, Form
+from ninja.security import django_auth
 from api.models import *
-from rest_framework_simplejwt.tokens import RefreshToken
 from ninja.responses import Response
 from rest_framework import status
 import logging
@@ -82,3 +82,71 @@ class OrganizerAPI:
         except Event.DoesNotExist:
             logging.error(f"Organizer {organizer.organizer_name} attempted to delete non-existing event {event_id}.")          
             return Response({'error': 'Event does not exist or you do not have permission to delete it'}, status=status.HTTP_404_NOT_FOUND)
+        
+    @router.get('/organizer-profile', response=OrganizerResponseSchema, auth=django_auth)
+    def view_organizer_profile(request):
+        """
+        Get the profile of the currently authenticated organizer.
+        """
+        if not request.user.is_authenticated:
+            logger.warning(f"Unauthorized access to organizer profile by user: {request.user}")
+            return Response({'error': 'User must be logged in'}, status=status.HTTP_401_UNAUTHORIZED)
+        
+        try:
+            organizer = Organizer.objects.get(user=request.user)
+            return OrganizerResponseSchema(
+                id=organizer.id,
+                organizer_name=organizer.organizer_name,
+                email=organizer.email
+            )
+        except Organizer.DoesNotExist:
+            logger.error(f"User {request.user.username} tried to access an organizer profile but is not an organizer.")
+            return Response({'error': 'User is not an organizer'}, status=status.HTTP_404_NOT_FOUND)
+
+    # Still can't use.
+    @router.put('/update-organizer', response=OrganizerResponseSchema)
+    def update_organizer(request, form: OrganizerSchema = Form(...)):
+        """
+        Update the profile information of the authenticated organizer.
+        """
+        if not request.user.is_authenticated:
+            logger.warning(f"Unauthorized organizer update attempt by user: {request.user}")
+            return Response({'error': 'User must be logged in to update organizer profile'}, status=status.HTTP_401_UNAUTHORIZED)
+        
+        try:
+            organizer = Organizer.objects.get(user=request.user)
+            organizer.organizer_name = form.organizer_name
+            organizer.email = form.email
+            organizer.save()
+            logger.info(f"User {request.user.id} updated their organizer profile.")
+            
+            return OrganizerResponseSchema(
+                id=organizer.id,
+                organizer_name=organizer.organizer_name,
+                email=organizer.email
+            )
+        except Organizer.DoesNotExist:
+            logger.error(f"User {request.user.username} tried to update an organizer profile but is not an organizer.")
+            return Response({'error': 'User is not an organizer'}, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            logger.error(f"Error while updating organizer for user {request.user.id}: {str(e)}")
+            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+@router.delete('/revoke-organizer', response={204: None, 403: ErrorResponseSchema, 404: ErrorResponseSchema})
+def revoke_organizer(request):
+    """
+    Revoke the organizer role of the authenticated user.
+    """
+    if not request.user.is_authenticated:
+        logger.warning(f"Unauthorized revocation attempt by user: {request.user}")
+        return Response({'error': 'User must be logged in'}, status=status.HTTP_401_UNAUTHORIZED)
+
+    try:
+        organizer = Organizer.objects.get(user=request.user)
+        organizer.delete()
+        logger.info(f"Organizer role revoked for user {request.user.id}.")
+        return Response(status=status.HTTP_204_NO_CONTENT)
+    except Organizer.DoesNotExist:
+        logger.error(f"User {request.user.username} tried to revoke a non-existing organizer profile.")
+        return Response({'error': 'User is not an organizer'}, status=status.HTTP_404_NOT_FOUND)
+

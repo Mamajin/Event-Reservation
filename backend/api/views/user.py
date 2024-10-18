@@ -100,5 +100,5 @@ class UserAPI:
         return {
             "username": user.username,
             "access_token": str(refresh.access_token),
-            "refresh_token": str(refresh)
+            "refresh_token": str(refresh),
         }
