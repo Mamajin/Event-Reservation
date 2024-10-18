@@ -7,9 +7,9 @@ function Sidebar() {
     const Menus = [
         { title: "Discover", path: "/" },
         { title: "Apply Event", path: "/create-event" },
-        { title: "Accepted Event", path: "#" },
+        { title: "Accepted Event", path: "/acceptedevents" },
         { title: "Invitation", path: "#" },
-        { title: "Become Holder", path: "#" },
+        { title: "Become Organizer", path: "#" },
         { title: "Account Info", path: "/accountinfo" }, // Add the path for Account Info
     ];
 

@@ -9,6 +9,7 @@ import Navbar from './components/Navbar';
 import CreateEvent from './pages/CreateEvent';
 import AccountInfo from './pages/AccountInfo';
 import AppliedEvents from './pages/AppliedEvents';
+import AcceptedEvents from './pages/AcceptedEvents';
 
 
 function App() {
@@ -24,6 +25,7 @@ function App() {
           <Route path="/" element={<Home />}/>
           <Route path="/accountinfo" element={<AccountInfo />}/>
           <Route path="/appliedevents" element={<AppliedEvents />}/>
+          <Route path="/acceptedevents" element={<AcceptedEvents />}/>
           <Route path="/login" element={<Login />} />
           <Route path="/logout" element={<Navigate to="/" onEnter={handleLogout} />} />
           <Route path="/register" element={<Register />} />
@@ -33,6 +35,7 @@ function App() {
               <ProtectedRoute>
                   <AccountInfo />
                   <AppliedEvents/>
+                  <AcceptedEvents/>
                   <CreateEvent />
               </ProtectedRoute>
             }
