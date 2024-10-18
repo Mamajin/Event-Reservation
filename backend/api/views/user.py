@@ -84,10 +84,12 @@ class UserAPI:
     @router.get('/profile', response=UserResponseSchema)
     def view_profile(request):
         """
-        Retrieve the profile details of the currently logged-in user.
+        Retrieve the profile details of the currently logged-in user, 
+        including their role (Organizer or Attendee).
 
         Returns:
-            The user's profile information including username and tokens.
+            The user's profile information including username, tokens, 
+            and role (Organizer or Attendee).
         """
         user = request.user
         if not user.is_authenticated:
@@ -96,9 +98,13 @@ class UserAPI:
                 status=status.HTTP_403_FORBIDDEN
             )
         
+        # Check if the user is an organizer
+        is_organizer = Organizer.objects.filter(user=user).exists()
+
         refresh = RefreshToken.for_user(user)
         return {
             "username": user.username,
+            "role": "Organizer" if is_organizer else "Attendee",
             "access_token": str(refresh.access_token),
             "refresh_token": str(refresh),
         }
