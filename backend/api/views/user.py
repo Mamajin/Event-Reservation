@@ -10,6 +10,10 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from datetime import datetime, date
 from ninja.responses import Response
 from rest_framework import status
+import logging
+
+
+logger = logging.getLogger("api")
 
 
 router = Router()
@@ -64,7 +68,6 @@ class UserAPI:
     @router.post('/login', response = LoginResponseSchema)
     def login(request, form: LoginSchema = Form(...)):
         user = authenticate(request, username = form.username, password = form.password)
-            
         if user is not None:
             login(request,user)
             refresh = RefreshToken.for_user(user)

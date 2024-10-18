@@ -1,6 +1,5 @@
 from ninja import Router, Schema, NinjaAPI, Field
 from django.contrib.auth import authenticate, login
-from django.contrib.auth.models import User
 from ninja import NinjaAPI, Router, Schema, ModelSchema, Form
 from typing import List, Optional
 from api.models import *
@@ -16,14 +15,14 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 import logging
 from rest_framework.exceptions import AuthenticationFailed
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("api")
 
 router = Router()
 
 
 class UserSchema(ModelSchema):
     class Meta:
-        model = User
+        model = AttendeeUser
         fields = ['id', 'username', 'password','email'] 
         
  
@@ -53,13 +52,13 @@ class EventSchema(ModelSchema):
 class EventAPI:
 
 
-
     @router.post('/create-event', response=EventSchema)
     def create_event(request, data: EventSchema):
         auth = JWTAuthentication()
         # Authenticate user
         try:
-            user, _ = auth.authenticate(request)  # Use authenticate instead of get_user
+            user = auth.authenticate(request)  # Use authenticate instead of get_user
+            print(user)
         except AuthenticationFailed:
             raise HttpError(status_code=403, message="You must be logged in to create an event.")
         # Now, `user` will be the authenticated user.
