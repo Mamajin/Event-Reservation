@@ -128,4 +128,3 @@ class UserAPI:
             "status": status,
         }
         return profile_data
-    

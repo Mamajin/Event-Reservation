@@ -10,12 +10,20 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from datetime import datetime
 from ninja.responses import Response
 from rest_framework import status
-
+from django.shortcuts import get_object_or_404
+from ninja_jwt.authentication import JWTAuth
 
 router = Router()
 
 
 class TicketSchema(ModelSchema):
-    class Config:
+    class Meta:
         model = Ticket
-        model_fields = '__all__'
+        fields = ['event', 'attendee', 'register_date']
+
+class TicketAPI:
+    @router.get('event/{user_id}', response=List[TicketSchema], auth = JWTAuth())
+    def list_event(request, user_id: int):
+        user = get_object_or_404(AttendeeUser, id = user_id)
+        return user.ticket_set.all()
+        
