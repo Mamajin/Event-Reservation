@@ -11,7 +11,7 @@ from datetime import datetime, date
 from ninja.responses import Response
 from rest_framework import status
 from django.shortcuts import get_object_or_404
-from ninja_jwt.authentication import JWTAuth
+from rest_framework_simplejwt.authentication import JWTAuthentication
 
 
 router = Router()

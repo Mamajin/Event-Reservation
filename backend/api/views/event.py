@@ -11,6 +11,7 @@ from datetime import datetime
 from ninja.responses import Response
 from rest_framework import status
 from ninja_jwt.authentication import JWTAuth
+from rest_framework_simplejwt.authentication import JWTAuthentication
 
 
 router = Router()
@@ -41,7 +42,7 @@ class EventResponseSchema(ModelSchema):
 
 class EventAPI:
 
-    @router.post('/create-event', response=EventResponseSchema, auth= JWTAuth())
+    @router.post('/create-event', response=EventResponseSchema, auth= JWTAuthentication())
     def create_event(request, form: EventSchema = Form(...)):
         this_user = request.user
         try:
