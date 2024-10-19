@@ -6,15 +6,12 @@ from typing import List, Optional
 from api.models import *
 from django.contrib.auth.hashers import make_password
 from pydantic import field_validator
-from rest_framework_simplejwt.tokens import RefreshToken
 from datetime import datetime
 from ninja.responses import Response
-from rest_framework import status
 from ninja_jwt.authentication import JWTAuth
-from rest_framework_simplejwt.authentication import JWTAuthentication
+from ninja.errors import HttpError
 
 router = Router()
-
 
 class UserSchema(ModelSchema):
     class Meta:
@@ -48,14 +45,9 @@ class EventSchema(ModelSchema):
 class EventAPI:
 
 
-     @router.post('/create-event', response=EventSchema)
+     @router.post('/create-event', response=EventSchema, auth=JWTAuth())
      def create_event(request, data: EventSchema):
-        auth = JWTAuthentication()
-        # Authenticate user
-        try:
-            user, _ = auth.authenticate(request)  # Use authenticate instead of get_user
-        except AuthenticationFailed:
-            raise HttpError(status_code=403, message="You must be logged in to create an event.")
+        this_user = request.user
         # Now, `user` will be the authenticated user.
         try:
             organizer = Organizer.objects.get(user=this_user)

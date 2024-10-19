@@ -6,12 +6,12 @@ from typing import List, Optional
 from api.models import *
 from django.contrib.auth.hashers import make_password
 from pydantic import field_validator
-from rest_framework_simplejwt.tokens import RefreshToken
 from datetime import datetime, date
 from ninja.responses import Response
 from rest_framework import status
 from django.shortcuts import get_object_or_404
-from rest_framework_simplejwt.authentication import JWTAuthentication
+from ninja_jwt.authentication import JWTAuth
+from ninja_jwt.tokens import AccessToken, RefreshToken
 
 
 router = Router()
@@ -77,12 +77,13 @@ class UserAPI:
             
         if user is not None:
             login(request,user)
-            refresh = RefreshToken.for_user(user)
+            access_token = AccessToken.for_user(user)
+            refresh_token = RefreshToken.for_user(user)
             return {
                 "success": True,
                 "message": "Login successful",
-                "access_token": str(refresh.access_token),
-                "refresh_token": str(refresh),
+                "access_token": str(access_token),
+                "refresh_token": str(refresh_token),
                 "username": user.username,
                 "password": user.password,
                 "id" : user.id
@@ -93,7 +94,7 @@ class UserAPI:
             status=status.HTTP_403_FORBIDDEN
         )
         
-    @router.get('/profile', response=UserResponseSchema)
+    @router.get('/profile', response=UserResponseSchema, auth = JWTAuth())
     def view_profile(request):
         """
         Retrieve the profile details of the currently logged-in user.
@@ -128,4 +129,3 @@ class UserAPI:
         }
         return profile_data
     
-
