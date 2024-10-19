@@ -49,6 +49,8 @@ INSTALLED_APPS = [
     "corsheaders",
     "ninja",
     "stub_api",
+    "ninja_extra",
+    "ninja_jwt",
 ]
 
 

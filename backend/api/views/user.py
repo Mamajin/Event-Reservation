@@ -11,6 +11,7 @@ from datetime import datetime, date
 from ninja.responses import Response
 from rest_framework import status
 from django.shortcuts import get_object_or_404
+from ninja_jwt.authentication import JWTAuth
 
 
 router = Router()
@@ -54,6 +55,8 @@ class UserResponseSchema(Schema):
 
 
 class UserAPI:
+    
+
             
     @router.post('/register')
     def create_user(request, form: UserSchema = Form(...)):
