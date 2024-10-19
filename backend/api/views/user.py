@@ -38,6 +38,7 @@ class LoginSchema(Schema):
     password: str
 
 class LoginResponseSchema(Schema):
+    id : int
     username: str
     password: str
     access_token: str

@@ -10,10 +10,15 @@ export default function Navbar() {
     localStorage.clear();
     navigate('/login');
   };
-
+  const handleHome = () => {
+    navigate('')
+  }
   const handleLogin = () => {
     navigate('/login');
   };
+  const handleCreateEvent = () => {
+    navigate('/create-event');
+  }
 
   const handleRegister = () => {
     navigate('/register');
@@ -25,19 +30,22 @@ export default function Navbar() {
     <div className="navbar bg-dark-purple">
       <StarIcon className="bg-amber-300 text-xl h-8 w-9 text-dark-purple rounded cursor-pointer mr-2" />
       <div className="navbar-start">
-        <a className="btn btn-ghost text-xl p-0">EventEase</a>
+        <a className="btn btn-ghost text-xl p-0" onClick={handleHome}>EventEase </a>
       </div>
       <div className="navbar-end">
+      <button className="btn ml-2 bg-amber-300 text-dark-purple" onClick={handleCreateEvent}>
+            Create Event
+          </button>
         {isLoggedIn ? (
-          <button className="btn" onClick={onLogout}>
+          <button className="btn ml-2 bg-amber-300 text-dark-purple " onClick={onLogout}>
             Logout
           </button>
         ) : (
           <>
-            <button className="btn" onClick={handleLogin}>
+            <button className="btn ml-2 bg-amber-300 text-dark-purple" onClick={handleLogin}>
               Login
             </button>
-            <button className="btn ml-2" onClick={handleRegister}>
+            <button className="btn ml-2 bg-amber-300 text-dark-purple" onClick={handleRegister}>
               Sign Up
             </button>
           </>

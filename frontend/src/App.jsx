@@ -6,8 +6,8 @@ import Home from './pages/Home';
 import NotFound from './pages/NotFound';
 import ProtectedRoute from './components/ProtectedRoute';
 import Navbar from './components/Navbar';
-import Footer from './components/Footer';
-import Sidebar from './components/Sidebar';
+import CreateEvent from './pages/CreateEvent';
+
 
 function App() {
   const handleLogout = () => {
@@ -16,29 +16,21 @@ function App() {
 
   return (
     <BrowserRouter>
-      <div className="flex flex-col min-h-screen"> {/* Set up flexbox for full height */}
+      <div className="flex flex-col min-h-screen">
         <Navbar />
         <Routes>
-          <Route
-            path="/"
+          <Route path="/" element={<Home />}/>
+          <Route path="/login" element={<Login />} />
+          <Route path="/logout" element={<Navigate to="/" onEnter={handleLogout} />} />
+          <Route path="/register" element={<Register />} />
+          <Route 
+            path="/create-event" 
             element={
               <ProtectedRoute>
-                <div className="flex flex-1">
-                  <Sidebar />
-                  <main className="flex-1">
-                    <Home />
-                  </main>
-                </div>
-                <Footer />
+                  <CreateEvent />
               </ProtectedRoute>
             }
           />
-          <Route path="/login" element={<Login />} />
-          <Route 
-            path="/logout" 
-            element={<Navigate to="/" onEnter={handleLogout} />} 
-          />
-          <Route path="/register" element={<Register />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
 
