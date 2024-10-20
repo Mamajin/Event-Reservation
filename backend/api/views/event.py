@@ -1,128 +1,155 @@
-from ninja import Router, Schema, Form
-from typing import Optional
-from api.models import Organizer, Event
-from ninja.errors import HttpError
-from django.http import HttpRequest
+from ninja import Router, Schema, NinjaAPI, Field
+from ninja import NinjaAPI, Router, Schema, ModelSchema, Form
+from typing import List, Optional
+from api.models import *
+from api.views.organizer import *
 from ninja.responses import Response
 from ninja_jwt.authentication import JWTAuth
-import logging
+from ninja.errors import HttpError
+from django.shortcuts import get_object_or_404
+from datetime import datetime
 
 logger = logging.getLogger(__name__)
 router = Router()
 
-
-class OrganizerSchema(Schema):
-    organizer_name: Optional[str]
-    email: Optional[str]
-
-
-class OrganizerResponseSchema(Schema):
-    id: int
-    organizer_name: str
-    email: str
-
-
-class ErrorResponseSchema(Schema):
-    error: str
-
-
-class OrganizerAPI:
-    @router.post('/apply-organizer', response=OrganizerResponseSchema, auth=JWTAuth())
-    def apply_organizer(request: HttpRequest, form: OrganizerSchema = Form(...)):
-        """Apply an authenticated user to be an organizer"""
-        if not request.user.is_authenticated:
-            logger.warning(f"Unauthorized organizer application attempt by user: {request.user}")
-            return Response({'error': 'User must be logged in to apply as an organizer'}, status=401)
-
-        logger.info(f"User {request.user.id} is attempting to apply as an organizer.")
-
-        if Organizer.objects.filter(user=request.user).exists():
-            logger.info(f"User {request.user.id} already has an organizer profile.")
-            return Response({'error': 'User is already an organizer'}, status=400)
+class UserSchema(ModelSchema):
+    class Meta:
+        model = AttendeeUser
+        fields = ['id', 'username', 'password','email'] 
+        
+ 
+class OrganizerSchema(ModelSchema):
+    user : UserSchema
     
+    class Meta:
+        model = Organizer
+        fields = ['user', 'organizer_name', 'email']
+
+
+class EventSchema(ModelSchema):
+    class Meta:
+        model = Event
+        fields = [
+            'event_name',
+            'event_create_date',
+            'start_date_event',
+            'end_date_event',
+            'start_date_register',
+            'end_date_register',
+            'description',
+            'max_attendee',
+        ]
+    
+
+class EventResponseSchema(Schema):
+    id: int
+    organizer: OrganizerResponseSchema
+    event_name: str
+    event_create_date: datetime
+    start_date_event: datetime
+    end_date_event: datetime
+    start_date_register: datetime
+    end_date_register: datetime
+    description: str
+    max_attendee: int
+                
+
+class EventAPI:
+
+    @router.post('/create-event', response=EventSchema, auth=JWTAuth())
+    def create_event(request, data: EventSchema):
+        this_user = request.user
+        # Now, `user` will be the authenticated user.
         try:
-            organizer = Organizer.objects.create(
-                user=request.user,
-                organizer_name=form.organizer_name or "",
-                email=form.email or request.user.email
-            )
-            logger.info(f"User {request.user.id} successfully applied as an organizer with ID {organizer.id}.")
-
-            return Response(
-                OrganizerResponseSchema(
-                    id=organizer.id,
-                    organizer_name=organizer.organizer_name,
-                    email=organizer.email
-                ).dict(),
-                status=201
-            )
-        except Exception as e:
-            logger.error(f"Error while creating organizer for user {request.user.id}: {str(e)}", exc_info=True)
-            return Response({'error': str(e)}, status=400)
-
-    @router.delete('/delete-event/{event_id}', response={204: None, 403: ErrorResponseSchema, 404: ErrorResponseSchema}, auth=JWTAuth())
-    def delete_event(request: HttpRequest, event_id: int):
-        """Delete event by event id."""
-        if not request.user.is_authenticated:
-            return Response({'error': 'User must be logged in'}, status=401)
-
-        try:
-            organizer = Organizer.objects.get(user=request.user)
+            organizer = Organizer.objects.get(user=this_user)
         except Organizer.DoesNotExist:
-            logger.error(f"User {request.user.username} attempted to delete event {event_id} but is not an organizer.")
-            return Response({'error': 'User is not an organizer'}, status=403)
+            raise HttpError(status_code=403, message="You are not an organizer.")
         
         try:
-            event = Event.objects.get(id=event_id, organizer=organizer)
-            event.delete()
-            logger.info(f"Organizer {organizer.organizer_name} deleted event {event_id}.")
-            return Response(status=204)
-        except Event.DoesNotExist:
-            logger.error(f"Organizer {organizer.organizer_name} attempted to delete non-existing event {event_id}.")
-            return Response({'error': 'Event does not exist or you do not have permission to delete it'}, status=404)
-
-    @router.put('/update-organizer', response={200: OrganizerResponseSchema, 401: ErrorResponseSchema, 404: ErrorResponseSchema}, auth=JWTAuth())
-    def update_organizer(request: HttpRequest, form: OrganizerSchema = Form(...)):
-        """Update the profile information of the authenticated organizer."""
+            # Create the event
+            event = Event.objects.create(
+                event_name=data.event_name,
+                organizer=organizer,  # Associate the organizer
+                event_create_date=timezone.now(),  # Set creation date to current time
+                start_date_event=data.start_date_event,
+                end_date_event=data.end_date_event,
+                start_date_register=data.start_date_register or timezone.now(),
+                end_date_register=data.end_date_register,
+                description=data.description,
+                max_attendee=data.max_attendee
+            )
+        except Exception as e:
+            raise HttpError(status_code=400, message=f"Failed to create event: {str(e)}")
+        
+        # Return the created event
+        return event
+        
+    
+    @router.get('/my-events', response=List[EventResponseSchema], auth=JWTAuth())
+    def get_my_events(request: HttpRequest):
+        """
+        Retrieve a list of events created by the authenticated organizer.
+        """
         if not request.user.is_authenticated:
-            logger.warning(f"Unauthorized organizer update attempt by user: {request.user}")
-            return Response({'error': 'User must be logged in to update organizer profile'}, status=401)
+            logger.warning(f"Unauthorized access to events by user: {request.user}")
+            return Response({'error': 'User must be logged in'}, status=401)
         
         try:
-            organizer = Organizer.objects.get(user=request.user)
-            organizer.organizer_name = form.organizer_name or organizer.organizer_name
-            organizer.email = form.email or organizer.email
-            organizer.save()
-
-            logger.info(f"User {request.user.id} updated their organizer profile.")
+            organizer = Organizer.objects.get(user=request.user)        
+            events = Event.objects.filter(organizer=organizer)
+            event_list = [
+                EventResponseSchema(
+                    id=event.id,
+                    organizer=event.organizer,
+                    event_name=event.event_name,
+                    event_create_date=event.event_create_date,
+                    start_date_event=event.start_date_event,
+                    end_date_event=event.end_date_event,
+                    start_date_register=event.start_date_register,
+                    end_date_register=event.end_date_register,
+                    description=event.description,
+                    max_attendee=event.max_attendee
+                )
+                for event in events
+            ]
             
-            return Response(
-                OrganizerResponseSchema(
-                    id=organizer.id,
-                    organizer_name=organizer.organizer_name,
-                    email=organizer.email
-                ).dict(),
-                status=200
-            )
+            logger.info(f"Organizer {organizer.organizer_name} retrieved their events.")
+            return event_list
+        
         except Organizer.DoesNotExist:
-            logger.error(f"User {request.user.username} tried to update an organizer profile but is not an organizer.")
+            logger.error(f"User {request.user.username} tried to access events but is not an organizer.")
             return Response({'error': 'User is not an organizer'}, status=404)
         except Exception as e:
-            logger.error(f"Error while updating organizer for user {request.user.id}: {str(e)}", exc_info=True)
+            logger.error(f"Error while retrieving events for organizer {request.user.id}: {str(e)}")
             return Response({'error': str(e)}, status=400)
-            
-    @router.delete('/revoke-organizer', response={204: None, 403: ErrorResponseSchema, 404: ErrorResponseSchema}, auth=JWTAuth())
-    def revoke_organizer(request: HttpRequest):
-        """Revoke the organizer role of the authenticated user."""
-        if not request.user.is_authenticated:
-            logger.warning(f"Unauthorized revocation attempt by user: {request.user}")
-            return Response({'error': 'User must be logged in'}, status=401)
-
+        
+    @router.get('/events', response=List[EventResponseSchema])
+    def list_all_events(request: HttpRequest):
+        """
+        Retrieve a list of all events for the homepage.
+        This endpoint is accessible to both authorized and unauthorized users.
+        """
         try:
-            organizer = Organizer.objects.get(user=request.user)
-            organizer.delete()
-            logger.info(f"Organizer role revoked for user {request.user.id}.")
-            return Response(status=204)
-        except Organizer.DoesNotExist:
-            logger.error(f"User {request.user.username} tried to revoke a non-existing organizer profile.")
-            return Response({'error': 'User is not an organizer'}, status=404)
+            events = Event.objects.all()
+            event_list = [
+                EventResponseSchema(
+                    id=event.id,
+                    organizer=event.organizer,
+                    event_name=event.event_name,
+                    event_create_date=event.event_create_date,
+                    start_date_event=event.start_date_event,
+                    end_date_event=event.end_date_event,
+                    start_date_register=event.start_date_register,
+                    end_date_register=event.end_date_register,
+                    description=event.description,
+                    max_attendee=event.max_attendee
+                )
+                for event in events
+            ]
+
+            logger.info("Retrieved all events for the homepage.")
+            return event_list
+        
+        except Exception as e:
+            logger.error(f"Error while retrieving events for the homepage: {str(e)}")
+            return Response({'error': str(e)}, status=400)

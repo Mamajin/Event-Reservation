@@ -82,7 +82,7 @@ class OrganizerAPI:
             return Response({'error': 'Event does not exist or you do not have permission to delete it'}, status=404)
 
     @router.put('/update-organizer', response={200: OrganizerResponseSchema, 401: ErrorResponseSchema, 404: ErrorResponseSchema}, auth=JWTAuth())
-    def update_organizer(request: HttpRequest, form: OrganizerSchema = Form(...)):
+    def update_organizer(request: HttpRequest, data: OrganizerSchema):
         """Update the profile information of the authenticated organizer."""
         if not request.user.is_authenticated:
             logger.warning(f"Unauthorized organizer update attempt by user: {request.user}")
@@ -90,8 +90,8 @@ class OrganizerAPI:
         
         try:
             organizer = Organizer.objects.get(user=request.user)
-            organizer.organizer_name = form.organizer_name or organizer.organizer_name
-            organizer.email = form.email or organizer.email
+            organizer.organizer_name = data.organizer_name
+            organizer.email = data.email
             organizer.save()
 
             logger.info(f"User {request.user.id} updated their organizer profile.")
@@ -125,4 +125,19 @@ class OrganizerAPI:
             return Response(status=204)
         except Organizer.DoesNotExist:
             logger.error(f"User {request.user.username} tried to revoke a non-existing organizer profile.")
+            return Response({'error': 'User is not an organizer'}, status=404)
+        
+    @router.get('/view-organizer', response={200: OrganizerResponseSchema, 401: ErrorResponseSchema, 404: ErrorResponseSchema}, auth=JWTAuth())
+    def view_organizer(request: HttpRequest):
+        """View the organizer profile."""
+        try:
+            organizer = Organizer.objects.get(user=request.user)
+            logger.info(f"User {request.user.id} viewed their organizer profile.")
+            return OrganizerResponseSchema(
+                id=organizer.id,
+                organizer_name=organizer.organizer_name,
+                email=organizer.email
+            )
+        except Organizer.DoesNotExist:
+            logger.error(f"User {request.user.username} tried to access a non-existing organizer profile.")
             return Response({'error': 'User is not an organizer'}, status=404)
