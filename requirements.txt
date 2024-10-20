@@ -9,5 +9,5 @@ sqlparse
 psycopg2-binary
 python-dotenv
 django-ninja
-djanog-ninja-jwt
+django-ninja-jwt
 faker
