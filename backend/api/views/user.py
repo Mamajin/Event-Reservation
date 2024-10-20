@@ -6,10 +6,12 @@ from typing import List, Optional
 from api.models import *
 from django.contrib.auth.hashers import make_password
 from pydantic import field_validator
-from rest_framework_simplejwt.tokens import RefreshToken
 from datetime import datetime, date
 from ninja.responses import Response
 from rest_framework import status
+from django.shortcuts import get_object_or_404
+from ninja_jwt.authentication import JWTAuth
+from ninja_jwt.tokens import AccessToken, RefreshToken
 
 
 router = Router()
@@ -36,19 +38,28 @@ class LoginSchema(Schema):
     password: str
 
 class LoginResponseSchema(Schema):
+    id : int
     username: str
     password: str
     access_token: str
     refresh_token: str
+    id : int
     
 
 class UserResponseSchema(Schema):
     username: str
+    firstname: str
+    lastname: str
+    birth_date: date 
+    phonenumber: str
+    status: str
 
 
 class UserAPI:
+    
+
             
-    @router.post('/register', response=UserResponseSchema)
+    @router.post('/register')
     def create_user(request, form: UserSchema = Form(...)):
         if form.password != form.password2:
             return {"error": "Passwords do not match"}
@@ -66,14 +77,16 @@ class UserAPI:
             
         if user is not None:
             login(request,user)
-            refresh = RefreshToken.for_user(user)
+            access_token = AccessToken.for_user(user)
+            refresh_token = RefreshToken.for_user(user)
             return {
                 "success": True,
                 "message": "Login successful",
-                "access_token": str(refresh.access_token),
-                "refresh_token": str(refresh),
+                "access_token": str(access_token),
+                "refresh_token": str(refresh_token),
                 "username": user.username,
                 "password": user.password,
+                "id" : user.id
             }
         else:
             return Response(
@@ -81,7 +94,7 @@ class UserAPI:
             status=status.HTTP_403_FORBIDDEN
         )
         
-    @router.get('/profile', response=UserResponseSchema)
+    @router.get('/profile', response=UserResponseSchema, auth = JWTAuth())
     def view_profile(request):
         """
         Retrieve the profile details of the currently logged-in user, 
@@ -98,13 +111,22 @@ class UserAPI:
                 status=status.HTTP_403_FORBIDDEN
             )
         
-        # Check if the user is an organizer
-        is_organizer = Organizer.objects.filter(user=user).exists()
-
-        refresh = RefreshToken.for_user(user)
-        return {
-            "username": user.username,
-            "role": "Organizer" if is_organizer else "Attendee",
-            "access_token": str(refresh.access_token),
-            "refresh_token": str(refresh),
+        if Organizer.objects.filter(user = user).exists():
+            status = "Organizer"
+        else:
+            status = "Attendee"
+            
+        try:
+            profile_user = get_object_or_404(AttendeeUser, username = user.username)
+        except AttendeeUser.DoesNotExist:
+            return Response({"error": "This user does not exist."}, status = status.HTTP_403_FORBIDDEN)
+        
+        profile_data = {
+            "username" : profile_user.username,
+            "firstname": profile_user.first_name,
+            "lastname": profile_user.last_name,
+            "birth_date": profile_user.birth_date,
+            "phonenumber": profile_user.phone_number,
+            "status": status,
         }
+        return profile_data

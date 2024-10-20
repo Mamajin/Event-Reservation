@@ -1,6 +1,5 @@
-from ninja import Router, Schema, NinjaAPI, Field
 from django.contrib.auth import authenticate, login
-from ninja import NinjaAPI, Router, Schema, ModelSchema, Form
+from ninja import Router, Schema, Form
 from typing import Optional
 from ninja.security import django_auth
 from api.models import *

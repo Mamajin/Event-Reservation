@@ -4,6 +4,7 @@ from django.utils import timezone
 from django.core.validators import MinValueValidator
 
 
+
 class AttendeeUser(AbstractUser):
     first_name = models.CharField(max_length= 100, null = False, blank= False)
     last_name = models.CharField(max_length= 100, null = False , blank = False)
