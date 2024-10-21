@@ -41,6 +41,15 @@ class EventSchema(ModelSchema):
             'max_attendee',
         ]
                 
+class EventResponseSchema(Schema):
+    event_name : str
+    event_create_date : datetime
+    start_date_event : datetime
+    end_date_event : datetime
+    start_date_event : datetime
+    end_date_register : datetime
+    description : str
+    max_attendee : int
 
 class EventAPI:
 
@@ -71,3 +80,8 @@ class EventAPI:
             
             # Return the created event
             return event
+        
+        
+        @router.get('/show_event/',response= List[EventResponseSchema])
+        def list_event(request):
+            return Event.objects.all()

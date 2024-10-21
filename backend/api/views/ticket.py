@@ -34,8 +34,13 @@ class TicketAPI:
         user_id = request.user.id
         event = get_object_or_404(Event, id = event_id)
         user = get_object_or_404(AttendeeUser, id = user_id)
-        ticket = Ticket.objects.create(event = event, attendee = user)
-        return ticket
+        if event.can_register() and not event.is_max_attendee():
+            ticket = Ticket.objects.create(event = event, attendee = user)
+            return ticket
+        else:
+            {"error": "Registration for this event has been closed."}
+        
+        
     
     @router.delete('delete-event/{ticket_id}', auth= JWTAuth())
     def delete_event(request, ticket_id):
