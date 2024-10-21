@@ -1,11 +1,30 @@
 from django.db import models
-from django.contrib.auth.models import User
+from django.contrib.auth.models import AbstractUser
 from django.utils import timezone
 from django.core.validators import MinValueValidator
 
 
+
+class AttendeeUser(AbstractUser):
+    first_name = models.CharField(max_length= 100, null = False, blank= False)
+    last_name = models.CharField(max_length= 100, null = False , blank = False)
+    birth_date = models.DateField('Birth Date', null=False, blank=False)
+    phone_number = models.CharField(max_length=50, null = False, blank= False)
+    groups = models.ManyToManyField(
+        'auth.Group',
+        related_name='attendeeuser_set',  # Change this to your desired name
+        blank=True,
+    )
+    
+    user_permissions = models.ManyToManyField(
+        'auth.Permission',
+        related_name='attendeeuser_set',  # Change this to your desired name
+        blank=True,
+    )
+
+
 class Organizer(models.Model):
-    user = models.ForeignKey(User, on_delete= models.CASCADE)
+    user = models.ForeignKey(AttendeeUser, on_delete= models.CASCADE)
     organizer_name = models.CharField(max_length=100)
     email = models.EmailField()
 
@@ -124,28 +143,11 @@ class Event(models.Model):
         return f"Event: {self.event_name}"
     
     
-class Attendee(models.Model):
-    user = models.ForeignKey(User, on_delete= models.CASCADE)
-    event_list = models.ManyToManyField(Event, through= 'Ticket')
-    
-    
-    def show_event_registered(self):
-        """
-        Get all events an attendee has joined
-
-        Return:
-            query_set: List of events an attendee has joined
-        """
-        return self.event_list.all()
-
-    
-    def __str__(self) -> str:
-        return f"Name: {self.user.username}"
     
     
 class Ticket(models.Model):
     event = models.ForeignKey(Event, on_delete= models.CASCADE)
-    attendee = models.ForeignKey(Attendee, on_delete= models.CASCADE)
+    attendee = models.ForeignKey(AttendeeUser, on_delete= models.CASCADE)
     register_date = models.DateTimeField('Date registered', default= timezone.now)
     
         
@@ -174,4 +176,4 @@ class Ticket(models.Model):
         self.delete()
 
     def __str__(self) -> str:
-        return f"Event: {self.event.event_name}, Attendee: {self.attendee.user.username}"
+        return f"Event: {self.event.event_name}, Attendee: {self.attendee.first_name}"
