@@ -153,3 +153,42 @@ class EventAPI:
         except Exception as e:
             logger.error(f"Error while retrieving events for the homepage: {str(e)}")
             return Response({'error': str(e)}, status=400)
+        
+    @router.put('/edit-event-{event_id}', response={204: None, 401: ErrorResponseSchema, 404: ErrorResponseSchema}, auth=JWTAuth())
+    def edit_event(request: HttpRequest, event_id: int, data: EventSchema):
+        """Edit event detail by event ID."""
+        if not request.user.is_authenticated:
+            logger.warning(f"Unauthorized access to edit event by user: {request.user}")
+            return Response({'error': 'User must be logged in'}, status=401)
+        
+        try:
+            event = Event.objects.get(id=event_id)  
+            organizer = Organizer.objects.get(user=request.user)
+            if event.organizer != organizer:
+                logger.warning(f"User {request.user.username} tried to edit an event they do not own.")
+                return Response({'error': 'You are not allowed to edit this event.'}, status=403)
+            
+            event.event_name = data.event_name
+            event.start_date_event = data.start_date_event
+            event.end_date_event = data.end_date_event
+            event.start_date_register = data.start_date_register or timezone.now()
+            event.end_date_register = data.end_date_register
+            event.description = data.description
+            event.max_attendee = data.max_attendee
+            
+            event.save()
+            
+            logger.info(f"Organizer {organizer.organizer_name} edited their event {event_id}.")
+            return Response(status=204) 
+        
+        except Event.DoesNotExist:
+            logger.error(f"Event with ID {event_id} does not exist.")
+            return Response({'error': 'Event not found'}, status=404)
+        
+        except Organizer.DoesNotExist:
+            logger.error(f"User {request.user.username} is not an organizer.")
+            return Response({'error': 'User is not an organizer'}, status=404)
+        
+        except Exception as e:
+            logger.error(f"Error while editing event {event_id}: {str(e)}")
+            return Response({'error': str(e)}, status=400)
