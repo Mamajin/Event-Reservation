@@ -3,7 +3,8 @@ from django.contrib.auth import authenticate, login
 from ninja import NinjaAPI, Router, Schema, ModelSchema, Form
 from typing import List, Optional
 from api.models import *
-from django.contrib.auth.hashers import make_password
+from api.views.organizer import *
+from django.contrib.auth.decorators import login_required
 from pydantic import field_validator
 from datetime import datetime
 from ninja.responses import Response
@@ -11,6 +12,7 @@ from ninja_jwt.authentication import JWTAuth
 from ninja.errors import HttpError
 from django.shortcuts import get_object_or_404
 
+logger = logging.getLogger(__name__)
 router = Router()
 
 class UserSchema(ModelSchema):
