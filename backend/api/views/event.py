@@ -1,58 +1,6 @@
-from ninja import Router, Schema, NinjaAPI, Field
-from ninja import NinjaAPI, Router, Schema, ModelSchema, Form
-from typing import List, Optional
-from api.models import *
-from api.views.organizer import *
-from ninja.responses import Response
-from ninja_jwt.authentication import JWTAuth
-from ninja.errors import HttpError
-from django.shortcuts import get_object_or_404
-from datetime import datetime
+from .schemas import *   
 
-logger = logging.getLogger(__name__)
 router = Router()
-
-class UserSchema(ModelSchema):
-    class Meta:
-        model = AttendeeUser
-        fields = ['id', 'username', 'password','email'] 
-        
- 
-class OrganizerSchema(ModelSchema):
-    user : UserSchema
-    
-    class Meta:
-        model = Organizer
-        fields = ['user', 'organizer_name', 'email']
-
-
-class EventSchema(ModelSchema):
-    class Meta:
-        model = Event
-        fields = [
-            'event_name',
-            'event_create_date',
-            'start_date_event',
-            'end_date_event',
-            'start_date_register',
-            'end_date_register',
-            'description',
-            'max_attendee',
-        ]
-    
-
-class EventResponseSchema(Schema):
-    id: int
-    organizer: OrganizerResponseSchema
-    event_name: str
-    event_create_date: datetime
-    start_date_event: datetime
-    end_date_event: datetime
-    start_date_register: datetime
-    end_date_register: datetime
-    description: str
-    max_attendee: int
-                
 
 class EventAPI:
 
