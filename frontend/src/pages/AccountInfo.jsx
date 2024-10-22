@@ -3,7 +3,7 @@ import axios from 'axios';
 import Sidebar from '../components/Sidebar';
 import Footer from '../components/Footer';
 
-function AccountInfo() {
+function AccountInfo( {user} ) {
   const [userData, setUserData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -11,7 +11,7 @@ function AccountInfo() {
   useEffect(() => {
     const fetchUserData = async () => {
       try {
-        const response = await axios.get('http://localhost:8000/mock_api/event/');
+        const response = await axios.get('http://localhost:8000/api/users/profile');
         const organizer = response.data[0]?.organizer;
         if (organizer?.user) {
           setUserData(organizer.user);
@@ -51,8 +51,12 @@ function AccountInfo() {
           <div className="bg-white min-h-screen p-6">
             <h2 className="text-2xl font-bold mb-4">Account Information</h2>
             <div className="info">
-              <p><strong>Username:</strong> {userData.username || 'Unknown'}</p>
-              <p><strong>Email:</strong> {userData.email || 'Unknown'}</p>
+              <p><strong>Username:</strong> {user.username || 'Unknown'}</p>
+              <p><strong>Email:</strong> {user.email || 'Unknown'}</p>
+              <p><strong>First Name:</strong> {user.firstname || 'Unknown'}</p>
+              <p><strong>Last Name:</strong> {user.lastname || 'Unknown'}</p>
+              <p><strong>Phone Number:</strong> {user.phonenumber || 'Unknown'}</p>
+              <p><strong>Status:</strong> {user.status || 'Unknown'}</p>
             </div>
           </div>
         </main>
