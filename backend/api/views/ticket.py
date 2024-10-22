@@ -14,7 +14,10 @@ from django.shortcuts import get_object_or_404
 from ninja_jwt.authentication import JWTAuth
 router = Router()
 
-
+class TicketSchema(ModelSchema):
+    class Meta:
+        model = Ticket
+        fields = ['id','event', 'attendee', 'register_date']
 
 class TicketAPI:
     
