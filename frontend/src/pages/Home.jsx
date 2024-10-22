@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
+import api from '../api';
 import EventCard from '../components/EventCard';
 import Sidebar from '../components/Sidebar';
 import Footer from '../components/Footer';
@@ -12,7 +12,7 @@ function Home() {
   useEffect(() => {
     const fetchEvents = async () => {
       try {
-        const response = await axios.get('http://localhost:8000/stub_api/mock_api/event/');
+        const response = await api.get('/events/events');
         setEvents(response.data);
       } catch (err) {
         setError(err);
@@ -40,7 +40,7 @@ function Home() {
       <div className="bg-white min-h-screen p-6">
         <div className="card lg:card-side bg-base-100 shadow-xl">
           {events.map((event) => (
-            <EventCard key={event.organizer.user.id} event={event} />
+            <EventCard key={event.id} event={event} />
           ))}
         </div>
       </div>
