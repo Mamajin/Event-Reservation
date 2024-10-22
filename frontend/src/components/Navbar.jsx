@@ -28,7 +28,7 @@ export default function Navbar() {
 
   return (
     <div className="navbar bg-dark-purple">
-      <BoltIcon className="bg-amber-300 text-xl h-8 w-9 text-dark-purple rounded cursor-pointer mr-2" />
+      <StarIcon className="bg-amber-300 text-xl h-8 w-9 text-dark-purple rounded cursor-pointer mr-2" />
       <div className="navbar-start">
         <a className="btn btn-ghost text-xl p-0" onClick={handleHome}>EventEase </a>
       </div>
