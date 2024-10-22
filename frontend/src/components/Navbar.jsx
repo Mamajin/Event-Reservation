@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { ACCESS_TOKEN } from '../constants';
 import { StarIcon } from '@heroicons/react/24/solid';
 
-export default function Navbar() {
+function Navbar() {
   const navigate = useNavigate();
 
   const onLogout = () => {
@@ -56,3 +56,4 @@ export default function Navbar() {
     </div>
   );
 }
+export default Navbar

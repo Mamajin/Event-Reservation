@@ -9,7 +9,7 @@ function Sidebar() {
         { title: "Apply Event", path: "/apply-event" },
         { title: "Accepted Event", path: "/accepted-event" },
         { title: "Invitation", path: "/invitation" },
-        { title: "Become Holder", path: "/become-holder" },
+        { title: "Become Organizer", path: "/become-organizer" },
         { title: "Account Info", path: "/account-info" },
     ];
     

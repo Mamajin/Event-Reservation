@@ -7,6 +7,7 @@ import NotFound from './pages/NotFound';
 import ProtectedRoute from './components/ProtectedRoute';
 import Navbar from './components/Navbar';
 import CreateEvent from './pages/CreateEvent';
+import ApplyOrganizer from './pages/ApplyOrganizer';
 
 
 function App() {
@@ -23,6 +24,7 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/logout" element={<Navigate to="/" onEnter={handleLogout} />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/become-organizer" element={<ApplyOrganizer />} />
           <Route 
             path="/create-event" 
             element={
