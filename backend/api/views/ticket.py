@@ -1,12 +1,9 @@
-from .schemas import *
+from .schemas import TicketSchema
+from .modules import List, JWTAuth, AttendeeUser, get_object_or_404, Event, Ticket, Router
 
 router = Router()
 
 
-class TicketSchema(ModelSchema):
-    class Meta:
-        model = Ticket
-        fields = ['id','event', 'attendee', 'register_date']
 
 class TicketAPI:
     
