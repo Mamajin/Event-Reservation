@@ -1,8 +1,29 @@
-from .schemas import OrganizerResponseSchema,  OrganizerSchema, Organizer,ErrorResponseSchema, Event
-from .modules import HttpRequest, JWTAuth, Form, logger, Response, Router
+from ninja import Router, Schema, Form
+from typing import Optional
+from api.models import Organizer, Event
+from ninja.errors import HttpError
+from django.http import HttpRequest
+from ninja.responses import Response
+from ninja_jwt.authentication import JWTAuth
+import logging
 
+logger = logging.getLogger(__name__)
 router = Router()
 
+
+class OrganizerSchema(Schema):
+    organizer_name: Optional[str]
+    email: Optional[str]
+
+
+class OrganizerResponseSchema(Schema):
+    id: int
+    organizer_name: str
+    email: str
+
+
+class ErrorResponseSchema(Schema):
+    error: str
 
 
 class OrganizerAPI:
