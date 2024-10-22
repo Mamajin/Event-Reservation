@@ -179,7 +179,8 @@ class EventAPI:
             event.save()
             
             logger.info(f"Organizer {organizer.organizer_name} edited their event {event_id}.")
-            return Response(status=204) 
+            
+            return Response({event},status=204) 
         
         except Event.DoesNotExist:
             logger.error(f"Event with ID {event_id} does not exist.")
