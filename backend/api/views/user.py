@@ -97,10 +97,12 @@ class UserAPI:
     @router.get('/profile', response=UserResponseSchema, auth = JWTAuth())
     def view_profile(request):
         """
-        Retrieve the profile details of the currently logged-in user.
+        Retrieve the profile details of the currently logged-in user, 
+        including their role (Organizer or Attendee).
 
         Returns:
-            The user's profile information including username and tokens.
+            The user's profile information including username, tokens, 
+            and role (Organizer or Attendee).
         """
         user = request.user
         if not user.is_authenticated:
