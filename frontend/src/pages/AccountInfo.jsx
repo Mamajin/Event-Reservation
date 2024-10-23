@@ -45,7 +45,14 @@ function AccountInfo() {
   }, [navigate]); // Add 'navigate' as a dependency
 
   if (loading) {
-    return <div>Loading...</div>;
+    return (
+      <PageLayout>
+        <h2 className="text-2xl font-bold mb-4">Applied Events</h2>
+          <div className="grid grid-cols-1 gap-4">
+            <div>Loading...</div>
+          </div>
+      </PageLayout>
+  );
   }
 
   if (error) {
@@ -59,15 +66,19 @@ function AccountInfo() {
 
   return (
     <PageLayout>
-      <h2 className="text-2xl font-bold mb-4">Account Information</h2>
-      <div className="info">
-        <p><strong>Username:</strong> {userData.username || 'Unknown'}</p>
-        <p><strong>Email:</strong> {userData.email || 'Unknown'}</p>
-        <p><strong>First Name:</strong> {userData.firstname || 'Unknown'}</p>
-        <p><strong>Last Name:</strong> {userData.lastname || 'Unknown'}</p>
-        <p><strong>Phone Number:</strong> {userData.phonenumber || 'Unknown'}</p>
-        <p><strong>Status:</strong> {userData.status || 'Unknown'}</p>
-      </div>
+        <div className="flex justify-end items-start min-h-screen bg-white-100 p-4">
+            <div className="w-full max-w-xs bg-white rounded-lg shadow-lg p-6 space-y-4">
+                <h2 className="text-2xl font-bold mb-4 text-center text-dark-purple">Account Information</h2>
+                <div className="info space-y-2">
+                    <p className="text-lg"><strong>Username:</strong> {userData.username || 'Unknown'}</p>
+                    <p className="text-lg"><strong>Email:</strong> {userData.email || 'Unknown'}</p>
+                    <p className="text-lg"><strong>First Name:</strong> {userData.firstname || 'Unknown'}</p>
+                    <p className="text-lg"><strong>Last Name:</strong> {userData.lastname || 'Unknown'}</p>
+                    <p className="text-lg"><strong>Phone Number:</strong> {userData.phonenumber || 'Unknown'}</p>
+                    <p className="text-lg"><strong>Status:</strong> {userData.status || 'Unknown'}</p>
+                </div>
+            </div>
+        </div>
     </PageLayout>
   );
 }
