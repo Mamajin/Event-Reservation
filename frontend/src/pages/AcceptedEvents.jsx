@@ -30,6 +30,7 @@ function AcceptedEvent() {
           setUserData(organizer.user); // Set the fetched user data
         } else {
           setUserData({
+            id: 'Unknown',
             username: 'Unknown',
             email: 'Unknown',
             firstname: 'Unknown',

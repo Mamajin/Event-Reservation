@@ -70,6 +70,7 @@ function AccountInfo() {
             <div className="w-full max-w-xs bg-white rounded-lg shadow-lg p-6 space-y-4">
                 <h2 className="text-2xl font-bold mb-4 text-center text-dark-purple">Account Information</h2>
                 <div className="info space-y-2">
+                    <p className="text-lg"><strong>ID:</strong> {userData.id || 'Unknown'}</p>
                     <p className="text-lg"><strong>Username:</strong> {userData.username || 'Unknown'}</p>
                     <p className="text-lg"><strong>Email:</strong> {userData.email || 'Unknown'}</p>
                     <p className="text-lg"><strong>First Name:</strong> {userData.firstname || 'Unknown'}</p>
