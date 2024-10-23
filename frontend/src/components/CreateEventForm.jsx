@@ -41,7 +41,7 @@ function CreateEventForm() {
             console.log("Payload being sent to API:", payload); // Log payload for debugging
             console.log("Payload being sent to API:", JSON.stringify(payload, null, 2));
             const token = localStorage.getItem(ACCESS_TOKEN);
-            const response = await api.post('/api/events/create-event', payload, {
+            const response = await api.post('/events/create-event', payload, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                     'Content-Type': 'application/json',

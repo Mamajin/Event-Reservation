@@ -1,5 +1,5 @@
-import Form from "../components/AuthenticationForm"
+import LoginForm from "../components/LoginForm"
 function Login(){
-    return <Form route="/api/users/login" method="login"/>
+    return <LoginForm />
 }
  export default Login

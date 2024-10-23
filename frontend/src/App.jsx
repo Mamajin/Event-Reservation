@@ -10,6 +10,7 @@ import CreateEvent from './pages/CreateEvent';
 import AccountInfo from './pages/AccountInfo';
 import AppliedEvents from './pages/AppliedEvents';
 import AcceptedEvents from './pages/AcceptedEvents';
+import ApplyOrganizer from './pages/ApplyOrganizer';
 
 
 function App() {
@@ -23,12 +24,13 @@ function App() {
         <Navbar />
         <Routes>
           <Route path="/" element={<Home />}/>
-          <Route path="/accountinfo" element={<AccountInfo />}/>
-          <Route path="/appliedevents" element={<AppliedEvents />}/>
-          <Route path="/acceptedevents" element={<AcceptedEvents />}/>
+          <Route path="/account-info" element={<AccountInfo />}/>
+          <Route path="/applied-events" element={<AppliedEvents />}/>
+          <Route path="/accepted-events" element={<AcceptedEvents />}/>
           <Route path="/login" element={<Login />} />
           <Route path="/logout" element={<Navigate to="/" onEnter={handleLogout} />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/become-organizer" element={<ApplyOrganizer />} />
           <Route 
             path="/create-event" 
             element={

@@ -68,7 +68,7 @@ function AcceptedEvent() {
 
   return (
     <PageLayout>
-      <h2 className="text-2xl font-bold mb-4">Accecpted Events</h2>
+      <h2 className="text-2xl font-bold mb-4">Accepted Events</h2>
       <div className="info">
         <p><strong>Place-holder</strong></p>
       </div>
