@@ -1,58 +1,8 @@
-from ninja import Router, Schema, NinjaAPI, Field
-from django.contrib.auth import authenticate, login
-from django.contrib.auth.models import User
-from ninja import NinjaAPI, Router, Schema, ModelSchema, Form
-from typing import List, Optional
-from api.models import *
-from django.contrib.auth.hashers import make_password
-from pydantic import field_validator
-from datetime import datetime, date
-from ninja.responses import Response
-from rest_framework import status
-from django.shortcuts import get_object_or_404
-from ninja_jwt.authentication import JWTAuth
-from ninja_jwt.tokens import AccessToken, RefreshToken
-
+from .schemas import UserSchema, LoginResponseSchema, UserResponseSchema, LoginSchema
+from .modules import AttendeeUser, Form, make_password, authenticate, login, AccessToken, RefreshToken,Response, JWTAuth, Organizer, status,get_object_or_404, Router
 
 router = Router()
 
-
-class UserSchema(Schema):
-    username: str
-    password: str
-    password2: str
-    first_name: str
-    last_name : str
-    birth_date: date
-    phone_number: str
-    email: str
-    
-    @field_validator("password2")
-    def passwords_match(cls, password2, values, **kwargs):
-        if "password" in values.data and values.data["password"] != password2:
-            raise ValueError("Passwords do not match")
-        return password2
-    
-class LoginSchema(Schema):
-    username: str
-    password: str
-
-class LoginResponseSchema(Schema):
-    id : int
-    username: str
-    password: str
-    access_token: str
-    refresh_token: str
-    id : int
-    
-
-class UserResponseSchema(Schema):
-    username: str
-    firstname: str
-    lastname: str
-    birth_date: date 
-    phonenumber: str
-    status: str
 
 
 class UserAPI:
