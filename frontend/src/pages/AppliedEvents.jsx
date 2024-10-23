@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import PageLayout from '../components/PageLayout';
-import { useNavigate } from 'react-router-dom'; // Import useNavigate
+import { useNavigate } from 'react-router-dom';
+import EventCard from '../components/EventCard';
 import { ACCESS_TOKEN } from "../constants";
 
 function AppliedEvents() {
@@ -14,11 +15,13 @@ function AppliedEvents() {
     const fetchAppliedEvents = async () => {
       try {
         const token = localStorage.getItem(ACCESS_TOKEN);
+        const userId = 1; // Replace with the actual user ID as needed or fetch dynamically
+
         if (!token) {
           throw new Error('No access token found'); // Handle missing token
         }
 
-        const response = await axios.get('http://localhost:8000/api/users/applied-events', {
+        const response = await axios.get(`http://localhost:8000/api/tickets/event/${userId}`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -52,20 +55,22 @@ function AppliedEvents() {
   }
 
   if (events.length === 0) {
-    return <div>No applied events available</div>;
+    return (
+      <PageLayout>
+      <h2 className="text-2xl font-bold mb-4">Applied Events</h2>
+      <div className="grid grid-cols-1 gap-4">
+        <div>No applied events available</div>
+      </div>
+    </PageLayout>
+  );
   }
 
   return (
     <PageLayout>
       <h2 className="text-2xl font-bold mb-4">Applied Events</h2>
-      <div className="events-list">
-        {events.map((event, index) => (
-          <div key={index} className="event-item">
-            <h3>{event.name}</h3>
-            <p><strong>Date:</strong> {event.date}</p>
-            <p><strong>Location:</strong> {event.location}</p>
-            <p><strong>Status:</strong> {event.status}</p>
-          </div>
+      <div className="grid grid-cols-1 gap-4">
+        {events.map((ticket, index) => (
+          <EventCard key={index} event={ticket.event} />
         ))}
       </div>
     </PageLayout>
