@@ -185,11 +185,9 @@ class Session(models.Model):
     end_date_event = models.DateTimeField('Session End Date', null= False, blank = True)
     start_date_register = models.DateTimeField('Registration Start Date', default=timezone.now)
     end_date_register = models.DateTimeField('Registration End Date', null=False, blank=False)
-    description = models.TextField()
-    max_attendee = models.PositiveIntegerField()
+    description = models.TextField(max_length=400)
+    max_attendee = models.PositiveIntegerField(default=0, validators = [MinValueValidator(0)])
+    session_type = models.CharField(max_length=100)
 
     def __str__(self):
         return f"{self.session_name} - {self.event.event_name}"
-
-    class Meta:
-        ordering = ['start_time']
