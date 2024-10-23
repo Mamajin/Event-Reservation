@@ -1,12 +1,13 @@
-from ninja import Router, Schema, NinjaAPI, Field
-from ninja import NinjaAPI, Router, Schema, ModelSchema, Form
+from ninja import Router, Schema, ModelSchema, Form, Field
 from typing import List, Optional
 from api.models import *
 from api.views.organizer import *
+from api.views.session import *
 from ninja.responses import Response
 from ninja_jwt.authentication import JWTAuth
 from ninja.errors import HttpError
 from django.shortcuts import get_object_or_404
+from django.utils import timezone
 from datetime import datetime
 
 logger = logging.getLogger(__name__)
@@ -52,6 +53,7 @@ class EventResponseSchema(Schema):
     end_date_register: datetime
     description: str
     max_attendee: int
+    session: Optional[SessionResponseSchema]
                 
 
 class EventAPI:
@@ -83,8 +85,28 @@ class EventAPI:
         
         # Return the created event
         return event
-        
     
+    @router.get('/{event_id}', response=EventResponseSchema)
+    def event_detail(request: HttpRequest, event_id: int):
+        """Show event detail by event ID"""
+        event = get_object_or_404(Event, id=event_id)
+
+        session = Session.objects.filter(event=event).first()
+
+        return EventResponseSchema(
+                id=event.id,
+                organizer=event.organizer,
+                event_name=event.event_name,
+                event_create_date=event.event_create_date,
+                start_date_event=event.start_date_event,
+                end_date_event=event.end_date_event,
+                start_date_register=event.start_date_register,
+                end_date_register=event.end_date_register,
+                description=event.description,
+                max_attendee=event.max_attendee,
+                session=session
+        )
+        
     @router.get('/my-events', response=List[EventResponseSchema], auth=JWTAuth())
     def get_my_events(request: HttpRequest):
         """
@@ -108,7 +130,7 @@ class EventAPI:
                     start_date_register=event.start_date_register,
                     end_date_register=event.end_date_register,
                     description=event.description,
-                    max_attendee=event.max_attendee
+                    max_attendee=event.max_attendee,
                 )
                 for event in events
             ]
@@ -193,3 +215,4 @@ class EventAPI:
         except Exception as e:
             logger.error(f"Error while editing event {event_id}: {str(e)}")
             return Response({'error': str(e)}, status=400)
+    
