@@ -33,28 +33,12 @@ function AppliedEvents() {
   }
 
   return (
-    <div className="flex flex-col min-h-screen">
-      <div className="flex flex-1">
-        <Sidebar />
-        <main className="flex-1">
-          <div className="bg-white min-h-screen p-6">
-            <h2 className="text-2xl font-bold mb-4">Applied Events</h2>
-            {appliedEvents.length === 0 ? (
-              <p>No events applied for.</p>
-            ) : (
-              <ul>
-                {appliedEvents.map((event) => (
-                  <li key={event.event_name}>
-                    <strong>{event.event_name}</strong> - {event.start_date_event}
-                  </li>
-                ))}
-              </ul>
-            )}
-          </div>
-        </main>
+    <PageLayout>
+      <h2 className="text-2xl font-bold mb-4">Account Information</h2>
+      <div className="info">
+        <p><strong>Place Holder</strong></p>
       </div>
-      <Footer />
-    </div>
+    </PageLayout>
   );
 }
 

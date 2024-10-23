@@ -1,64 +1,79 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import Sidebar from '../components/Sidebar';
-import Footer from '../components/Footer';
+import PageLayout from '../components/PageLayout';
+import { useNavigate } from 'react-router-dom'; // Import useNavigate
+import { ACCESS_TOKEN } from "../constants";
 
-function AcceptedEvents() {
-  const [acceptedEvents, setAcceptedEvents] = useState([]);
+function AcceptedEvent() {
+  const [userData, setUserData] = useState(null); // Initially null
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const navigate = useNavigate(); // Initialize useNavigate here
 
   useEffect(() => {
-    const fetchAcceptedEvents = async () => {
+    const fetchUserData = async () => {
       try {
-        // Call the API to fetch accepted events
-        const response = await axios.get('http://localhost:8000/mock_api/event/');
-        // Please consult me before merging we might need more stub data
-        // Filter events to include only those that are accepted (assuming we created a way to mark them as accepted)
-        const accepted = response.data.filter((event) => event.is_accepted);
-        setAcceptedEvents(accepted);
+        const token = localStorage.getItem(ACCESS_TOKEN);
+        console.log('Token:', token);
+        if (!token) {
+          throw new Error('No access token found'); // Handle missing token
+        }
+
+        const response = await axios.get('http://localhost:8000/api/users/profile', {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        const organizer = response.data[0]?.organizer;
+        if (organizer?.user) {
+          setUserData(organizer.user); // Set the fetched user data
+        } else {
+          setUserData({
+            username: 'Unknown',
+            email: 'Unknown',
+            firstname: 'Unknown',
+            lastname: 'Unknown',
+            phonenumber: 'Unknown',
+            status: 'Unknown',
+          });
+        }
       } catch (err) {
-        setError(err);
+        if (err.message === 'No access token found') {
+          alert('You are not logged in. Redirecting to login page...');
+          navigate('/login'); // Redirect to login if token is missing
+        } else {
+          setError(err); // Handle other errors
+        }
       } finally {
         setLoading(false);
       }
     };
 
-    fetchAcceptedEvents();
-  }, []);
+    fetchUserData();
+  }, [navigate]); // Add 'navigate' as a dependency
 
   if (loading) {
     return <div>Loading...</div>;
   }
 
   if (error) {
-    return <div>Error fetching accepted events: {error.message}</div>;
+    return <div>Error fetching user data: {error.message}</div>;
+  }
+
+  // Ensure userData is available before rendering its properties
+  if (!userData) {
+    return <div>No user data available</div>;
   }
 
   return (
-    <div className="flex flex-col min-h-screen">
-      <div className="flex flex-1">
-        <Sidebar />
-        <main className="flex-1">
-          <div className="bg-white min-h-screen p-6">
-            <h2 className="text-2xl font-bold mb-4">Accepted Events</h2>
-            {acceptedEvents.length === 0 ? (
-              <p>No accepted events.</p>
-            ) : (
-              <ul>
-                {acceptedEvents.map((event) => (
-                  <li key={event.event_name}>
-                    <strong>{event.event_name}</strong> - {new Date(event.start_date_event).toLocaleDateString()}
-                  </li>
-                ))}
-              </ul>
-            )}
-          </div>
-        </main>
+    <PageLayout>
+      <h2 className="text-2xl font-bold mb-4">Accecpted Events</h2>
+      <div className="info">
+        <p><strong>Place-holder</strong></p>
       </div>
-      <Footer />
-    </div>
+    </PageLayout>
   );
 }
 
-export default AcceptedEvents;
+export default AcceptedEvent;

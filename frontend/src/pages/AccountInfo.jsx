@@ -14,7 +14,6 @@ function AccountInfo() {
     const fetchUserData = async () => {
       try {
         const token = localStorage.getItem(ACCESS_TOKEN);
-        console.log('Token:', token);
         if (!token) {
           throw new Error('No access token found'); // Handle missing token
         }
@@ -25,19 +24,11 @@ function AccountInfo() {
           },
         });
 
-        const organizer = response.data[0]?.organizer;
-        if (organizer?.user) {
-          setUserData(organizer.user); // Set the fetched user data
-        } else {
-          setUserData({
-            username: 'Unknown',
-            email: 'Unknown',
-            firstname: 'Unknown',
-            lastname: 'Unknown',
-            phonenumber: 'Unknown',
-            status: 'Unknown',
-          });
-        }
+        console.log('API response:', response.data); // Log the API response
+
+        // Assuming response.data is a single user object, update the state
+        setUserData(response.data);
+
       } catch (err) {
         if (err.message === 'No access token found') {
           alert('You are not logged in. Redirecting to login page...');
