@@ -68,10 +68,14 @@ function AcceptedEvent() {
 
   return (
     <PageLayout>
-      <h2 className="text-2xl font-bold mb-4">Accepted Events</h2>
-      <div className="info">
-        <p><strong>Place-holder</strong></p>
-      </div>
+        <div className="flex justify-end items-start min-h-screen bg-white-100 p-4">
+            <div className="w-full max-w-lg bg-white rounded-lg shadow-lg p-6 space-y-4">
+                <h2 className="text-2xl font-bold mb-4 text-center text-dark-purple">Accepted Events</h2>
+                <div className="info">
+                    <p className="text-lg"><strong>Place-holder</strong></p>
+                </div>
+            </div>
+        </div>
     </PageLayout>
   );
 }

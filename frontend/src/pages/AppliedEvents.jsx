@@ -50,10 +50,14 @@ function AppliedEvents() {
   if (loading || userLoading) {
     return (
       <PageLayout>
-        <h2 className="text-2xl font-bold mb-4">Applied Events</h2>
-          <div className="grid grid-cols-1 gap-4">
-            <div>Loading...</div>
-          </div>
+        <div className="flex justify-end items-start min-h-screen bg-white-100 p-4">
+            <div className="w-full max-w-lg bg-white rounded-lg shadow-lg p-6 space-y-4">
+                <h2 className="text-2xl font-bold mb-4 text-center text-dark-purple">Applied Events</h2>
+                <div className="grid grid-cols-1 gap-4">
+                    <div className="text-center">Loading...</div>
+                </div>
+            </div>
+        </div>
       </PageLayout>
   );
   }
@@ -75,12 +79,16 @@ function AppliedEvents() {
 
   return (
     <PageLayout>
-      <h2 className="text-2xl font-bold mb-4">Applied Events</h2>
-      <div className="grid grid-cols-1 gap-4">
-        {events.map((ticket, index) => (
-          <EventCard key={index} event={ticket.event} />
-        ))}
-      </div>
+        <div className="flex justify-end items-start min-h-screen bg-white-100 p-4">
+            <div className="w-full max-w-lg bg-white rounded-lg shadow-lg p-6 space-y-4">
+                <h2 className="text-2xl font-bold mb-4 text-center text-dark-purple">Applied Events</h2>
+                <div className="grid grid-cols-1 gap-4">
+                    {events.map((ticket, index) => (
+                        <EventCard key={index} event={ticket.event} />
+                    ))}
+                </div>
+            </div>
+        </div>
     </PageLayout>
   );
 }
