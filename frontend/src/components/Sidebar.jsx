@@ -6,7 +6,7 @@ function Sidebar() {
     const [open, setOpen] = useState(true);
     const Menus = [
         { title: "Discover", path: "/" },
-        { title: "Applied Event", path: "/create-event" },
+        { title: "Applied Event", path: "/appliedevents" },
         { title: "Accepted Event", path: "/acceptedevents" },
         { title: "Invitation", path: "#" },
         { title: "Become Organizer", path: "#" },
