@@ -66,22 +66,71 @@ function AccountInfo() {
 
   return (
     <PageLayout>
-        <div className="flex justify-end items-start min-h-screen bg-white-100 p-4">
-            <div className="w-full max-w-xs bg-white rounded-lg shadow-lg p-6 space-y-4">
-                <h2 className="text-2xl font-bold mb-4 text-center text-dark-purple">Account Information</h2>
-                <div className="info space-y-2">
-                    <p className="text-lg"><strong>ID:</strong> {userData.id || 'Unknown'}</p>
-                    <p className="text-lg"><strong>Username:</strong> {userData.username || 'Unknown'}</p>
-                    <p className="text-lg"><strong>Email:</strong> {userData.email || 'Unknown'}</p>
-                    <p className="text-lg"><strong>First Name:</strong> {userData.firstname || 'Unknown'}</p>
-                    <p className="text-lg"><strong>Last Name:</strong> {userData.lastname || 'Unknown'}</p>
-                    <p className="text-lg"><strong>Phone Number:</strong> {userData.phonenumber || 'Unknown'}</p>
-                    <p className="text-lg"><strong>Status:</strong> {userData.status || 'Unknown'}</p>
-                </div>
+      <div className="flex min-h-screen bg-white-100 p-6">
+        {/* Main Content */}
+        <div className="flex-1 p-6 bg-white rounded-lg shadow-lg w-full max-w-screen-lg mx-auto">
+          <div className="max-w-3xl mx-auto">
+            <h1 className="text-2xl font-bold mb-6 text-dark-purple">Account Details</h1>
+            <p className="text-gray-600 mb-6">Manage your user login details.</p>
+            
+            {/* Profile Image */}
+            <div className="flex items-center mb-6">
+              <div className="w-24 h-24 bg-gray-200 rounded-full flex justify-center items-center">
+                <svg className="w-12 h-12 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 12c2.667 0 4.667-2 4.667-4.667S14.667 2.667 12 2.667 7.333 4.667 7.333 7.333 9.333 12 12 12zm0 0v7.333m0 0c-1.567 0-5.333 1-5.333 2.333V21h10.667v-1.334c0-1.333-3.767-2.333-5.333-2.333z" />
+                </svg>
+              </div>
             </div>
+
+            {/* Information */}
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700">Username</label>
+              <p className="mt-1 text-gray-900">{userData.username || 'N/A'}</p>
+            </div>
+
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">First Name</label>
+                  <p className="mt-1 text-gray-900">{userData.firstname || 'N/A'}</p>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Last Name</label>
+                  <p className="mt-1 text-gray-900">{userData.lastname || 'N/A'}</p>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Status</label>
+                <p className="mt-1 text-gray-900">{userData.status || 'N/A'}</p>
+              </div>
+
+              <div className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">Email</label>
+                      <p className="mt-1 text-gray-900">{userData.email || 'N/A'}</p>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">Mobile Phone</label>
+                      <p className="mt-1 text-gray-900">{userData.phonenumber || 'N/A'}</p>
+                    </div>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Birth Date</label>
+                <p className="mt-1 text-gray-900">{userData.birth_date || 'N/A'}</p>
+              </div>
+
+
+
+            </div>
+          </div>
         </div>
+      </div>
     </PageLayout>
   );
 }
-
 export default AccountInfo;
