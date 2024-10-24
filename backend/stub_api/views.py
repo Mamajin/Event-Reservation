@@ -2,12 +2,13 @@ from ninja import Router, NinjaAPI, ModelSchema
 from faker import Faker
 import datetime
 from typing import List
-from api.models import *
+from api.models import Organizer, Event, Ticket, AttendeeUser
 from django.utils import timezone
 from django.contrib.auth.models import User
-import datetime
+from ninja.errors import HttpError
+from django.shortcuts import get_object_or_404
 
-stub_api = NinjaAPI()
+stub_api = NinjaAPI(version='1.0.0')
 router = Router()
 fake = Faker()
 
@@ -47,6 +48,10 @@ class EventSchema(ModelSchema):
         ]
         # Optional: You can also define nested schemas if you need more detail for the organizer
 
+class TicketSchema(ModelSchema):
+    class Config:
+        model = Ticket
+        model_fields = '__all__'
 
     
 @router.get("/event/", response=List[EventSchema])  
@@ -110,7 +115,6 @@ def create_event(request):
             'email': organizer_data['email'],
         }
     )
-    now = timezone.now()
 
     event_data = {
         'event_name': fake.catch_phrase(),
@@ -130,10 +134,95 @@ def create_event(request):
     )
     
     return event
-    
+
+@router.post("/create/fake_ticket/", response=TicketSchema)
+def create_fake_ticket(request):
+    """
+    Creates a fake ticket for testing.
+    """
+    # Create or get a mock attendee user
+    user_data = {
+        'username': fake.user_name(),
+        'email': fake.email(),
+        'password': fake.password(),
+    }
+    user, _ = AttendeeUser.objects.get_or_create(
+        username=user_data['username'],
+        defaults={'email': user_data['email'], 'password': user_data['password']}
+    )
+
+    # Create or get a mock event
+    event_data = {
+        'event_name': fake.catch_phrase(),
+        'event_create_date': fake.date_time_this_year(),
+        'start_date_event': fake.future_datetime(end_date="+30d"),
+        'end_date_event': fake.future_datetime(end_date="+60d"),
+        'start_date_register': fake.date_time_this_year() - datetime.timedelta(days=5),
+        'end_date_register': fake.date_time_this_year(),
+        'description': fake.text(max_nb_chars=200),
+        'max_attendee': fake.random_int(min=10, max=500),
+    }
+
+    # Retrieve an organizer or create one
+    organizer = Organizer.objects.first()
+    if not organizer:
+        organizer_user = User.objects.create(
+            username=fake.user_name(), 
+            email=fake.email(), 
+            password=fake.password()
+        )
+        organizer = Organizer.objects.create(
+            user=organizer_user,
+            organizer_name=fake.company(),
+            email=organizer_user.email
+        )
+
+    event, _ = Event.objects.get_or_create(
+        organizer=organizer,
+        defaults=event_data
+    )
+
+    # Create the ticket for the attendee
+    ticket = Ticket.objects.create(
+        event=event,
+        attendee=user
+    )
+
+    return ticket
+
+
+@router.get('event/{user_id}', response=List[TicketSchema])
+def list_my_event(request, user_id: int):
+    """
+    Lists all tickets for a given user.
+    """
+    user = get_object_or_404(AttendeeUser, id=user_id)
+    return user.ticket_set.all()
+
+
+@router.post('event/{event_id}/reserve', response=TicketSchema)
+def event_reserve(request, event_id: int):
+    """
+    Reserves a ticket for a user for a specific event.
+    """
+    user_id = request.user.id
+    event = get_object_or_404(Event, id=event_id)
+    user = get_object_or_404(AttendeeUser, id=user_id)
+    ticket = Ticket.objects.create(event=event, attendee=user)
+    return ticket
+
+
+@router.delete('delete-event/{ticket_id}')
+def delete_ticket(request, ticket_id: int):
+    """
+    Cancels a ticket by ID for the authenticated user.
+    """
+    user = request.user
+    try:
+        ticket = user.ticket_set.get(id=ticket_id)
+        ticket.delete()
+        return {"success": f"Ticket with ID {ticket_id} has been canceled."}
+    except Ticket.DoesNotExist:
+        return {"error": f"Ticket with ID {ticket_id} does not exist."}
     
 stub_api.add_router("/mock_api/", router)
-    
-    
-
-    
