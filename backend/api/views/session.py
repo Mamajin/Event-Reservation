@@ -3,6 +3,7 @@ from ninja import Router, Schema, Form
 from ninja.responses import Response
 from ninja_jwt.authentication import JWTAuth
 from django.http import HttpRequest
+from django.shortcuts import get_object_or_404
 from typing import List, Optional
 from api.models import *
 from datetime import datetime
@@ -80,3 +81,14 @@ class SessionAPI:
         except Exception as e:
             logger.error(f"Error while creating session for event {event_id}: {str(e)}")
             return Response({'error': str(e)}, status=400)
+        
+    @router.delete('/{event_id}/delete-session/{session_id}', response={204: None, 404: ErrorResponseSchema}, auth=JWTAuth())
+    def delete_session(request: HttpRequest, event_id: int, session_id: int):
+        """Delete a session by session id from event id."""
+        session = get_object_or_404(Session, 
+                                    id=session_id, 
+                                    event__organizer__user=request.user,
+                                    event__id=event_id)
+        session.delete()
+        logger.info(f"Session {session_id} for event {event_id} deleted by user {request.user.username}.")
+        return Response(status=204)
