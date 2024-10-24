@@ -21,6 +21,15 @@ class AttendeeUser(AbstractUser):
         related_name='attendeeuser_set',  # Change this to your desired name
         blank=True,
     )
+    
+    @property
+    def age(self):
+        today = timezone.now().date()
+        age = today.year - self.birth_date.year
+        if (today.month, today.day) < (self.birth_date.month, self.birth_date.day):
+            age -= 1
+            
+        return age
 
 
 class Organizer(models.Model):
