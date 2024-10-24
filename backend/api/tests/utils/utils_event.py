@@ -34,18 +34,15 @@ class EventModelsTest(TestCase):
         self.event_test = Event.objects.create(
             event_name=fake.company(),
             organizer= self.become_organizer(self.test_user, "test_user"),
-            start_date_event=timezone.make_aware(fake.date_time_this_year()),
-            end_date_event=timezone.make_aware(fake.date_time_this_year() + datetime.timedelta(days=1)),  # Ensure it ends after it starts
-            start_date_register=timezone.make_aware(fake.date_time_this_year() - datetime.timedelta(days=5)),  # Example for registration start
-            end_date_register=timezone.make_aware(fake.date_time_this_year()),  # Registration ends when the event starts
+            start_date_event=timezone.now(),
+            end_date_event= timezone.now() + datetime.timedelta(days = 1),  # Ensure it ends after it starts
+            start_date_register=timezone.now() - datetime.timedelta(days = 2),  # Example for registration start
+            end_date_register=timezone.now() + datetime.timedelta(days = 3),  # Registration ends when the event starts
             max_attendee=fake.random_int(min=10, max=500),
             description=fake.text(max_nb_chars=200)
         )
         
-        self.token = self.get_token_for_user(self.test_user)
-        
-        self.organizer = self.become_organizer(self.test_user, "test_user")
-        
+    
 
     def get_token_for_user(self, user):
         """Helper method to generate a JWT token for the test user"""
@@ -58,6 +55,18 @@ class EventModelsTest(TestCase):
             organizer_name = organizer_name,
         )
         return self.organizer
+    
+    def create_user(self, username, first_name):
+        return AttendeeUser.objects.create_user(
+            username = username, 
+            password = "password123",
+            first_name = first_name,
+            last_name = 'Doe',
+            birth_date='1995-06-15',
+            phone_number='9876543210',
+            email='jane.doe@example.com'
+        )
+            
     
     
         

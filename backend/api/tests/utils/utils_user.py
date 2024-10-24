@@ -6,6 +6,7 @@ from ninja.testing import TestClient
 from api.urls import user_router
 from ninja_jwt.tokens import RefreshToken
 from faker import Faker
+from django.contrib.auth import get_user_model
 
 faker = Faker()
 
@@ -42,14 +43,16 @@ class UserModelsTest(TestCase):
         return self.organizer
     
     def create_user(self, username, first_name):
-        return AttendeeUser.objects.create_user(
+        user = AttendeeUser.objects.create(
             username = username, 
-            password = "password123",
             first_name = first_name,
             last_name = 'Doe',
             birth_date='1995-06-15',
             phone_number='9876543210',
             email='jane.doe@example.com'
         )
+        user.set_password("password123")
+        return  user
+        
             
         

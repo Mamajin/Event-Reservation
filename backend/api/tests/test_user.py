@@ -41,7 +41,7 @@ class UserAPITests(UserModelsTest):
         organizer = self.become_organizer(user, "test_user")
         self.assertTrue(Organizer.objects.filter(organizer_name = organizer.organizer_name).exists())
         
-        
+    
 
         
         
