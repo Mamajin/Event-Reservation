@@ -80,10 +80,10 @@ class LoginResponseSchema(Schema):
     password: str
     access_token: str
     refresh_token: str
-    id : int
     
 
 class UserResponseSchema(Schema):
+    id: int
     username: str
     firstname: str
     lastname: str
