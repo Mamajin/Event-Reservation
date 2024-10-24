@@ -24,9 +24,27 @@ function App() {
         <Navbar />
         <Routes>
           <Route path="/" element={<Home />}/>
-          <Route path="/account-info" element={<AccountInfo />}/>
-          <Route path="/applied-events" element={<AppliedEvents />}/>
-          <Route path="/accepted-events" element={<AcceptedEvents />}/>
+          <Route path="/account-info"
+            element={
+              <ProtectedRoute>
+                <AccountInfo />
+              </ProtectedRoute>
+            } 
+          />
+          <Route path="/applied-events"
+            element={
+              <ProtectedRoute>
+                <AppliedEvents />
+              </ProtectedRoute>
+            } 
+          />
+          <Route path="/accepted-events" 
+            element={
+              <ProtectedRoute>
+                <AcceptedEvents />
+              </ProtectedRoute>
+            } 
+          />
           <Route path="/login" element={<Login />} />
           <Route path="/logout" element={<Navigate to="/" onEnter={handleLogout} />} />
           <Route path="/register" element={<Register />} />
@@ -35,9 +53,6 @@ function App() {
             path="/create-event" 
             element={
               <ProtectedRoute>
-                  <AccountInfo />
-                  <AppliedEvents/>
-                  <AcceptedEvents/>
                   <CreateEvent />
               </ProtectedRoute>
             }
