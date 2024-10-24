@@ -53,7 +53,7 @@ class SessionAPI:
         try:
             organizer = Organizer.objects.get(user=request.user)
         except Organizer.DoesNotExist:
-            logger.error(f"User {request.user.username} attempted to delete event {event_id} but is not an organizer.")
+            logger.error(f"User {request.user.username} attempted to create event({event_id}) session but is not an organizer.")
             return Response({'error': 'User is not an organizer'}, status=403)
         
         try:
@@ -82,13 +82,60 @@ class SessionAPI:
             logger.error(f"Error while creating session for event {event_id}: {str(e)}")
             return Response({'error': str(e)}, status=400)
         
-    @router.delete('/{event_id}/delete-session/{session_id}', response={204: None, 404: ErrorResponseSchema}, auth=JWTAuth())
+    @router.delete('/{session_id}/delete/event/{event_id}', response={204: None, 404: ErrorResponseSchema}, auth=JWTAuth())
     def delete_session(request: HttpRequest, event_id: int, session_id: int):
         """Delete a session by session id from event id."""
-        session = get_object_or_404(Session, 
-                                    id=session_id, 
-                                    event__organizer__user=request.user,
-                                    event__id=event_id)
-        session.delete()
-        logger.info(f"Session {session_id} for event {event_id} deleted by user {request.user.username}.")
-        return Response(status=204)
+        try:
+            event = Event.objects.get(id=event_id, organizer__user=request.user)
+            logger.info(f"Organizer {request.user.username} is attempting to delete session {session_id} for event {event_id}.")
+            
+            session = get_object_or_404(Session, id=session_id, event=event)
+            
+            session.delete()
+            logger.info(f"Session {session_id} for event {event_id} deleted by user {request.user.username}.")
+            return Response(status=204)
+    
+        except Event.DoesNotExist:
+            logger.error(f"Event {event_id} not found or user {request.user.username} is not authorized to access it.")
+            return Response({"error": "Event not found or you do not have permission to access this event."}, status=404)
+
+    @router.put('/{session_id}/edit/event/{event_id}', response={204: None, 404: ErrorResponseSchema}, auth=JWTAuth())
+    def edit_session(request: HttpRequest, event_id: int, session_id: int, data: SessionSchema):
+        """Edit a session by session id from event id.""" 
+        try:
+            event = Event.objects.get(id=event_id, organizer__user=request.user)
+            logger.info(f"Organizer {request.user.username} is attempting to edit session {session_id} for event {event_id}.")
+            
+            session = get_object_or_404(Session, id=session_id, event=event)
+
+            session.session_name = data.session_name
+            session.start_date_event = data.start_date_event
+            session.end_date_event = data.end_date_event
+            session.start_date_register = data.start_date_register or timezone.now()
+            session.end_date_register = data.end_date_register
+            session.description = data.description
+            session.max_attendee = data.max_attendee
+            session.session_type = data.session_type
+
+            session.save()
+            
+            logger.info(f"Organizer {request.user.username} updated their session({session_id}) detail from event({event_id}).")
+            
+            return Response(
+                SessionResponseSchema(
+                    id=session.id,
+                    session_name=session.session_name,
+                    start_date_event=session.start_date_event,
+                    end_date_event=session.end_date_event,
+                    start_date_register=session.start_date_register,
+                    end_date_register=session.end_date_register,
+                    description=session.description,
+                    max_attendee=session.max_attendee,
+                    session_type=session.session_type,
+                ).dict(),
+                status=200
+            )
+    
+        except Event.DoesNotExist:
+            logger.error(f"Event {event_id} not found or user {request.user.username} is not authorized to access it.")
+            return Response({"error": "Event not found or you do not have permission to access this event."}, status=404)
