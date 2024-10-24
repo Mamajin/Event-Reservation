@@ -72,6 +72,7 @@ class UserAPI:
             return Response({"error": "This user does not exist."}, status = status.HTTP_403_FORBIDDEN)
         
         profile_data = {
+            "id": profile_user.id,
             "username" : profile_user.username,
             "firstname": profile_user.first_name,
             "lastname": profile_user.last_name,

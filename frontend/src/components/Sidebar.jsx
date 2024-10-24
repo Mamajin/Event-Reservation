@@ -1,13 +1,13 @@
-import { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { useState } from 'react';
 import { ArrowLeftCircleIcon, MagnifyingGlassIcon } from '@heroicons/react/24/solid';
 
 function Sidebar() {
     const [open, setOpen] = useState(true);
     const Menus = [
         { title: "Discover", path: "/discover" },
-        { title: "Apply Event", path: "/apply-event" },
-        { title: "Accepted Event", path: "/accepted-event" },
+        { title: "Applied Event", path: "/applied-events" },
+        { title: "Accepted Event", path: "/accepted-events" },
         { title: "Invitation", path: "/invitation" },
         { title: "Become Organizer", path: "/become-organizer" },
         { title: "Account Info", path: "/account-info" },
