@@ -53,7 +53,7 @@ class EventResponseSchema(Schema):
     end_date_register: datetime
     description: str
     max_attendee: int
-    session: Optional[SessionResponseSchema]
+    session: Optional[List[SessionResponseSchema]]
                 
 
 class EventAPI:
@@ -110,7 +110,7 @@ class EventAPI:
                     end_date_register=event.end_date_register,
                     description=event.description,
                     max_attendee=event.max_attendee,
-                    session=Session.objects.filter(event=event).first()
+                    session=Session.objects.filter(event=event)
                 )
                 for event in events
             ]
@@ -145,7 +145,7 @@ class EventAPI:
                     end_date_register=event.end_date_register,
                     description=event.description,
                     max_attendee=event.max_attendee,
-                    session=Session.objects.filter(event=event).first()
+                    session=Session.objects.filter(event=event)
                 )
                 for event in events
             ]
@@ -200,9 +200,8 @@ class EventAPI:
     @router.get('/{event_id}', response=EventResponseSchema)
     def event_detail(request: HttpRequest, event_id: int):
         """Show event detail by event ID"""
+        logger.info(f"Fetching details for event ID: {event_id} by user {request.user.username}.")
         event = get_object_or_404(Event, id=event_id)
-
-        session = Session.objects.filter(event=event).first()
 
         return EventResponseSchema(
                 id=event.id,
@@ -215,6 +214,6 @@ class EventAPI:
                 end_date_register=event.end_date_register,
                 description=event.description,
                 max_attendee=event.max_attendee,
-                session=session
+                session=Session.objects.filter(event=event)
         )
     
