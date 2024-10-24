@@ -66,7 +66,6 @@ function AccountInfo() {
 
   return (
     <PageLayout>
-      <div className="flex min-h-screen bg-white-100 p-6">
         {/* Main Content */}
         <div className="flex-1 p-6 bg-white rounded-lg shadow-lg w-full max-w-screen-lg mx-auto">
           <div className="max-w-3xl mx-auto">
@@ -83,53 +82,54 @@ function AccountInfo() {
             </div>
 
             {/* Information */}
+            <div className="space-y-6">
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Username</label>
-              <p className="mt-1 text-gray-900">{userData.username || 'N/A'}</p>
-            </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">ID</label>
+                <p className="mt-0 text-gray-900">{userData.id || 'N/A'}</p>
+              </div>
 
-            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Username</label>
+                  <p className="mt-0 text-gray-900">{userData.username || 'N/A'}</p>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Status</label>
+                  <p className="mt-0 text-gray-900">{userData.status || 'N/A'}</p>
+                </div>
+              </div>
+
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700">First Name</label>
-                  <p className="mt-1 text-gray-900">{userData.firstname || 'N/A'}</p>
+                  <p className="mt-0 text-gray-900">{userData.firstname || 'N/A'}</p>
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700">Last Name</label>
-                  <p className="mt-1 text-gray-900">{userData.lastname || 'N/A'}</p>
+                  <p className="mt-0 text-gray-900">{userData.lastname || 'N/A'}</p>
                 </div>
               </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Status</label>
-                <p className="mt-1 text-gray-900">{userData.status || 'N/A'}</p>
-              </div>
-
-              <div className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700">Email</label>
-                      <p className="mt-1 text-gray-900">{userData.email || 'N/A'}</p>
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700">Mobile Phone</label>
-                      <p className="mt-1 text-gray-900">{userData.phonenumber || 'N/A'}</p>
-                    </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Email</label>
+                  <p className="mt-0 text-gray-900">{userData.email || 'N/A'}</p>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Mobile Phone</label>
+                  <p className="mt-0 text-gray-900">{userData.phonenumber || 'N/A'}</p>
                 </div>
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700">Birth Date</label>
-                <p className="mt-1 text-gray-900">{userData.birth_date || 'N/A'}</p>
+                <p className="mt-0 text-gray-900">{userData.birth_date || 'N/A'}</p>
               </div>
-
-
 
             </div>
           </div>
         </div>
-      </div>
     </PageLayout>
   );
 }
