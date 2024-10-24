@@ -193,3 +193,23 @@ class EventAPI:
         except Exception as e:
             logger.error(f"Error while editing event {event_id}: {str(e)}")
             return Response({'error': str(e)}, status=400)
+
+    @router.get('/{event_id}', response=EventResponseSchema)
+    def event_detail(request: HttpRequest, event_id: int):
+        """Show event detail by event ID"""
+        logger.info(f"Fetching details for event ID: {event_id} by user {request.user.username}.")
+        event = get_object_or_404(Event, id=event_id)
+
+        return EventResponseSchema(
+                id=event.id,
+                organizer=event.organizer,
+                event_name=event.event_name,
+                event_create_date=event.event_create_date,
+                start_date_event=event.start_date_event,
+                end_date_event=event.end_date_event,
+                start_date_register=event.start_date_register,
+                end_date_register=event.end_date_register,
+                description=event.description,
+                max_attendee=event.max_attendee,
+        )
+    
