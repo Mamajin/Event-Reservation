@@ -1,15 +1,11 @@
 from api.urls import api  
-from api.models import AttendeeUser
-from .utlis import BaseModelsTest, RefreshToken, AccessToken
+from api.models import AttendeeUser, Organizer
+from .utils.utils_user import UserModelsTest
 
-class UserAPITests(BaseModelsTest):
+
+class UserAPITests(UserModelsTest):
     
-    def get_token_for_user(self, user):
-        """Helper method to generate a JWT token for the test user"""
-        refresh = RefreshToken.for_user(user)
-        return str(refresh.access_token)
-            
-        
+             
     def test_user_creation(self):
         response = self.client.post(self.user_create_url, data={
             'username': 'attendeeuser1',
@@ -33,5 +29,20 @@ class UserAPITests(BaseModelsTest):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json()['username'], self.test_user.username)
         self.assertIn('status', response.json())
+        
+    
+    def test_is_Attendeeuser(self):
+        user = self.create_user("test","test_user")
+        self.assertTrue(AttendeeUser.objects.filter(username = user.username))
+        
+    def test_is_Organizer(self):
+        user = self.create_user("user_test", "test_user1")
+        self.assertFalse(Organizer.objects.filter(user = user))
+        organizer = self.become_organizer(user, "test_user")
+        self.assertTrue(Organizer.objects.filter(organizer_name = organizer.organizer_name).exists())
+        
+        
+
+        
         
         
