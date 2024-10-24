@@ -1,6 +1,6 @@
-import OrganizerForm from '../components/OrganizerForm';
-import Sidebar from '../components/Sidebar';
-import Footer from '../components/Footer';
+import OrganizerForm from '../components/OrganizerForm/OrganizerForm';
+import Sidebar from '../components/Sidebar/Sidebar';
+import Footer from '../components/Footer/Footer';
 
 function ApplyOrganizer() {
     return(

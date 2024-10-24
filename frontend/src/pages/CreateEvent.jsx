@@ -1,6 +1,6 @@
-import CreateEventForm from "../components/CreateEventForm";
-import Sidebar from '../components/Sidebar';
-import Footer from '../components/Footer';
+import CreateEventForm from "../components/CreateEventForm/CreateEventForm";
+import Sidebar from '../components/Sidebar/Sidebar';
+import Footer from '../components/Footer/Footer';
 
 function CreateEvent() {
     return(

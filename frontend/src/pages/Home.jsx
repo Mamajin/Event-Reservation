@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import api from '../api';
-import EventCard from '../components/EventCard';
-import Sidebar from '../components/Sidebar';
-import Footer from '../components/Footer';
+import EventCard from '../components/EventCard/EventCard';
+import Sidebar from '../components/Sidebar/Sidebar';
+import Footer from '../components/Footer/Footer';
 
 function Home() {
   const [events, setEvents] = useState([]);

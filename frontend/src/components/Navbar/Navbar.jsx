@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ACCESS_TOKEN } from '../constants';
+import { ACCESS_TOKEN } from '../../constants';
 import { StarIcon } from '@heroicons/react/24/solid';
 
 function Navbar() {

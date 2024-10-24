@@ -1,9 +1,9 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import api from "../api";
-import { ACCESS_TOKEN, REFRESH_TOKEN, USER_NAME } from "../constants";
+import api from "../../api";
+import { ACCESS_TOKEN, REFRESH_TOKEN, USER_NAME } from "../../constants";
 import qs from "qs";
-import "../style/index.css";
+import "../../style/index.css";
 
 function LoginForm() {
     const [username, setUsername] = useState("");
