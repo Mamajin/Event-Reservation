@@ -24,7 +24,7 @@ function AccountInfo() {
           },
         });
 
-        console.log('API response:', response.data); // Log the API response
+        // console.log('API response:', response.data); // Log the API response
 
         // Assuming response.data is a single user object, update the state
         setUserData(response.data);
@@ -70,7 +70,7 @@ function AccountInfo() {
         <div className="flex-1 p-6 bg-white rounded-lg shadow-lg w-full max-w-screen-lg mx-auto">
           <div className="max-w-3xl mx-auto">
             <h1 className="text-2xl font-bold mb-6 text-dark-purple">Account Details</h1>
-            <p className="text-gray-600 mb-6">Manage your user login details.</p>
+            <p className="text-gray-600 mb-6">See your user login details.</p>
             
             {/* Profile Image */}
             <div className="flex items-center mb-6">

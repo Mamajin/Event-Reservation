@@ -10,9 +10,7 @@ function PageLayout({ children }) {
         <Sidebar />
         <main className="flex-1">
           <div className="bg-white min-h-screen p-6">
-            <div className="card lg:card-side bg-base-100 shadow-xl">
             {children}
-            </div>
           </div>
         </main>
       </div>

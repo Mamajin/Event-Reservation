@@ -29,8 +29,20 @@ function AppliedEvents() {
                     },
                 });
 
-                setEvents(response.data);
-                console.log('Fetched events:', response.data);
+                // Map the ticket response to fetch detailed event info
+                const eventsData = await Promise.all(
+                    response.data.map(async (ticket) => {
+                        const eventResponse = await axios.get(`http://localhost:8000/api/events/${ticket.event}`, {
+                            headers: {
+                                Authorization: `Bearer ${token}`,
+                            },
+                        });
+                        return { ...ticket, event: eventResponse.data };
+                    })
+                );
+
+                setEvents(eventsData);
+                console.log('Fetched events:', eventsData);
             } catch (err) {
                 console.error('Error fetching applied events:', err);
                 setError(err);
@@ -49,7 +61,7 @@ function AppliedEvents() {
     if (loading || userLoading) {
         return (
             <PageLayout>
-                <div className="flex justify-end items-start min-h-screen bg-white-100 p-4">
+                <div className="flex justify-center items-start min-h-screen p-4">
                     <div className="w-full max-w-lg bg-white rounded-lg shadow-lg p-6 space-y-4">
                         <h2 className="text-2xl font-bold mb-4 text-center text-dark-purple">Applied Events</h2>
                         <div className="grid grid-cols-1 gap-4">
@@ -64,7 +76,7 @@ function AppliedEvents() {
     if (error || userError) {
         return (
             <PageLayout>
-                <div className="flex justify-end items-start min-h-screen bg-white-100 p-4">
+                <div className="flex justify-center items-start min-h-screen p-4">
                     <div className="w-full max-w-lg bg-white rounded-lg shadow-lg p-6 space-y-4">
                         <h2 className="text-2xl font-bold mb-4 text-center text-dark-purple">Error</h2>
                         <div className="text-center">
@@ -79,7 +91,7 @@ function AppliedEvents() {
     if (events.length === 0) {
         return (
             <PageLayout>
-                <div className="flex justify-end items-start min-h-screen bg-white-100 p-4">
+                <div className="flex justify-center items-start min-h-screen p-4">
                     <div className="w-full max-w-lg bg-white rounded-lg shadow-lg p-6 space-y-4">
                         <h2 className="text-2xl font-bold mb-4 text-center text-dark-purple">Applied Events</h2>
                         <div className="grid grid-cols-1 gap-4">
@@ -93,9 +105,9 @@ function AppliedEvents() {
 
     return (
         <PageLayout>
-            <div className="flex justify-end items-start min-h-screen bg-white-100 p-4">
+            <div className="flex justify-center items-start min-h-screen p-4">
                 <div className="w-full max-w-lg bg-white rounded-lg shadow-lg p-6 space-y-4">
-                    <h2 className="text-2xl font-bold mb-4 text-center text-dark-purple">Applied Events</h2>
+                    <h1 className="text-2xl font-bold mb-6 text-center text-dark-purple">Applied Events</h1>
                     <div className="grid grid-cols-1 gap-4">
                         {events.map((ticket, index) => (
                             <EventCard key={index} event={ticket.event} />

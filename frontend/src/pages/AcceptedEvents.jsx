@@ -69,7 +69,7 @@ function AcceptedEvent() {
 
   return (
     <PageLayout>
-        <div className="flex justify-end items-start min-h-screen bg-white-100 p-4">
+        <div className="flex justify-center items-start min-h-screen p-4"> {/* Centering and setting background */}
             <div className="w-full max-w-lg bg-white rounded-lg shadow-lg p-6 space-y-4">
                 <h2 className="text-2xl font-bold mb-4 text-center text-dark-purple">Accepted Events</h2>
                 <div className="info">

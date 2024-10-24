@@ -11,7 +11,7 @@ function useUserProfile(navigate) {
     useEffect(() => {
         const fetchUserProfile = async () => {
             try {
-                console.log("Fetching user profile...");
+                // console.log("Fetching user profile...");
                 const token = localStorage.getItem(ACCESS_TOKEN);
 
                 if (!token) {
@@ -25,7 +25,7 @@ function useUserProfile(navigate) {
                     },
                 });
 
-                console.log("API response data:", response.data);
+                // console.log("API response data:", response.data);
 
                 // Validate the response data structure
                 if (!response.data || !response.data.username || !response.data.id) {
@@ -33,7 +33,7 @@ function useUserProfile(navigate) {
                 }
 
                 setUserId(response.data.id);
-                console.log("User profile response:", response.data);
+                // console.log("User profile response:", response.data);
             } catch (err) {
                 console.error("Error fetching user profile:", err);
                 setError(err);
