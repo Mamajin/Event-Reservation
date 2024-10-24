@@ -8,6 +8,7 @@ pytz
 sqlparse
 psycopg2-binary
 python-dotenv
+python-decouple
 django-ninja
 django-ninja-jwt
 faker
