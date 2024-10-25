@@ -1,5 +1,5 @@
 from .schemas import EventSchema, EventResponseSchema, ErrorResponseSchema
-from .modules import JWTAuth, Organizer, HttpError, timezone, Event, HttpRequest, logger, Response, Router, List
+from .modules import JWTAuth, Organizer, HttpError, timezone, Event, HttpRequest, logger, Response, Router, List, get_object_or_404
 router = Router()
 
 
