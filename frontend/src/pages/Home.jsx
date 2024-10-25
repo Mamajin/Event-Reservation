@@ -33,7 +33,7 @@ function Home() {
 
   return (
     <PageLayout>
-      <div className="p-4">
+      <div className="p-2">
         {events.map((event) => (
             <EventCard key={event.id} event={event} />
           ))}
