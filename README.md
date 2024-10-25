@@ -105,7 +105,7 @@ npm run dev
 Use these credentials to log in the application.
 
 ## Usage
-1. **Access the app**: Open http://localhost:3000 in your web browser.
+1. **Access the app**: Open http://localhost:5173 in your web browser.
 2. **Register/Login**: Create a new account or log in with your credentials.
 3. **Create Events**: If you are an organizer, you can create and manage events.
 

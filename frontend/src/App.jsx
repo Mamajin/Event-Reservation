@@ -11,7 +11,7 @@ import AccountInfo from './pages/AccountInfo';
 import AppliedEvents from './pages/AppliedEvents';
 import AcceptedEvents from './pages/AcceptedEvents';
 import ApplyOrganizer from './pages/ApplyOrganizer';
-
+import EventDetailPage from './pages/EventDetailPage';
 
 function App() {
   const handleLogout = () => {
@@ -21,7 +21,7 @@ function App() {
   return (
     <BrowserRouter>
       <div className="flex flex-col min-h-screen">
-        <Navbar />
+        <Navbar />  
         <Routes>
           <Route path="/" element={<Home />}/>
           <Route path="/account-info"
@@ -49,6 +49,7 @@ function App() {
           <Route path="/logout" element={<Navigate to="/" onEnter={handleLogout} />} />
           <Route path="/register" element={<Register />} />
           <Route path="/become-organizer" element={<ApplyOrganizer />} />
+          <Route path="/events/:eventId" element={<EventDetailPage />} /> 
           <Route 
             path="/create-event" 
             element={
