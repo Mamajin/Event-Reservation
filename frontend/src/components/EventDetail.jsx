@@ -1,14 +1,16 @@
 import React, { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom'; // Import useNavigate
+import { useParams, useNavigate } from 'react-router-dom';
 import api from '../api';
 import { FaRegBookmark, FaRegHeart, FaShareAlt, FaArrowLeft } from 'react-icons/fa';
 
 function EventDetail() {
   const { eventId } = useParams();
-  const navigate = useNavigate(); // Initialize useNavigate
+  const navigate = useNavigate();
   const [event, setEvent] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [applyError, setApplyError] = useState(null);
+  const [applySuccess, setApplySuccess] = useState(false);
 
   useEffect(() => {
     const fetchEvent = async () => {
@@ -29,9 +31,25 @@ function EventDetail() {
     navigate(-1);
   };
   
-  const handleApplyEvent = () => {
+  const handleApplyEvent = async () => {
+    setLoading(true);
+    setApplyError(null);
+    setApplySuccess(false);
 
-  }
+    try {
+      const response = await api.post(`/tickets/event/${event.id}/reserve`);
+      if (response.status === 200 || response.status === 201) {
+        setApplySuccess(true);
+      } else {
+        setApplyError("An unexpected error occurred.");
+      }
+    } catch (err) {
+      setApplyError(err.response?.data?.message || "Failed to apply for the event.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   if (loading) {
     return <div className="text-center mt-8">Loading...</div>;
   }
@@ -54,7 +72,7 @@ function EventDetail() {
         <FaRegBookmark className="text-gray-500 mr-4 cursor-pointer ml-3" />
         <FaShareAlt className="text-gray-500 cursor-pointer ml-3" />
       </div>
-      <h1 className="text-5xl text-dark-purple mb-5 font-bold break-words max-w-full">{event.event_name}</h1>
+      <h1 className="text-5xl text-dark-purple mb-5 font-bold break-words max-w-full">{event?.event_name}</h1>
       <div className="flex items-center space-x-3 mb-6">
         <div className="avatar placeholder">
           <div className="bg-gradient-to-r from-slate-300 to-amber-500 w-10 h-10 flex items-center justify-center rounded-full">
@@ -95,9 +113,15 @@ function EventDetail() {
         </p>
         <p className="mt-2 text-gray-700 break-words max-w-full">{event.description}</p>
       </div>
-      <button className="btn bg-amber-300 text-dark-purple" onClick={handleApplyEvent} >
-        Apply Event
+      {applyError && <div className="text-red-500 mb-2">{applyError}</div>}
+      <button
+        className="btn bg-amber-300 text-dark-purple"
+        onClick={handleApplyEvent}
+        disabled={loading}
+      >
+        {loading ? "Applying..." : "Apply Event"}
       </button>
+      {applySuccess && <div className="text-green-500">Successfully applied for the event!</div>}
     </div>
   );
 }
