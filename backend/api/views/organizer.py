@@ -54,7 +54,7 @@ class OrganizerAPI:
             event = Event.objects.get(id=event_id, organizer=organizer)
             event.delete()
             logger.info(f"Organizer {organizer.organizer_name} deleted event {event_id}.")
-            return Response(status=204)
+            return Response({'success': f" Delete event ID {event_id} successfully"},status=204)
         except Event.DoesNotExist:
             logger.error(f"Organizer {organizer.organizer_name} attempted to delete non-existing event {event_id}.")
             return Response({'error': 'Event does not exist or you do not have permission to delete it'}, status=404)
