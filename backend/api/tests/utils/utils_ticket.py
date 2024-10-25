@@ -3,23 +3,24 @@ from django.utils import timezone
 from api.models import AttendeeUser, Organizer, Event, Ticket
 from datetime import datetime
 from ninja.testing import TestClient
-from api.urls import user_router
+from api.urls import ticket_router
 from ninja_jwt.tokens import RefreshToken
 from faker import Faker
 from django.contrib.auth import get_user_model
+import datetime
 
-faker = Faker()
+fake = Faker()
 
-class UserModelsTest(TestCase):
+class TicketModelsTest(TestCase):
 
     def setUp(self):
         """
         Set up initial test data for models.
         """
-        self.client = TestClient(user_router)
-        self.user_create_url = '/register'
-        self.user_login_url = '/login'
-        self.user_profile_url = '/profile'
+        self.client = TestClient(ticket_router)
+        self.user_list_event_url = 'event/'
+        self.user_reserve_event_url = 'event/'
+        self.user_cancel_event_url = 'delete-event/'
         self.test_user = AttendeeUser.objects.create_user(
             username='attendeeuser3',
             password='password123',
@@ -28,6 +29,18 @@ class UserModelsTest(TestCase):
             birth_date='1995-06-15',
             phone_number='9876543210',
             email='jane.doe@example.com'
+        )
+        
+        self.organizer = self.become_organizer(self.test_user, "test_user")
+        self.event_test = Event.objects.create(
+            event_name=fake.company(),
+            organizer= self.organizer,
+            start_date_event=timezone.now(),
+            end_date_event= timezone.now() + datetime.timedelta(days = 1),  # Ensure it ends after it starts
+            start_date_register=timezone.now() - datetime.timedelta(days = 2),  # Example for registration start
+            end_date_register=timezone.now() + datetime.timedelta(days = 3),  # Registration ends when the event starts
+            max_attendee=fake.random_int(min=10, max=500),
+            description=fake.text(max_nb_chars=200)
         )
         
     def get_token_for_user(self, user):

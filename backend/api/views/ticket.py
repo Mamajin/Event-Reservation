@@ -1,4 +1,4 @@
-from .modules import List, JWTAuth, get_object_or_404, Ticket, AttendeeUser, Event, Router
+from .modules import List, JWTAuth, get_object_or_404, Ticket, AttendeeUser, Event, Router, Response, logger, Organizer
 from .schemas import TicketSchema
 
 router = Router()
@@ -8,15 +8,31 @@ class TicketAPI:
     
     @router.get('event/{user_id}', response=List[TicketSchema], auth = JWTAuth())
     def list_event(request, user_id: int):
-        user = get_object_or_404(AttendeeUser, id = user_id)
+        try:
+            user = AttendeeUser.objects.get(id = user_id)
+        except AttendeeUser.DoesNotExist:
+            return Response({'error': 'This user does not exists'}, status = 400)
+
         return user.ticket_set.all()
         
         
     @router.post('event/{event_id}/reserve', response= TicketSchema, auth= JWTAuth())
     def event_reserve(request, event_id):
         user_id = request.user.id
-        event = get_object_or_404(Event, id = event_id)
-        user = get_object_or_404(AttendeeUser, id = user_id)
+        if Organizer.objects.filter(user =request.user).exists():
+            organizer = Organizer.objects.get(user = request.user)
+        try:
+            event = Event.objects.get(id = event_id)
+        except Event.DoesNotExist:
+            logger.error('This event does not exist')
+            return Response({'error': 'This event does not exists'})
+        try:
+            user = AttendeeUser.objects.get(id = user_id)
+        except AttendeeUser.DoesNotExist:
+            logger.error('This user does not exists')
+            return Response({'error': 'This user does not exists'})
+        if Organizer.objects.filter(user = request.user).exists() and event.organizer == organizer:
+            return Response({'error': 'Organizer is not allowed to register own event.'}, status = 400)
         ticket = Ticket.objects.create(event = event, attendee = user)
         return ticket
     
@@ -26,6 +42,6 @@ class TicketAPI:
         try:
             ticket = this_user.ticket_set.get(id = ticket_id)
         except Ticket.DoesNotExist:
-            return {"error": f"This ticket is does not exist."}
+            return Response({"error": f"This ticket is does not exist."}, status = 400)
         ticket.delete()
-        return {"success": f"Ticket with ID {ticket.id} has been canceled."}
+        return Response({"success": f"Ticket with ID {ticket_id} has been canceled."}, status = 200)
