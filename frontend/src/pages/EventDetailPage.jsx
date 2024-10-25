@@ -1,5 +1,6 @@
 import EventDetail from "../components/EventDetail";
 import PageLayout from "../components/PageLayout";
+
 function EventDetailPage() {
     return(
         <PageLayout>

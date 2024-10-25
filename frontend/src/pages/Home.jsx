@@ -1,8 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import api from '../api';
 import EventCard from '../components/EventCard';
-import Sidebar from '../components/Sidebar';
-import Footer from '../components/Footer';
 import PageLayout from '../components/PageLayout';
 
 function Home() {
@@ -35,11 +33,11 @@ function Home() {
 
   return (
     <PageLayout>
-        <div className="card lg:card-side bg-base-100 shadow-xl">
-          {events.map((event) => (
+      <div className="p-4">
+        {events.map((event) => (
             <EventCard key={event.id} event={event} />
           ))}
-          </div>
+      </div>
     </PageLayout>
   );
 }
