@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import api from '../api';
+import { FaRegBookmark, FaRegHeart, FaShareAlt, FaArrowLeft } from 'react-icons/fa';
+
 
 function EventDetail() {
   const { eventId } = useParams();
@@ -24,37 +26,65 @@ function EventDetail() {
   }, [eventId]);
 
   if (loading) {
-    return <div>Loading...</div>;
+    return <div className="text-center mt-8">Loading...</div>;
   }
 
   if (error) {
-    return <div>Error fetching event details: {error.message}</div>;
+    return (
+      <div className="text-center mt-8 text-red-500">
+        Error fetching event details: {error.message}
+      </div>
+    );
   }
 
   return (
-    <div className="p-4">
-        <h1 className="text-7xl text-dark-purple mb-5 font-bold">{event.event_name}</h1>
-        <div className="flex items-center space-x-3">
-          <div className="avatar placeholder">
-            <div className="bg-gradient-to-r from-slate-300 to-amber-500 text-neutral-content w-6 h-6 flex items-center justify-center rounded-full">
-              <span className="text-md text-dark-purple">
-                {event.organizer.organizer_name.charAt(0)}
-              </span>
-            </div>
-          </div>
-          <p className="text-sm text-gray-600">{event.organizer.organizer_name}</p>
+    <div className="max-w-5xl mx-auto p-6 bg-white shadow-lg rounded-lg mt-8">
+        <div className="flex items-center mt-4">
+          <FaRegHeart className="text-gray-500 mr-4 cursor-pointer ml-auto" />
+          <FaRegBookmark className="text-gray-500 mr-4 cursor-pointer ml-3" />
+          <FaShareAlt className="text-gray-500 cursor-pointer ml-3" />
         </div>
-        <img
-        className="mt-10 object-cover rounded-lg"
+      <h1 className="text-5xl text-dark-purple mb-5 font-bold break-words max-w-full">{event.event_name}</h1>
+      <div className="flex items-center space-x-3 mb-6">
+        <div className="avatar placeholder">
+          <div className="bg-gradient-to-r from-slate-300 to-amber-500 w-10 h-10 flex items-center justify-center rounded-full">
+            <span className="text-2xl text-dark-purple font-bold">
+              {event.organizer.organizer_name.charAt(0)}
+            </span>
+          </div>
+        </div>
+        <div>
+          <p className=" text-dark-purple text-lg font-medium">{event.organizer.organizer_name}</p>
+          <p className="text-sm text-gray-600">{event.organizer.email}</p>
+        </div>
+      </div>
+      <img
+        className="w-full h-64 object-cover rounded-lg mb-6"
         src="https://images.unsplash.com/photo-1513623935135-c896b59073c1?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTR8fGV2ZW50fGVufDB8fDB8fHww"
         alt="Event"
-        />
-         <p className="mt-2">Organizer: {event.organizer.organizer_name}</p>
-         <p>Email: {event.organizer.email}</p>
-         <p className="mt-4">{event.description}</p>
-         <p>Date: {new Date(event.start_date_event).toLocaleDateString()} - {new Date(event.end_date_event).toLocaleDateString()}
-          </p>
-        <p>Max Attendees: {event.max_attendee}</p>
+      />
+      <div className="mb-6">
+        <p className="text-lg">
+          <span className="font-semibold text-dark-purple mr-2">Event Dates:</span>
+          {new Date(event.start_date_event).toLocaleDateString()} - {new Date(event.end_date_event).toLocaleDateString()}
+        </p>
+        <p className="text-lg">
+          <span className="font-semibold text-dark-purple mr-2">Registration Period:</span>
+          {new Date(event.start_date_register).toLocaleDateString()} - {new Date(event.end_date_register).toLocaleDateString()}
+        </p>
+      </div>
+      <div className="mb-6">
+        <p className="text-lg">
+          <span className="font-semibold text-dark-purple mr-2">Max Attendees:</span>
+          {event.max_attendee}
+        </p>
+      </div>
+      <div className="mb-6">
+        <p className="text-lg">
+          <span className="font-semibold text-dark-purple">Event Description:</span>
+        </p>
+        <p className="mt-2 text-gray-700 break-words max-w-full">{event.description}</p>
+      </div>
     </div>
   );
 }
