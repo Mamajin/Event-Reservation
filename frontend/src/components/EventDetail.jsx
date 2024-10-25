@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom'; // Import useNavigate
 import api from '../api';
 import { FaRegBookmark, FaRegHeart, FaShareAlt, FaArrowLeft } from 'react-icons/fa';
 
-
 function EventDetail() {
   const { eventId } = useParams();
+  const navigate = useNavigate(); // Initialize useNavigate
   const [event, setEvent] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -25,6 +25,13 @@ function EventDetail() {
     fetchEvent();
   }, [eventId]);
 
+  const handleBackClick = () => {
+    navigate(-1);
+  };
+  
+  const handleApplyEvent = () => {
+
+  }
   if (loading) {
     return <div className="text-center mt-8">Loading...</div>;
   }
@@ -38,12 +45,15 @@ function EventDetail() {
   }
 
   return (
-    <div className="max-w-5xl mx-auto p-6 bg-white shadow-lg rounded-lg mt-8">
-        <div className="flex items-center mt-4">
-          <FaRegHeart className="text-gray-500 mr-4 cursor-pointer ml-auto" />
-          <FaRegBookmark className="text-gray-500 mr-4 cursor-pointer ml-3" />
-          <FaShareAlt className="text-gray-500 cursor-pointer ml-3" />
-        </div>
+    <div className="max-w-5xl mx-auto p-6 bg-white shadow-lg rounded-lg mt-8 relative">
+      <button className="absolute top-4 left-4 p-2" onClick={handleBackClick}>
+        <FaArrowLeft className="text-gray-500" />
+      </button>
+      <div className="flex items-center mt-4">
+        <FaRegHeart className="text-gray-500 mr-4 cursor-pointer ml-auto" />
+        <FaRegBookmark className="text-gray-500 mr-4 cursor-pointer ml-3" />
+        <FaShareAlt className="text-gray-500 cursor-pointer ml-3" />
+      </div>
       <h1 className="text-5xl text-dark-purple mb-5 font-bold break-words max-w-full">{event.event_name}</h1>
       <div className="flex items-center space-x-3 mb-6">
         <div className="avatar placeholder">
@@ -54,7 +64,7 @@ function EventDetail() {
           </div>
         </div>
         <div>
-          <p className=" text-dark-purple text-lg font-medium">{event.organizer.organizer_name}</p>
+          <p className="text-dark-purple text-lg font-medium">{event.organizer.organizer_name}</p>
           <p className="text-sm text-gray-600">{event.organizer.email}</p>
         </div>
       </div>
@@ -85,6 +95,9 @@ function EventDetail() {
         </p>
         <p className="mt-2 text-gray-700 break-words max-w-full">{event.description}</p>
       </div>
+      <button className="btn bg-amber-300 text-dark-purple" onClick={handleApplyEvent} >
+        Apply Event
+      </button>
     </div>
   );
 }
