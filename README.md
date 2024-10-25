@@ -79,7 +79,12 @@ python manage.py runserver
 cd ../frontend
 ```
 
-**2. Install dependencies and start the development server:**
+**2. Copy sample.env file into .env file:**
+```bash
+cp sample.env .env
+```
+
+**3. Install dependencies and start the development server:**
 ```bash
 npm install
 npm run dev
