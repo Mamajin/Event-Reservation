@@ -19,8 +19,6 @@ class EventModelsTest(TestCase):
         """
         self.client = TestClient(event_router)
         self.event_create_url = '/create-event'
-        self.user_login_url = '/login'
-        self.user_profile_url = '/profile'
         self.test_user = AttendeeUser.objects.create(
             username='attendeeuser4',
             password='password123',
