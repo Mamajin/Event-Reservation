@@ -6,8 +6,8 @@ from ninja.testing import TestClient
 from api.urls import organizer_router
 from ninja_jwt.tokens import RefreshToken
 from faker import Faker
-from django.contrib.auth import get_user_model
 import datetime
+from django.utils import timezone
 
 fake = Faker()
 
@@ -17,7 +17,7 @@ class OrganizerModelsTest(TestCase):
         """
         Set up initial test data for models.
         """
-        self.event_id  = None
+        
         self.client = TestClient(organizer_router)
         self.apply_organizer_url = '/apply-organizer'
         self.delete_event_url = f"/delete-event/"
@@ -48,7 +48,6 @@ class OrganizerModelsTest(TestCase):
         refresh = RefreshToken.for_user(user)
         return str(refresh.access_token)
     
-    
     def become_organizer(self,user, organizer_name):
         self.organizer, created = Organizer.objects.get_or_create(
             user= user,
@@ -58,19 +57,14 @@ class OrganizerModelsTest(TestCase):
 
     
     def create_user(self, username, first_name):
-        user = AttendeeUser.objects.create(
+        return AttendeeUser.objects.create_user(
             username = username, 
+            password = "password123",
             first_name = first_name,
             last_name = 'Doe',
             birth_date='1995-06-15',
             phone_number='9876543210',
             email='jane.doe@example.com'
         )
-        user.set_password("password123")
-        return  user
-    
-    
-
-        
-            
+          
         

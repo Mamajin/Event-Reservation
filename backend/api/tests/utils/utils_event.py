@@ -16,7 +16,7 @@ class EventModelsTest(TestCase):
     def setUp(self):
         """
         Set up initial test data for models.
-        """
+        """ 
         self.client = TestClient(event_router)
         self.event_create_url = '/create-event'
         self.test_user = AttendeeUser.objects.create(
