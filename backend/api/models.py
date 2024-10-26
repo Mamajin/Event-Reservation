@@ -30,7 +30,7 @@ class AttendeeUser(AbstractUser):
             age -= 1
             
         return age
-
+    
 
 class Organizer(models.Model):
     user = models.ForeignKey(AttendeeUser, on_delete= models.CASCADE)
@@ -177,14 +177,6 @@ class Ticket(models.Model):
         """
         self.delete()
         
-    def is_organizer_join_own_event(self):
-        if Organizer.objects.filter(user =self.attendee).exists():
-            organizer = Organizer.objects.get(user = self.attendee)
-            if self.event.organizer == organizer:
-                return True
-            else:
-                return False
-
     def __str__(self) -> str:
         return f"Event: {self.event.event_name}, Attendee: {self.attendee.first_name}"
     
