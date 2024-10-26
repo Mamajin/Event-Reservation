@@ -22,7 +22,7 @@ class OrganizerAPI:
         
         if organizer.is_organizer(request.user):
             logger.info(f"User {request.user.id} already has an organizer profile.")
-            return Response({'error': 'User is already an organizer'}, status=404)
+            return Response({'error': 'User is already an organizer'}, status=400)
         
         if organizer.organizer_name_is_taken(form.organizer_name):
             logger.info(f"Organizer name '{form.organizer_name}' is already taken.")
