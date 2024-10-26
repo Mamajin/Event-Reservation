@@ -12,9 +12,9 @@ import AppliedEvents from './pages/AppliedEvents';
 import AcceptedEvents from './pages/AcceptedEvents';
 import ApplyOrganizer from './pages/ApplyOrganizer';
 import EventDetailPage from './pages/EventDetailPage';
-import TermsOfUse from './pages/TermsOfUse';
-import PrivacyInfo from './pages/PrivacyInfo';
-import BiscuitInfo from './pages/BiscuitInfo';
+import TermsOfUse from './pages/footerpage/TermsOfUse';
+import PrivacyInfo from './pages/footerpage/PrivacyInfo';
+import BiscuitInfo from './pages/footerpage/BiscuitInfo';
 
 function App() {
   const handleLogout = () => {
@@ -38,6 +38,7 @@ function App() {
           <Route path="/legal/terms-of-use" element={<TermsOfUse />} />
           <Route path="/legal/privacy-policy" element={<PrivacyInfo />} />
           <Route path="/legal/cookie-policy" element={<BiscuitInfo />} />
+
           
           {/* Protected Routes */}
           <Route path="/account-info" element={<ProtectedRoute><AccountInfo /></ProtectedRoute>} />
