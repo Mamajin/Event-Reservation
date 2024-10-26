@@ -15,6 +15,10 @@ import EventDetailPage from './pages/EventDetailPage';
 import TermsOfUse from './pages/footerpage/TermsOfUse';
 import PrivacyInfo from './pages/footerpage/PrivacyInfo';
 import BiscuitInfo from './pages/footerpage/BiscuitInfo';
+import AboutUs from './pages/footerpage/AboutUs';
+import Contact from './pages/footerpage/Contact';
+import Jobs from './pages/footerpage/Jobs';
+import PressKit from './pages/footerpage/PressKit';
 
 function App() {
   const handleLogout = () => {
@@ -38,6 +42,11 @@ function App() {
           <Route path="/legal/terms-of-use" element={<TermsOfUse />} />
           <Route path="/legal/privacy-policy" element={<PrivacyInfo />} />
           <Route path="/legal/cookie-policy" element={<BiscuitInfo />} />
+
+          <Route path="/team/about-us" element={<AboutUs />} />
+          <Route path="/team/contact" element={<Contact />} />
+          <Route path="/team/jobs" element={<Jobs />} />
+          <Route path="/team/press-kit" element={<PressKit />} />
 
           
           {/* Protected Routes */}
