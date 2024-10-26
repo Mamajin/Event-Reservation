@@ -33,6 +33,8 @@ class TicketAPI:
             ticket = Ticket.objects.create(event = event, attendee = user)
             if ticket.is_organizer_join_own_event():
                 return Response({'error': 'Organizer is not allowed to register own event.'}, status = 400)
+            if not event.is_max_attendee():
+                return Response({'error': "This event is full"}, status = 400)
             return ticket
         else:
             return Response({'error': 'Registration for this event is not allowed.'}, status = 400)
