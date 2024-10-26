@@ -29,9 +29,12 @@ class EventAPI:
             )
         except Exception as e:
             raise HttpError(status_code=400, message=f"Failed to create event: {str(e)}")
+        if event.is_valid_date():
+            return event        
+        else:
+            return Response({'error': 'Please enter valid date'}, status = 400)
+            
         
-        # Return the created event
-        return event
         
     
     @router.get('/my-events', response=List[EventResponseSchema], auth=JWTAuth())
