@@ -1,4 +1,4 @@
-from .utils.utils_ticket import TicketModelsTest, Organizer, Event, Ticket
+from .utils.utils_ticket import TicketModelsTest, Organizer, Event, Ticket, fake, timezone,datetime
 import logging
 logging.disable(logging.CRITICAL)
 
@@ -36,6 +36,7 @@ class TicketTestAPI(TicketModelsTest):
         token = self.get_token_for_user(self.test_user)
         response = self.client.post(self.user_reserve_event_url+ str(self.event_test.id)+"/reserve",  headers={'Authorization': f'Bearer {token}'})
         self.assertEqual(response.status_code, 400)
+        self.assertIn("Organizer is not allowed to register own event.", response.json().get("error", ""))
         
 
     def test_user_cancel_event(self):
@@ -53,6 +54,25 @@ class TicketTestAPI(TicketModelsTest):
         response = self.client.delete(self.user_cancel_event_url + str(ticket.id), headers={'Authorization': f'Bearer {token2}'})
         self.assertEqual(response.status_code, 400)
         self.assertTrue(Ticket.objects.filter(attendee = normal_user1).exists())
+        
+        
+    def test_user_cannot_register_full_event(self):
+        event_test = Event.objects.create(
+            event_name=fake.company(),
+            organizer= self.become_organizer(self.test_user, "test_user"),
+            start_date_register=timezone.now() - datetime.timedelta(days = 2),  # Example for registration start
+            end_date_register=timezone.now() + datetime.timedelta(days = 1),  # Registration ends when the event starts
+            start_date_event=timezone.now(),
+            end_date_event= timezone.now() + datetime.timedelta(days = 1),  # Ensure it ends after it starts
+            max_attendee=0,
+            description=fake.text(max_nb_chars=200)
+        )
+        normal_user = self.create_user("test","test")
+        token = self.get_token_for_user(normal_user)
+        response = self.client.post(self.user_reserve_event_url+ str(event_test.id)+"/reserve",  headers={'Authorization': f'Bearer {token}'})
+        self.assertEqual(response.status_code, 400)
+        self.assertIn('This event is full', response.json().get("error", ""))
+        
         
         
         

@@ -51,14 +51,50 @@ class EventTest(EventModelsTest):
         event_test = Event.objects.create(
             event_name=fake.company(),
             organizer= self.become_organizer(self.test_user, "test_user"),
-            start_date_event=timezone.now(),
-            end_date_event= timezone.now() + datetime.timedelta(days = 1),  # Ensure it ends after it starts
             start_date_register=timezone.now() - datetime.timedelta(days = 2),  # Example for registration start
-            end_date_register=timezone.now() + datetime.timedelta(days = 3),  # Registration ends when the event starts
+            end_date_register=timezone.now() + datetime.timedelta(days = 1),  # Registration ends when the event starts
+            start_date_event=timezone.now() + datetime.timedelta(days = 3),
+            end_date_event= timezone.now() + datetime.timedelta(days = 4),  # Ensure it ends after it starts
             max_attendee=fake.random_int(min=10, max=500),
             description=fake.text(max_nb_chars=200)
         )
-        self.assertTrue(event_test.can_register(), True)
+        self.assertTrue(event_test.can_register())
+        
+    def test_date_input_is_valid(self):
+        event_data = {
+            'event_name': 'Annual Tech Conference',
+            'start_date_register': timezone.now(),                    # Registration starts now
+            'end_date_register': timezone.now() + datetime.timedelta(days=1), # Registration ends in 5 days
+            'start_date_event': timezone.now() + datetime.timedelta(days=2),  # Start tomorrow
+            'end_date_event': timezone.now() + datetime.timedelta(days=3),    # End the day after
+            'description': 'A tech event for showcasing new innovations.',
+            'max_attendee': 100
+        }
+        normal_user = self.create_user("test", "test")
+        organizer = self.become_organizer(normal_user, "test")
+        token  = self.get_token_for_user(normal_user)
+        response = self.client.post(self.event_create_url, json=event_data, headers={'Authorization': f'Bearer {token}'})
+        self.assertEqual(response.status_code, 200)
+        
+    def test_date_input_invalid(self):
+        event_data = {
+            'event_name': 'Annual Tech Conference',
+            'start_date_register': timezone.now(),                    # Registration starts now
+            'end_date_register': timezone.now() - datetime.timedelta(days=2), # Registration ends in 5 days
+            'start_date_event': timezone.now() + datetime.timedelta(days=2),  # Start tomorrow
+            'end_date_event': timezone.now() + datetime.timedelta(days=3),    # End the day after
+            'description': 'A tech event for showcasing new innovations.',
+            'max_attendee': 100
+        }
+        normal_user = self.create_user("test", "test")
+        organizer = self.become_organizer(normal_user, "test")
+        token  = self.get_token_for_user(normal_user)
+        response = self.client.post(self.event_create_url, json=event_data, headers={'Authorization': f'Bearer {token}'})
+        self.assertEqual(response.status_code, 400)
+        self.assertIn('Please enter valid date', response.json().get("error", ""))
+        
+        
+        
         
 
         
