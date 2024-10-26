@@ -107,9 +107,9 @@ function AppliedEvents() {
     return (
         <PageLayout>
             <div className="flex justify-center items-start min-h-screen p-4">
-                <div className="w-full max-w-lg bg-white rounded-lg shadow-lg p-6 space-y-4">
+                <div className="w-full max-w-[900px] bg-white rounded-lg shadow-lg p-6 space-y-4">
                     <h1 className="text-2xl font-bold mb-6 text-center text-dark-purple">Applied Events</h1>
-                    <div className="card lg:card-side bg-base-100 shadow-xl">
+                    <div className="grid grid-cols-1 gap-4"> {/* Stacks EventCard components vertically with spacing */}
                         {events.map((event) => (
                             <EventCard key={event.id} event={event} />
                         ))}
