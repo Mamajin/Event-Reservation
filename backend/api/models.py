@@ -48,6 +48,30 @@ class Organizer(models.Model):
         """
         return Organizer.event_set.all()
     
+    def is_organizer(self, this_user):
+        """
+        Check if a given user is an organizer.
+
+        Args:
+            this_user (AttendeeUser): The user to check.
+
+        Returns:
+            bool: True if the user is an organizer, otherwise False.
+        """
+        return Organizer.objects.filter(user=this_user).exists()
+    
+    def organizer_name_is_taken(self, name):
+        """
+        Check if an organizer name is already taken.
+
+        Args:
+            name (str): The name to check.
+
+        Returns:
+            bool: True if the name is taken, otherwise False.
+        """
+        return Organizer.objects.filter(organizer_name=name).exists()
+    
     
     def __str__(self) -> str:
         return f"Organizer name: {self.organizer_name}"
