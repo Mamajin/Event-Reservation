@@ -11,28 +11,28 @@ function Contact() {
         <h2 className="text-2xl font-bold mt-4">Team Contacts</h2>
         <div className="mt-4 space-y-3">
           <div>
-            <h3 className="text-xl font-semibold">John Smith</h3>
-            <p>Email: <a href="mailto:john.smith@university.edu" className="text-blue-500">john.smith@university.edu</a></p>
-            <p>Phone: (123) 456-7890</p>
-            <p>Role: Project Manager</p>
+            <h3 className="text-xl font-semibold">Phantawat Lueangsiriwattana</h3>
+            <p>Email: <a href="mailto:phantawat.l@ku.th" className="text-blue-500">phantawat.l@ku.th</a></p>
+            <p>Phone: (+66) 456-7890</p>
+            <p>Role: Backend Developer</p>
           </div>
           <div>
-            <h3 className="text-xl font-semibold">Alice Johnson</h3>
-            <p>Email: <a href="mailto:alice.johnson@university.edu" className="text-blue-500">alice.johnson@university.edu</a></p>
-            <p>Phone: (123) 555-7891</p>
-            <p>Role: Lead Developer</p>
+            <h3 className="text-xl font-semibold">Napoldej Passornratchakul</h3>
+            <p>Email: <a href="mailto:napoldej.p@ku.th" className="text-blue-500">napoldej.p@ku.th</a></p>
+            <p>Phone: (+66) 555-7891</p>
+            <p>Role: Backend Developer</p>
           </div>
           <div>
-            <h3 className="text-xl font-semibold">Michael Brown</h3>
-            <p>Email: <a href="mailto:michael.brown@university.edu" className="text-blue-500">michael.brown@university.edu</a></p>
-            <p>Phone: (123) 555-7892</p>
-            <p>Role: UX/UI Designer</p>
+            <h3 className="text-xl font-semibold">Sunthorn Kompita</h3>
+            <p>Email: <a href="mailto:sunthorn.ko@ku.th" className="text-blue-500">sunthorn.ko@ku.th</a></p>
+            <p>Phone: (+66) 555-7892</p>
+            <p>Role: Frontend Developer</p>
           </div>
           <div>
-            <h3 className="text-xl font-semibold">Emma White</h3>
-            <p>Email: <a href="mailto:emma.white@university.edu" className="text-blue-500">emma.white@university.edu</a></p>
-            <p>Phone: (123) 555-7893</p>
-            <p>Role: Marketing Specialist</p>
+            <h3 className="text-xl font-semibold">Phasit Ruangmak</h3>
+            <p>Email: <a href="mailto:phasit.r@ku.th" className="text-blue-500">phasit.r@ku.th</a></p>
+            <p>Phone: (+66) 555-7893</p>
+            <p>Role: Frontend Developer</p>
           </div>
         </div>
       </div>
