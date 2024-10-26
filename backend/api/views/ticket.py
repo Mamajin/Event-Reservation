@@ -30,6 +30,9 @@ class TicketAPI:
             logger.error('This user does not exists')
             return Response({'error': 'This user does not exists'})
         
+        if Ticket.objects.filter(attendee = user, event = event).exists():
+            return Response({'error': 'You have registered this event already'}, status = 400)
+        
         if Organizer.objects.filter(user = request.user).exists():
             organizer = Organizer.objects.get(user = request.user)
             if event.organizer == organizer:
