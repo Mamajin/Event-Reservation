@@ -80,6 +80,7 @@ class LoginResponseSchema(Schema):
     password: str
     access_token: str
     refresh_token: str
+    status : str
     
 
 class UserResponseSchema(Schema):

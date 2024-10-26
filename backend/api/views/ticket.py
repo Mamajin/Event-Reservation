@@ -19,8 +19,6 @@ class TicketAPI:
     @router.post('event/{event_id}/reserve', response= TicketSchema, auth= JWTAuth())
     def event_reserve(request, event_id):
         user_id = request.user.id
-        if Organizer.objects.filter(user =request.user).exists():
-            organizer = Organizer.objects.get(user = request.user)
         try:
             event = Event.objects.get(id = event_id)
         except Event.DoesNotExist:
@@ -31,10 +29,23 @@ class TicketAPI:
         except AttendeeUser.DoesNotExist:
             logger.error('This user does not exists')
             return Response({'error': 'This user does not exists'})
-        if Organizer.objects.filter(user = request.user).exists() and event.organizer == organizer:
-            return Response({'error': 'Organizer is not allowed to register own event.'}, status = 400)
-        ticket = Ticket.objects.create(event = event, attendee = user)
-        return ticket
+        
+        if Organizer.objects.filter(user = request.user).exists():
+            organizer = Organizer.objects.get(user = request.user)
+            if event.organizer == organizer:
+                return Response({'error': 'Organizer is not allowed to register own event.'}, status = 400)
+            
+        if event.is_max_attendee():
+            return Response({'error': "This event is full"}, status = 400)
+
+        elif event.can_register():
+            ticket = Ticket.objects.create(event = event, attendee = user)
+            return ticket
+        
+        else:
+            return Response({'error': 'Registration for this event is not allowed.'}, status = 400)
+        
+
     
     @router.delete('delete-event/{ticket_id}', auth= JWTAuth())
     def delete_event(request, ticket_id):

@@ -10,10 +10,10 @@ class EventTest(EventModelsTest):
         organizer = self.become_organizer(user, "become_organizer")
         event_data = {
             'event_name': 'Annual Tech Conference',
-            'start_date_event': timezone.now() + datetime.timedelta(days=1),  # Start tomorrow
-            'end_date_event': timezone.now() + datetime.timedelta(days=2),    # End the day after
+            'start_date_event': timezone.now() + datetime.timedelta(days=2),  # Start tomorrow
+            'end_date_event': timezone.now() + datetime.timedelta(days=3),    # End the day after
             'start_date_register': timezone.now(),                    # Registration starts now
-            'end_date_register': timezone.now() + datetime.timedelta(days=5), # Registration ends in 5 days
+            'end_date_register': timezone.now() + datetime.timedelta(days=1), # Registration ends in 5 days
             'description': 'A tech event for showcasing new innovations.',
             'max_attendee': 100
         }

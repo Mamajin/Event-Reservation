@@ -30,7 +30,7 @@ class AttendeeUser(AbstractUser):
             age -= 1
             
         return age
-
+    
 
 class Organizer(models.Model):
     user = models.ForeignKey(AttendeeUser, on_delete= models.CASCADE)
@@ -128,15 +128,8 @@ class Event(models.Model):
         now = timezone.now()
         return self.event_create_date <= now
     
-    def is_end_date_register_lte_start_date_event(self) -> bool:
-        """
-        Check if event date is valid. If event end date is before event start date
-        then event is not valid.
-
-        Return:
-            bool: True if event is valid, False if event is not valid
-        """
-        return self.end_date_register < self.start_date_event
+    def is_valid_date(self) -> bool:
+        return self.start_date_register <= self.end_date_register <= self.start_date_event <= self.end_date_event
         
     def can_register(self) -> bool:
         """
@@ -183,6 +176,7 @@ class Ticket(models.Model):
         Cancels the ticket by deleting the Ticket instance.
         """
         self.delete()
-
+        
     def __str__(self) -> str:
         return f"Event: {self.event.event_name}, Attendee: {self.attendee.first_name}"
+    

@@ -32,14 +32,12 @@ class TicketTestAPI(TicketModelsTest):
         response = self.client.post(self.user_reserve_event_url+ str(self.event_test.id)+"/reserve",  headers={'Authorization': f'Bearer {token}'})
         self.assertEqual(response.status_code, 200)
         
-
     def test_organizer_cannot_register_own_event(self):
         token = self.get_token_for_user(self.test_user)
         response = self.client.post(self.user_reserve_event_url+ str(self.event_test.id)+"/reserve",  headers={'Authorization': f'Bearer {token}'})
         self.assertEqual(response.status_code, 400)
         
 
-        
     def test_user_cancel_event(self):
         normal_user = self.create_user("test","test")
         token = self.get_token_for_user(normal_user)
