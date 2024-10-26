@@ -23,12 +23,12 @@ class TicketAPI:
             event = Event.objects.get(id = event_id)
         except Event.DoesNotExist:
             logger.error('This event does not exist')
-            return Response({'error': 'This event does not exists'})
+            return Response({'error': 'This event does not exists'}, status = 404)
         try:
             user = AttendeeUser.objects.get(id = user_id)
         except AttendeeUser.DoesNotExist:
             logger.error('This user does not exists')
-            return Response({'error': 'This user does not exists'})
+            return Response({'error': 'This user does not exists'}, status = 404)
         
         if Ticket.objects.filter(attendee = user, event = event).exists():
             return Response({'error': 'You have registered this event already'}, status = 400)

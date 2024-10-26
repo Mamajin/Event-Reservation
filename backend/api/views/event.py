@@ -14,22 +14,20 @@ class EventAPI:
         except Organizer.DoesNotExist:
             raise HttpError(status_code=403, message="You are not an organizer.")
         
-        try:
             # Create the event
-            event = Event.objects.create(
-                event_name=data.event_name,
-                organizer=organizer,  # Associate the organizer
-                event_create_date=timezone.now(),  # Set creation date to current time
-                start_date_event=data.start_date_event,
-                end_date_event=data.end_date_event,
-                start_date_register=data.start_date_register or timezone.now(),
-                end_date_register=data.end_date_register,
-                description=data.description,
-                max_attendee=data.max_attendee
-            )
-        except Exception as e:
-            raise HttpError(status_code=400, message=f"Failed to create event: {str(e)}")
+        event = Event(
+            event_name=data.event_name,
+            organizer=organizer,  # Associate the organizer
+            event_create_date=timezone.now(),  # Set creation date to current time
+            start_date_event=data.start_date_event,
+            end_date_event=data.end_date_event,
+            start_date_register=data.start_date_register or timezone.now(),
+            end_date_register=data.end_date_register,
+            description=data.description,
+            max_attendee=data.max_attendee
+        )
         if event.is_valid_date():
+            event.save()
             return event        
         else:
             return Response({'error': 'Please enter valid date'}, status = 400)
