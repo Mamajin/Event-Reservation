@@ -23,44 +23,23 @@ function App() {
       <div className="flex flex-col min-h-screen">
         <Navbar />  
         <Routes>
-          <Route path="/" element={<Home />}/>
-          <Route path="/account-info"
-            element={
-              <ProtectedRoute>
-                <AccountInfo />
-              </ProtectedRoute>
-            } 
-          />
-          <Route path="/applied-events"
-            element={
-              <ProtectedRoute>
-                <AppliedEvents />
-              </ProtectedRoute>
-            } 
-          />
-          <Route path="/accepted-events" 
-            element={
-              <ProtectedRoute>
-                <AcceptedEvents />
-              </ProtectedRoute>
-            } 
-          />
+          {/* Public Routes */}
+          <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />
-          <Route path="/logout" element={<Navigate to="/" onEnter={handleLogout} />} />
           <Route path="/register" element={<Register />} />
           <Route path="/become-organizer" element={<ApplyOrganizer />} />
-          <Route path="/events/:eventId" element={<EventDetailPage />} /> 
-          <Route 
-            path="/create-event" 
-            element={
-              <ProtectedRoute>
-                  <CreateEvent />
-              </ProtectedRoute>
-            }
-          />
+          <Route path="/events/:eventId" element={<EventDetailPage />} />
+          <Route path="/logout" element={<Navigate to="/" onEnter={handleLogout} />} />
+          
+          {/* Protected Routes */}
+          <Route path="/account-info" element={<ProtectedRoute><AccountInfo /></ProtectedRoute>} />
+          <Route path="/applied-events" element={<ProtectedRoute><AppliedEvents /></ProtectedRoute>} />
+          <Route path="/accepted-events" element={<ProtectedRoute><AcceptedEvents /></ProtectedRoute>} />
+          <Route path="/create-event" element={<ProtectedRoute><CreateEvent /></ProtectedRoute>} />
+
+          {/* Fallback Route */}
           <Route path="*" element={<NotFound />} />
         </Routes>
-
       </div>
     </BrowserRouter>
   );
