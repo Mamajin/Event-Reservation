@@ -176,6 +176,15 @@ class Ticket(models.Model):
         Cancels the ticket by deleting the Ticket instance.
         """
         self.delete()
+        
+    def is_organizer_join_own_event(self):
+        if Organizer.objects.filter(user =self.attendee).exists():
+            organizer = Organizer.objects.get(user = self.attendee)
+            if self.event.organizer == organizer:
+                return True
+            else:
+                return False
 
     def __str__(self) -> str:
         return f"Event: {self.event.event_name}, Attendee: {self.attendee.first_name}"
+    
