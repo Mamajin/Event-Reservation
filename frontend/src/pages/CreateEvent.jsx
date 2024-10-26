@@ -1,6 +1,4 @@
 import CreateEventForm from "../components/CreateEventForm";
-import Sidebar from '../components/Sidebar';
-import Footer from '../components/Footer';
 import PageLayout from "../components/PageLayout";
 
 function CreateEvent() {
