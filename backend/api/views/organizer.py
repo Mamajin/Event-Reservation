@@ -13,30 +13,31 @@ class OrganizerAPI:
             return Response({'error': 'User must be logged in to apply as an organizer'}, status=401)
 
         logger.info(f"User {request.user.id} is attempting to apply as an organizer.")
-
-        if Organizer.objects.filter(user=request.user).exists():
+    
+        organizer = Organizer(
+            user=request.user,
+            organizer_name=form.organizer_name or "",
+            email=form.email or request.user.email
+        )
+        
+        if organizer.is_organizer(request.user):
             logger.info(f"User {request.user.id} already has an organizer profile.")
             return Response({'error': 'User is already an organizer'}, status=400)
-    
-        try:
-            organizer = Organizer.objects.create(
-                user=request.user,
-                organizer_name=form.organizer_name or "",
-                email=form.email or request.user.email
-            )
-            logger.info(f"User {request.user.id} successfully applied as an organizer with ID {organizer.id}.")
-
-            return Response(
-                OrganizerResponseSchema(
-                    id=organizer.id,
-                    organizer_name=organizer.organizer_name,
-                    email=organizer.email
-                ).dict(),
-                status=201
-            )
-        except Exception as e:
-            logger.error(f"Error while creating organizer for user {request.user.id}: {str(e)}", exc_info=True)
-            return Response({'error': str(e)}, status=400)
+        
+        if organizer.organizer_name_is_taken(form.organizer_name):
+            logger.info(f"Organizer name '{form.organizer_name}' is already taken.")
+            return Response({'error': 'Organizer name is already taken'}, status=400)
+        
+        organizer.save()
+        logger.info(f"User {request.user.id} successfully applied as an organizer with ID {organizer.id}.")
+        return Response(
+            OrganizerResponseSchema(
+                id=organizer.id,
+                organizer_name=organizer.organizer_name,
+                email=organizer.email
+            ).dict(),
+            status=201
+        )
 
     @router.delete('/delete-event/{event_id}', response={204: None, 403: ErrorResponseSchema, 404: ErrorResponseSchema}, auth=JWTAuth())
     def delete_event(request: HttpRequest, event_id: int):
@@ -66,28 +67,26 @@ class OrganizerAPI:
             logger.warning(f"Unauthorized organizer update attempt by user: {request.user}")
             return Response({'error': 'User must be logged in to update organizer profile'}, status=401)
         
-        try:
-            organizer = Organizer.objects.get(user=request.user)
-            organizer.organizer_name = data.organizer_name
-            organizer.email = data.email
-            organizer.save()
+        organizer = Organizer.objects.get(user=request.user)
+        organizer.organizer_name = data.organizer_name
+        organizer.email = data.email
+        
+        if organizer.organizer_name_is_taken(data.organizer_name):
+            logger.info(f"Organizer name '{data.organizer_name}' is already taken.")
+            return Response({'error': 'Organizer name is already taken'}, status=400)
+        
+        organizer.save()
 
-            logger.info(f"User {request.user.id} updated their organizer profile.")
-            
-            return Response(
-                OrganizerResponseSchema(
-                    id=organizer.id,
-                    organizer_name=organizer.organizer_name,
-                    email=organizer.email
-                ).dict(),
-                status=200
-            )
-        except Organizer.DoesNotExist:
-            logger.error(f"User {request.user.username} tried to update an organizer profile but is not an organizer.")
-            return Response({'error': 'User is not an organizer'}, status=404)
-        except Exception as e:
-            logger.error(f"Error while updating organizer for user {request.user.id}: {str(e)}", exc_info=True)
-            return Response({'error': str(e)}, status=400)
+        logger.info(f"User {request.user.id} updated their organizer profile.")
+        
+        return Response(
+            OrganizerResponseSchema(
+                id=organizer.id,
+                organizer_name=organizer.organizer_name,
+                email=organizer.email
+            ).dict(),
+            status=200
+        )
             
     @router.delete('/revoke-organizer', response={204: None, 403: ErrorResponseSchema, 404: ErrorResponseSchema}, auth=JWTAuth())
     def revoke_organizer(request: HttpRequest):
