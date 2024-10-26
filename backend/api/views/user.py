@@ -24,6 +24,11 @@ class UserAPI:
     @router.post('/login', response = LoginResponseSchema)
     def login(request, form: LoginSchema = Form(...)):
         user = authenticate(request, username = form.username, password = form.password)
+        
+        if Organizer.objects.filter(user = user).exists():
+            status = "Organizer"
+        else:
+            status = "Attendee"
             
         if user is not None:
             login(request,user)
@@ -36,7 +41,8 @@ class UserAPI:
                 "refresh_token": str(refresh_token),
                 "username": user.username,
                 "password": user.password,
-                "id" : user.id
+                "id" : user.id,
+                "status": status,
             }
         else:
             return Response(
