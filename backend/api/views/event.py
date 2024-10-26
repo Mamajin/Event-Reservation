@@ -82,7 +82,7 @@ class EventAPI:
         This endpoint is accessible to both authorized and unauthorized users.
         """
         try:
-            events = Event.objects.all()
+            events = Event.objects.filter(event_create_date__lte = timezone.now()).order_by("-event_create_date")
             event_list = [
                 EventResponseSchema(
                     id=event.id,
