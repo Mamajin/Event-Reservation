@@ -40,10 +40,6 @@ class EventAPI:
         """
         Retrieve a list of events created by the authenticated organizer.
         """
-        if not request.user.is_authenticated:
-            logger.warning(f"Unauthorized access to events by user: {request.user}")
-            return Response({'error': 'User must be logged in'}, status=401)
-        
         try:
             organizer = Organizer.objects.get(user=request.user)        
             events = Event.objects.filter(organizer=organizer)
@@ -107,10 +103,6 @@ class EventAPI:
     @router.put('/edit-event-{event_id}', response={204: None, 401: ErrorResponseSchema, 404: ErrorResponseSchema}, auth=JWTAuth())
     def edit_event(request: HttpRequest, event_id: int, data: EventSchema):
         """Edit event detail by event ID."""
-        if not request.user.is_authenticated:
-            logger.warning(f"Unauthorized access to edit event by user: {request.user}")
-            return Response({'error': 'User must be logged in'}, status=401)
-        
         try:
             event = Event.objects.get(id=event_id)  
             organizer = Organizer.objects.get(user=request.user)
