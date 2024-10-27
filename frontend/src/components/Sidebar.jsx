@@ -10,7 +10,6 @@ function Sidebar() {
         { title: "Accepted Event", path: "/accepted-events" },
         { title: "Invitation", path: "/invitation" },
         { title: "Become Organizer", path: "/become-organizer" },
-        { title: "Account Info", path: "/account-info" },
     ];
     
     return (
