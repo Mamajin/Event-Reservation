@@ -6,7 +6,7 @@ import { StarIcon } from '@heroicons/react/24/solid';
 function Navbar() {
   const navigate = useNavigate();
 
-  const onLogout = () => {
+  const handleLogout = () => {
     localStorage.clear();
     navigate('/login');
   };
@@ -50,7 +50,7 @@ function Navbar() {
                   </a>
                 </li>
                 <li>
-                  <button className="w-full text-left text-dark-purple" onClick={onLogout}>
+                  <button className="w-full text-left text-dark-purple" onClick={handleLogout}>
                     Logout
                   </button>
                 </li>

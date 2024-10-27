@@ -2,12 +2,16 @@ import React, { useEffect, useState } from 'react';
 import api from '../api';
 import EventCard from '../components/EventCard';
 import PageLayout from '../components/PageLayout';
-import { Link } from 'react-router-dom';
+import { useNavigate,Link } from 'react-router-dom';
+import {USER_STATUS} from '../constants'
 
 function Home() {
   const [latestEvents, setLatestEvents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const isOrganizer = localStorage.getItem(USER_STATUS) === "Organizer";
+  const navigate = useNavigate(); 
+
 
   useEffect(() => {
     const fetchEvents = async () => {
@@ -24,10 +28,17 @@ function Home() {
 
     fetchEvents();
   }, []);
-
+  const handleCreateEventClick = () => {
+    if (isOrganizer) {
+      navigate('/create-event');
+    } else {
+      navigate('/become-organizer');
+    }
+  };
   return (
     <PageLayout>
-      <div className="hero h-screen bg-cover bg-center" style={{ backgroundImage: `url('https://i.pinimg.com/564x/92/57/6b/92576be9601f00886b03e58363369647.jpg')` }}>
+      <div className='pr-6 pt-4'>
+      <div className="hero h-screen bg-cover bg-center " style={{ backgroundImage: `url('https://i.pinimg.com/564x/92/57/6b/92576be9601f00886b03e58363369647.jpg')` }}>
         <div className="hero-overlay bg-opacity-60 bg-black"></div>
         <div className="hero-content text-center text-neutral-content">
           <div className="max-w-md">
@@ -53,13 +64,22 @@ function Home() {
               <EventCard 
                 key={event.id} 
                 event={event} 
-                className="text-sm"
+                className="text-xs"
               />
             ))}
           </div>
         ) : (
           <div className="text-center text-lg font-semibold">No events found</div>
         )}
+      </div>
+
+      <div className="bg-white text-primary-content p-10 text-center">
+        <h2 className="text-3xl font-semibold mb-4">Want to organize your own event?</h2>
+        <p className="mb-6">Become an organizer and start creating events that bring people together.</p>
+        <button className="btn text-dark-purple bg-amber-300 px-8 py-3 text-lg" onClick={handleCreateEventClick}>
+          Create Event
+        </button>
+      </div>
       </div>
     </PageLayout>
   );
