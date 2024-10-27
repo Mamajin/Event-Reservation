@@ -85,7 +85,7 @@ class OrganizerAPI:
             organizer = Organizer.objects.get(user=request.user)
             organizer.delete()
             logger.info(f"Organizer role revoked for user {request.user.id}.")
-            return Response(status=204)
+            return Response({'success':f'Organizer role revoked for user {request.user.id}.'},status=204)
         except Organizer.DoesNotExist:
             logger.error(f"User {request.user.username} tried to revoke a non-existing organizer profile.")
             return Response({'error': 'User is not an organizer'}, status=404)
