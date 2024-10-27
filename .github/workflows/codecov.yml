@@ -3,10 +3,10 @@ name: Run tests and upload coverage
 on:
   push:
     branches:
-      - docs/codecov-edit
+      - main
   pull_request:
     branches:
-      - docs/codecov-edit
+      - main
 
 jobs:
   test:
