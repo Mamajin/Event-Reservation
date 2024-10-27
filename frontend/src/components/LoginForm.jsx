@@ -32,11 +32,12 @@ function LoginForm() {
             console.error("Login error:", error);
             let errorMessage = "Login failed. Please try again.";
             if (error.response) {
-                errorMessage = error.response.data?.message || errorMessage;
+                errorMessage = error.response.data.error || errorMessage; // Adjust this to look for "error"
             }
-            alert(errorMessage);
+    
+            alert(errorMessage); // Show the alert with error message
         } finally {
-            setLoading(false);
+            setLoading(false); // Reset loading state
         }
     };
 

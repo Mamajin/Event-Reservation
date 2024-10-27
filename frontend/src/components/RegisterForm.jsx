@@ -34,12 +34,6 @@ function SignupForm() {
         e.preventDefault();
         setLoading(true);
 
-        if (password !== password2) {
-            alert("Passwords do not match!");
-            setLoading(false);
-            return;
-        }
-
         try {
             const payload = {
                 username,
@@ -64,7 +58,7 @@ function SignupForm() {
             console.error("Registration error:", error);
             let errorMessage = "An error occurred during registration.";
             if (error.response) {
-                errorMessage = error.response.data?.message || errorMessage;
+                errorMessage = error.response.data.error || errorMessage;
             }
             alert(errorMessage);
             setLoading(false);
