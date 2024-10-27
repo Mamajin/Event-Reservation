@@ -63,12 +63,7 @@ class UserSchema(Schema):
     birth_date: date
     phone_number: str
     email: str
-    
-    @field_validator("password2")
-    def passwords_match(cls, password2, values, **kwargs):
-        if "password" in values.data and values.data["password"] != password2:
-            raise ValueError("Passwords do not match")
-        return password2
+
     
 class LoginSchema(Schema):
     username: str
