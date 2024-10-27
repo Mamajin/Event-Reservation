@@ -52,7 +52,8 @@ class UserModelsTest(TestCase):
             email='jane.doe@example.com'
         )
         user.set_password("password123")
-        return  user
+        user.save()
+        return user
         
             
         
