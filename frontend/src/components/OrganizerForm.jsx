@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import api from '../api';
 import { useNavigate } from 'react-router-dom';
-import { ACCESS_TOKEN } from '../constants';
+import { ACCESS_TOKEN, USER_STATUS } from '../constants';
 
 function OrganizerForm() {
     const [formData, setFormData] = useState({
@@ -39,6 +39,7 @@ function OrganizerForm() {
 
             alert(errorMessage);
         } finally {
+            localStorage.setItem(USER_STATUS, "Organizer");
             setLoading(false);
         }
     };
