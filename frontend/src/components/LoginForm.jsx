@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import api from "../api";
-import { ACCESS_TOKEN, REFRESH_TOKEN, USER_NAME } from "../constants";
+import { ACCESS_TOKEN, REFRESH_TOKEN, USER_NAME, USER_STATUS } from "../constants";
 import qs from "qs";
 import "../style/index.css";
 
@@ -23,10 +23,10 @@ function LoginForm() {
                     "Content-Type": "application/x-www-form-urlencoded",
                 },
             });
-
             localStorage.setItem(ACCESS_TOKEN, res.data.access_token);
             localStorage.setItem(REFRESH_TOKEN, res.data.refresh_token);
             localStorage.setItem(USER_NAME, res.data.username);
+            localStorage.setItem(USER_STATUS, res.data.status);
             navigate("/");
         } catch (error) {
             alert("An error occurred during login.");

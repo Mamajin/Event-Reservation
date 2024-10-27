@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ACCESS_TOKEN } from '../constants';
+import { ACCESS_TOKEN, USER_STATUS } from '../constants';
 import { StarIcon } from '@heroicons/react/24/solid';
 
 function Navbar() {
@@ -24,9 +24,10 @@ function Navbar() {
   };
 
   const isLoggedIn = localStorage.getItem(ACCESS_TOKEN) !== null;
+  const isOrganizer = localStorage.getItem(USER_STATUS) === "Organizer";
 
   return (
-    <nav className="navbar bg-dark-purple">
+    <nav className="navbar bg-white">
       <StarIcon className="bg-amber-300 text-xl h-8 w-9 text-dark-purple rounded cursor-pointer mr-2" />
       <div className="navbar-start">
         <span className="btn btn-ghost text-xl p-0 cursor-pointer" onClick={handleHome}>
@@ -36,9 +37,11 @@ function Navbar() {
       <div className="navbar-end">
         {isLoggedIn ? (
           <>
-            <button className="btn ml-2 bg-amber-300 text-dark-purple" onClick={handleCreateEvent} aria-label="Create Event">
-              Create Event
-            </button>
+            {isOrganizer && (
+              <button className="btn ml-2 bg-amber-300 text-dark-purple" onClick={handleCreateEvent} aria-label="Create Event">
+                Create Event
+              </button>
+            )}
             <button className="btn ml-2 bg-amber-300 text-dark-purple" onClick={onLogout} aria-label="Logout">
               Logout
             </button>
