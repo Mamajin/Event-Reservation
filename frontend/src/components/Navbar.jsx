@@ -10,15 +10,6 @@ function Navbar() {
     localStorage.clear();
     navigate('/login');
   };
-  const handleCreateEvent = () => {
-    navigate('/create-event');
-  };
-  const handleLogin = () => {
-    navigate('/login');
-  };
-  const handleRegister = () => {
-    navigate('/register');
-  };
 
   const isLoggedIn = localStorage.getItem(ACCESS_TOKEN) !== null;
   const isOrganizer = localStorage.getItem(USER_STATUS) === "Organizer";
@@ -36,8 +27,8 @@ function Navbar() {
         {isLoggedIn ? (
           <>
             {isOrganizer && (
-              <button className="btn ml-2 bg-amber-300 text-dark-purple" onClick={handleCreateEvent} aria-label="Create Event">
-                Create Event
+              <button className="btn ml-2 bg-amber-300 text-dark-purple" aria-label="Create Event">
+                <Link to="/create-event">Create Event</Link>
               </button>
             )}
             <div className="avatar placeholder pl-4 pr-3 dropdown dropdown-end">
@@ -79,13 +70,13 @@ function Navbar() {
               className="menu dropdown-content bg-gray-100 rounded-box z-[1] mt-4 w-36 p-2 shadow"
             >
               <li>
-                <button className="w-full text-left text-dark-purple" onClick={handleLogin}>
-                  Login
+                <button className="w-full text-left text-dark-purple">
+                <Link to="/login">Login</Link>
                 </button>
               </li>
               <li>
-                <button className="w-full text-left text-dark-purple" onClick={handleRegister}>
-                  Sign Up
+                <button className="w-full text-left text-dark-purple">
+                <Link to="/register">Sign Up</Link>
                 </button>
               </li>
             </ul>
