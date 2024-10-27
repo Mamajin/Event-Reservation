@@ -42,23 +42,14 @@ class Organizer(models.Model):
         blank=True,
         validators=[FileExtensionValidator(['jpg', 'jpeg', 'png'])]
     )
-    banner_image = models.ImageField(
-        upload_to='organizer_banners/',
-        null=True,
-        blank=True,
-        validators=[FileExtensionValidator(['jpg', 'jpeg', 'png'])]
-    )
-    brand_color = models.CharField(max_length=7, default='#000000', help_text="Hex color code")
 
     # Detailed Information
     description = models.TextField(blank=True)
-    mission_statement = models.TextField(blank=True)
-    year_established = models.PositiveIntegerField(null=True, blank=True)
 
     # Contact Information
-    contact_phone = models.CharField(max_length=50, blank=True)
-    contact_email = models.EmailField(blank=True)
-    support_email = models.EmailField(blank=True)
+    # contact_phone = models.CharField(max_length=50, blank=True)
+    # contact_email = models.EmailField(blank=True)
+    # support_email = models.EmailField(blank=True)
 
     # Address
     street_address = models.CharField(max_length=255, blank=True)
@@ -68,17 +59,10 @@ class Organizer(models.Model):
     postal_code = models.CharField(max_length=20, blank=True)
 
     # Social Media and Web Presence
-    website = models.URLField(max_length=200, blank=True, validators=[URLValidator()])
     facebook_url = models.URLField(max_length=200, blank=True)
     twitter_handle = models.CharField(max_length=50, blank=True)
     instagram_handle = models.CharField(max_length=50, blank=True)
-    linkedin_url = models.URLField(max_length=200, blank=True)
     youtube_channel = models.URLField(max_length=200, blank=True)
-
-    # Legal Information
-    tax_id = models.CharField(max_length=50, blank=True)
-    business_registration_number = models.CharField(max_length=50, blank=True)
-    legal_entity_name = models.CharField(max_length=200, blank=True)
 
     # Verification and Status
     is_verified = models.BooleanField(default=False)
@@ -87,64 +71,10 @@ class Organizer(models.Model):
         choices=VERIFICATION_STATUS_CHOICES,
         default='PENDING'
     )
-    verification_date = models.DateTimeField(null=True, blank=True)
-    verification_documents = models.FileField(
-        upload_to='verification_documents/',
-        null=True,
-        blank=True
-    )
-
-    # Categories and Specializations
-    event_categories = models.CharField(
-        max_length=500,
-        blank=True,
-        help_text="Comma-separated list of event categories"
-    )
-    specializations = models.CharField(
-        max_length=500,
-        blank=True,
-        help_text="Comma-separated list of specializations"
-    )
-
-    # Financial Information
-    bank_account_name = models.CharField(max_length=200, blank=True)
-    bank_account_number = models.CharField(max_length=50, blank=True)
-    bank_name = models.CharField(max_length=100, blank=True)
-    bank_swift_code = models.CharField(max_length=20, blank=True)
-
-    # Analytics and Metrics
-    total_events_organized = models.PositiveIntegerField(default=0)
-    total_attendees = models.PositiveIntegerField(default=0)
-    average_rating = models.DecimalField(
-        max_digits=3,
-        decimal_places=2,
-        default=Decimal('0.00'),
-        validators=[MinValueValidator(Decimal('0.00'))]
-    )
-
-    # Settings and Preferences
-    default_event_settings = models.JSONField(
-        default=dict,
-        help_text="Default settings for new events"
-    )
-    notification_preferences = models.JSONField(
-        default=dict,
-        help_text="Notification preferences"
-    )
 
     # System Fields
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-    last_active = models.DateTimeField(auto_now=True)
-    is_active = models.BooleanField(default=True)
-
-    class Meta:
-        ordering = ['-created_at']
-        indexes = [
-            models.Index(fields=['organizer_name']),
-            models.Index(fields=['verification_status']),
-            models.Index(fields=['created_at']),
-        ]
+    created_at = models.DateTimeField('Created At', default=timezone.now)
+    updated_at = models.DateTimeField('Updated At', auto_now=True)
 
     def show_events(self, status=None):
         """
@@ -169,61 +99,12 @@ class Organizer(models.Model):
 
         return events
 
-    def get_analytics(self, time_period=None):
-        """
-        Returns analytics for the organizer's events.
-
-        Args:
-            time_period (str, optional): Time period for analytics (week, month, year)
-
-        Returns:
-            dict: Analytics data
-        """
-        events = self.events.all()
-        if time_period:
-            start_date = timezone.now()
-            if time_period == 'week':
-                start_date -= timezone.timedelta(days=7)
-            elif time_period == 'month':
-                start_date -= timezone.timedelta(days=30)
-            elif time_period == 'year':
-                start_date -= timezone.timedelta(days=365)
-            events = events.filter(created_at__gte=start_date)
-
-        total_revenue = sum(event.ticket_price * event.current_number_attendee for event in events)
-
-        return {
-            'total_events': events.count(),
-            'total_attendees': sum(event.current_number_attendee for event in events),
-            'total_revenue': total_revenue,
-            'average_attendees': events.count() and sum(event.current_number_attendee for event in events) / events.count() or 0,
-        }
-
     def update_verification_status(self, status, verified_by=None):
         """Updates the verification status of the organizer."""
         self.verification_status = status
         if status == 'VERIFIED':
             self.is_verified = True
             self.verification_date = timezone.now()
-        self.save()
-
-    def get_upcoming_events_count(self):
-        """Returns the count of upcoming events."""
-        return self.events.filter(start_date_event__gt=timezone.now()).count()
-
-    def get_total_revenue(self):
-        """Calculates total revenue from all events."""
-        return sum(
-            event.ticket_price * event.current_number_attendee
-            for event in self.events.all()
-        )
-
-    def update_analytics(self):
-        """Updates analytics fields based on current data."""
-        self.total_events_organized = self.events.count()
-        self.total_attendees = sum(
-            event.current_number_attendee for event in self.events.all()
-        )
         self.save()
 
     def get_full_address(self):
