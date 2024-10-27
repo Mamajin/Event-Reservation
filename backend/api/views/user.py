@@ -66,11 +66,8 @@ class UserAPI:
             status = "Organizer"
         else:
             status = "Attendee"
-            
-        try:
-            profile_user = get_object_or_404(AttendeeUser, username = user.username)
-        except AttendeeUser.DoesNotExist:
-            return Response({"error": "This user does not exist."}, status = status.HTTP_403_FORBIDDEN)
+
+        profile_user = get_object_or_404(AttendeeUser, username = user.username)
         
         profile_data = {
             "id": profile_user.id,
