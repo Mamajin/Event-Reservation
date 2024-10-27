@@ -8,10 +8,6 @@ class OrganizerAPI:
     @router.post('/apply-organizer', response=OrganizerResponseSchema, auth=JWTAuth())
     def apply_organizer(request: HttpRequest, form: OrganizerSchema = Form(...)):
         """Apply an authenticated user to be an organizer"""
-        if not request.user.is_authenticated:
-            logger.warning(f"Unauthorized organizer application attempt by user: {request.user}")
-            return Response({'error': 'User must be logged in to apply as an organizer'}, status=401)
-
         logger.info(f"User {request.user.id} is attempting to apply as an organizer.")
     
         organizer = Organizer(
@@ -42,9 +38,6 @@ class OrganizerAPI:
     @router.delete('/delete-event/{event_id}', response={204: None, 403: ErrorResponseSchema, 404: ErrorResponseSchema}, auth=JWTAuth())
     def delete_event(request: HttpRequest, event_id: int):
         """Delete event by event id."""
-        if not request.user.is_authenticated:
-            return Response({'error': 'User must be logged in'}, status=401)
-
         try:
             organizer = Organizer.objects.get(user=request.user)
         except Organizer.DoesNotExist:
@@ -63,9 +56,6 @@ class OrganizerAPI:
     @router.put('/update-organizer', response={200: OrganizerResponseSchema, 401: ErrorResponseSchema, 404: ErrorResponseSchema}, auth=JWTAuth())
     def update_organizer(request: HttpRequest, data: OrganizerSchema):
         """Update the profile information of the authenticated organizer."""
-        if not request.user.is_authenticated:
-            logger.warning(f"Unauthorized organizer update attempt by user: {request.user}")
-            return Response({'error': 'User must be logged in to update organizer profile'}, status=401)
         
         organizer = Organizer.objects.get(user=request.user)
         organizer.organizer_name = data.organizer_name
@@ -91,10 +81,6 @@ class OrganizerAPI:
     @router.delete('/revoke-organizer', response={204: None, 403: ErrorResponseSchema, 404: ErrorResponseSchema}, auth=JWTAuth())
     def revoke_organizer(request: HttpRequest):
         """Revoke the organizer role of the authenticated user."""
-        if not request.user.is_authenticated:
-            logger.warning(f"Unauthorized revocation attempt by user: {request.user}")
-            return Response({'error': 'User must be logged in'}, status=401)
-
         try:
             organizer = Organizer.objects.get(user=request.user)
             organizer.delete()

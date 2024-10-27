@@ -48,7 +48,7 @@ class UserAPI:
             return Response(
             {"error": "Invalid username or password"},
             status= 400
-        )
+
         
     @router.get('/profile', response=UserResponseSchema, auth = JWTAuth())
     def view_profile(request):
@@ -61,11 +61,6 @@ class UserAPI:
             and role (Organizer or Attendee).
         """
         user = request.user
-        if not user.is_authenticated:
-            return Response(
-                {"error": "User is not authenticated"},
-                status=status.HTTP_403_FORBIDDEN
-            )
         
         if Organizer.objects.filter(user = user).exists():
             status = "Organizer"
