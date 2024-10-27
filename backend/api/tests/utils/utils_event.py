@@ -8,6 +8,7 @@ from ninja_jwt.tokens import RefreshToken
 from faker import Faker
 import datetime
 from django.utils import timezone
+from unittest.mock import patch
 
 fake = Faker()
 

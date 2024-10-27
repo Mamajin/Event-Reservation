@@ -1,4 +1,4 @@
-from .utils.utils_event import EventModelsTest, timezone,datetime, Event, Organizer, fake
+from .utils.utils_event import EventModelsTest, timezone,datetime, Event, Organizer, fake, patch, DatabaseError
 
 
 class EventTest(EventModelsTest):
@@ -170,6 +170,55 @@ class EventTest(EventModelsTest):
         response = self.client.put(self.edit_event_url + str(2), json = new_data ,headers={'Authorization': f'Bearer {token}'})
         self.assertTrue(response.status_code, 404)
         self.assertIn('Event not found', response.json().get("error", ""))
+        
+        
+    @patch("api.models.Organizer.objects.get")
+    def test_get_my_events_unexpected_exception(self, mock_get_organizer):
+        # Mock Organizer.objects.get to raise an unexpected exception
+        mock_get_organizer.side_effect = Exception(f"Error while retrieving events for organizer {self.test_user.id}")
+        token = self.get_token_for_user(self.test_user)
+
+        # Make the request with a JWT token in the header
+        response = self.client.get(
+            self.organizer_get_events,  # Replace with the actual URL name for your endpoint
+            headers={'Authorization': f'Bearer {token}'}
+        )
+  
+        # Assert that the response status is 400 (Bad Request)
+        self.assertEqual(response.status_code,  400)
+
+        # Assert that the response contains the error message
+        self.assertEqual(response.data['error'], f"Error while retrieving events for organizer {self.test_user.id}")
+        
+    @patch("api.models.Event.objects.filter")
+    def test_list_event_unexpected_exception(self,mock_filter):
+            # Simulate a DatabaseError
+        mock_filter.side_effect = Exception(f"Error while retrieving events for the homepage")
+
+        response = self.client.get(self.list_event_url)
+        self.assertEqual(response.status_code,400)
+        self.assertIn(f"Error while retrieving events for the homepage", response.json().get("error", ""))
+        
+    @patch("api.models.Event.objects.get")
+    def test_edit_evnt_unexpected_exception(self, mock_get_event):
+        new_data = {
+            "event_name": fake.company(),
+            "start_date_register": timezone.now() - datetime.timedelta(days = 2),
+            "end_date_register": timezone.now() - datetime.timedelta(days = 1),
+            "start_date_event": timezone.now(),
+            "end_date_event": timezone.now() + datetime.timedelta(days = 1),
+            "max_attendee": 1,
+            "description": fake.text(max_nb_chars=200)
+        }
+        mock_get_event.side_effect = Exception(f"Error while editing event {self.event_test.id}")
+        token = self.get_token_for_user(self.test_user)
+        
+        response = self.client.put(self.edit_event_url + str(2), json = new_data ,headers={'Authorization': f'Bearer {token}'})
+        self.assertEqual(response.status_code,400)
+        self.assertIn(f"Error while editing event {self.event_test.id}", response.json().get("error", ""))
+        
+
+        
         
         
         
