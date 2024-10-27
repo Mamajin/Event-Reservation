@@ -1,4 +1,4 @@
-from .schemas import UserSchema, LoginResponseSchema, UserResponseSchema, LoginSchema
+from .schemas import UserSchema, LoginResponseSchema, UserResponseSchema, LoginSchema, ErrorResponseSchema
 from .modules import AttendeeUser, Form, make_password, authenticate, login, AccessToken, RefreshToken,Response, JWTAuth, Organizer, status,get_object_or_404, Router
 
 router = Router()
@@ -9,15 +9,15 @@ class UserAPI:
     
 
             
-    @router.post('/register')
+    @router.post('/register', response={201: None, 400: ErrorResponseSchema})
     def create_user(request, form: UserSchema = Form(...)):
         if form.password != form.password2:
-            return {"error": "Passwords do not match"}
+            return Response({"error": "Passwords do not match"}, status=400)
         if AttendeeUser.objects.filter(username = form.username).exists():
-            return {"error": "Username already taken"}
+            return Response({"error": "Username already taken"}, status=400)
         user = AttendeeUser.objects.create(username = form.username, password =make_password(form.password), birth_date = form.birth_date, 
                                            phone_number = form.phone_number, email = form.email, first_name = form.first_name, last_name = form.last_name)
-        return {"username":user.username}
+        return Response({"username": user.username}, status=201)
     
     
     
