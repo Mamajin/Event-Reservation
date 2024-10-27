@@ -47,7 +47,7 @@ class UserAPI:
         else:
             return Response(
             {"error": "Invalid username or password"},
-            status= 400
+            status= 400)
 
         
     @router.get('/profile', response=UserResponseSchema, auth = JWTAuth())
