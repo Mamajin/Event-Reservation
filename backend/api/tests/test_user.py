@@ -54,26 +54,6 @@ class UserAPITests(UserModelsTest):
         self.assertEqual(response1.json()['error'], 'Username already taken')
         
         
-    # def test_login(self):
-    #     user = User.objects.create_user(
-    #         username="test",
-    #         first_name="test",
-    #         last_name='Doe',
-    #         birth_date='1995-06-15',
-    #         phone_number='9876543210',
-    #         email='jane.doe@example.com',
-    #         password='password123'  # Set the password here directly
-    #     )
-    #     data = {
-    #         "username": user.username,
-    #         "password": 'password123',
-    #     }
-    #     request = Mock()
-    #     request.session = {}
-
-    #     response = self.client.post(self.user_login_url, data= data)
-    #     print(response.json())
-        
     def test_if_user_is_organizer(self):
         normal_user = self.create_user("test","test")
         organizer = self.become_organizer(normal_user, "test")
