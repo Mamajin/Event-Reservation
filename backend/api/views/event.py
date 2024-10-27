@@ -40,6 +40,7 @@ class EventAPI:
         """
         Retrieve a list of events created by the authenticated organizer.
         """
+        
         try:
             organizer = Organizer.objects.get(user=request.user)        
             events = Event.objects.filter(organizer=organizer)
@@ -100,15 +101,17 @@ class EventAPI:
             logger.error(f"Error while retrieving events for the homepage: {str(e)}")
             return Response({'error': str(e)}, status=400)
         
-    @router.put('/edit-event-{event_id}', response={204: None, 401: ErrorResponseSchema, 404: ErrorResponseSchema}, auth=JWTAuth())
+    @router.put('/edit-event-{event_id}', response={204: EventResponseSchema, 401: ErrorResponseSchema, 404: ErrorResponseSchema}, auth=JWTAuth())
     def edit_event(request: HttpRequest, event_id: int, data: EventSchema):
         """Edit event detail by event ID."""
+        
         try:
             event = Event.objects.get(id=event_id)  
             organizer = Organizer.objects.get(user=request.user)
             if event.organizer != organizer:
                 logger.warning(f"User {request.user.username} tried to edit an event they do not own.")
                 return Response({'error': 'You are not allowed to edit this event.'}, status=403)
+            
             
             event.event_name = data.event_name
             event.start_date_event = data.start_date_event
@@ -120,9 +123,19 @@ class EventAPI:
             
             event.save()
             
+            event_data = {
+                "event_name": event.event_name,
+                "start_date_event": event.start_date_event,
+                "end_date_event": event.end_date_event,
+                "start_date_register":event.start_date_register,
+                "end_date_register": event.end_date_register,
+                "max_attendee": event.max_attendee,
+                "descriptiob": event.description,
+            }
+            
             logger.info(f"Organizer {organizer.organizer_name} edited their event {event_id}.")
             
-            return Response({event},status=204) 
+            return Response(event_data, status=204) 
         
         except Event.DoesNotExist:
             logger.error(f"Event with ID {event_id} does not exist.")

@@ -18,18 +18,13 @@ class TicketAPI:
         
     @router.post('event/{event_id}/reserve', response= TicketSchema, auth= JWTAuth())
     def event_reserve(request, event_id):
-        user_id = request.user.id
+        user = request.user
         try:
             event = Event.objects.get(id = event_id)
         except Event.DoesNotExist:
             logger.error('This event does not exist')
             return Response({'error': 'This event does not exists'}, status = 404)
-        try:
-            user = AttendeeUser.objects.get(id = user_id)
-        except AttendeeUser.DoesNotExist:
-            logger.error('This user does not exists')
-            return Response({'error': 'This user does not exists'}, status = 404)
-        
+                
         ticket = Ticket(
                         event = event,
                         attendee = user

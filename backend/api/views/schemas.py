@@ -63,7 +63,7 @@ class UserSchema(Schema):
     birth_date: date
     phone_number: str
     email: str
-    
+
     
 class LoginSchema(Schema):
     username: str
