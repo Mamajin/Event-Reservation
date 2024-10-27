@@ -1,6 +1,6 @@
-
 import React, { useEffect, useState } from 'react';
 import api from '../api';
+import EventCard from '../components/EventCard';
 import PageLayout from '../components/PageLayout';
 import { Link } from 'react-router-dom';
 
@@ -39,6 +39,27 @@ function Home() {
             <Link to="/discover" className="btn bg-amber-300 text-dark-purple mt-6 px-8 py-3 text-lg">Explore Events</Link>
           </div>
         </div>
+      </div>
+
+      <div className="p-10 bg-white">
+        <h2 className="text-4xl text-amber-300 font-semibold mb-10 text-center">Latest Events</h2>
+        {loading ? (
+          <div className="text-center">Loading...</div>
+        ) : error ? (
+          <div className="text-center text-bold text-red-500">Error fetching events: {error.message}</div>
+        ) : latestEvents.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {latestEvents.map(event => (
+              <EventCard 
+                key={event.id} 
+                event={event} 
+                className="text-sm"
+              />
+            ))}
+          </div>
+        ) : (
+          <div className="text-center text-lg font-semibold">No events found</div>
+        )}
       </div>
     </PageLayout>
   );
