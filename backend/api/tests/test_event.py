@@ -1,4 +1,4 @@
-from .utils.utils_event import EventModelsTest, timezone,datetime, Event, Organizer, fake, patch, DatabaseError
+from .utils.utils_event import EventModelsTest, timezone,datetime, Event, Organizer, fake, patch
 
 
 class EventTest(EventModelsTest):
