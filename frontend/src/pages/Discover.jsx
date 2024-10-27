@@ -7,6 +7,7 @@ function Discover() {
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
     const fetchEvents = async () => {
@@ -31,12 +32,29 @@ function Discover() {
     return <div>Error fetching data: {error.message}</div>;
   }
 
+  const filteredEvents = events.filter(event =>
+    event.event_name.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
   return (
     <PageLayout>
       <div className="p-2">
-        {events.map((event) => (
+        <input
+          type="text"
+          placeholder="Search events..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="input input-bordered w-full bg-gray-200 mb-4"
+        />
+        {filteredEvents.length > 0 ? (
+          filteredEvents.map((event) => (
             <EventCard key={event.id} event={event} />
-          ))}
+          ))
+        ) : (
+          <div className="flex items-center justify-center h-64 text-4xl text-dark-purple">
+          No events found
+        </div>
+         )}
       </div>
     </PageLayout>
   );

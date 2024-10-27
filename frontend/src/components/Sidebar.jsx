@@ -1,9 +1,12 @@
 import { Link } from 'react-router-dom';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { ArrowLeftCircleIcon, MagnifyingGlassIcon } from '@heroicons/react/24/solid';
 
 function Sidebar() {
-    const [open, setOpen] = useState(true);
+    const [open, setOpen] = useState(() => {
+        const savedState = localStorage.getItem('sidebarOpen');
+        return savedState !== null ? JSON.parse(savedState) : true;
+    });
     const Menus = [
         { title: "Discover", path: "/discover" },
         { title: "Applied Event", path: "/applied-events" },
@@ -11,7 +14,9 @@ function Sidebar() {
         { title: "Invitation", path: "/invitation" },
         { title: "Become Organizer", path: "/become-organizer" },
     ];
-    
+    useEffect(() => {
+        localStorage.setItem('sidebarOpen', JSON.stringify(open));
+    }, [open]);
     return (
         <div className="flex">
             <div className={`bg-dark-purple h-screen p-5 pt-20 fixed 
