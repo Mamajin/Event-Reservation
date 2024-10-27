@@ -47,7 +47,7 @@ class UserAPI:
         else:
             return Response(
             {"success": False, "message": "Invalid username or password"},
-            status=status.HTTP_403_FORBIDDEN
+            status=403
         )
         
     @router.get('/profile', response=UserResponseSchema, auth = JWTAuth())
