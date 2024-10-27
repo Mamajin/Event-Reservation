@@ -169,8 +169,6 @@ class Event(models.Model):
         return f"Event: {self.event_name}"
     
     
-    
-    
 class Ticket(models.Model):
     event = models.ForeignKey(Event, on_delete= models.CASCADE)
     attendee = models.ForeignKey(AttendeeUser, on_delete= models.CASCADE)
@@ -216,3 +214,18 @@ class Ticket(models.Model):
     def __str__(self) -> str:
         return f"Event: {self.event.event_name}, Attendee: {self.attendee.first_name}"
     
+
+class Session(models.Model):
+    session_name = models.CharField(max_length=255)
+    event = models.ForeignKey(Event, related_name='sessions', on_delete=models.CASCADE)
+    event_create_date = models.DateTimeField('Session Created At', default= timezone.now)
+    start_date_event = models.DateTimeField('Session Start Date', null = False, blank= False)
+    end_date_event = models.DateTimeField('Session End Date', null= False, blank = True)
+    start_date_register = models.DateTimeField('Registration Start Date', default=timezone.now)
+    end_date_register = models.DateTimeField('Registration End Date', null=False, blank=False)
+    description = models.TextField(max_length=400)
+    max_attendee = models.PositiveIntegerField(default=0, validators = [MinValueValidator(0)])
+    session_type = models.CharField(max_length=100)
+
+    def __str__(self):
+        return f"{self.session_name} - {self.event.event_name}"

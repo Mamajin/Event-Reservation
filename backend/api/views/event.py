@@ -1,5 +1,7 @@
 from .schemas import EventSchema, EventResponseSchema, ErrorResponseSchema
-from .modules import JWTAuth, Organizer, HttpError, timezone, Event, HttpRequest, logger, Response, Router, List, get_object_or_404
+from .modules import JWTAuth, Organizer, HttpError, timezone, Event, HttpRequest, logger, Response, Router, List, get_object_or_404, Session
+
+
 router = Router()
 
 
@@ -34,7 +36,6 @@ class EventAPI:
             
         
         
-    
     @router.get('/my-events', response=List[EventResponseSchema], auth=JWTAuth())
     def get_my_events(request: HttpRequest):
         """
@@ -58,7 +59,8 @@ class EventAPI:
                     start_date_register=event.start_date_register,
                     end_date_register=event.end_date_register,
                     description=event.description,
-                    max_attendee=event.max_attendee
+                    max_attendee=event.max_attendee,
+                    session=Session.objects.filter(event=event)
                 )
                 for event in events
             ]
@@ -73,7 +75,7 @@ class EventAPI:
             logger.error(f"Error while retrieving events for organizer {request.user.id}: {str(e)}")
             return Response({'error': str(e)}, status=400)
         
-    @router.get('/events', response=List[EventResponseSchema])
+    @router.get('/', response=List[EventResponseSchema])
     def list_all_events(request: HttpRequest):
         """
         Retrieve a list of all events for the homepage.
@@ -92,7 +94,8 @@ class EventAPI:
                     start_date_register=event.start_date_register,
                     end_date_register=event.end_date_register,
                     description=event.description,
-                    max_attendee=event.max_attendee
+                    max_attendee=event.max_attendee,
+                    session=Session.objects.filter(event=event)
                 )
                 for event in events
             ]
@@ -143,7 +146,7 @@ class EventAPI:
         except Exception as e:
             logger.error(f"Error while editing event {event_id}: {str(e)}")
             return Response({'error': str(e)}, status=400)
-
+        
     @router.get('/{event_id}', response=EventResponseSchema)
     def event_detail(request: HttpRequest, event_id: int):
         """Show event detail by event ID"""
@@ -161,5 +164,6 @@ class EventAPI:
                 end_date_register=event.end_date_register,
                 description=event.description,
                 max_attendee=event.max_attendee,
+                session=Session.objects.filter(event=event)
         )
     
