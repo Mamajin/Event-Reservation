@@ -61,11 +61,6 @@ class UserAPI:
             and role (Organizer or Attendee).
         """
         user = request.user
-        if not user.is_authenticated:
-            return Response(
-                {"error": "User is not authenticated"},
-                status=status.HTTP_403_FORBIDDEN
-            )
         
         if Organizer.objects.filter(user = user).exists():
             status = "Organizer"
