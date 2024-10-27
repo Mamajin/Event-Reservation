@@ -47,7 +47,7 @@ function Sidebar() {
                     ))}
                 </ul>
             </div>
-            <div className={`p-7 transition-all duration-300 w-full ${open ? "ml-72" : "ml-20"}`}>
+            <div className={`p-7 pr-0 transition-all duration-300 w-full ${open ? "ml-72" : "ml-20"}`}>
             </div>
         </div>
     );

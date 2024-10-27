@@ -9,7 +9,7 @@ function PageLayout({ children }) {
       <div className="flex flex-1">
         <Sidebar />
         <main className="flex-1">
-          <div className="bg-white min-h-screen  pt-20 p-6">
+          <div className="bg-white min-h-screen  pt-20">
             {children}
           </div>
         </main>

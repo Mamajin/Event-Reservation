@@ -51,9 +51,9 @@ function Discover() {
             <EventCard key={event.id} event={event} />
           ))
         ) : (
-          <div className="flex items-center justify-center h-64 text-4xl text-dark-purple">
+          <h2 className="flex items-center font-bold justify-center h-64 text-4xl text-dark-purple">
           No events found
-        </div>
+        </h2>
          )}
       </div>
     </PageLayout>
