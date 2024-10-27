@@ -19,6 +19,10 @@ import AboutUs from './pages/footerpage/AboutUs';
 import Contact from './pages/footerpage/Contact';
 import Jobs from './pages/footerpage/Jobs';
 import PressKit from './pages/footerpage/PressKit';
+import Advertisement from './pages/footerpage/Advertisement';
+import Branding from './pages/footerpage/Branding';
+import Design from './pages/footerpage/Design';
+import Marketing from './pages/footerpage/Marketing';
 
 function App() {
   const handleLogout = () => {
@@ -48,6 +52,10 @@ function App() {
           <Route path="/team/jobs" element={<Jobs />} />
           <Route path="/team/press-kit" element={<PressKit />} />
 
+          <Route path="/services/branding" element={<Branding />} />
+          <Route path="/services/design" element={<Design />} />
+          <Route path="/services/marketing" element={<Marketing />} />
+          <Route path="/services/advertisement" element={<Advertisement />} />
           
           {/* Protected Routes */}
           <Route path="/account-info" element={<ProtectedRoute><AccountInfo /></ProtectedRoute>} />
