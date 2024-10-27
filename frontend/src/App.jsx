@@ -19,6 +19,7 @@ import AboutUs from './pages/footerpage/AboutUs';
 import Contact from './pages/footerpage/Contact';
 import Jobs from './pages/footerpage/Jobs';
 import PressKit from './pages/footerpage/PressKit';
+import Discover from './pages/Discover';
 
 function App() {
   const handleLogout = () => {
@@ -32,6 +33,7 @@ function App() {
         <Routes>
           {/* Public Routes */}
           <Route path="/" element={<Home />} />
+          <Route path="/discover" element={<Discover />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/become-organizer" element={<ApplyOrganizer />} />

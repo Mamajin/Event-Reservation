@@ -30,7 +30,7 @@ function Navbar() {
     <nav className="navbar bg-dark-purple fixed top-0 left-0 right-0 z-50">
       <StarIcon className="bg-amber-300 text-xl h-8 w-9 text-dark-purple rounded cursor-pointer mr-2" />
       <div className="navbar-start">
-        <span className="btn btn-ghost text-xl p-0 cursor-pointer" onClick={handleHome}>
+        <span className="btn btn-ghost text-white text-xl p-0 cursor-pointer" onClick={handleHome}>
           EventEase
         </span>
       </div>
