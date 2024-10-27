@@ -1,6 +1,7 @@
 # Event-Reservation
 
 [![Django CI](https://github.com/Mamajin/Event-Reservation/actions/workflows/django.yml/badge.svg)](https://github.com/Mamajin/Event-Reservation/actions/workflows/django.yml)
+[![codecov](https://codecov.io/gh/Mamajin/Event-Reservation/graph/badge.svg?token=UNKZKHCFVV)](https://codecov.io/gh/Mamajin/Event-Reservation)
 
 Welcome to the Event Reservation System! This web application allows users to create, manage, and participate in various events. 
 The project is built using Django for the backend and React for the frontend, aiming to provide a practical solution for event discovery, registration, and feedback.

@@ -29,3 +29,12 @@ jobs:
       run: |
         cd backend
         python manage.py test
+
+    - name: Generate Coverage
+      run: |
+        coverage run --branch -m unittest
+
+    - name: Upload results to Codecov
+      uses: codecov/codecov-action@v4
+      with:
+        token: ${{ secrets.CODECOV_TOKEN }}
