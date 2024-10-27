@@ -29,7 +29,12 @@ function LoginForm() {
             localStorage.setItem(USER_STATUS, res.data.status);
             navigate("/");
         } catch (error) {
-            alert("An error occurred during login.");
+            console.error("Login error:", error);
+            let errorMessage = "Login failed. Please try again.";
+            if (error.response) {
+                errorMessage = error.response.data?.message || errorMessage;
+            }
+            alert(errorMessage);
         } finally {
             setLoading(false);
         }

@@ -61,8 +61,12 @@ function SignupForm() {
 
             navigate("/login");
         } catch (error) {
-            alert("An error occurred during registration.");
-        } finally {
+            console.error("Registration error:", error);
+            let errorMessage = "An error occurred during registration.";
+            if (error.response) {
+                errorMessage = error.response.data?.message || errorMessage;
+            }
+            alert(errorMessage);
             setLoading(false);
         }
     };

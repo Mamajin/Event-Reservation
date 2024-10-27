@@ -30,8 +30,14 @@ function OrganizerForm() {
             alert('Application to become an organizer submitted successfully!');
             navigate('/');
         } catch (error) {
-            console.error('Error applying to become an organizer:', error);
-            alert('Failed to submit the application. Please try again.');
+            console.error("Error applying to become an organizer", error);
+            let errorMessage = "Failed to submit the application. Please try again.";
+
+            if (error.response) {
+                errorMessage = error.response.data?.error || errorMessage;
+            }
+
+            alert(errorMessage);
         } finally {
             setLoading(false);
         }
