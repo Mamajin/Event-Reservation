@@ -32,7 +32,7 @@ function EventCard({ event }) {
         <p className="text-sm text-gray-600 mt-1">
           {new Date(event.start_date_event).toLocaleDateString()} - {new Date(event.end_date_event).toLocaleDateString()}
         </p>
-        <p className="mt-2 text-gray-700">
+        <p className="mt-2 text-gray-700 break-words">
         {event.description.length > maxDescriptionLength
           ? `${event.description.substring(0, maxDescriptionLength)}...`
           : event.description}
