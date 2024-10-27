@@ -12,6 +12,7 @@ import AppliedEvents from './pages/AppliedEvents';
 import AcceptedEvents from './pages/AcceptedEvents';
 import ApplyOrganizer from './pages/ApplyOrganizer';
 import EventDetailPage from './pages/EventDetailPage';
+import Discover from './pages/Discover';
 import TermsOfUse from './pages/footerpage/TermsOfUse';
 import PrivacyInfo from './pages/footerpage/PrivacyInfo';
 import BiscuitInfo from './pages/footerpage/BiscuitInfo';
@@ -36,6 +37,7 @@ function App() {
         <Routes>
           {/* Public Routes */}
           <Route path="/" element={<Home />} />
+          <Route path="/discover" element={<Discover />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/become-organizer" element={<ApplyOrganizer />} />
