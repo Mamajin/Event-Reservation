@@ -93,3 +93,28 @@ class TicketSchema(ModelSchema):
     class Meta:
         model = Ticket
         fields = ['id','event', 'attendee', 'register_date']
+        
+        
+class SessionSchema(Schema):
+    session_name: str
+    start_date_event: datetime
+    end_date_event: datetime
+    start_date_register: Optional[datetime]
+    end_date_register: datetime
+    description: str
+    max_attendee: int
+    session_type: str
+
+
+class SessionResponseSchema(Schema):
+    id: int
+    session_name: str
+    event_create_date: datetime
+    start_date_event: datetime
+    end_date_event: datetime
+    start_date_register: datetime
+    end_date_register: datetime
+    description: str
+    max_attendee: int
+    session_type: str
+    

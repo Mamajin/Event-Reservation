@@ -5,7 +5,7 @@ from api.views.user import router as user_router
 from api.views.organizer import router as organizer_router
 from api.views.event import router as event_router
 from api.views.ticket import router as ticket_router
-# from api.views.google_login import router as google_login
+from api.views.session import router as session_router
 
 api = NinjaExtraAPI(version ="2.0.0")
 api.register_controllers(NinjaJWTDefaultController)
@@ -15,7 +15,7 @@ api.add_router("/users/", user_router)
 api.add_router("/organizers/", organizer_router)
 api.add_router("/events/", event_router)
 api.add_router("/tickets/", ticket_router)
-# api.add_router("/auth/", google_login)
+api.add_router("/sessions/", session_router)
 
 urlpatterns = [
     path("", api.urls),  # Prefix all API routes with /api/
