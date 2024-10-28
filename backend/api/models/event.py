@@ -51,6 +51,11 @@ class Event(models.Model):
     country = models.CharField(max_length=100, null=True, blank=True)
     postal_code = models.CharField(max_length=20, null=True, blank=True)
     
+    # Pricing
+    is_free = models.BooleanField(default=True)
+    ticket_price = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    expected_price = models.DecimalField(decimal_places=2, default=0.00)
+    
     # Online events
     is_online = models.BooleanField(default=False)
 
@@ -59,7 +64,6 @@ class Event(models.Model):
     tags = models.CharField(max_length=200, blank=True, help_text="Comma-separated tags")
 
     # Additional details
-    short_description = models.CharField(max_length=200, blank=True, help_text="Brief description for listings")
     detailed_description = models.TextField(blank=True, help_text="Full event details including schedule")
     status = models.CharField(max_length=20, default='')
 
@@ -80,11 +84,72 @@ class Event(models.Model):
     )
     # Timestamps
     updated_at = models.DateTimeField(auto_now=True)
+    
+    terms_and_conditions = models.TextField(blank=True)
 
     # Existing methods remain the same
     @property
     def current_number_attendee(self):
         return self.ticket_set.count()
+    
+    def get_event_status(self) -> str:
+        """
+        Get current event Status
+
+        Returns:
+            str: String of the current status of the event
+        """
+        now = timezone.now()
+        if now < self.start_date_event:
+            return "Upcoming"
+        elif self.start_date_event <= now <= self.end_date_event:
+            return "Ongoing"
+        else:
+            return "Finished"
+
+    def available_spot(self) -> int:
+        """
+        Get availble spots left in an event
+
+        Return:
+            int: Number of slots available for the event
+        """
+        return self.max_attendee - self.current_number_attendee
+    
+    
+    def is_max_attendee(self) -> bool:
+        """
+        Check if event is slots are full
+
+        Return:
+            bool: True if event is full on slots, False if event is not full
+        """
+        if self.current_number_attendee == self.max_attendee:
+            return True
+        return False
+    
+    def is_event_published(self) -> bool:
+        """
+        Check if event is published
+
+        Return:
+            bool: True if event is published  if not return False
+        """
+        now = timezone.now()
+        return self.event_create_date <= now
+    
+    def is_valid_date(self) -> bool:
+        return self.start_date_register <= self.end_date_register <= self.start_date_event <= self.end_date_event
+        
+    def can_register(self) -> bool:
+        """
+        Check if registered within register period.
+
+        Return:
+            bool: True if can register, False if cannot register
+        """
+        now = timezone.now()
+        return self.start_date_register <= now < self.end_date_register
 
     def get_event_status(self) -> str:
         now = timezone.now()

@@ -1,7 +1,6 @@
 from django.db import models
-from django.core.validators import MinValueValidator, FileExtensionValidator, URLValidator, EmailValidator
+from django.core.validators import FileExtensionValidator, EmailValidator
 from django.utils import timezone
-from decimal import Decimal
 
 class Organizer(models.Model):
     """
@@ -47,9 +46,9 @@ class Organizer(models.Model):
     description = models.TextField(blank=True)
 
     # Contact Information
-    # contact_phone = models.CharField(max_length=50, blank=True)
-    # contact_email = models.EmailField(blank=True)
-    # support_email = models.EmailField(blank=True)
+    contact_phone = models.CharField(max_length=50, blank=True)
+    contact_email = models.EmailField(blank=True)
+    support_email = models.EmailField(blank=True)
 
     # Address
     street_address = models.CharField(max_length=255, blank=True)
@@ -75,29 +74,41 @@ class Organizer(models.Model):
     # System Fields
     created_at = models.DateTimeField('Created At', default=timezone.now)
     updated_at = models.DateTimeField('Updated At', auto_now=True)
-
-    def show_events(self, status=None):
+    
+    
+    def show_event(self):
         """
-        Returns events organized by this organizer, optionally filtered by status.
-
-        Args:
-            status (str, optional): Filter events by status (upcoming, ongoing, finished)
+        Returns all events an Organizer has ever organized both active and closed
+        events
 
         Returns:
-            QuerySet: Filtered events
+            query_set: List of events an organizer have organized
         """
-        events = self.events.all()
+        return Organizer.event_set.all()
+    
+    def is_organizer(self, this_user):
+        """
+        Check if a given user is an organizer.
 
-        if status:
-            now = timezone.now()
-            if status.lower() == 'upcoming':
-                return events.filter(start_date_event__gt=now)
-            elif status.lower() == 'ongoing':
-                return events.filter(start_date_event__lte=now, end_date_event__gte=now)
-            elif status.lower() == 'finished':
-                return events.filter(end_date_event__lt=now)
+        Args:
+            this_user (AttendeeUser): The user to check.
 
-        return events
+        Returns:
+            bool: True if the user is an organizer, otherwise False.
+        """
+        return Organizer.objects.filter(user=this_user).exists()
+    
+    def organizer_name_is_taken(self, name):
+        """
+        Check if an organizer name is already taken.
+
+        Args:
+            name (str): The name to check.
+
+        Returns:
+            bool: True if the name is taken, otherwise False.
+        """
+        return Organizer.objects.filter(organizer_name=name).exists()
 
     def update_verification_status(self, status, verified_by=None):
         """Updates the verification status of the organizer."""
