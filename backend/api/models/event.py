@@ -54,7 +54,7 @@ class Event(models.Model):
     # Pricing
     is_free = models.BooleanField(default=True)
     ticket_price = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
-    expected_price = models.DecimalField(decimal_places=2, default=0.00)
+    expected_price = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
     
     # Online events
     is_online = models.BooleanField(default=False)

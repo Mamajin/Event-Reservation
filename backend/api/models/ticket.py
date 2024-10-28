@@ -1,5 +1,7 @@
 from django.db import models
 from django.utils import timezone
+import random
+import string
 from api.models.organizer import Organizer
 
 
@@ -14,10 +16,18 @@ class Ticket(models.Model):
     attendee = models.ForeignKey('AttendeeUser', on_delete=models.CASCADE)
     register_date = models.DateTimeField('Date registered', default=timezone.now)
 
+    TICKET_STATUS_CHOICES = [
+        ('ACTIVE', 'Active'),
+        ('CANCELLED', 'Cancelled'),
+        ('EXPIRED', 'Expired'),
+    ] 
     status = models.CharField(
         max_length=20,
-        default=''
+        choices=TICKET_STATUS_CHOICES,
+        default='ACTIVE'
     )
+
+    ticket_number = models.CharField(max_length=100, unique=True, default='', editable=False)
 
     # Cancellation/Refund
     cancellation_date = models.DateTimeField(null=True, blank=True)
@@ -42,6 +52,12 @@ class Ticket(models.Model):
             'ticket_type': self.ticket_type,
             'status': self.status,
         }
+        
+    def generate_ticket_number(self):
+        """Generate a random, unique ticket number."""
+        prefix = "TICKET"
+        random_string = ''.join(random.choices(string.ascii_uppercase + string.digits, k=8))
+        return f"{prefix}-{random_string}"
         
     def add_event(self, event) -> None:
         """

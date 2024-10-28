@@ -45,11 +45,6 @@ class Organizer(models.Model):
     # Detailed Information
     description = models.TextField(blank=True)
 
-    # Contact Information
-    contact_phone = models.CharField(max_length=50, blank=True)
-    contact_email = models.EmailField(blank=True)
-    support_email = models.EmailField(blank=True)
-
     # Address
     street_address = models.CharField(max_length=255, blank=True)
     city = models.CharField(max_length=100, blank=True)
@@ -84,7 +79,7 @@ class Organizer(models.Model):
         Returns:
             query_set: List of events an organizer have organized
         """
-        return Organizer.event_set.all()
+        return Organizer.events_set.all()
     
     def is_organizer(self, this_user):
         """
