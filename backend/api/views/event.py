@@ -6,7 +6,7 @@ router = Router()
 class EventAPI:
 
     @router.post('/create-event', response=EventResponseSchema, auth=JWTAuth())
-    def create_event(request, data: EventSchema):
+    def create_event(request: HttpRequest, data: EventSchema):
         this_user = request.user
         try:
             organizer = Organizer.objects.get(user=this_user)
@@ -21,7 +21,7 @@ class EventAPI:
             end_date_event=data.end_date_event,
             start_date_register=data.start_date_register or timezone.now(),
             end_date_register=data.end_date_register,
-            description=data.description,
+            description=data.description, 
             max_attendee=data.max_attendee
         )
         if event.is_valid_date():

@@ -46,6 +46,7 @@ class EventSchema(ModelSchema):
 
 class EventResponseSchema(Schema):
     id: int
+    event_name: str
     organizer: OrganizerResponseSchema 
     event_create_date: datetime
     start_date_event: datetime
@@ -55,9 +56,6 @@ class EventResponseSchema(Schema):
     description: str
     max_attendee: int
     event_image: Optional[str]
-    # address: Optional[str] = None
-    # latitude: Optional[float] = None
-    # longtitude: Optional[float] = None
     is_free: bool
     ticket_price: Decimal
     expected_price: Decimal 
@@ -114,18 +112,20 @@ class UserResponseSchema(Schema):
 class TicketSchema(Schema):
     ticket_number: str
     event_id: int
-    user_id: int
+    fullname: str
     register_date: datetime
-    status: Optional[str]
+    status: Optional[str] = None
     
 
 class TicketResponseSchema(Schema):
     id: int
     ticket_number: str
     event_id: int
-    user_id: int
+    fullname: str
     register_date: datetime
-    status: Optional[str]
+    status: Optional[str] = None
+    created_at: datetime
+    updated_at: datetime
         
         
 class SessionSchema(Schema):
