@@ -24,6 +24,25 @@ class Event(models.Model):
         ('SPORTS', 'Sports'),
         ('OTHER', 'Other'),
     ]
+    DRESS_CODES = [
+    ('CASUAL', 'Casual'),
+    ('SMART_CASUAL', 'Smart Casual'),
+    ('BUSINESS_CASUAL', 'Business Casual'),
+    ('SEMI_FORMAL', 'Semi-Formal'),
+    ('FORMAL', 'Formal'),
+    ('BLACK_TIE', 'Black Tie'),
+    ('WHITE_TIE', 'White Tie'),
+    ('THEMED', 'Themed Dress Code'),
+    ('OUTDOOR_BEACH_CASUAL', 'Outdoor/Beach Casual'),
+    ]
+    STATUS_OF_REGISTRATION = [
+    ('OPEN', 'Open'),
+    ('CLOSED', 'Closed'),
+    ('FULL', 'Full'),
+    ('PENDING', 'Pending'),
+    ('CANCELLED', 'Cancelled'),
+    ('WAITLIST', 'Waitlist'),
+]
     # Existing fields
     event_name = models.CharField(max_length=100)
     organizer = models.ForeignKey('Organizer', on_delete=models.CASCADE, related_name='events')
@@ -58,6 +77,8 @@ class Event(models.Model):
     # Additional details
     detailed_description = models.TextField(blank=True, help_text="Full event details including schedule")
     status = models.CharField(max_length=20, default='')
+    dress_code = models.CharField(max_length=20, choices = DRESS_CODES, null = False, blank = False)
+    status_registeration = models.CharField(max_length=20, choices= STATUS_OF_REGISTRATION, null = False, blank= False)
 
     # Contact information
     contact_email = models.EmailField(blank=True)
