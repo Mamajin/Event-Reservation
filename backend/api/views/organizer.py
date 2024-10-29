@@ -75,6 +75,7 @@ class OrganizerAPI:
         organizer = Organizer.objects.get(user=request.user)
         organizer.organizer_name = data.organizer_name
         organizer.email = data.email
+        organizer.organization_type = data.organization_type
         
         if organizer.organizer_name_is_taken(data.organizer_name):
             logger.info(f"Organizer name '{data.organizer_name}' is already taken.")
@@ -88,7 +89,9 @@ class OrganizerAPI:
             OrganizerResponseSchema(
                 id=organizer.id,
                 organizer_name=organizer.organizer_name,
-                email=organizer.email
+                email=organizer.email,
+                organization_type=organizer.organization_type,
+                is_verified=organizer.is_verified,
             ).dict(),
             status=200
         )
@@ -114,7 +117,9 @@ class OrganizerAPI:
             return OrganizerResponseSchema(
                 id=organizer.id,
                 organizer_name=organizer.organizer_name,
-                email=organizer.email
+                email=organizer.email,
+                organization_type=organizer.organization_type,
+                is_verified=organizer.is_verified
             )
         except Organizer.DoesNotExist:
             logger.error(f"User {request.user.username} tried to access a non-existing organizer profile.")

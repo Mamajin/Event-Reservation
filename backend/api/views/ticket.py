@@ -26,9 +26,10 @@ class TicketAPI:
             return Response({'error': 'This event does not exists'}, status = 404)
                 
         ticket = Ticket(
-                        event = event,
-                        attendee = user
-                        )
+                    event = event,
+                    attendee = user,
+                    
+                    )
         
         if ticket.is_user_register_the_same_event():
             return Response({'error': 'You have registered this event already'}, status = 400)

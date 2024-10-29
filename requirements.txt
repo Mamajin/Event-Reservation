@@ -12,3 +12,5 @@ django-ninja
 django-ninja-jwt
 faker
 Pillow
+pydantic
+pydantic[email]
