@@ -8,7 +8,7 @@ from api.models.organizer import *
 from api.models.ticket import *
 from api.models.session import *
 from django.contrib.auth.hashers import make_password
-from pydantic import EmailStr, HttpUrl, constr, conint
+from pydantic import EmailStr, HttpUrl, constr, conint, Field
 from datetime import datetime, date
 from ninja.responses import Response
 from rest_framework import status

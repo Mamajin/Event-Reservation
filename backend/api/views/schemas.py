@@ -47,10 +47,20 @@ class EventSchema(ModelSchema):
 
  
 # Schema for User                
-class UserSchema(Schema):
+class UserSchema(ModelSchema):
+    password2: Optional[str] = None
     class Meta:
         model = AttendeeUser
-        field = "__all__"
+        fields = (
+            "username",
+            "password",          
+            "email",             
+            "first_name",        
+            "last_name",        
+            "birth_date",       
+            "phone_number",                
+        )
+      
 
     
 class LoginSchema(Schema):

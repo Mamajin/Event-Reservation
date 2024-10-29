@@ -7,25 +7,24 @@ router = Router()
 
 class UserAPI:
             
-    @router.post('/register', response={201: None, 400: ErrorResponseSchema})
+    @router.post('/register', response={201: UserSchema, 400: ErrorResponseSchema})
     def create_user(request, form: UserSchema = Form(...)):
         if form.password != form.password2:
             return Response({"error": "Passwords do not match"}, status=400)
         if AttendeeUser.objects.filter(username = form.username).exists():
             return Response({"error": "Username already taken"}, status=400)
-        user = AttendeeUser.objects.create(username = form.username, password =make_password(form.password), birth_date = form.birth_date, 
+        try:
+            user = AttendeeUser(username = form.username, password =make_password(form.password), birth_date = form.birth_date, 
                                            phone_number = form.phone_number, email = form.email, first_name = form.first_name, last_name = form.last_name)
-        return Response({"username": user.username}, status=201)
+        except Exception as e:
+            return Exception
+        user.save()
+        return Response(UserSchema.from_orm(user), status=201)
     
     @router.post('/login', response = LoginResponseSchema)
     def login(request, form: LoginSchema = Form(...)):
         user = authenticate(request, username = form.username, password = form.password)
         
-        if Organizer.objects.filter(user = user).exists():
-            status = "Organizer"
-        else:
-            status = "Attendee"
-            
         if user is not None:
             login(request,user)
             access_token = AccessToken.for_user(user)
@@ -38,7 +37,7 @@ class UserAPI:
                 "username": user.username,
                 "password": user.password,
                 "id" : user.id,
-                "status": status,
+                "status": user.status,
             })
         else:
             return Response(
