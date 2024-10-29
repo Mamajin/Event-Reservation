@@ -21,7 +21,9 @@ class OrganizerModelsTest(TestCase):
         self.client = TestClient(organizer_router)
         self.apply_organizer_url = '/apply-organizer'
         self.delete_event_url = f"/delete-event/"
-        
+        self.update_organizer_url = '/update-organizer'
+        self.revoke_organizer_url = '/revoke-organizer'
+        self.view_organizer_url = "/view-organizer"
         self.test_user = AttendeeUser.objects.create_user(
             username='attendeeuser3',
             password='password123',

@@ -73,6 +73,52 @@ class TicketTestAPI(TicketModelsTest):
         self.assertEqual(response.status_code, 400)
         self.assertIn('This event is full', response.json().get("error", ""))
         
+    def test_invalid_list_my_events(self):
+        normal_user=  self.create_user("test", "test")
+        token = self.get_token_for_user(normal_user)
+        response = self.client.get(self.user_list_event_url+str(0),  headers={'Authorization': f'Bearer {token}'})
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.json()['error'], "This user does not exists")
+        
+    def test_register_with_event_that_does_not_exist(self):
+        normal_user = self.create_user("test","test")
+        token = self.get_token_for_user(normal_user)
+        response = self.client.post(self.user_reserve_event_url+ str(0)+"/reserve",  headers={'Authorization': f'Bearer {token}'})
+        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.json()['error'], "This event does not exists")
+    
+    def test_user_register_same_event(self):
+        normal_user = self.create_user("test","test")
+        ticket = Ticket.objects.create(event = self.event_test, attendee =normal_user)
+        token = self.get_token_for_user(normal_user)
+        response = self.client.post(self.user_reserve_event_url+ str(self.event_test.id)+"/reserve",  headers={'Authorization': f'Bearer {token}'})
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.json()['error'], 'You have registered this event already')
+        
+    def test_user_not_falls_in_register_dates(self):
+        normal_user = self.create_user("test","test")
+        token = self.get_token_for_user(normal_user)
+        event_test = Event.objects.create(
+            event_name=fake.company(),
+            organizer= self.become_organizer(self.test_user, "test_user"),
+            start_date_register=timezone.now() + datetime.timedelta(days = 2),  # Example for registration start
+            end_date_register=timezone.now() + datetime.timedelta(days = 1),  # Registration ends when the event starts
+            start_date_event=timezone.now(),
+            end_date_event= timezone.now() + datetime.timedelta(days = 1),  # Ensure it ends after it starts
+            max_attendee=100,
+            description=fake.text(max_nb_chars=200)
+        )
+        response = self.client.post(self.user_reserve_event_url+ str(event_test.id)+"/reserve",  headers={'Authorization': f'Bearer {token}'})
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.json()['error'], 'Registration for this event is not allowed.')
+        
+    
+
+        
+        
+        
+        
+        
         
         
         
