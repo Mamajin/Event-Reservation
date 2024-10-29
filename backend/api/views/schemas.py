@@ -35,6 +35,9 @@ class EventSchema(ModelSchema):
             'end_date_register',
             'description',
             'max_attendee',
+            'address',
+            'latitude',
+            'longtitude',
         ]
     
 
@@ -49,6 +52,9 @@ class EventResponseSchema(Schema):
     end_date_register: datetime
     description: str
     max_attendee: int
+    address: str
+    latitude: Decimal
+    longtitude: Decimal
                 
                 
                 
@@ -63,6 +69,9 @@ class UserSchema(Schema):
     birth_date: date
     phone_number: str
     email: str
+    address: str
+    longtitude: Decimal
+    latitude: Decimal
 
     
 class LoginSchema(Schema):

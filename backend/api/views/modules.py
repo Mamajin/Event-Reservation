@@ -13,6 +13,7 @@ from ninja_jwt.authentication import JWTAuth
 from ninja_jwt.tokens import AccessToken, RefreshToken
 from django.http import HttpRequest
 from ninja.errors import HttpError
+from decimal import Decimal
 import logging
 
 logger = logging.getLogger(__name__)

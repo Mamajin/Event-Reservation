@@ -16,7 +16,8 @@ class UserAPI:
         if AttendeeUser.objects.filter(username = form.username).exists():
             return Response({"error": "Username already taken"}, status=400)
         user = AttendeeUser.objects.create(username = form.username, password =make_password(form.password), birth_date = form.birth_date, 
-                                           phone_number = form.phone_number, email = form.email, first_name = form.first_name, last_name = form.last_name)
+                                           phone_number = form.phone_number, email = form.email, first_name = form.first_name, last_name = form.last_name, address = form.address, 
+                                           latitude = form.latitude, longtitude = form.longtitude)
         return Response({"username": user.username}, status=201)
     
     

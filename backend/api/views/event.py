@@ -24,7 +24,10 @@ class EventAPI:
             start_date_register=data.start_date_register or timezone.now(),
             end_date_register=data.end_date_register,
             description=data.description,
-            max_attendee=data.max_attendee
+            max_attendee=data.max_attendee,
+            address = data.address,
+            longtitude = data.longtitude,
+            latitude = data.latitude,
         )
         if event.is_valid_date():
             event.save()
@@ -55,7 +58,10 @@ class EventAPI:
                     start_date_register=event.start_date_register,
                     end_date_register=event.end_date_register,
                     description=event.description,
-                    max_attendee=event.max_attendee
+                    max_attendee=event.max_attendee,
+                    address= event.address,
+                    longtitude= event.longtitude,
+                    latitude = event.latitude,
                 )
                 for event in events
             ]
