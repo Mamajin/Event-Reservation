@@ -30,7 +30,7 @@ class UserAPI:
             login(request,user)
             access_token = AccessToken.for_user(user)
             refresh_token = RefreshToken.for_user(user)
-            return {
+            return Response({
                 "success": True,
                 "message": "Login successful",
                 "access_token": str(access_token),
@@ -39,12 +39,12 @@ class UserAPI:
                 "password": user.password,
                 "id" : user.id,
                 "status": status,
-            }
+            })
         else:
             return Response(
-            {"success": False, "message": "Invalid username or password"},
-            status=403
-        )
+            {"error": "Invalid username or password"},
+            status= 400)
+
         
     @router.get('/profile', response=UserResponseSchema, auth = JWTAuth())
     def view_profile(request):

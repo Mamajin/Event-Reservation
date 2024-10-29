@@ -38,13 +38,16 @@ function EventDetail() {
 
     try {
       const response = await api.post(`/tickets/event/${event.id}/reserve`);
-      if (response.status === 200 || response.status === 201) {
-        setApplySuccess(true);
-      } else {
-        setApplyError("An unexpected error occurred.");
+      alert("Event apply successfully!");
+      navigate("/applied-events");
+    } catch (error) {
+      console.error("Error apply event:", error);
+      let errorMessage = "Failed to apply for the event.";
+      if (error.response) {
+          errorMessage = error.response.data?.error || errorMessage;
       }
-    } catch (err) {
-      setApplyError(err.response?.data?.message || "Failed to apply for the event.");
+      alert(errorMessage);
+      navigate("/discover");
     } finally {
       setLoading(false);
     }

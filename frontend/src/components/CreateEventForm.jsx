@@ -51,15 +51,13 @@ function CreateEventForm() {
             navigate("/");
         } catch (error) {
             console.error("Error creating event:", error);
-            if (error.response && error.response.status === 403) {
-                alert("You must be an organizer to create an event. Please become an organizer first.");
-            } else {
-                let errorMessage = "Failed to create event. Please try again.";
-                if (error.response) {
-                    errorMessage = error.response.data?.message || error.response.statusText || errorMessage;
-                }
-                alert(errorMessage);
+            let errorMessage = "Failed to create event. Please try again.";
+
+            if (error.response) {
+                errorMessage = error.response.data?.error || errorMessage;
             }
+
+            alert(errorMessage);
         } finally {
             setLoading(false);
         }

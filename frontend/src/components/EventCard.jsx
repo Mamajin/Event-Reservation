@@ -28,11 +28,11 @@ function EventCard({ event }) {
           </div>
           <p className="text-sm text-gray-600">{event.organizer.organizer_name}</p>
         </div>
-        <h2 className="text-3xl text-dark-purple font-bold mb-2">{event.event_name}</h2>
+        <h2 className="text-3xl text-dark-purple font-bold mb-2 cursor-pointer"onClick={handleMoreDetailClick}>{event.event_name}</h2>
         <p className="text-sm text-gray-600 mt-1">
           {new Date(event.start_date_event).toLocaleDateString()} - {new Date(event.end_date_event).toLocaleDateString()}
         </p>
-        <p className="mt-2 text-gray-700">
+        <p className="mt-2 text-gray-700 break-words">
         {event.description.length > maxDescriptionLength
           ? `${event.description.substring(0, maxDescriptionLength)}...`
           : event.description}
@@ -41,9 +41,6 @@ function EventCard({ event }) {
           <FaRegHeart className="text-gray-500 mr-4 cursor-pointer" />
           <FaRegBookmark className="text-gray-500 mr-4 cursor-pointer ml-3" />
           <FaShareAlt className="text-gray-500 cursor-pointer ml-3" />
-          <button className="btn bg-amber-300 text-dark-purple ml-5" onClick={handleMoreDetailClick}>
-            More Detail
-          </button>
         </div>
       </div>
     </div>
