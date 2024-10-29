@@ -130,7 +130,6 @@ class TicketResponseSchema(Schema):
         
 class SessionSchema(Schema):
     session_name: str
-    event_id: int
     session_type: str
     start_date_event: datetime
     end_date_event: datetime
@@ -138,13 +137,13 @@ class SessionSchema(Schema):
     end_date_register: datetime
     description: str
     max_attendee: int
-    session_type: str
 
 
 class SessionResponseSchema(Schema):
     id: int
     session_name: str
     event_id: int
+    session_type: str
     event_create_date: datetime
     start_date_event: datetime
     end_date_event: datetime
@@ -152,5 +151,4 @@ class SessionResponseSchema(Schema):
     end_date_register: datetime
     description: str
     max_attendee: int
-    session_type: str
     
