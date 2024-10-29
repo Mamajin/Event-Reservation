@@ -39,51 +39,18 @@ class ErrorResponseSchema(Schema):
     
     
 class EventSchema(ModelSchema):
+    organizer : OrganizerResponseSchema
     class Meta:
         model = Event
         fields = '__all__'
         
 
-class EventResponseSchema(Schema):
-    id: int
-    organizer: OrganizerResponseSchema 
-    event_create_date: datetime
-    start_date_event: datetime
-    end_date_event: datetime
-    start_date_register: datetime
-    end_date_register: datetime
-    description: str
-    max_attendee: int
-    event_image: Optional[str]
-    # address: Optional[str] = None
-    # latitude: Optional[float] = None
-    # longtitude: Optional[float] = None
-    is_free: bool
-    ticket_price: Decimal
-    expected_price: Decimal 
-    is_online: bool  
-    category: EventCategory
-    detailed_description: Optional[str]
-    status: str 
-    contact_email: Optional[str]
-    contact_phone: Optional[str]
-    website_url: Optional[str] 
-    facebook_url: Optional[str] 
-    twitter_url: Optional[str]  
-    instagram_url: Optional[str]
-    min_age_requirement: Optional[int]
-    terms_and_conditions: Optional[str]
  
 # Schema for User                
 class UserSchema(Schema):
-    username: str
-    password: str
-    password2: str
-    first_name: str
-    last_name: str
-    birth_date: date
-    phone_number: str
-    email: EmailStr
+    class Meta:
+        model = AttendeeUser
+        field = "__all__"
 
     
 class LoginSchema(Schema):
