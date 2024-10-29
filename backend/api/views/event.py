@@ -95,7 +95,10 @@ class EventAPI:
                     start_date_register=event.start_date_register,
                     end_date_register=event.end_date_register,
                     description=event.description,
-                    max_attendee=event.max_attendee
+                    max_attendee=event.max_attendee,
+                    address = event.address,
+                    longtitude= event.longtitude,
+                    latitude= event.latitude
                 )
                 for event in events
             ]
