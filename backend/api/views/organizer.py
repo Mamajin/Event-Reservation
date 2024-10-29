@@ -27,8 +27,7 @@ class OrganizerAPI:
                 user=request.user,
                 organizer_name=organizer_name,
                 email=form.email or request.user.email,
-                organizer_type=form.organizer_type,
-                is_verified="PENDING"  # Default state for new organizers
+                organization_type=form.organization_type,
             )
             
             # Validate the model
@@ -38,13 +37,7 @@ class OrganizerAPI:
             logger.info(f"User {request.user.id} successfully applied as an organizer with ID {organizer.id}.")
             
             # Return formatted response
-            return Response(OrganizerResponseSchema(
-                id=organizer.id,
-                organizer_name=organizer.organizer_name,
-                email=organizer.email,
-                organizer_type=organizer.organizer_type,
-                is_verified=organizer.is_verified
-            ).dict(), status=201)
+            return Response(OrganizerResponseSchema.from_orm(organizer), status=201)
         
         except Exception as e:
             logger.error(f"Unexpected error while creating organizer for user {request.user.id}: {str(e)}")
