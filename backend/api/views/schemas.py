@@ -9,22 +9,32 @@ class EventCategory(str, Enum):
     CONCERT = 'CONCERT'
     SPORTS = 'SPORTS'
     OTHER = 'OTHER'
+    
+
+class OrganizerType(str, Enum):
+    INDIVIDUAL = 'INDIVIDUAL'
+    COMPANY = 'COMPANY'
+    NONPROFIT = 'NONPROFIT'
+    EDUCATIONAL = 'EDUCATIONAL'
+    GOVERNMENT = 'GOVERNMENT'
+    
 
 # Schema for Organizer
 class OrganizerSchema(Schema):
     organizer_name: Optional[str]
     email: Optional[str]
+    organizer_type: OrganizerType
 
 
 class OrganizerResponseSchema(Schema):
     id: int
     organizer_name: str
     email: str
-    organizer_type: str
+    organizer_type: OrganizerType
     is_verified: str
 
 
-class ErrorResponseSchema(Schema):
+class Error(Schema):
     error: str
 
 # Schemas for Event
