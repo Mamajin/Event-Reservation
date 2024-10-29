@@ -6,8 +6,6 @@ router = Router()
 
 
 class UserAPI:
-    
-
             
     @router.post('/register', response={201: None, 400: ErrorResponseSchema})
     def create_user(request, form: UserSchema = Form(...)):
@@ -18,8 +16,6 @@ class UserAPI:
         user = AttendeeUser.objects.create(username = form.username, password =make_password(form.password), birth_date = form.birth_date, 
                                            phone_number = form.phone_number, email = form.email, first_name = form.first_name, last_name = form.last_name)
         return Response({"username": user.username}, status=201)
-    
-    
     
     @router.post('/login', response = LoginResponseSchema)
     def login(request, form: LoginSchema = Form(...)):
@@ -61,21 +57,18 @@ class UserAPI:
             and role (Organizer or Attendee).
         """
         user = request.user
-        
-        if Organizer.objects.filter(user = user).exists():
-            status = "Organizer"
-        else:
-            status = "Attendee"
 
         profile_user = get_object_or_404(AttendeeUser, username = user.username)
         
-        profile_data = {
-            "id": profile_user.id,
-            "username" : profile_user.username,
-            "firstname": profile_user.first_name,
-            "lastname": profile_user.last_name,
-            "birth_date": profile_user.birth_date,
-            "phonenumber": profile_user.phone_number,
-            "status": status,
-        }
+        profile_data = UserResponseSchema(
+            id=profile_user.id,
+            username=profile_user.username,
+            first_name=profile_user.first_name,
+            last_name=profile_user.last_name,
+            birth_date=profile_user.birth_date,
+            phone_number=profile_user.phone_number,
+            email=profile_user.email,
+            status=profile_user.status,
+        )
+
         return profile_data

@@ -5,35 +5,50 @@ router = Router()
 
 
 class OrganizerAPI:
-    @router.post('/apply-organizer', response=OrganizerResponseSchema, auth=JWTAuth())
+    @router.post('/apply-organizer',response={201: OrganizerResponseSchema, 400: ErrorResponseSchema}, auth=JWTAuth())    
     def apply_organizer(request: HttpRequest, form: OrganizerSchema = Form(...)):
         """Apply an authenticated user to be an organizer"""
-        logger.info(f"User {request.user.id} is attempting to apply as an organizer.")
-    
-        organizer = Organizer(
-            user=request.user,
-            organizer_name=form.organizer_name or "",
-            email=form.email or request.user.email
-        )
-        
-        if organizer.is_organizer(request.user):
-            logger.info(f"User {request.user.id} already has an organizer profile.")
-            return Response({'error': 'User is already an organizer'}, status=400)
-        
-        if organizer.organizer_name_is_taken(form.organizer_name):
-            logger.info(f"Organizer name '{form.organizer_name}' is already taken.")
-            return Response({'error': 'Organizer name is already taken'}, status=400)
-        
-        organizer.save()
-        logger.info(f"User {request.user.id} successfully applied as an organizer with ID {organizer.id}.")
-        return Response(
-            OrganizerResponseSchema(
+        try:
+            logger.info(f"User {request.user.id} is attempting to apply as an organizer.")
+            
+            # Validate user isn't already an organizer
+            if Organizer.objects.filter(user=request.user).exists():
+                logger.info(f"User {request.user.id} already has an organizer profile.")
+                return Response({"error": "User is already an organizer"}, status=400)
+
+            # Validate organizer name
+            organizer_name = form.organizer_name or ""
+            if organizer_name and Organizer.objects.filter(organizer_name=organizer_name).exists():
+                logger.info(f"Organizer name '{organizer_name}' is already taken.")
+                return Response({"error": "Organizer name is already taken"}, status=400)
+                
+            # Create and save organizer profile
+            organizer = Organizer(
+                user=request.user,
+                organizer_name=organizer_name,
+                email=form.email or request.user.email,
+                organizer_type=form.organizer_type,
+                is_verified="PENDING"  # Default state for new organizers
+            )
+            
+            # Validate the model
+            organizer.full_clean()
+            organizer.save()
+            
+            logger.info(f"User {request.user.id} successfully applied as an organizer with ID {organizer.id}.")
+            
+            # Return formatted response
+            return Response(OrganizerResponseSchema(
                 id=organizer.id,
                 organizer_name=organizer.organizer_name,
-                email=organizer.email
-            ).dict(),
-            status=201
-        )
+                email=organizer.email,
+                organizer_type=organizer.organizer_type,
+                is_verified=organizer.is_verified
+            ).dict(), status=201)
+        
+        except Exception as e:
+            logger.error(f"Unexpected error while creating organizer for user {request.user.id}: {str(e)}")
+            return 400, {"error": "An unexpected error occurred"}
 
     @router.delete('/delete-event/{event_id}', response={204: None, 403: ErrorResponseSchema, 404: ErrorResponseSchema}, auth=JWTAuth())
     def delete_event(request: HttpRequest, event_id: int):

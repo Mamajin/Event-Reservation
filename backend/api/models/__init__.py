@@ -1,4 +1,4 @@
-from api.models.attendeeuser import AttendeeUser
+from api.models.user import AttendeeUser
 from api.models.event import Event
 from api.models.organizer import Organizer
 from api.models.session import Session

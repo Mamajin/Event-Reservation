@@ -28,7 +28,7 @@ class Ticket(models.Model):
     )
 
     ticket_number = models.CharField(max_length=100, unique=True, default='', editable=False)
-
+    
     # Cancellation/Refund
     cancellation_date = models.DateTimeField(null=True, blank=True)
 

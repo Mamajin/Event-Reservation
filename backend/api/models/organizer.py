@@ -24,7 +24,7 @@ class Organizer(models.Model):
 
     # Basic Information
     user = models.ForeignKey('AttendeeUser', on_delete=models.CASCADE)
-    organizer_name = models.CharField(max_length=100, unique=True)
+    organizer_name = models.CharField(max_length=100)
     email = models.EmailField(validators=[EmailValidator()])
 
     # Organization Details
@@ -44,13 +44,6 @@ class Organizer(models.Model):
 
     # Detailed Information
     description = models.TextField(blank=True)
-
-    # Address
-    street_address = models.CharField(max_length=255, blank=True)
-    city = models.CharField(max_length=100, blank=True)
-    state = models.CharField(max_length=100, blank=True)
-    country = models.CharField(max_length=100, blank=True)
-    postal_code = models.CharField(max_length=20, blank=True)
 
     # Social Media and Web Presence
     facebook_url = models.URLField(max_length=200, blank=True)
@@ -112,17 +105,6 @@ class Organizer(models.Model):
             self.is_verified = True
             self.verification_date = timezone.now()
         self.save()
-
-    def get_full_address(self):
-        """Returns the complete address string."""
-        address_parts = filter(None, [
-            self.street_address,
-            self.city,
-            self.state,
-            self.postal_code,
-            self.country
-        ])
-        return ", ".join(address_parts)
 
     def __str__(self) -> str:
         return f"Organizer: {self.organizer_name}"

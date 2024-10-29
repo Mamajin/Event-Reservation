@@ -2,7 +2,7 @@ from django.contrib.auth import authenticate, login
 from django.contrib.auth.models import User
 from ninja import Schema, ModelSchema, Form, Router
 from typing import List, Optional
-from api.models.attendeeuser import *
+from api.models.user import *
 from api.models.event import *
 from api.models.organizer import *
 from api.models.ticket import *

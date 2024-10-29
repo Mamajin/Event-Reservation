@@ -42,14 +42,6 @@ class Event(models.Model):
         blank=True,
         validators=[FileExtensionValidator(['jpg', 'jpeg', 'png', 'gif'])]
     )
-
-    # Location fields
-    venue_name = models.CharField(max_length=200, null=True, blank=True)
-    street_address = models.CharField(max_length=200, null=True, blank=True)
-    city = models.CharField(max_length=100, null=True, blank=True)
-    state = models.CharField(max_length=100, null=True, blank=True)
-    country = models.CharField(max_length=100, null=True, blank=True)
-    postal_code = models.CharField(max_length=20, null=True, blank=True)
     
     # Pricing
     is_free = models.BooleanField(default=True)
@@ -159,22 +151,6 @@ class Event(models.Model):
             return "Ongoing"
         else:
             return "Finished"
-
-    # New methods
-    def get_full_address(self):
-        """Returns the complete address of the venue"""
-        if self.is_online:
-            return "Online Event"
-
-        address_parts = filter(None, [
-            self.venue_name,
-            self.street_address,
-            self.city,
-            self.state,
-            self.postal_code,
-            self.country
-        ])
-        return ", ".join(address_parts)
 
     def __str__(self) -> str:
         return f"Event: {self.event_name}"
