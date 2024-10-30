@@ -99,7 +99,7 @@ class TicketSchema(Schema):
     event_id: int
     fullname: str
     register_date: datetime
-    status: Optional[str] = None
+    status: Optional[str]
     
 
 class TicketResponseSchema(Schema):
@@ -108,7 +108,7 @@ class TicketResponseSchema(Schema):
     event_id: int
     fullname: str
     register_date: datetime
-    status: Optional[str] = None
+    status: Optional[str]
     created_at: datetime
     updated_at: datetime
         

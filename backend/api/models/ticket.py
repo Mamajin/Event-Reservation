@@ -98,7 +98,6 @@ class Ticket(models.Model):
             "fullname": self.attendee.full_name,
             "register_date": self.register_date,
             "status": self.status,
-            'cancellation_date': self.cancellation_date,
             'created_at': self.created_at,
             'updated_at': self.updated_at
         }
