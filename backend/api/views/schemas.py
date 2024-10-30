@@ -38,13 +38,19 @@ class ErrorResponseSchema(Schema):
     error: str
     
     
-class EventSchema(ModelSchema):
+class EventInputSchema(ModelSchema):
+    # not include Organizer Information
+    class Meta:
+        model = Event
+        exclude = ('organizer', 'id')
+    
+    
+class EventResponseSchema(ModelSchema):
+    # Include Organizer information
     organizer : OrganizerResponseSchema
     class Meta:
         model = Event
         fields = '__all__'
-        
-
  
 # Schema for User                
 class UserSchema(ModelSchema):
