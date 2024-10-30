@@ -5,7 +5,7 @@ function DateTimeInput({ label, name, value, onChange, required }) {
     return (
         <div className="form-control w-full">
             <label className="label">
-                <span className="label-text text-dark-purple">{label}</span>
+                <span className="label-text font-medium text-dark-purple">{label}</span>
             </label>
             <input
                 type="datetime-local"
