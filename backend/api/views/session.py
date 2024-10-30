@@ -16,8 +16,20 @@ class SessionAPI:
         
         try:
             event = Event.objects.get(id=event_id, organizer=organizer)
+            
+            session = Session(
+                event=event,
+                session_name=data.session_name,
+                session_type=data.session_type,
+                start_date_event=data.start_date_event,
+                end_date_event=data.end_date_event,
+                start_date_register=data.start_date_register or timezone.now(),
+                end_date_register=data.end_date_register,
+                description=data.description,
+                max_attendee=data.max_attendee
+            )
 
-            if data.start_date_event < event.start_date or data.end_date_event > event.end_date:
+            if data.start_date_event < event.start_date_event or data.end_date_event > event.end_date_event:
                 return Response({
                     'error': 'Session dates must be within event dates'
                 }, status=400)
@@ -33,19 +45,11 @@ class SessionAPI:
                 return Response({
                     'error': 'This session overlaps with an existing session'
                 }, status=400)
-
-            session = Session.objects.create(
-                event=event,
-                session_name=data.session_name,
-                session_type=data.session_type,
-                start_date_event=data.start_date_event,
-                end_date_event=data.end_date_event,
-                start_date_register=data.start_date_register or timezone.now(),
-                end_date_register=data.end_date_register,
-                description=data.description,
-                max_attendee=data.max_attendee
-            )
-            return Response(SessionResponseSchema.from_orm(session), status=201)
+            session.save()
+            return Response(SessionResponseSchema(
+                    id=session.id,
+                    **session.get_session_detail()
+                ), status=201)
         except Event.DoesNotExist:
             logger.error(f"Event with ID {event_id} does not exist or access denied.")
             return Response({'error': 'Event not found or access denied'}, status=404)

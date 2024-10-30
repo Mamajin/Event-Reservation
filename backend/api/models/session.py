@@ -142,6 +142,21 @@ class Session(models.Model):
         if self.max_attendee == 0:  # 0 means unlimited
             return True
         return self.attendees.count() < self.max_attendee
+    
+    def get_session_detail(self):
+        """Return Session details."""
+        return {
+            'session_name': self.session_name,
+            'event_id': self.event.id,
+            'session_type': self.session_type,
+            'event_create_date': self.event_create_date,
+            'start_date_event': self.start_date_event,
+            'end_date_event': self.end_date_event,
+            'start_date_register': self.start_date_register,
+            'end_date_register': self.end_date_register,
+            'description': self.description,
+            'max_attendee': self.max_attendee
+        }
 
     @property
     def remaining_capacity(self) -> Optional[int]:
