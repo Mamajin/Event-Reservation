@@ -3,6 +3,7 @@ from django.utils import timezone
 from django.core.exceptions import ValidationError
 from django.db.models import Q
 from typing import List, Optional
+from ninja.responses import Response
 from datetime import datetime, timedelta
 
 class Session(models.Model):
@@ -25,7 +26,7 @@ class Session(models.Model):
         choices=SESSION_TYPE_CHOICES,
         default='POLLS'
     )
-    description = models.TextField(blank=True)
+    description = models.TextField(max_length=400, blank=True)
     max_attendee = models.PositiveIntegerField(default=0)
 
     # Timing
@@ -109,6 +110,7 @@ class Session(models.Model):
     def get_session_detail(self):
         """Return Session details."""
         return {
+            'id': self.id,
             'session_name': self.session_name,
             'event_id': self.event.id,
             'session_type': self.session_type,
