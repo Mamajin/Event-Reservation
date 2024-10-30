@@ -3,7 +3,7 @@ from django.db import models
 from django.utils import timezone
 import random
 import string
-from pydantic import ValidationError
+from ninja.responses import Response
 from api.models.organizer import Organizer
 
 
@@ -66,10 +66,10 @@ class Ticket(models.Model):
     def clean(self):
         """Validate the ticket before saving."""
         if self.is_user_register_the_same_event():
-            raise ValidationError("User has already registered for this event.")
+            raise Response({"error": "User has already registered for this event."}, status=400)
             
         if self.is_organizer_join_own_event(self.attendee):
-            raise ValidationError("Organizer cannot register for their own event.")
+            raise Response({"error": "Organizer cannot register for their own event."}, status=400)
 
     def cancel_ticket(self, reason: Optional[str] = None) -> None:
         """
@@ -79,7 +79,7 @@ class Ticket(models.Model):
             reason (str, optional): Reason for cancellation
         """
         if self.status == 'CANCELLED':
-            raise ValidationError("Ticket is already cancelled.")
+            raise Response({"error": "Ticket is already cancelled."}, status=400)
             
         self.status = 'CANCELLED'
         self.cancellation_date = timezone.now()
