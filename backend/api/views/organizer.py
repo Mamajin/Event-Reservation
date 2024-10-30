@@ -1,5 +1,5 @@
 from .schemas import OrganizerResponseSchema, ErrorResponseSchema,OrganizerSchema
-from .modules import HttpRequest, JWTAuth, Form, logger, Response, Organizer, Event, Router
+from .modules import HttpRequest, JWTAuth, Form, logger, Response, Organizer, Event, Router, AttendeeUser
 
 router = Router()
 
@@ -33,6 +33,10 @@ class OrganizerAPI:
             # Validate the model
             organizer.full_clean()
             organizer.save()
+            
+            request.user.status = "Organizer"
+            request.user.save()
+            
             
             logger.info(f"User {request.user.id} successfully applied as an organizer with ID {organizer.id}.")
             
