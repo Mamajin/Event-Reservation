@@ -18,6 +18,22 @@ class OrganizerType(str, Enum):
     EDUCATIONAL = 'EDUCATIONAL'
     GOVERNMENT = 'GOVERNMENT'
     
+    
+class DressCode(str, Enum):
+    CASUAL = 'CASUAL'
+    SMART_CASUAL = 'SMART_CASUAL'
+    BUSINESS_CASUAL = 'BUSINESS_CASUAL'
+    SEMI_FORMAL = 'SEMI_FORMAL'
+    FORMAL = 'FORMAL'
+    BLACK_TIE = 'BLACK_TIE'
+    WHITE_TIE = 'WHITE_TIE'
+    THEMED = 'THEMED'
+    OUTDOOR_BEACH_CASUAL = 'OUTDOOR_BEACH_CASUAL'
+
+
+
+
+    
 
 # Schema for Organizer
 class OrganizerSchema(Schema):
@@ -39,14 +55,19 @@ class ErrorResponseSchema(Schema):
     
     
 class EventInputSchema(ModelSchema):
+    category : EventCategory
+    dress_code : DressCode
+
     # not include Organizer Information
     class Meta:
         model = Event
-        exclude = ('organizer', 'id')
+        exclude = ('organizer', 'id', 'status_registeration','tags','status')
     
     
 class EventResponseSchema(ModelSchema):
     # Include Organizer information
+    category : EventCategory
+    dress_code : DressCode
     organizer : OrganizerResponseSchema
     class Meta:
         model = Event

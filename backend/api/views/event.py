@@ -22,7 +22,18 @@ class EventAPI:
             start_date_register=data.start_date_register or timezone.now(),
             end_date_register=data.end_date_register,
             description=data.description, 
-            max_attendee=data.max_attendee
+            max_attendee=data.max_attendee,
+            dress_code = data.dress_code,
+            detailed_description = data.detailed_description,
+            category = data.category,
+            contact_email = data.contact_email,
+            contact_phone = data.contact_phone,
+            website_url = data.website_url,
+            facebook_url = data.facebook_url,
+            twitter_url = data.twitter_url,
+            instagram_url = data.instagram_url,
+            min_age_requirement = data.min_age_requirement,
+            terms_and_conditions  = data.terms_and_conditions 
         )
         if event.is_valid_date():
             event.save()
