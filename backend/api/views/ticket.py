@@ -12,7 +12,6 @@ class TicketAPI:
             tickets = Ticket.objects.filter(attendee=user, register_date__lte=timezone.now()).order_by("-register_date")
             return [
                 TicketResponseSchema(
-                    id=ticket.id,
                     **ticket.get_ticket_details()
                 ) for ticket in tickets
             ]
@@ -56,13 +55,6 @@ class TicketAPI:
         return Response(TicketResponseSchema(
             id=ticket.id,
             **ticket.get_ticket_details()).dict(), status=201)
-    
-    # except Event.DoesNotExist:
-    #     logger.error(f"Event with ID {event_id} does not exist.")
-    #     return Response({'error': 'Event not found'}, status=404)
-        # except Exception as e:
-        #     logger.error(f"Error registering for event: {str(e)}")
-        #     return Response({'error': 'Internal server error'}, status=500)
 
     @router.delete('/{ticket_id}/cancel', auth=JWTAuth())
     def cancel_ticket(request: HttpRequest, ticket_id: int):
@@ -83,7 +75,6 @@ class TicketAPI:
         try:
             ticket = get_object_or_404(Ticket, id=ticket_id)
             return Response(TicketResponseSchema(
-                id=ticket_id,
                 **ticket.get_ticket_details()), status=200)
             
         except Ticket.DoesNotExist:

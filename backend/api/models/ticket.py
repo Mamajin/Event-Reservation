@@ -93,6 +93,7 @@ class Ticket(models.Model):
             Dict: Dictionary containing ticket details
         """
         return {
+            "id": self.id,
             "ticket_number": self.ticket_number,
             "event_id": self.event.id,
             "fullname": self.attendee.full_name,
