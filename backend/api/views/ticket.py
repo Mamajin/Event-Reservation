@@ -25,42 +25,36 @@ class TicketAPI:
         """
         Register a user for an event and create a ticket.
         """
-        try:
-            user = request.user
-            event = get_object_or_404(Event, id=event_id)
-            
-            if event.is_max_attendee():
-                return Response(
-                {'error': "This event has reached the maximum number of attendees"},
+        user = request.user
+        event = get_object_or_404(Event, id=event_id)
+        
+        if event.is_max_attendee():
+            return Response(
+            {'error': "This event has reached the maximum number of attendees"},
+            status=400
+        )
+
+        if not event.can_register():
+            return Response(
+                {'error': 'Registration for this event is not allowed'},
                 status=400
             )
-
-            if not event.can_register():
-                return Response(
-                    {'error': 'Registration for this event is not allowed'},
-                    status=400
-                )
-                
-            ticket = Ticket(
-                event=event,
-                attendee=user,
-                register_date=timezone.now(),
-                status='ACTIVE'  # Set the status explicitly here
-            )
             
-            try:
-                ticket.clean()
-            except ValidationError as e:
-                return Response({'error': str(e)}, status=400)
-            ticket.save()
-            return Response(TicketResponseSchema(**ticket.get_ticket_details()).dict(), status=201)
+        ticket = Ticket(
+            event=event,
+            attendee=user,
+            register_date=timezone.now(),
+            status='ACTIVE',
+            created_at=timezone.now()
+        )
         
-        except Event.DoesNotExist:
-            logger.error(f"Event with ID {event_id} does not exist.")
-            return Response({'error': 'Event not found'}, status=404)
-        except Exception as e:
-            logger.error(f"Error registering for event: {str(e)}")
-            return Response({'error': 'Internal server error'}, status=500)
+        try:
+            ticket.clean()
+        except ValidationError as e:
+            return Response({'error': str(e)}, status=400)
+        ticket.save()
+        return Response(TicketResponseSchema(
+            **ticket.get_ticket_details()).dict(), status=201)
 
     @router.delete('/{ticket_id}/cancel', auth=JWTAuth())
     def cancel_ticket(request: HttpRequest, ticket_id: int):
