@@ -21,7 +21,7 @@ class EventAPI:
             end_date_event=data.end_date_event,
             start_date_register=data.start_date_register or timezone.now(),
             end_date_register=data.end_date_register,
-            description=data.description,
+            description=data.description, 
             max_attendee=data.max_attendee
         )
         if event.is_valid_date():
