@@ -3,6 +3,7 @@ import api from "../api";
 import { useNavigate } from "react-router-dom";
 import { ACCESS_TOKEN } from "../constants";
 import DateTimeInput from "./DateTimeInput";
+import FileInput from "./FileInput";
 import Map from "./Map";
 
 function CreateEventForm() {
@@ -27,6 +28,9 @@ function CreateEventForm() {
         const date = new Date(dateTime);
         return date.toISOString(); // Formats to "YYYY-MM-DDTHH:MM:SS.sssZ"
     };
+
+    const handleFileChange = (e) => {}
+
     const handleChange = (e) => {
         const { name, value } = e.target; // Destructure name and value from input
         setFormData({ ...formData, [name]: value }); // Update corresponding field in state
@@ -120,6 +124,14 @@ function CreateEventForm() {
                             required
                         />
   
+                    </div>
+                    <div className="mt-6 w-full">
+                        <FileInput
+                            label="Event Banner"
+                            name="event_file"
+                            onChange={handleFileChange}
+                            accept=".jpg,.jpeg,.png,.pdf"
+                        />
                     </div>
                     <div className="form-control w-full ">
                         <label className="label">
