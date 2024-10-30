@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import api from "../api";
 import { useNavigate } from "react-router-dom";
 import { ACCESS_TOKEN } from "../constants";
+import DateTimeInput from "./DateTimeInput";
 
 function CreateEventForm() {
 
@@ -13,7 +14,11 @@ function CreateEventForm() {
         end_date_event: "",
         description: "",
         max_attendee: "",
+        address: '',
+        latitude: 0,
+        longtitude: 0,
     });
+    const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
     
@@ -64,6 +69,7 @@ function CreateEventForm() {
     };
     return (
         <div className="flex justify-center items-center min-h-screen bg-white-100">
+            <div className="max-w-4xl mx-auto">
             <form
                 onSubmit={handleSubmit}
                 className="w-full max-w-lg bg-white rounded-lg shadow-lg p-6 space-y-4"
@@ -78,62 +84,40 @@ function CreateEventForm() {
                         name="event_name"
                         value={formData.event_name}
                         onChange={handleChange}
-                        className="input bg-white input-bordered w-full"
+                        className="input bg-gray-100 input-bordered w-full"
                         placeholder="Enter event name"
                         required
                     />
                 </div>
-                <div className="form-control w-full">
-                    <label className="label">
-                        <span className="label-text text-dark-purple">Start Date for Registration</span>
-                    </label>
-                    <input
-                        type="datetime-local"
-                        name="start_date_register"
-                        value={formData.start_date_register}
-                        onChange={handleChange}
-                        className="input bg-white input-bordered w-full"
-                        required
-                    />
-                </div>
-                <div className="form-control w-full">
-                    <label className="label">
-                        <span className="label-text text-dark-purple">End Date for Registration</span>
-                    </label>
-                    <input
-                        type="datetime-local"
-                        name="end_date_register"
-                        value={formData.end_date_register}
-                        onChange={handleChange}
-                        className="input bg-white input-bordered w-full"
-                        required
-                    />
-                </div>
-                <div className="form-control w-full">
-                    <label className="label">
-                        <span className="label-text text-dark-purple">Start Date of Event</span>
-                    </label>
-                    <input
-                        type="datetime-local"
-                        name="start_date_event"
-                        value={formData.start_date_event}
-                        onChange={handleChange}
-                        className="input bg-white input-bordered w-full"
-                        required
-                    />
-                </div>
-                <div className="form-control w-full">
-                    <label className="label">
-                        <span className="label-text text-dark-purple">End Date of Event</span>
-                    </label>
-                    <input
-                        type="datetime-local"
-                        name="end_date_event"
-                        value={formData.end_date_event}
-                        onChange={handleChange}
-                        className="input bg-white input-bordered w-full"
-                        required
-                    />
+                <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+                <DateTimeInput
+                    label="Start Date for Registration"
+                    name="start_date_register"
+                    value={formData.start_date_register}
+                    onChange={handleChange}
+                    required
+                />
+                <DateTimeInput
+                    label="End Date for Registration"
+                    name="end_date_register"
+                    value={formData.end_date_register}
+                    onChange={handleChange}
+                    required
+                />
+                <DateTimeInput
+                    label="Start Date of Event"
+                    name="start_date_event"
+                    value={formData.start_date_event}
+                    onChange={handleChange}
+                    required
+                />
+                <DateTimeInput
+                    label="End Date of Event"
+                    name="end_date_event"
+                    value={formData.end_date_event}
+                    onChange={handleChange}
+                    required
+                />
                 </div>
                 <div className="form-control w-full">
                     <label className="label">
@@ -144,7 +128,7 @@ function CreateEventForm() {
                         name="max_attendee"
                         value={formData.max_attendee}
                         onChange={handleChange}
-                        className="input bg-white input-bordered w-full"
+                        className="input bg-gray-100 input-bordered w-full"
                         placeholder="Maximum number of attendees"
                         min="1"
                         required
@@ -170,7 +154,8 @@ function CreateEventForm() {
                 >
                     {loading ? "Creating..." : "Create Event"}
                 </button>
-            </form>
+                </form>
+            </div>
         </div>
     );
 }
