@@ -15,7 +15,7 @@ class SessionAPI:
             return Response({'error': 'User is not an organizer'}, status=403)
         
         try:
-            event = Event.objects.get(id=event_id, organizer=organizer)
+            event = get_object_or_404(Event, id=event_id)
             
             session = Session(
                 event=event,
@@ -38,7 +38,8 @@ class SessionAPI:
             overlapping = Session.objects.filter(
                 event=event,
                 start_date_event__lt=data.end_date_event,
-                end_date_event__gt=data.start_date_event
+                end_date_event__gt=data.start_date_event,
+                session_type=session.session_type
             ).exists()
             
             if overlapping:
@@ -47,7 +48,6 @@ class SessionAPI:
                 }, status=400)
             session.save()
             return Response(SessionResponseSchema(
-                    id=session.id,
                     **session.get_session_detail()
                 ), status=201)
         except Event.DoesNotExist:
@@ -75,7 +75,7 @@ class SessionAPI:
             
             session.delete()
             logger.info(f"Session {session_id} for event {event_id} deleted by user {request.user.username}.")
-            return Response(status=204)
+            return Response({'success': f'Session {session_id} for event {event_id} is deleted.'}, status=204)
     
         except Event.DoesNotExist:
             logger.error(f"Event {event_id} not found or user {request.user.username} is not authorized to access it.")
@@ -131,3 +131,13 @@ class SessionAPI:
             return Response({
                 "error": "Event not found or you do not have permission to access this event."
             }, status=404)
+            
+    @router.get('/{session_id}/details', response=SessionResponseSchema)
+    def session_detail(request: HttpRequest, session_id: int):
+        """
+        Get Session deatils by session id
+        """
+        logger.info('User view session details.')
+        session = get_object_or_404(Session, id=session_id)
+        return Response(SessionResponseSchema.from_orm(session).dict(), status=200)
+    
