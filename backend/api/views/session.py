@@ -83,7 +83,7 @@ class SessionAPI:
     
         except Event.DoesNotExist:
             logger.error(f"Event {event_id} not found or user {request.user.username} is not authorized to access it.")
-            return Response({"error": "Event not found."}, status=404)
+            return Response({"error": "Event not found or you do not have permission."}, status=404)
 
     @router.put('/{session_id}/edit/event/{event_id}', response={200: SessionResponseSchema, 404: ErrorResponseSchema}, auth=JWTAuth())
     def edit_session(request: HttpRequest, event_id: int, session_id: int, data: SessionSchema):
