@@ -26,7 +26,7 @@ class EventAPI:
             description=data.description,
             max_attendee=data.max_attendee,
             address = data.address,
-            longtitude = data.longtitude,
+            longitude = data.longitude,
             latitude = data.latitude,
         )
         if event.is_valid_date():
@@ -60,7 +60,7 @@ class EventAPI:
                     description=event.description,
                     max_attendee=event.max_attendee,
                     address= event.address,
-                    longtitude= event.longtitude,
+                    longitude= event.longitude,
                     latitude = event.latitude,
                 )
                 for event in events
@@ -97,7 +97,7 @@ class EventAPI:
                     description=event.description,
                     max_attendee=event.max_attendee,
                     address = event.address,
-                    longtitude= event.longtitude,
+                    longitude= event.longitude,
                     latitude= event.latitude
                 )
                 for event in events
@@ -176,6 +176,6 @@ class EventAPI:
                 description=event.description,
                 max_attendee=event.max_attendee,
                 latitude= event.latitude,
-                longitude= event.longtitude
+                longitude= event.longitude
         )
     

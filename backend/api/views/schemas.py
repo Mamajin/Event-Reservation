@@ -69,9 +69,6 @@ class UserSchema(Schema):
     birth_date: date
     phone_number: str
     email: str
-    address: str
-    longtitude: Decimal
-    latitude: Decimal
 
     
 class LoginSchema(Schema):
