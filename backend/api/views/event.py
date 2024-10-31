@@ -33,7 +33,10 @@ class EventAPI:
             twitter_url = data.twitter_url,
             instagram_url = data.instagram_url,
             min_age_requirement = data.min_age_requirement,
-            terms_and_conditions  = data.terms_and_conditions 
+            terms_and_conditions  = data.terms_and_conditions,
+            address = data.address,
+            longitude = data.longitude,
+            latitude = data.latitude,
         )
         if event.is_valid_date():
             event.save()
