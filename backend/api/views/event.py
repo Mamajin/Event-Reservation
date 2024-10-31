@@ -5,7 +5,7 @@ router = Router()
 
 class EventAPI:
 
-    @router.post('/create-event', response=EventSchema, auth=JWTAuth())
+    @router.post('/create-event', response=EventResponseSchema, auth=JWTAuth())
     def create_event(request, data: EventSchema):
         this_user = request.user
         # Now, `user` will be the authenticated user.
@@ -175,6 +175,7 @@ class EventAPI:
                 end_date_register=event.end_date_register,
                 description=event.description,
                 max_attendee=event.max_attendee,
+                address= event.address,
                 latitude= event.latitude,
                 longitude= event.longitude
         )
