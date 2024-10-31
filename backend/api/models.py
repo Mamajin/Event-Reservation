@@ -10,9 +10,9 @@ class AttendeeUser(AbstractUser):
     last_name = models.CharField(max_length= 100, null = False , blank = False)
     birth_date = models.DateField('Birth Date', null=False, blank=False)
     phone_number = models.CharField(max_length=50, null = False, blank= False)
-    address = models.CharField(max_length=500, null = True, blank = True)
-    latitude = models.DecimalField(max_digits=9, decimal_places=6, null = True, blank= True)
-    longitude = models.DecimalField(max_digits=9, decimal_places=6, null = True, blank= True)
+    address = models.CharField(max_length=500, null = True, blank = True, default= " ")
+    latitude = models.DecimalField(max_digits=9, decimal_places=6, null = True, blank= True, default= 0.00)
+    longitude = models.DecimalField(max_digits=9, decimal_places=6, null = True, blank= True, default= 0.00)
     event_image = models.ImageField(
         upload_to='event_images/',
         null=True,
@@ -111,7 +111,7 @@ class Event(models.Model):
     max_attendee = models.IntegerField(default=0, validators = [MinValueValidator(0)])
     address = models.CharField(max_length=500)
     latitude = models.DecimalField(max_digits=9, decimal_places=6)
-    longtitude = models.DecimalField(max_digits=9, decimal_places=6)
+    longitude = models.DecimalField(max_digits=9, decimal_places=6)
 
     
     @property
