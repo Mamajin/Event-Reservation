@@ -175,6 +175,7 @@ class EventAPI:
                 end_date_register=event.end_date_register,
                 description=event.description,
                 max_attendee=event.max_attendee,
+                address= event.address,
                 latitude= event.latitude,
                 longitude= event.longitude
         )
