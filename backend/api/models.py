@@ -1,7 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.utils import timezone
-from django.core.validators import MinValueValidator
+from django.core.validators import MinValueValidator, FileExtensionValidator
 
 
 
@@ -12,7 +12,7 @@ class AttendeeUser(AbstractUser):
     phone_number = models.CharField(max_length=50, null = False, blank= False)
     address = models.CharField(max_length=500, null = True, blank = True)
     latitude = models.DecimalField(max_digits=9, decimal_places=6, null = True, blank= True)
-    longtitude = models.DecimalField(max_digits=9, decimal_places=6, null = True, blank= True)
+    longitude = models.DecimalField(max_digits=9, decimal_places=6, null = True, blank= True)
     groups = models.ManyToManyField(
         'auth.Group',
         related_name='attendeeuser_set',  # Change this to your desired name

@@ -37,7 +37,7 @@ class EventSchema(ModelSchema):
             'max_attendee',
             'address',
             'latitude',
-            'longtitude',
+            'longitude',
         ]
     
 
@@ -54,7 +54,7 @@ class EventResponseSchema(Schema):
     max_attendee: int
     address: str
     latitude: Decimal
-    longtitude: Decimal
+    longitude: Decimal
                 
                 
                 
