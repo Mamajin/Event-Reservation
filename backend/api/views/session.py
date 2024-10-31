@@ -17,6 +17,10 @@ class SessionAPI:
         try:
             event = get_object_or_404(Event, id=event_id)
             
+            if event.organizer != organizer:
+                logger.error(f'Organizer {organizer.organizer_name} attempted to create event({event_id}) session but is not their own event.')
+                return Response({'error': 'Organizer is not have permission to create session in this event.'}, status=400)
+            
             session = Session(
                 event=event,
                 session_name=data.session_name,
@@ -67,7 +71,7 @@ class SessionAPI:
             event = Event.objects.get(id=event_id, organizer__user=request.user)
             logger.info(f"Organizer {request.user.username} is attempting to delete session {session_id} for event {event_id}.")
             session = get_object_or_404(Session, id=session_id, event=event)
-            
+
             if session.is_active:
                 return Response({
                     'error': 'Cannot delete an active session'
@@ -79,7 +83,7 @@ class SessionAPI:
     
         except Event.DoesNotExist:
             logger.error(f"Event {event_id} not found or user {request.user.username} is not authorized to access it.")
-            return Response({"error": "Event not found or you do not have permission to access this event."}, status=404)
+            return Response({"error": "Event not found."}, status=404)
 
     @router.put('/{session_id}/edit/event/{event_id}', response={200: SessionResponseSchema, 404: ErrorResponseSchema}, auth=JWTAuth())
     def edit_session(request: HttpRequest, event_id: int, session_id: int, data: SessionSchema):

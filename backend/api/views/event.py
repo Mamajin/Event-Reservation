@@ -35,7 +35,7 @@ class EventAPI:
         try:
             organizer = Organizer.objects.get(user=request.user)
             events = Event.objects.filter(organizer=organizer)
-            event_list = [EventInputSchema.from_orm(event) for event in events]
+            event_list = [EventResponseSchema.from_orm(event) for event in events]
             logger.info(f"Organizer {organizer.organizer_name} retrieved their events.")
             return event_list
         except Organizer.DoesNotExist:

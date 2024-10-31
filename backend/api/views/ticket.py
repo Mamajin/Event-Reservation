@@ -1,5 +1,5 @@
 from .modules import List, JWTAuth, get_object_or_404, Ticket, AttendeeUser, Event, Router, Response, logger, timezone, HttpRequest, ValidationError
-from .schemas import TicketSchema, TicketResponseSchema, SessionSchema, SessionResponseSchema, ErrorResponseSchema
+from .schemas import TicketSchema, TicketResponseSchema, ErrorResponseSchema
 
 router = Router()
 
@@ -53,7 +53,6 @@ class TicketAPI:
             return Response({'error': str(e)}, status=400)
         ticket.save()
         return Response(TicketResponseSchema(
-            id=ticket.id,
             **ticket.get_ticket_details()).dict(), status=201)
 
     @router.delete('/{ticket_id}/cancel', auth=JWTAuth())
