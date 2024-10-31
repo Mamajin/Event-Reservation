@@ -13,6 +13,12 @@ class AttendeeUser(AbstractUser):
     address = models.CharField(max_length=500, null = True, blank = True)
     latitude = models.DecimalField(max_digits=9, decimal_places=6, null = True, blank= True)
     longitude = models.DecimalField(max_digits=9, decimal_places=6, null = True, blank= True)
+    event_image = models.ImageField(
+        upload_to='event_images/',
+        null=True,
+        blank=True,
+        validators=[FileExtensionValidator(['jpg', 'jpeg', 'png'])]
+    )
     groups = models.ManyToManyField(
         'auth.Group',
         related_name='attendeeuser_set',  # Change this to your desired name

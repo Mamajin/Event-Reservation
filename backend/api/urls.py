@@ -5,6 +5,8 @@ from api.views.user import router as user_router
 from api.views.organizer import router as organizer_router
 from api.views.event import router as event_router
 from api.views.ticket import router as ticket_router
+from django.conf import settings
+from django.conf.urls.static import static
 # from api.views.google_login import router as google_login
 
 api = NinjaExtraAPI(version ="2.0.0")
@@ -19,4 +21,4 @@ api.add_router("/tickets/", ticket_router)
 
 urlpatterns = [
     path("", api.urls),  # Prefix all API routes with /api/
-]
+]+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
