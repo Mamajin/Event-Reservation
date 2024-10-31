@@ -53,6 +53,9 @@ class Event(models.Model):
     end_date_register = models.DateTimeField('Registration End Date', null=False, blank=False)
     description = models.TextField(max_length=400) 
     max_attendee = models.IntegerField(default=0, validators=[MinValueValidator(0)])
+    address = models.CharField(max_length=500, null = True, blank = True, default= " ")
+    latitude = models.DecimalField(max_digits=9, decimal_places=6, null = True, blank= True, default= 0.00)
+    longitude = models.DecimalField(max_digits=9, decimal_places=6, null = True, blank= True, default= 0.00)
 
     # Image fields
     event_image = models.ImageField(
@@ -163,15 +166,6 @@ class Event(models.Model):
         """
         now = timezone.now()
         return self.start_date_register <= now < self.end_date_register
-
-    def get_event_status(self) -> str:
-        now = timezone.now()
-        if now < self.start_date_event:
-            return "Upcoming"
-        elif self.start_date_event <= now <= self.end_date_event:
-            return "Ongoing"
-        else:
-            return "Finished"
 
     def __str__(self) -> str:
         return f"Event: {self.event_name}"

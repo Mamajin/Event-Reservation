@@ -17,6 +17,9 @@ class AttendeeUser(AbstractUser):
     birth_date = models.DateField('Birth Date', null=False, blank=False)
     phone_number = models.CharField(max_length=50, null=False, blank=False, ) # Max number
     status = models.CharField(max_length=50, null=True, blank=True, default='Attendee')
+    address = models.CharField(max_length=500, null = True, blank = True, default= " ")
+    latitude = models.DecimalField(max_digits=9, decimal_places=6, null = True, blank= True, default= 0.00)
+    longitude = models.DecimalField(max_digits=9, decimal_places=6, null = True, blank= True, default= 0.00)
 
     # Profile Picture
     profile_picture = models.ImageField(
