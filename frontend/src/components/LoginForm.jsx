@@ -23,10 +23,19 @@ function LoginForm() {
                     "Content-Type": "application/x-www-form-urlencoded",
                 },
             });
-            localStorage.setItem(ACCESS_TOKEN, res.data.access_token);
-            localStorage.setItem(REFRESH_TOKEN, res.data.refresh_token);
+            const token = await api.post("/token/pair", payload, {
+                headers: {
+                    'Content-Type': 'application/json',
+                }});
+
+            localStorage.setItem(ACCESS_TOKEN, token.data.access);
+            localStorage.setItem(REFRESH_TOKEN, token.data.refresh);
             localStorage.setItem(USER_NAME, res.data.username);
             localStorage.setItem(USER_STATUS, res.data.status);
+            console.log("Ninja access token",token.data.access)
+            console.log("Our api access token",res.data.access_token)
+            console.log("Ninja refresh token",token.data.refresh)
+            console.log("Our api refresh token",res.data.refresh_token)
             navigate("/");
         } catch (error) {
             console.error("Login error:", error);

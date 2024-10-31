@@ -31,6 +31,14 @@ function EventDetail() {
     navigate(-1);
   };
   
+  const handleLocation = () => {
+    const latitude = event.latitude
+    const longitude = event.longitude
+    const address = event.address
+    const googleMapsLink = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}`;
+    const googleMapsLinkByCoordinates = `https://www.google.com/maps/search/?api=1&query=${latitude},${longitude}`;
+    window.open(googleMapsLink, "_blank");
+  };
   const handleApplyEvent = async () => {
     setLoading(true);
     setApplyError(null);
@@ -108,6 +116,12 @@ function EventDetail() {
         <p className="text-lg">
           <span className="font-semibold text-dark-purple mr-2">Max Attendees:</span>
           {event.max_attendee}
+        </p>
+      </div>
+      <div className="mb-6">
+        <p className="text-lg">
+          <span className="font-semibold text-dark-purple mr-2" >Location:</span>
+          <p className="text-lg cursor-pointer  "onClick={handleLocation}>{event.address}</p>
         </p>
       </div>
       <div className="mb-6">

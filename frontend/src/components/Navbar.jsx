@@ -19,17 +19,17 @@ function Navbar() {
     <nav className="navbar bg-dark-purple fixed top-0 left-0 right-0 z-50">
       <StarIcon className="bg-amber-300 text-xl h-8 w-9 text-dark-purple rounded cursor-pointer mr-2" />
       <div className="navbar-start">
-        <span className="btn btn-ghost text-white text-xl p-0 cursor-pointer">
-          <Link to="/">EventEase</Link>
-        </span>
+        <Link to="/" className="btn btn-ghost text-white text-xl p-0">
+          EventEase
+        </Link>
       </div>
       <div className="navbar-end">
         {isLoggedIn ? (
           <>
             {isOrganizer && (
-              <button className="btn ml-2 bg-amber-300 text-dark-purple" aria-label="Create Event">
-                <Link to="/create-event">Create Event</Link>
-              </button>
+              <Link to="/create-event" className="btn ml-2 bg-amber-300 text-dark-purple">
+                Create Event
+              </Link>
             )}
             <div className="avatar placeholder pl-4 pr-3 dropdown dropdown-end">
               <div
@@ -45,9 +45,9 @@ function Navbar() {
                 className="menu dropdown-content bg-gray-100 rounded-box z-[1] mt-4 w-36 p-2 shadow"
               >
                 <li>
-                  <a className="justify-between text-dark-purple">
-                  <Link to="/account-info">Account</Link>
-                  </a>
+                  <Link to="/account-info" className="justify-between text-dark-purple">
+                    Account
+                  </Link>
                 </li>
                 <li>
                   <button className="w-full text-left text-dark-purple" onClick={handleLogout}>
@@ -70,14 +70,14 @@ function Navbar() {
               className="menu dropdown-content bg-gray-100 rounded-box z-[1] mt-4 w-36 p-2 shadow"
             >
               <li>
-                <button className="w-full text-left text-dark-purple">
-                <Link to="/login">Login</Link>
-                </button>
+                <Link to="/login" className="w-full text-left text-dark-purple">
+                  Login
+                </Link>
               </li>
               <li>
-                <button className="w-full text-left text-dark-purple">
-                <Link to="/register">Sign Up</Link>
-                </button>
+                <Link to="/register" className="w-full text-left text-dark-purple">
+                  Sign Up
+                </Link>
               </li>
             </ul>
           </div>

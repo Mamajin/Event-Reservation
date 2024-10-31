@@ -2,6 +2,9 @@ import React, { useState } from "react";
 import api from "../api";
 import { useNavigate } from "react-router-dom";
 import { ACCESS_TOKEN } from "../constants";
+import DateTimeInput from "./DateTimeInput";
+import FileInput from "./FileInput";
+import Map from "./Map";
 
 function CreateEventForm() {
 
@@ -13,7 +16,11 @@ function CreateEventForm() {
         end_date_event: "",
         description: "",
         max_attendee: "",
+        address: '',
+        latitude: 0,
+        longtitude: 0,
     });
+    const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
     
@@ -21,6 +28,9 @@ function CreateEventForm() {
         const date = new Date(dateTime);
         return date.toISOString(); // Formats to "YYYY-MM-DDTHH:MM:SS.sssZ"
     };
+
+    const handleFileChange = (e) => {}
+
     const handleChange = (e) => {
         const { name, value } = e.target; // Destructure name and value from input
         setFormData({ ...formData, [name]: value }); // Update corresponding field in state
@@ -63,114 +73,110 @@ function CreateEventForm() {
         }
     };
     return (
-        <div className="flex justify-center items-center min-h-screen bg-white-100">
-            <form
-                onSubmit={handleSubmit}
-                className="w-full max-w-lg bg-white rounded-lg shadow-lg p-6 space-y-4"
-            >
-                <h1 className="text-2xl font-bold mb-4 text-center text-dark-purple">Create Event</h1>
-                <div className="form-control w-full">
-                    <label className="label">
-                        <span className="label-text text-dark-purple">Event Name</span>
-                    </label>
-                    <input
-                        type="text"
-                        name="event_name"
-                        value={formData.event_name}
-                        onChange={handleChange}
-                        className="input bg-white input-bordered w-full"
-                        placeholder="Enter event name"
-                        required
-                    />
-                </div>
-                <div className="form-control w-full">
-                    <label className="label">
-                        <span className="label-text text-dark-purple">Start Date for Registration</span>
-                    </label>
-                    <input
-                        type="datetime-local"
-                        name="start_date_register"
-                        value={formData.start_date_register}
-                        onChange={handleChange}
-                        className="input bg-white input-bordered w-full"
-                        required
-                    />
-                </div>
-                <div className="form-control w-full">
-                    <label className="label">
-                        <span className="label-text text-dark-purple">End Date for Registration</span>
-                    </label>
-                    <input
-                        type="datetime-local"
-                        name="end_date_register"
-                        value={formData.end_date_register}
-                        onChange={handleChange}
-                        className="input bg-white input-bordered w-full"
-                        required
-                    />
-                </div>
-                <div className="form-control w-full">
-                    <label className="label">
-                        <span className="label-text text-dark-purple">Start Date of Event</span>
-                    </label>
-                    <input
-                        type="datetime-local"
-                        name="start_date_event"
-                        value={formData.start_date_event}
-                        onChange={handleChange}
-                        className="input bg-white input-bordered w-full"
-                        required
-                    />
-                </div>
-                <div className="form-control w-full">
-                    <label className="label">
-                        <span className="label-text text-dark-purple">End Date of Event</span>
-                    </label>
-                    <input
-                        type="datetime-local"
-                        name="end_date_event"
-                        value={formData.end_date_event}
-                        onChange={handleChange}
-                        className="input bg-white input-bordered w-full"
-                        required
-                    />
-                </div>
-                <div className="form-control w-full">
-                    <label className="label">
-                        <span className="label-text text-dark-purple">Maximum Attendees</span>
-                    </label>
-                    <input
-                        type="number"
-                        name="max_attendee"
-                        value={formData.max_attendee}
-                        onChange={handleChange}
-                        className="input bg-white input-bordered w-full"
-                        placeholder="Maximum number of attendees"
-                        min="1"
-                        required
-                    />
-                </div>
-                <div className="form-control w-full">
-                    <label className="label">
-                        <span className="label-text text-dark-purple">Description</span>
-                    </label>
-                    <textarea
-                        name="description"
-                        value={formData.description}
-                        onChange={handleChange}
-                        className="textarea bg-white textarea-bordered w-full"
-                        placeholder="Enter event description"
-                        required
-                    ></textarea>
-                </div>
-                <button
-                    type="submit"
-                    className={`btn bg-amber-300 text-dark-purple w-full mt-4 ${loading ? "loading" : ""}`}
-                    disabled={loading}
+        <div className="flex justify-center items-center min-h-screen pt-9 bg-white-100 px-4">
+            <div className="w-full lg:max-w-4xl mx-auto px-4">
+                <form
+                    onSubmit={handleSubmit}
+                    className="w-full max-w bg-white rounded shadow p-6 space-y-4 mx-auto"
                 >
-                    {loading ? "Creating..." : "Create Event"}
-                </button>
-            </form>
+                    <h1 className="text-4xl font-bold mb-4 text-center p-6 text-dark-purple">Create Your Event</h1>
+                    <div className="form-control w-full">
+                        <label className="label">
+                            <span className="label-text font-medium text-dark-purple">Event Name</span>
+                        </label>
+                        <input
+                            type="text"
+                            name="event_name"
+                            value={formData.event_name}
+                            onChange={handleChange}
+                            className="input bg-gray-100 input-bordered w-full"
+                            placeholder="Enter event name"
+                            required
+                        />
+                    </div>
+                    <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+                        <DateTimeInput
+                            label="Start Date for Registration"
+                            name="start_date_register"
+                            value={formData.start_date_register}
+                            onChange={handleChange}
+                            required
+                        />
+                        <DateTimeInput
+                            label="End Date for Registration"
+                            name="end_date_register"
+                            value={formData.end_date_register}
+                            onChange={handleChange}
+                            required
+                        />
+                        <DateTimeInput
+                            label="Start Date of Event"
+                            name="start_date_event"
+                            value={formData.start_date_event}
+                            onChange={handleChange}
+                            required
+                        />
+                        <DateTimeInput
+                            label="End Date of Event"
+                            name="end_date_event"
+                            value={formData.end_date_event}
+                            onChange={handleChange}
+                            required
+                        />
+  
+                    </div>
+                    <div className="mt-6 w-full">
+                        <FileInput
+                            label="Event Banner"
+                            name="event_file"
+                            onChange={handleFileChange}
+                            accept=".jpg,.jpeg,.png,.pdf"
+                        />
+                    </div>
+                    <div className="form-control w-full ">
+                        <label className="label">
+                            <span className="label-text font-medium text-dark-purple">Maximum Attendees</span>
+                        </label>
+                        <input
+                            type="number"
+                            name="max_attendee"
+                            value={formData.max_attendee}
+                            onChange={handleChange}
+                            className="input bg-gray-100 input-bordered w-full"
+                            placeholder="Maximum number of attendees"
+                            min="1"
+                            required
+                        />
+                    </div>
+                    <div className="mt-6">
+                        <label className="label">
+                            <span className="label-text font-medium text-dark-purple">Location</span>
+                        </label>
+                        <Map formData={formData} setFormData={setFormData} setError={setError} />
+                    </div>
+                    <div className="form-control w-full">
+                        <label className="label">
+                            <span className="label-text font-medium text-dark-purple">Description</span>
+                        </label>
+                        <textarea
+                            name="description"
+                            value={formData.description}
+                            onChange={handleChange}
+                            className="textarea bg-white textarea-bordered w-full"
+                            placeholder="Enter event description"
+                            required
+                        ></textarea>
+                    </div>
+    
+                    <button
+                        type="submit"
+                        className={`btn bg-amber-300 text-dark-purple w-full mt-4 ${loading ? "loading" : ""}`}
+                        disabled={loading}
+                    >
+                        {loading ? "Creating..." : "Create Event"}
+                    </button>
+                </form>
+            </div>
         </div>
     );
 }
