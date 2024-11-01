@@ -81,6 +81,6 @@ class UserAPI:
             if Organizer.objects.filter(user = user).exists():
                 organizer=  Organizer.objects.get(user = user)
                 organizer.delete()
-        return Response({'sucess': 'Your account has been delete'})
+        return Response({'sucess': 'Your account has been deleted'})
         
         
