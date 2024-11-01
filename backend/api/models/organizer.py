@@ -2,6 +2,7 @@ from django.db import models
 from django.utils import timezone
 from django.core.files.storage import default_storage
 from django.core.validators import FileExtensionValidator, EmailValidator
+from api.views.user import AttendeeUser
 
 
 class Organizer(models.Model):
@@ -25,7 +26,7 @@ class Organizer(models.Model):
     ]
 
     # Basic Information
-    user = models.ForeignKey('AttendeeUser', on_delete=models.CASCADE)
+    user = models.ForeignKey(AttendeeUser, on_delete=models.CASCADE)
     organizer_name = models.CharField(max_length=100)
     email = models.EmailField(validators=[EmailValidator()])
 

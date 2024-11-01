@@ -108,6 +108,18 @@ class UserResponseSchema(Schema):
     phone_number: str  
     email: EmailStr  
     status: str
+    address : str
+    latitude : Decimal
+    longitude: Decimal
+    company : str
+    facebook_profile : str
+    instagram_handle : str
+    nationality : str
+    attended_events_count: int
+    cancelled_events_count : int
+    created_at : datetime
+    updated_at : datetime
+    
 
 # Schema for Ticket
 class TicketSchema(Schema):
