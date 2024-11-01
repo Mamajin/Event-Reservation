@@ -4,6 +4,7 @@ from django.core.exceptions import ValidationError
 from django.db.models import Q
 from typing import List, Optional
 from datetime import datetime, timedelta
+from api.models.event import Event
 
 class Session(models.Model):
     """
@@ -19,7 +20,7 @@ class Session(models.Model):
 
     # Basic Information
     session_name = models.CharField(max_length=255)
-    event = models.ForeignKey('Event', related_name='sessions', on_delete=models.CASCADE)
+    event = models.ForeignKey(Event, related_name='sessions', on_delete=models.CASCADE)
     session_type = models.CharField(
         max_length=20,
         choices=SESSION_TYPE_CHOICES,

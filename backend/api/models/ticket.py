@@ -5,6 +5,7 @@ import random
 import string
 from pydantic import ValidationError
 from api.models.organizer import Organizer
+from api.models.event import Event
 
 
 class Ticket(models.Model):
@@ -14,7 +15,7 @@ class Ticket(models.Model):
     """
 
     # Basic Information
-    event = models.ForeignKey('Event', on_delete=models.CASCADE)
+    event = models.ForeignKey(Event, on_delete=models.CASCADE)
     attendee = models.ForeignKey('AttendeeUser', on_delete=models.CASCADE)
     register_date = models.DateTimeField('Date registered', default=timezone.now)
 

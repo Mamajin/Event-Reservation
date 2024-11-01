@@ -2,7 +2,7 @@ from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.utils import timezone
 from django.core.validators import MinValueValidator, MaxValueValidator, FileExtensionValidator
-
+from api.models.organizer import Organizer
 class Event(models.Model):
     """
     Represents an event with enhanced fields for better event management.
@@ -45,7 +45,7 @@ class Event(models.Model):
     ]
     # Existing fields
     event_name = models.CharField(max_length=100)
-    organizer = models.ForeignKey('Organizer', on_delete=models.CASCADE, related_name='events')
+    organizer = models.ForeignKey(Organizer, on_delete=models.CASCADE, related_name='events')
     event_create_date = models.DateTimeField('Event Created At', default=timezone.now)
     start_date_event = models.DateTimeField('Event Start Date', null=False, blank=False)
     end_date_event = models.DateTimeField('Event End Date', null=False, blank=True)
