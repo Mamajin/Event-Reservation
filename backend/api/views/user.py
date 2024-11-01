@@ -72,4 +72,15 @@ class UserAPI:
         user_data = UserResponseSchema.from_orm(user).dict()
         return user_data
     
+    @router.delete('delete/{user_id}/', auth=  JWTAuth())
+    def delete_profile(request, user_id : int):
+        user = request.user
+        if AttendeeUser.objects.filter(id = user_id).exists():
+            user = AttendeeUser.objects.get(id = user_id)
+            user.delete()
+            if Organizer.objects.filter(user = user).exists():
+                organizer=  Organizer.objects.get(user = user)
+                organizer.delete()
+        return Response({'sucess': 'Your account has been delete'})
+        
         
