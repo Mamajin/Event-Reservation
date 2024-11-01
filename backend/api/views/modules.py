@@ -3,6 +3,7 @@ from django.contrib.auth.models import User
 from django.contrib.auth.hashers import make_password
 from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
+from django.conf import settings
 from django.shortcuts import get_object_or_404
 from django.http import HttpRequest
 from ninja import Schema, ModelSchema, Form, Router, File
@@ -16,6 +17,7 @@ from api.models.event import *
 from api.models.organizer import *
 from api.models.ticket import *
 from api.models.session import *
+from botocore.exceptions import ClientError
 from pydantic import EmailStr, HttpUrl, constr, conint, Field
 from datetime import datetime, date
 from typing import List, Optional
@@ -24,5 +26,6 @@ from enum import Enum
 import logging
 import os
 import uuid
+import boto3
 
 logger = logging.getLogger(__name__)
