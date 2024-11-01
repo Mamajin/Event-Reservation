@@ -158,3 +158,27 @@ class SessionResponseSchema(Schema):
     description: str
     max_attendee: int
     
+
+class FileUploadResponseSchema(Schema):
+    file_url: str
+    message: str = "Upload successful"
+    file_name: str
+    uploaded_at: datetime
+
+
+class ImageUploadSchema(Schema):
+    file_url: str
+    original_name: str
+    file_size: int
+    content_type: str
+
+    
+class ProfileImageUpdateSchema(Schema):
+    profile_picture_url: Optional[str]
+    updated_at: datetime
+
+
+class EventImageUpdateSchema(Schema):
+    event_image_url: Optional[str]
+    updated_at: datetime
+    
