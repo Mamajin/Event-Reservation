@@ -37,8 +37,14 @@ ALLOWED_HOSTS = config('ALLOWED_HOSTS',
 
 GOOGLE_MAPS_API_KEY = config("GOOGLE_MAPS_API_KEY")
 
-
-
+AWS_ACCESS_KEY_ID = config('AWS_ACCESS_KEY_ID')
+AWS_SECRET_ACCESS_KEY = config('AWS_SECRET_ACCESS_KEY')
+AWS_STORAGE_BUCKET_NAME = config('AWS_STORAGE_BUCKET_NAME')
+AWS_S3_REGION_NAME = config('AWS_S3_REGION_NAME', default='ap-southeast-1')  # e.g., 'ap-southeast-1'
+AWS_S3_SIGNATURE_VERSION = 's3v4'
+AWS_S3_FILE_OVERWRITE = False
+AWS_DEFAULT_ACL = None
+AWS_S3_VERIFY = True
 
 # Application definition
 
@@ -55,9 +61,8 @@ INSTALLED_APPS = [
     "stub_api",
     "ninja_extra",
     "ninja_jwt",
+    "storages",
 ]
-
-
 
 
 MIDDLEWARE = [
@@ -155,10 +160,26 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.0/howto/static-files/
 
 STATIC_URL = "static/"
+STATIC_LOCATION = 'static'
+STATIC_URL = f'https://{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com/{STATIC_LOCATION}/'
+STATICFILES_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
 
 MEDIA_URL = '/media/'
+MEDIA_LOCATION = 'media'
+MEDIA_URL = f'https://{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com/{MEDIA_LOCATION}/'
+DEFAULT_FILE_STORAGE = 'core.storage_backends.MediaStorage'
 
 MEDIA_ROOT = BASE_DIR / 'media'
+
+AWS_S3_CORS_RULES = [
+    {
+        'AllowedHeaders': ['*'],
+        'AllowedMethods': ['GET', 'POST', 'PUT', 'DELETE', 'HEAD'],
+        'AllowedOrigins': ['*'],  # In production, replace with your frontend domain
+        'ExposeHeaders': ['ETag'],
+        'MaxAgeSeconds': 3000
+    }
+]
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field

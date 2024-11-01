@@ -1,6 +1,8 @@
 from django.db import models
-from django.core.validators import FileExtensionValidator, EmailValidator
 from django.utils import timezone
+from django.core.files.storage import default_storage
+from django.core.validators import FileExtensionValidator, EmailValidator
+
 
 class Organizer(models.Model):
     """
@@ -37,6 +39,7 @@ class Organizer(models.Model):
     # Branding
     logo = models.ImageField(
         upload_to='organizer_logos/',
+        storage=default_storage,
         null=True,
         blank=True,
         validators=[FileExtensionValidator(['jpg', 'jpeg', 'png'])]
@@ -63,6 +66,13 @@ class Organizer(models.Model):
     created_at = models.DateTimeField('Created At', default=timezone.now)
     updated_at = models.DateTimeField('Updated At', auto_now=True)
     
+    
+    @property
+    def logo_image_url(self):
+        """Return the organizer image url if has."""
+        if self.logo:
+            return self.logo.url
+        return None
     
     def show_event(self):
         """

@@ -1,6 +1,6 @@
 from django.db import models
-from django.contrib.auth.models import AbstractUser
 from django.utils import timezone
+from django.core.files.storage import default_storage
 from django.core.validators import MinValueValidator, MaxValueValidator, FileExtensionValidator
 
 class Event(models.Model):
@@ -25,24 +25,24 @@ class Event(models.Model):
         ('OTHER', 'Other'),
     ]
     DRESS_CODES = [
-    ('CASUAL', 'Casual'),
-    ('SMART_CASUAL', 'Smart Casual'),
-    ('BUSINESS_CASUAL', 'Business Casual'),
-    ('SEMI_FORMAL', 'Semi-Formal'),
-    ('FORMAL', 'Formal'),
-    ('BLACK_TIE', 'Black Tie'),
-    ('WHITE_TIE', 'White Tie'),
-    ('THEMED', 'Themed Dress Code'),
-    ('OUTDOOR_BEACH_CASUAL', 'Outdoor/Beach Casual'),
-    ]
+        ('CASUAL', 'Casual'),
+        ('SMART_CASUAL', 'Smart Casual'),
+        ('BUSINESS_CASUAL', 'Business Casual'),
+        ('SEMI_FORMAL', 'Semi-Formal'),
+        ('FORMAL', 'Formal'),
+        ('BLACK_TIE', 'Black Tie'),
+        ('WHITE_TIE', 'White Tie'),
+        ('THEMED', 'Themed Dress Code'),
+        ('OUTDOOR_BEACH_CASUAL', 'Outdoor/Beach Casual'),
+        ]
     STATUS_OF_REGISTRATION = [
-    ('OPEN', 'Open'),
-    ('CLOSED', 'Closed'),
-    ('FULL', 'Full'),
-    ('PENDING', 'Pending'),
-    ('CANCELLED', 'Cancelled'),
-    ('WAITLIST', 'Waitlist'),
-]
+        ('OPEN', 'Open'),
+        ('CLOSED', 'Closed'),
+        ('FULL', 'Full'),
+        ('PENDING', 'Pending'),
+        ('CANCELLED', 'Cancelled'),
+        ('WAITLIST', 'Waitlist'),
+    ]
     # Existing fields
     event_name = models.CharField(max_length=100)
     organizer = models.ForeignKey('Organizer', on_delete=models.CASCADE, related_name='events')
@@ -60,6 +60,7 @@ class Event(models.Model):
     # Image fields
     event_image = models.ImageField(
         upload_to='event_images/',
+        storage=default_storage,
         null=True,
         blank=True,
         validators=[FileExtensionValidator(['jpg', 'jpeg', 'png', 'gif'])]
