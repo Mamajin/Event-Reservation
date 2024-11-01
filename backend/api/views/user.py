@@ -58,16 +58,18 @@ class UserAPI:
         user = request.user
 
         profile_user = get_object_or_404(AttendeeUser, username = user.username)
+        profile_dict = UserResponseSchema.from_orm(profile_user).dict()
+
         
-        profile_data = UserResponseSchema(
-            id=profile_user.id,
-            username=profile_user.username,
-            first_name=profile_user.first_name,
-            last_name=profile_user.last_name,
-            birth_date=profile_user.birth_date,
-            phone_number=profile_user.phone_number,
-            email=profile_user.email,
-            status=profile_user.status,
-        )
+        profile_data = UserResponseSchema(**profile_dict)
 
         return profile_data
+    
+    @router.put('/edit-profile/{user_id}/', response=UserResponseSchema, auth=  JWTAuth())
+    def edit_profile(request, user_id : int, new_data : UserResponseSchema):
+        AttendeeUser.objects.filter(id = user_id).update(**new_data.dict())
+        user = AttendeeUser.objects.get(id = user_id)
+        user_data = UserResponseSchema.from_orm(user).dict()
+        return user_data
+    
+        
