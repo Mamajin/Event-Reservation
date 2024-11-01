@@ -29,10 +29,6 @@ class DressCode(str, Enum):
     WHITE_TIE = 'WHITE_TIE'
     THEMED = 'THEMED'
     OUTDOOR_BEACH_CASUAL = 'OUTDOOR_BEACH_CASUAL'
-
-
-
-
     
 
 # Schema for Organizer
@@ -87,7 +83,6 @@ class UserSchema(ModelSchema):
             "birth_date",       
             "phone_number",                
         )
-      
 
     
 class LoginSchema(Schema):

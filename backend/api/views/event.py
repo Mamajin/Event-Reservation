@@ -1,5 +1,5 @@
-from .schemas import EventInputSchema, ErrorResponseSchema, EventResponseSchema
-from .modules import JWTAuth, Organizer, HttpError, timezone, Event, HttpRequest, logger, Response, Router, List, get_object_or_404, Session
+from .schemas import EventInputSchema, ErrorResponseSchema, EventResponseSchema, FileUploadResponseSchema
+from .modules import *
 
 router = Router()
 
@@ -99,3 +99,35 @@ class EventAPI:
         logger.info(f"Fetching details for event ID: {event_id} by user {request.user.username}.")
         event = get_object_or_404(Event, id=event_id)
         return EventResponseSchema.from_orm(event)
+    
+    @router.post('/{event_id}/upload-image', response={200: FileUploadResponseSchema, 400: ErrorResponseSchema}, auth=JWTAuth())
+    def upload_event_image(request: HttpRequest, event_id: int, file: UploadedFile = File(...)):
+        """
+        Upload an image for a specific event.
+        """
+        try:
+            event = get_object_or_404(Event, id=event_id)
+
+            # Check if the user is the organizer of the event
+            organizer = Organizer.objects.get(user=request.user)
+            if event.organizer != organizer:
+                return Response({'error': 'You are not allowed to upload an image for this event.'}, status=403)
+
+            filename = f'event_images/{uuid.uuid4()}{os.path.splitext(file.name)[1]}'
+            saved_path = default_storage.save(filename, ContentFile(file.read()))
+            file_url = default_storage.url(saved_path)
+            event.event_image = saved_path
+            event.save()
+            
+            return Response(FileUploadResponseSchema(
+                file_url=file_url,
+                message="Upload successful",
+                file_name=os.path.basename(filename),
+                uploaded_at=timezone.now()
+            ), status=200)
+            
+        except Organizer.DoesNotExist:
+            return Response({'error': 'User is not an organizer'}, status=404)
+        except Exception as e:
+            return Response({'error': str(e)}, status=400)
+                

@@ -75,7 +75,6 @@ class TicketAPI:
         try:
             ticket = get_object_or_404(Ticket, id=ticket_id)
             return Response(TicketResponseSchema(
-                id=ticket_id,
                 **ticket.get_ticket_details()), status=200)
             
         except Ticket.DoesNotExist:
