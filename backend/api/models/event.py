@@ -53,7 +53,7 @@ class Event(models.Model):
     end_date_register = models.DateTimeField('Registration End Date', null=False, blank=False)
     description = models.TextField(max_length=400) 
     max_attendee = models.IntegerField(default=0, validators=[MinValueValidator(0)])
-    address = models.CharField(max_length=500, null = True, blank = True, default= " ")
+    address = models.CharField(max_length=500, null = True, blank = True)
     latitude = models.DecimalField(max_digits=9, decimal_places=6, null = True, blank= True, default= 0.00)
     longitude = models.DecimalField(max_digits=9, decimal_places=6, null = True, blank= True, default= 0.00)
 
@@ -81,7 +81,7 @@ class Event(models.Model):
     # Additional details
     detailed_description = models.TextField(blank=True, help_text="Full event details including schedule")
     status = models.CharField(max_length=20, default='')
-    dress_code = models.CharField(max_length=20, choices = DRESS_CODES, null = False, blank = False)
+    dress_code = models.CharField(max_length=20, choices = DRESS_CODES, null = False, blank = False, default= "CASUAL")
     status_registeration = models.CharField(max_length=20, choices= STATUS_OF_REGISTRATION, null = False, blank= False)
 
     # Contact information
@@ -89,10 +89,10 @@ class Event(models.Model):
     contact_phone = models.CharField(max_length=20, blank=True)
 
     # Social media
-    website_url = models.URLField(max_length=200, blank=True)
-    facebook_url = models.URLField(max_length=200, blank=True)
-    twitter_url = models.URLField(max_length=200, blank=True)
-    instagram_url = models.URLField(max_length=200, blank=True)
+    website_url = models.URLField(max_length=200, null=True, blank=True)
+    facebook_url = models.URLField(max_length=200, null=True, blank=True)
+    twitter_url = models.URLField(max_length=200, null=True, blank=True)
+    instagram_url = models.URLField(max_length=200, null=True, blank=True)
 
     min_age_requirement = models.PositiveIntegerField(
         default=0,
@@ -102,7 +102,7 @@ class Event(models.Model):
     # Timestamps
     updated_at = models.DateTimeField(auto_now=True)
     
-    terms_and_conditions = models.TextField(blank=True)
+    terms_and_conditions = models.TextField(null=True, blank=True)
 
     # Existing methods remain the same
     @property
