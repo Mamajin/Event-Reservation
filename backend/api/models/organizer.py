@@ -2,7 +2,7 @@ from django.db import models
 from django.utils import timezone
 from django.core.files.storage import default_storage
 from django.core.validators import FileExtensionValidator, EmailValidator
-from api.views.user import AttendeeUser
+from api.models.user import AttendeeUser
 
 
 class Organizer(models.Model):
