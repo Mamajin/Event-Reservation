@@ -3,7 +3,7 @@ from .modules import *
 
 router = Router()
 
-MAX_FILE_SIZE = 5 * 1024 * 1024  # 5MB
+MAX_FILE_SIZE = 10 * 1024 * 1024  # 10MB
 ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/jpg']
 
 class EventAPI:
