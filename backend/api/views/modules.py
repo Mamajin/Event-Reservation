@@ -29,3 +29,6 @@ import uuid
 import boto3
 
 logger = logging.getLogger(__name__)
+
+MAX_FILE_SIZE = 10 * 1024 * 1024  # 10MB
+ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/jpg']
