@@ -116,8 +116,8 @@ class UserResponseSchema(Schema):
     username: str
     first_name: str  
     last_name: str   
-    birth_date: date 
-    phone_number: str  
+    birth_date: Optional[date] = None
+    phone_number: Optional[str]  = None
     email: EmailStr  
     status: str
     address : str
