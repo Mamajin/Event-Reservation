@@ -81,7 +81,8 @@ class UserSchema(ModelSchema):
             "first_name",        
             "last_name",        
             "birth_date",       
-            "phone_number",                
+            "phone_number",
+            "profile_picture"
         )
 
     
@@ -97,6 +98,7 @@ class LoginResponseSchema(Schema):
     access_token: str
     refresh_token: str
     status : str
+    image_url: str = None
     
 
 class UserResponseSchema(Schema):
@@ -109,8 +111,9 @@ class UserResponseSchema(Schema):
     email: EmailStr  
     status: str
     address : str
-    latitude : Decimal
-    longitude: Decimal
+    latitude: Optional[Decimal] = 0.00 
+    longitude: Optional[Decimal] = 0.00 
+    profile_picture: Optional[str]  # Ensure this is also 
     company : str
     facebook_profile : str
     instagram_handle : str
