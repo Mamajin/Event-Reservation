@@ -13,11 +13,13 @@ class AttendeeUser(AbstractUser):
     """
     
     # Personal Information
+    username = models.CharField(max_length=150, unique=True, null=True, blank=True)  # Optional field
     first_name = models.CharField(max_length=100, null=False, blank=False)
     last_name = models.CharField(max_length=100, null=False, blank=False)
-    birth_date = models.DateField('Birth Date', null=False, blank=False)
-    phone_number = models.CharField(max_length=50, null=False, blank=False, ) # Max number
+    birth_date = models.DateField('Birth Date', null=True, blank=False)
+    phone_number = models.CharField(max_length=50, null=True, blank=False, ) # Max number
     status = models.CharField(max_length=50, null=True, blank=True, default='Attendee')
+    email = models.EmailField(unique=True, null=False, blank=False) 
     address = models.CharField(max_length=500, null = True, blank = True, default= " ")
     latitude = models.DecimalField(max_digits=9, decimal_places=6, null = True, blank= True, default= 0.00)
     longitude = models.DecimalField(max_digits=9, decimal_places=6, null = True, blank= True, default= 0.00)
@@ -85,6 +87,11 @@ class AttendeeUser(AbstractUser):
         if self.profile_picture:
             return self.profile_picture.url
         return None
+    
+    def save(self, *args, **kwargs):
+        if not self.username:
+            self.username = self.email  # Set username to email if not provided
+        super().save(*args, **kwargs)
 
     def get_upcoming_events(self):
         """Returns all upcoming events the user is registered for."""

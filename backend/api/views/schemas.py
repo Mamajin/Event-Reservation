@@ -61,7 +61,12 @@ class EventInputSchema(ModelSchema):
     
 class AuthResponseSchema(Schema):
     access_token: str
-    user: dict
+    refresh_token : str
+    status : str
+    first_name : str
+    last_name : str
+    picture : str
+    email : str
     
 class GoogleAuthSchema(Schema):
     token: str

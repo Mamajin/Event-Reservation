@@ -18,6 +18,7 @@ from api.models.organizer import *
 from api.models.ticket import *
 from api.models.session import *
 from botocore.exceptions import ClientError
+from django.conf import settings
 from pydantic import EmailStr, HttpUrl, constr, conint, Field
 from datetime import datetime, date
 from typing import List, Optional
@@ -25,6 +26,7 @@ from decimal import Decimal
 from enum import Enum
 from google.oauth2 import id_token
 from google.auth.transport import requests
+from django.utils.crypto import get_random_string
 import logging
 import os
 import uuid

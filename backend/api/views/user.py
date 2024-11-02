@@ -1,5 +1,5 @@
 from .schemas import UserSchema, LoginResponseSchema, UserResponseSchema, LoginSchema, ErrorResponseSchema, AuthResponseSchema, GoogleAuthSchema
-from .modules import AttendeeUser, Form, make_password, authenticate, login, AccessToken, RefreshToken,Response, JWTAuth, Organizer, get_object_or_404, Router, id_token, requests
+from .modules import AttendeeUser, Form, make_password, authenticate, login, AccessToken, RefreshToken,Response, JWTAuth, Organizer, get_object_or_404, Router, id_token, requests,settings,get_random_string
 
 router = Router()
 
@@ -21,10 +21,42 @@ class UserAPI:
         user.save()
         return Response(UserSchema.from_orm(user), status=201)
     
-    # @router.post('/auth/google', response =  AuthResponseSchema)
-    # def google_auth(request, data : GoogleAuthSchema):
-    #     try:
-    #         idinfo = id_inf
+    
+    @router.post('/auth/google', response =  AuthResponseSchema)
+    def google_auth(request, data : GoogleAuthSchema):
+            idinfo = id_token.verify_oauth2_token(
+            data.token, 
+            requests.Request(),
+            settings.SOCIAL_AUTH_GOOGLE_OAUTH2_KEY
+            )
+            email = idinfo.get('email')
+            first_name  = idinfo.get('given_name')
+            last_name = idinfo.get('family_name')
+            picture = idinfo.get('picture')
+            user, created = AttendeeUser.objects.get_or_create(email=email,
+                                                               defaults={
+                                                                'first_name': first_name,
+                                                                'last_name': last_name,
+                                                                'username': email.split('@')[0],  # Optionally use email prefix as username
+                                                                'password': make_password(get_random_string(8)),  # Generate a random password
+                                                            }                                    
+                                                        )
+            access_token = AccessToken.for_user(user)
+            refresh_token = RefreshToken.for_user(user)
+            login(request,user)
+            return Response(
+                {'status': user.status,
+                 'refresh_token': str(refresh_token),
+                 'access_token': str(access_token),
+                 'first_name': str(first_name),
+                 'last_name': str(last_name),
+                 'picture': str(picture),
+                 'email' : str(email)
+                 }
+            )
+            
+            
+            
     
     @router.post('/login', response = LoginResponseSchema)
     def login(request, form: LoginSchema = Form(...)):
