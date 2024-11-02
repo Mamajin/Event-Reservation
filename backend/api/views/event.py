@@ -3,49 +3,52 @@ from .modules import *
 
 router = Router()
 
-MAX_FILE_SIZE = 5 * 1024 * 1024  # 5MB
-ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/jpg']
 
 class EventAPI:
 
     @router.post('/create-event', response=EventResponseSchema, auth=JWTAuth())
-    def create_event(request, data: EventInputSchema):
+    def create_event(request, data: EventInputSchema, image: UploadedFile = File(None)):
         this_user = request.user
         try:
             organizer = Organizer.objects.get(user=this_user)
         except Organizer.DoesNotExist:
             raise HttpError(status_code=403, message="You are not an organizer.")
         
-        event = Event(
-            event_name=data.event_name,
-            organizer=organizer,
-            event_create_date=timezone.now(),
-            start_date_event=data.start_date_event,
-            end_date_event=data.end_date_event,
-            start_date_register=data.start_date_register or timezone.now(),
-            end_date_register=data.end_date_register,
-            description=data.description, 
-            max_attendee=data.max_attendee,
-            dress_code = data.dress_code,
-            detailed_description = data.detailed_description,
-            category = data.category,
-            contact_email = organizer.email,
-            contact_phone = organizer.user.phone_number,
-            website_url = data.website_url,
-            facebook_url = data.facebook_url,
-            twitter_url = data.twitter_url,
-            instagram_url = data.instagram_url,
-            min_age_requirement = data.min_age_requirement,
-            terms_and_conditions  = data.terms_and_conditions,
-            address = data.address,
-            longitude = data.longitude,
-            latitude = data.latitude,
-        )
-        if event.is_valid_date():
-            event.save()
-            return EventResponseSchema.from_orm(event)
-        else:
+        # Create event
+        event = Event(**data.dict(), organizer=organizer)
+        if not event.is_valid_date():
             return Response({'error': 'Please enter valid date'}, status=400)
+
+        # If an image is provided, upload it
+        if image:
+            if image.content_type not in ALLOWED_IMAGE_TYPES:
+                return Response({'error': 'Invalid file type. Only JPEG and PNG are allowed.'}, status=400)
+            
+            # (Image upload process, similar to your upload_event_image logic)
+            filename = f'event_images/{uuid.uuid4()}{os.path.splitext(image.name)[1]}'
+            try:
+                s3_client = boto3.client(
+                    's3',
+                    aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
+                    aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY,
+                    region_name=settings.AWS_S3_REGION_NAME
+                )
+                s3_client.upload_fileobj(
+                    image.file,
+                    settings.AWS_STORAGE_BUCKET_NAME,
+                    filename,
+                    ExtraArgs={'ContentType': image.content_type}
+                )
+                event.event_image = filename
+                event.save()
+                file_url = f"https://{settings.AWS_S3_CUSTOM_DOMAIN}/{filename}"
+                logger.info(f"Uploaded event image for event ID {event.id}: {file_url}")
+            except ClientError as e:
+                return Response({'error': f"S3 upload failed: {str(e)}"}, status=400)
+        
+        # Save event and return response
+        event.save()
+        return EventResponseSchema.from_orm(event)
 
     @router.get('/my-events', response=List[EventResponseSchema], auth=JWTAuth())
     def get_my_events(request: HttpRequest):
@@ -54,7 +57,7 @@ class EventAPI:
             events = Event.objects.filter(organizer=organizer)
             event_list = [EventInputSchema.from_orm(event) for event in events]
             logger.info(f"Organizer {organizer.organizer_name} retrieved their events.")
-            return event_list
+            return Response(event_list, status=200)
         except Organizer.DoesNotExist:
             logger.error(f"User {request.user.username} tried to access events but is not an organizer.")
             return Response({'error': 'User is not an organizer'}, status=404)
@@ -103,7 +106,7 @@ class EventAPI:
         event = get_object_or_404(Event, id=event_id)
         return EventResponseSchema.from_orm(event)
     
-    @router.post('/{event_id}/upload-image', response={200: FileUploadResponseSchema, 400: ErrorResponseSchema}, auth=JWTAuth())
+    @router.post('/{event_id}/upload/event-image/', response={200: FileUploadResponseSchema, 400: ErrorResponseSchema}, auth=JWTAuth())
     def upload_event_image(request: HttpRequest, event_id: int, file: UploadedFile = File(...)):
         """
         Upload an image for a specific event.

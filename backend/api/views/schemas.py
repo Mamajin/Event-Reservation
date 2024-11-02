@@ -43,6 +43,7 @@ class OrganizerResponseSchema(Schema):
     organizer_name: str
     email: EmailStr
     organization_type: OrganizerType
+    logo: str = None
     is_verified: bool
 
 
@@ -93,7 +94,8 @@ class UserSchema(ModelSchema):
             "first_name",        
             "last_name",        
             "birth_date",       
-            "phone_number",                
+            "phone_number",
+            "profile_picture"
         )
 
     
@@ -109,6 +111,7 @@ class LoginResponseSchema(Schema):
     access_token: str
     refresh_token: str
     status : str
+    image_url: str = None
     
 
 class UserResponseSchema(Schema):
@@ -121,8 +124,9 @@ class UserResponseSchema(Schema):
     email: EmailStr  
     status: str
     address : str
-    latitude : Decimal
-    longitude: Decimal
+    latitude: Optional[Decimal] = 0.00 
+    longitude: Optional[Decimal] = 0.00 
+    profile_picture: Optional[str]  # Ensure this is also 
     company : str
     facebook_profile : str
     instagram_handle : str
@@ -183,21 +187,4 @@ class FileUploadResponseSchema(Schema):
     message: str = "Upload successful"
     file_name: str
     uploaded_at: datetime
-
-
-class ImageUploadSchema(Schema):
-    file_url: str
-    original_name: str
-    file_size: int
-    content_type: str
-
-    
-class ProfileImageUpdateSchema(Schema):
-    profile_picture_url: Optional[str]
-    updated_at: datetime
-
-
-class EventImageUpdateSchema(Schema):
-    event_image_url: Optional[str]
-    updated_at: datetime
     

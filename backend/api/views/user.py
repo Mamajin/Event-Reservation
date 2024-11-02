@@ -1,5 +1,7 @@
-from .schemas import UserSchema, LoginResponseSchema, UserResponseSchema, LoginSchema, ErrorResponseSchema, AuthResponseSchema, GoogleAuthSchema
-from .modules import AttendeeUser, Form, make_password, authenticate, login, AccessToken, RefreshToken,Response, JWTAuth, Organizer, get_object_or_404, Router, id_token, requests,settings,get_random_string
+from .schemas import UserSchema, LoginResponseSchema, UserResponseSchema, LoginSchema, ErrorResponseSchema, AuthResponseSchema, GoogleAuthSchema, FileUploadResponseSchema
+from .modules import *
+
+
 
 router = Router()
 
@@ -67,20 +69,28 @@ class UserAPI:
             login(request,user)
             access_token = AccessToken.for_user(user)
             refresh_token = RefreshToken.for_user(user)
-            return Response({
+            response_data = {
                 "success": True,
                 "message": "Login successful",
                 "access_token": str(access_token),
                 "refresh_token": str(refresh_token),
                 "username": user.username,
-                "password": user.password,
-                "id" : user.id,
+                "id": user.id,
                 "status": user.status,
-            })
+            }
+
+            # Conditional inclusion of image_url
+            if user.status == 'Organizer':
+                response_data["image_url"] = Organizer.objects.get(user=user).logo.url if hasattr(Organizer.objects.get(user=user), 'logo') else None
+            else:
+                response_data["image_url"] = user.profile_picture.url if user.profile_picture else None
+
+            return Response(response_data, status=200)
         else:
             return Response(
-            {"error": "Invalid username or password"},
-            status= 400)
+                {"error": "Invalid username or password"},
+                status=400
+            )
 
         
     @router.get('/profile', response=UserResponseSchema, auth = JWTAuth())
@@ -97,7 +107,6 @@ class UserAPI:
 
         profile_user = get_object_or_404(AttendeeUser, username = user.username)
         profile_dict = UserResponseSchema.from_orm(profile_user).dict()
-
         
         profile_data = UserResponseSchema(**profile_dict)
 
@@ -120,5 +129,73 @@ class UserAPI:
                 organizer=  Organizer.objects.get(user = user)
                 organizer.delete()
         return Response({'sucess': 'Your account has been deleted'})
-        
-        
+    
+    @router.post('/{user_id}/upload/profile-picture/', response={200: FileUploadResponseSchema, 400: ErrorResponseSchema}, auth=JWTAuth())
+    def upload_profile_picture(request: HttpRequest, user_id: int, profile_picture: UploadedFile = File(...)):
+        """
+        Upload an profile picture for a user by user I.
+        """
+        try:
+            user = request.user
+            
+            if profile_picture.content_type not in ALLOWED_IMAGE_TYPES:
+                return Response({'error': 'Invalid file type. Only JPEG and PNG are allowed.'}, status=400)
+            
+            if profile_picture.size > MAX_FILE_SIZE:
+                return Response({'error': f'File size exceeds the limit of {MAX_FILE_SIZE / (1024 * 1024)} MB.'}, status=400)
+            
+            # Check if there's an existing image
+            if user.profile_picture:
+                old_filename = user.profile_picture.url
+                s3_client = boto3.client(
+                    's3',
+                    aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
+                    aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY,
+                    region_name=settings.AWS_S3_REGION_NAME
+                )
+                try:
+                    s3_client.delete_object(Bucket=settings.AWS_STORAGE_BUCKET_NAME, Key=old_filename)
+                    logger.info(f"Deleted old image from S3: {old_filename}")
+                except ClientError as e:
+                    logger.error(f"Failed to delete old image from S3: {str(e)}")
+
+            filename = f'picture_profiles/{uuid.uuid4()}{os.path.splitext(profile_picture.name)[1]}'
+            logger.info(f"Starting upload for file: {filename}")
+            try:
+                # Direct S3 upload using boto3
+                s3_client = boto3.client(
+                    's3',
+                    aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
+                    aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY,
+                    region_name=settings.AWS_S3_REGION_NAME
+                )
+
+                # Upload file to S3
+                s3_client.upload_fileobj(
+                    profile_picture.file,
+                    settings.AWS_STORAGE_BUCKET_NAME,
+                    filename,
+                    ExtraArgs={
+                        'ContentType': profile_picture.content_type,
+                    }
+                )
+
+                file_url = f"https://{settings.AWS_S3_CUSTOM_DOMAIN}/{filename}"
+                logger.info(f"Successfully uploaded file to S3: {file_url}")
+                
+                user.profile_picture = filename
+                user.save()
+            
+                return Response(FileUploadResponseSchema(
+                    file_url=file_url,
+                    message="Upload successful",
+                    file_name=os.path.basename(filename),
+                    uploaded_at=timezone.now()
+                ), status=200)
+            
+            except ClientError as e:
+                logger.error(f"S3 upload error: {str(e)}")
+                return Response({'error': f"S3 upload failed: {str(e)}"}, status=400)
+            
+        except Exception as e:
+            return Response({'error': f"Upload failed: {str(e)}"}, status=400)
