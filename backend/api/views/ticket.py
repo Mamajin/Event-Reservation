@@ -20,7 +20,7 @@ class TicketAPI:
             logger.error(f"User with ID {user_id} does not exist.")
             return Response({'error': 'User not found'}, status=404)
 
-    @router.post('/event/{event_id}/register', response=TicketResponseSchema, auth=JWTAuth())
+    @router.post('/event/{event_id}/register', response={201: TicketResponseSchema, 400 : ErrorResponseSchema}, auth=JWTAuth())
     def register_for_event(request: HttpRequest, event_id: int):
         """
         Register a user for an event and create a ticket.
@@ -48,10 +48,13 @@ class TicketAPI:
             created_at=timezone.now()
         )
         
+        if not ticket.is_valid_min_age_requirement():
+            return Response({'error': f"You must be at least {event.min_age_requirement} years old to attend this event."})
+
         try:
             ticket.clean()
         except ValidationError as e:
-            return Response({'error': str(e)}, status=400)
+            return Response({'error': str(e.messages[0])}, status=400)
         ticket.save()
         return Response(TicketResponseSchema(
             **ticket.get_ticket_details()).dict(), status=201)
