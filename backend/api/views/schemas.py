@@ -29,10 +29,6 @@ class DressCode(str, Enum):
     WHITE_TIE = 'WHITE_TIE'
     THEMED = 'THEMED'
     OUTDOOR_BEACH_CASUAL = 'OUTDOOR_BEACH_CASUAL'
-
-
-
-
     
 
 # Schema for Organizer
@@ -87,7 +83,6 @@ class UserSchema(ModelSchema):
             "birth_date",       
             "phone_number",                
         )
-      
 
     
 class LoginSchema(Schema):
@@ -169,4 +164,28 @@ class SessionResponseSchema(Schema):
     end_date_register: datetime
     description: str
     max_attendee: int
+    
+
+class FileUploadResponseSchema(Schema):
+    file_url: str
+    message: str = "Upload successful"
+    file_name: str
+    uploaded_at: datetime
+
+
+class ImageUploadSchema(Schema):
+    file_url: str
+    original_name: str
+    file_size: int
+    content_type: str
+
+    
+class ProfileImageUpdateSchema(Schema):
+    profile_picture_url: Optional[str]
+    updated_at: datetime
+
+
+class EventImageUpdateSchema(Schema):
+    event_image_url: Optional[str]
+    updated_at: datetime
     

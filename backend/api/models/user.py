@@ -1,8 +1,9 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.utils import timezone
-from django.core.validators import FileExtensionValidator, EmailValidator
+from django.core.validators import FileExtensionValidator
 from django.utils.translation import gettext_lazy as _
+from django.core.files.storage import default_storage
 
 
 class AttendeeUser(AbstractUser):
@@ -24,6 +25,7 @@ class AttendeeUser(AbstractUser):
     # Profile Picture
     profile_picture = models.ImageField(
         upload_to='profile_pictures/',
+        storage=default_storage,
         null=True,
         blank=True,
         validators=[FileExtensionValidator(['jpg', 'jpeg', 'png'])]
@@ -76,6 +78,13 @@ class AttendeeUser(AbstractUser):
     def full_name(self):
         """Returns the user's full name."""
         return f"{self.first_name} {self.last_name}"
+    
+    @property
+    def profile_picture_url(self):
+        """Return the user profile picture if has."""
+        if self.profile_picture:
+            return self.profile_picture.url
+        return None
 
     def get_upcoming_events(self):
         """Returns all upcoming events the user is registered for."""

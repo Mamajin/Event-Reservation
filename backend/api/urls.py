@@ -8,7 +8,6 @@ from api.views.ticket import router as ticket_router
 from api.views.session import router as session_router
 from django.conf import settings
 from django.conf.urls.static import static
-# from api.views.google_login import router as google_login
 
 api = NinjaExtraAPI(version ="2.0.0")
 api.register_controllers(NinjaJWTDefaultController)

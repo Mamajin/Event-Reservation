@@ -1,6 +1,6 @@
 from django.db import models
-from django.contrib.auth.models import AbstractUser
 from django.utils import timezone
+from django.core.files.storage import default_storage
 from django.core.validators import MinValueValidator, MaxValueValidator, FileExtensionValidator
 from api.models.organizer import Organizer
 class Event(models.Model):
@@ -60,6 +60,7 @@ class Event(models.Model):
     # Image fields
     event_image = models.ImageField(
         upload_to='event_images/',
+        storage=default_storage,
         null=True,
         blank=True,
         validators=[FileExtensionValidator(['jpg', 'jpeg', 'png', 'gif'])]

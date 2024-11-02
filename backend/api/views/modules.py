@@ -1,24 +1,31 @@
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.models import User
-from ninja import Schema, ModelSchema, Form, Router
-from typing import List, Optional
+from django.contrib.auth.hashers import make_password
+from django.core.files.storage import default_storage
+from django.core.files.base import ContentFile
+from django.conf import settings
+from django.shortcuts import get_object_or_404
+from django.http import HttpRequest
+from ninja import Schema, ModelSchema, Form, Router, File
+from ninja.responses import Response
+from ninja.errors import HttpError
+from ninja.files import UploadedFile
+from ninja_jwt.authentication import JWTAuth
+from ninja_jwt.tokens import AccessToken, RefreshToken
 from api.models.user import *
 from api.models.event import *
 from api.models.organizer import *
 from api.models.ticket import *
 from api.models.session import *
-from django.contrib.auth.hashers import make_password
+from botocore.exceptions import ClientError
 from pydantic import EmailStr, HttpUrl, constr, conint, Field
 from datetime import datetime, date
-from ninja.responses import Response
-from rest_framework import status
-from django.shortcuts import get_object_or_404
-from ninja_jwt.authentication import JWTAuth
-from ninja_jwt.tokens import AccessToken, RefreshToken
-from django.http import HttpRequest
-from ninja.errors import HttpError
+from typing import List, Optional
 from decimal import Decimal
 from enum import Enum
 import logging
+import os
+import uuid
+import boto3
 
 logger = logging.getLogger(__name__)
