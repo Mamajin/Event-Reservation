@@ -9,8 +9,13 @@ sqlparse
 psycopg2-binary
 python-dotenv
 django-ninja
+django-ninja-extra
 django-ninja-jwt
 faker
 Pillow
 pydantic
 pydantic[email]
+python-decouple
+django-storages
+boto3
+google-auth
