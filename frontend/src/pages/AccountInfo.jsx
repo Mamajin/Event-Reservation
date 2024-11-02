@@ -99,25 +99,55 @@ function AccountInfo() {
             </div>
           </div>
 
-          <div className="space-y-6">
-            <div>
-              <label className="block text-sm font-medium text-gray-700">ID</label>
-              <p className="mt-0 text-gray-900">{userData.id || 'N/A'}</p>
-            </div>
-            <div className="grid grid-cols-2 gap-4">
+            {/* Information */}
+            <div className="space-y-6">
+
               <div>
-                <label className="block text-sm font-medium text-gray-700">Username</label>
-                <p className="mt-0 text-gray-900">{userData.username || 'N/A'}</p>
+                <label className="block text-sm font-medium text-gray-700">ID</label>
+                <p className="mt-0 text-gray-900">{userData.id || 'N/A'}</p>
               </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Username</label>
+                  <p className="mt-0 text-gray-900">{userData.username || 'N/A'}</p>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Status</label>
+                  <p className="mt-0 text-gray-900">{userData.status || 'N/A'}</p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">First Name</label>
+                  <p className="mt-0 text-gray-900">{userData.first_name || 'N/A'}</p>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Last Name</label>
+                  <p className="mt-0 text-gray-900">{userData.last_name || 'N/A'}</p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Email</label>
+                  <p className="mt-0 text-gray-900">{userData.email || 'N/A'}</p>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Mobile Phone</label>
+                  <p className="mt-0 text-gray-900">{userData.phone_number || 'N/A'}</p>
+                </div>
+              </div>
+
               <div>
-                <label className="block text-sm font-medium text-gray-700">Status</label>
-                <p className="mt-0 text-gray-900">{userData.status || 'N/A'}</p>
+                <label className="block text-sm font-medium text-gray-700">Birth Date</label>
+                <p className="mt-0 text-gray-900">{userData.birth_date || 'N/A'}</p>
               </div>
+
             </div>
-            {/* Additional fields can be added here */}
           </div>
         </div>
-      </div>
     </PageLayout>
   );
 }
