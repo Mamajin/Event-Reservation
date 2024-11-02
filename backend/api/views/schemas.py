@@ -43,7 +43,7 @@ class OrganizerResponseSchema(Schema):
     organizer_name: str
     email: EmailStr
     organization_type: OrganizerType
-    logo: str = None
+    logo: Optional[str]
     is_verified: bool
 
 
