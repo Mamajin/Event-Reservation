@@ -3,9 +3,10 @@ from django.db import models
 from django.utils import timezone
 import random
 import string
-from pydantic import ValidationError
+from django.core.exceptions import ValidationError
 from api.models.organizer import Organizer
 from api.models.event import Event
+from api.models.user import AttendeeUser
 
 
 class Ticket(models.Model):
@@ -16,7 +17,7 @@ class Ticket(models.Model):
 
     # Basic Information
     event = models.ForeignKey(Event, on_delete=models.CASCADE)
-    attendee = models.ForeignKey('AttendeeUser', on_delete=models.CASCADE)
+    attendee = models.ForeignKey(AttendeeUser, on_delete=models.CASCADE)
     register_date = models.DateTimeField('Date registered', default=timezone.now)
 
     TICKET_STATUS_CHOICES = [
@@ -85,7 +86,12 @@ class Ticket(models.Model):
         self.status = 'CANCELLED'
         self.cancellation_date = timezone.now()
         self.save()
-
+        
+    def is_valid_min_age_requirement(self):
+        if self.event.min_age_requirement <= self.attendee.age:
+            return True
+        return False
+    
     def get_ticket_details(self) -> Dict:
         """
         Get comprehensive ticket details.
