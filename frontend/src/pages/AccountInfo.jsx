@@ -84,6 +84,7 @@ function AccountInfo() {
           <h1 className="text-2xl font-bold mb-6 text-dark-purple">Account Details</h1>
           <p className="text-gray-600 mb-6">See your user login details.</p>
 
+          {/* Profile Image */}
           <div className="flex items-center mb-6">
             <div className="w-24 h-24 bg-gray-200 rounded-full flex justify-center items-center">
               <svg 
@@ -99,55 +100,99 @@ function AccountInfo() {
             </div>
           </div>
 
-            {/* Information */}
-            <div className="space-y-6">
-
+          {/* User Information */}
+          <div className="space-y-6">
+            {/* Personal Info */}
+            <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700">ID</label>
-                <p className="mt-0 text-gray-900">{userData.id || 'N/A'}</p>
+                <label className="block text-sm font-medium text-gray-700">Username</label>
+                <p className="mt-0 text-gray-900">{userData.username || 'N/A'}</p>
               </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">Username</label>
-                  <p className="mt-0 text-gray-900">{userData.username || 'N/A'}</p>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">Status</label>
-                  <p className="mt-0 text-gray-900">{userData.status || 'N/A'}</p>
-                </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Status</label>
+                <p className="mt-0 text-gray-900">{userData.status || 'N/A'}</p>
               </div>
+            </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">First Name</label>
-                  <p className="mt-0 text-gray-900">{userData.first_name || 'N/A'}</p>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">Last Name</label>
-                  <p className="mt-0 text-gray-900">{userData.last_name || 'N/A'}</p>
-                </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700">First Name</label>
+                <p className="mt-0 text-gray-900">{userData.first_name || 'N/A'}</p>
               </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">Email</label>
-                  <p className="mt-0 text-gray-900">{userData.email || 'N/A'}</p>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">Mobile Phone</label>
-                  <p className="mt-0 text-gray-900">{userData.phone_number || 'N/A'}</p>
-                </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Last Name</label>
+                <p className="mt-0 text-gray-900">{userData.last_name || 'N/A'}</p>
               </div>
+            </div>
 
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Email</label>
+                <p className="mt-0 text-gray-900">{userData.email || 'N/A'}</p>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Mobile Phone</label>
+                <p className="mt-0 text-gray-900">{userData.phone_number || 'N/A'}</p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700">Birth Date</label>
                 <p className="mt-0 text-gray-900">{userData.birth_date || 'N/A'}</p>
               </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Address</label>
+                <p className="mt-0 text-gray-900">{userData.address || 'N/A'}</p>
+              </div>
+            </div>
 
+            <div>
+              <label className="block text-sm font-medium text-gray-700">Company</label>
+              <p className="mt-0 text-gray-900">{userData.company || 'N/A'}</p>
+            </div>
+
+            {/* Social and Event Info */}
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Facebook Profile</label>
+                <p className="mt-0 text-gray-900">{userData.facebook_profile || 'N/A'}</p>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Instagram Handle</label>
+                <p className="mt-0 text-gray-900">{userData.instagram_handle || 'N/A'}</p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Attended Events</label>
+                <p className="mt-0 text-gray-900">{userData.attended_events_count || 0}</p>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Cancelled Events</label>
+                <p className="mt-0 text-gray-900">{userData.cancelled_events_count || 0}</p>
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700">Nationality</label>
+              <p className="mt-0 text-gray-900">{userData.nationality || 'N/A'}</p>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Created At</label>
+                <p className="mt-0 text-gray-900">{new Date(userData.created_at).toLocaleString() || 'N/A'}</p>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Updated At</label>
+                <p className="mt-0 text-gray-900">{new Date(userData.updated_at).toLocaleString() || 'N/A'}</p>
+              </div>
             </div>
           </div>
         </div>
+      </div>
     </PageLayout>
   );
 }
