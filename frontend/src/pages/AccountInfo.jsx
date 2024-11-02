@@ -103,11 +103,11 @@ function AccountInfo() {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700">First Name</label>
-                  <p className="mt-0 text-gray-900">{userData.firstname || 'N/A'}</p>
+                  <p className="mt-0 text-gray-900">{userData.first_name || 'N/A'}</p>
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700">Last Name</label>
-                  <p className="mt-0 text-gray-900">{userData.lastname || 'N/A'}</p>
+                  <p className="mt-0 text-gray-900">{userData.last_name || 'N/A'}</p>
                 </div>
               </div>
 
@@ -118,7 +118,7 @@ function AccountInfo() {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700">Mobile Phone</label>
-                  <p className="mt-0 text-gray-900">{userData.phonenumber || 'N/A'}</p>
+                  <p className="mt-0 text-gray-900">{userData.phone_number || 'N/A'}</p>
                 </div>
               </div>
 
