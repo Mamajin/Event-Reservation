@@ -73,7 +73,7 @@ class UserAPI:
         return profile_data
     
     @router.put('/edit-profile/{user_id}/', response=UserResponseSchema, auth=  JWTAuth())
-    def edit_profile(request, user_id : int, new_data : UserResponseSchema, file: UploadedFile = File(None)):
+    def edit_profile(request, user_id : int, new_data : UserResponseSchema):
         AttendeeUser.objects.filter(id = user_id).update(**new_data.dict())
         user = AttendeeUser.objects.get(id = user_id)
         user_data = UserResponseSchema.from_orm(user).dict()
