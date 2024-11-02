@@ -4,7 +4,6 @@ from .modules import *
 router = Router()
 
 
-
 class UserAPI:
             
     @router.post('/register', response={201: UserSchema, 400: ErrorResponseSchema})
@@ -41,7 +40,11 @@ class UserAPI:
 
             # Conditional inclusion of image_url
             if user.status == 'Organizer':
-                response_data["image_url"] = Organizer.objects.get(user=user).logo.url if hasattr(Organizer.objects.get(user=user), 'logo') else None
+                try:
+                    organizer = Organizer.objects.get(user=user)
+                    response_data["image_url"] = organizer.logo.url if organizer.logo else None
+                except Organizer.DoesNotExist:
+                    response_data["image_url"] = None
             else:
                 response_data["image_url"] = user.profile_picture.url if user.profile_picture else None
 
