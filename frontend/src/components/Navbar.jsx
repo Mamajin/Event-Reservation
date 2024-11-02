@@ -37,7 +37,7 @@ function Navbar() {
                 className="bg-gradient-to-r from-slate-300 to-amber-500 text-neutral-content w-9 h-9 flex items-center justify-center rounded-full cursor-pointer"
               >
                 <span className="text-md text-dark-purple">
-                  {username.charAt(0)}
+                  {/* {username.charAt(0)} */}
                 </span>
               </div>
               <ul

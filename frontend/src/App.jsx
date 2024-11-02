@@ -1,4 +1,5 @@
 import React from 'react';
+import { GoogleOAuthProvider } from '@react-oauth/google';
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Login from './pages/Login';
 import Register from './pages/Register';
@@ -31,6 +32,7 @@ function App() {
   };
 
   return (
+    <GoogleOAuthProvider clientId="987028649849-8uhmhr5qrkg494ren8um9prtdsavd6uv.apps.googleusercontent.com">
     <BrowserRouter>
       <div className="flex flex-col min-h-screen">
         <Navbar />  
@@ -70,6 +72,7 @@ function App() {
         </Routes>
       </div>
     </BrowserRouter>
+    </GoogleOAuthProvider>
   );
 }
 

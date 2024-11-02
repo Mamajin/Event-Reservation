@@ -27,7 +27,8 @@ class UserAPI:
             idinfo = id_token.verify_oauth2_token(
             data.token, 
             requests.Request(),
-            settings.SOCIAL_AUTH_GOOGLE_OAUTH2_KEY
+            settings.SOCIAL_AUTH_GOOGLE_OAUTH2_KEY,
+            clock_skew_in_seconds=10
             )
             email = idinfo.get('email')
             first_name  = idinfo.get('given_name')
