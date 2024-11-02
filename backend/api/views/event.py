@@ -28,7 +28,7 @@ class EventAPI:
             events = Event.objects.filter(organizer=organizer)
             event_list = [EventInputSchema.from_orm(event) for event in events]
             logger.info(f"Organizer {organizer.organizer_name} retrieved their events.")
-            return event_list
+            return Response(event_list, status=200)
         except Organizer.DoesNotExist:
             logger.error(f"User {request.user.username} tried to access events but is not an organizer.")
             return Response({'error': 'User is not an organizer'}, status=404)
