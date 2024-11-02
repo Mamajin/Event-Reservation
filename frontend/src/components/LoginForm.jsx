@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import api from "../api";
 import { GoogleLogin } from '@react-oauth/google';
 import { ACCESS_TOKEN, REFRESH_TOKEN,USER_NAME,USER_STATUS } from "../constants";
@@ -162,9 +162,9 @@ function LoginForm() {
                         {/* Sign Up Link */}
                         <p className="text-center text-sm">
                             Don't have an account?{' '}
-                            <a href="#" className="link link-primary">
+                            <Link to="/register"  className="link link-primary">
                                 Sign up
-                            </a>
+                            </Link>
                         </p>
                     </div>
                 </div>
