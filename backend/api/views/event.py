@@ -3,8 +3,6 @@ from .modules import *
 
 router = Router()
 
-MAX_FILE_SIZE = 10 * 1024 * 1024  # 10MB
-ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/jpg']
 
 class EventAPI:
 
@@ -16,31 +14,7 @@ class EventAPI:
         except Organizer.DoesNotExist:
             raise HttpError(status_code=403, message="You are not an organizer.")
         
-        event = Event(
-            event_name=data.event_name,
-            organizer=organizer,
-            event_create_date=timezone.now(),
-            start_date_event=data.start_date_event,
-            end_date_event=data.end_date_event,
-            start_date_register=data.start_date_register or timezone.now(),
-            end_date_register=data.end_date_register,
-            description=data.description, 
-            max_attendee=data.max_attendee,
-            dress_code = data.dress_code,
-            detailed_description = data.detailed_description,
-            category = data.category,
-            contact_email = organizer.email,
-            contact_phone = organizer.user.phone_number,
-            website_url = data.website_url,
-            facebook_url = data.facebook_url,
-            twitter_url = data.twitter_url,
-            instagram_url = data.instagram_url,
-            min_age_requirement = data.min_age_requirement,
-            terms_and_conditions  = data.terms_and_conditions,
-            address = data.address,
-            longitude = data.longitude,
-            latitude = data.latitude,
-        )
+        event = Event(**data.dict(), organizer=organizer)
         if event.is_valid_date():
             event.save()
             return EventResponseSchema.from_orm(event)
