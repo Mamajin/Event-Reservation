@@ -1,5 +1,5 @@
-from .schemas import UserSchema, LoginResponseSchema, UserResponseSchema, LoginSchema, ErrorResponseSchema
-from .modules import AttendeeUser, Form, make_password, authenticate, login, AccessToken, RefreshToken,Response, JWTAuth, Organizer, get_object_or_404, Router
+from .schemas import UserSchema, LoginResponseSchema, UserResponseSchema, LoginSchema, ErrorResponseSchema, AuthResponseSchema, GoogleAuthSchema
+from .modules import AttendeeUser, Form, make_password, authenticate, login, AccessToken, RefreshToken,Response, JWTAuth, Organizer, get_object_or_404, Router, id_token, requests
 
 router = Router()
 
@@ -20,6 +20,11 @@ class UserAPI:
             return Exception
         user.save()
         return Response(UserSchema.from_orm(user), status=201)
+    
+    # @router.post('/auth/google', response =  AuthResponseSchema)
+    # def google_auth(request, data : GoogleAuthSchema):
+    #     try:
+    #         idinfo = id_inf
     
     @router.post('/login', response = LoginResponseSchema)
     def login(request, form: LoginSchema = Form(...)):

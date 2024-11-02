@@ -59,7 +59,14 @@ class EventInputSchema(ModelSchema):
         model = Event
         exclude = ('organizer', 'id', 'status_registeration','tags','status')
     
+class AuthResponseSchema(Schema):
+    access_token: str
+    user: dict
     
+class GoogleAuthSchema(Schema):
+    token: str
+
+
 class EventResponseSchema(ModelSchema):
     # Include Organizer information
     category : EventCategory
