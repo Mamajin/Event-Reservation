@@ -7,19 +7,48 @@ router = Router()
 class EventAPI:
 
     @router.post('/create-event', response=EventResponseSchema, auth=JWTAuth())
-    def create_event(request, data: EventInputSchema):
+    def create_event(request, data: EventInputSchema, image: UploadedFile = File(None)):
         this_user = request.user
         try:
             organizer = Organizer.objects.get(user=this_user)
         except Organizer.DoesNotExist:
             raise HttpError(status_code=403, message="You are not an organizer.")
         
+        # Create event
         event = Event(**data.dict(), organizer=organizer)
-        if event.is_valid_date():
-            event.save()
-            return EventResponseSchema.from_orm(event)
-        else:
+        if not event.is_valid_date():
             return Response({'error': 'Please enter valid date'}, status=400)
+
+        # If an image is provided, upload it
+        if image:
+            if image.content_type not in ALLOWED_IMAGE_TYPES:
+                return Response({'error': 'Invalid file type. Only JPEG and PNG are allowed.'}, status=400)
+            
+            # (Image upload process, similar to your upload_event_image logic)
+            filename = f'event_images/{uuid.uuid4()}{os.path.splitext(image.name)[1]}'
+            try:
+                s3_client = boto3.client(
+                    's3',
+                    aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
+                    aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY,
+                    region_name=settings.AWS_S3_REGION_NAME
+                )
+                s3_client.upload_fileobj(
+                    image.file,
+                    settings.AWS_STORAGE_BUCKET_NAME,
+                    filename,
+                    ExtraArgs={'ContentType': image.content_type}
+                )
+                event.event_image = filename
+                event.save()
+                file_url = f"https://{settings.AWS_S3_CUSTOM_DOMAIN}/{filename}"
+                logger.info(f"Uploaded event image for event ID {event.id}: {file_url}")
+            except ClientError as e:
+                return Response({'error': f"S3 upload failed: {str(e)}"}, status=400)
+        
+        # Save event and return response
+        event.save()
+        return EventResponseSchema.from_orm(event)
 
     @router.get('/my-events', response=List[EventResponseSchema], auth=JWTAuth())
     def get_my_events(request: HttpRequest):
