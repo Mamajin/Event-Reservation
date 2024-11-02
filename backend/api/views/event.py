@@ -103,7 +103,7 @@ class EventAPI:
         event = get_object_or_404(Event, id=event_id)
         return EventResponseSchema.from_orm(event)
     
-    @router.post('/{event_id}/upload-image', response={200: FileUploadResponseSchema, 400: ErrorResponseSchema}, auth=JWTAuth())
+    @router.post('/{event_id}/upload/event-image/', response={200: FileUploadResponseSchema, 400: ErrorResponseSchema}, auth=JWTAuth())
     def upload_event_image(request: HttpRequest, event_id: int, file: UploadedFile = File(...)):
         """
         Upload an image for a specific event.
