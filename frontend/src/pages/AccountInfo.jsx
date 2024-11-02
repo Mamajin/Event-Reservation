@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
+import api from '../api';
 import PageLayout from '../components/PageLayout';
 import { useNavigate } from 'react-router-dom'; // Import useNavigate
 import { ACCESS_TOKEN } from "../constants";
@@ -18,7 +18,7 @@ function AccountInfo() {
           throw new Error('No access token found'); // Handle missing token
         }
 
-        const response = await axios.get('http://localhost:8000/api/users/profile', {
+        const response = await api.get('/users/profile', {
           headers: {
             Authorization: `Bearer ${token}`,
           },
