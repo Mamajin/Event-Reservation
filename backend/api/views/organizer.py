@@ -68,30 +68,18 @@ class OrganizerAPI:
     @router.put('/update-organizer', response={200: OrganizerResponseSchema, 401: ErrorResponseSchema, 404: ErrorResponseSchema}, auth=JWTAuth())
     def update_organizer(request: HttpRequest, data: OrganizerSchema):
         """Update the profile information of the authenticated organizer."""
-        
+
+        Organizer.objects.filter(user=request.user).update(**data.dict())
         organizer = Organizer.objects.get(user=request.user)
-        organizer.organizer_name = data.organizer_name
-        organizer.email = data.email
-        organizer.organization_type = data.organization_type
+        organize_data = OrganizerResponseSchema.from_orm(organizer).dict()
         
         if organizer.organizer_name_is_taken(data.organizer_name):
             logger.info(f"Organizer name '{data.organizer_name}' is already taken.")
             return Response({'error': 'Organizer name is already taken'}, status=400)
-        
-        organizer.save()
 
         logger.info(f"User {request.user.id} updated their organizer profile.")
         
-        return Response(
-            OrganizerResponseSchema(
-                id=organizer.id,
-                organizer_name=organizer.organizer_name,
-                email=organizer.email,
-                organization_type=organizer.organization_type,
-                is_verified=organizer.is_verified,
-            ).dict(),
-            status=200
-        )
+        return Response(organize_data, status=200)
             
     @router.delete('/revoke-organizer', response={204: None, 403: ErrorResponseSchema, 404: ErrorResponseSchema}, auth=JWTAuth())
     def revoke_organizer(request: HttpRequest):
@@ -108,19 +96,10 @@ class OrganizerAPI:
     @router.get('/view-organizer', response={200: OrganizerResponseSchema, 401: ErrorResponseSchema, 404: ErrorResponseSchema}, auth=JWTAuth())
     def view_organizer(request: HttpRequest):
         """View the organizer profile."""
-        try:
-            organizer = Organizer.objects.get(user=request.user)
-            logger.info(f"User {request.user.id} viewed their organizer profile.")
-            return OrganizerResponseSchema(
-                id=organizer.id,
-                organizer_name=organizer.organizer_name,
-                email=organizer.email,
-                organization_type=organizer.organization_type,
-                is_verified=organizer.is_verified
-            )
-        except Organizer.DoesNotExist:
-            logger.error(f"User {request.user.username} tried to access a non-existing organizer profile.")
-            return Response({'error': 'User is not an organizer'}, status=404)
+        organizer = get_object_or_404(Organizer, user=request.user)
+        logger.info(f"User {request.user.id} viewed their organizer profile.")
+        organizer_dict = OrganizerResponseSchema.from_orm(organizer).dict()
+        return Response(OrganizerResponseSchema(**organizer_dict), status=200)
         
     @router.post('/{organizer_id}/upload/logo/', response={200: FileUploadResponseSchema, 400: ErrorResponseSchema}, auth=JWTAuth())
     def upload_profile_picture(request: HttpRequest, organzier_id: int, logo: UploadedFile = File(...)):
