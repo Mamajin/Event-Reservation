@@ -29,20 +29,28 @@ class UserAPI:
             login(request,user)
             access_token = AccessToken.for_user(user)
             refresh_token = RefreshToken.for_user(user)
-            return Response({
+            response_data = {
                 "success": True,
                 "message": "Login successful",
                 "access_token": str(access_token),
                 "refresh_token": str(refresh_token),
                 "username": user.username,
-                "password": user.password,
-                "id" : user.id,
+                "id": user.id,
                 "status": user.status,
-            })
+            }
+
+            # Conditional inclusion of image_url
+            if user.status == 'Organizer':
+                response_data["image_url"] = Organizer.objects.get(user=user).logo.url if hasattr(Organizer.objects.get(user=user), 'logo') else None
+            else:
+                response_data["image_url"] = user.profile_picture.url if user.profile_picture else None
+
+            return Response(response_data, status=200)
         else:
             return Response(
-            {"error": "Invalid username or password"},
-            status= 400)
+                {"error": "Invalid username or password"},
+                status=400
+            )
 
         
     @router.get('/profile', response=UserResponseSchema, auth = JWTAuth())
@@ -59,7 +67,6 @@ class UserAPI:
 
         profile_user = get_object_or_404(AttendeeUser, username = user.username)
         profile_dict = UserResponseSchema.from_orm(profile_user).dict()
-
         
         profile_data = UserResponseSchema(**profile_dict)
 
@@ -86,7 +93,7 @@ class UserAPI:
     @router.post('/{user_id}/upload/profile-picture/', response={200: FileUploadResponseSchema, 400: ErrorResponseSchema}, auth=JWTAuth())
     def upload_profile_picture(request: HttpRequest, user_id: int, profile_picture: UploadedFile = File(...)):
         """
-        Upload an profile picture for a specific event.
+        Upload an profile picture for a user by user I.
         """
         try:
             user = request.user
