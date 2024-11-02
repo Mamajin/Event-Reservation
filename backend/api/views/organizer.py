@@ -1,5 +1,5 @@
-from .schemas import OrganizerResponseSchema, ErrorResponseSchema,OrganizerSchema
-from .modules import HttpRequest, JWTAuth, Form, logger, Response, Organizer, Event, Router, AttendeeUser
+from .schemas import OrganizerResponseSchema, ErrorResponseSchema, OrganizerSchema, FileUploadResponseSchema
+from .modules import *
 
 router = Router()
 
@@ -121,3 +121,74 @@ class OrganizerAPI:
         except Organizer.DoesNotExist:
             logger.error(f"User {request.user.username} tried to access a non-existing organizer profile.")
             return Response({'error': 'User is not an organizer'}, status=404)
+        
+    @router.post('/{organizer_id}/upload/logo/', response={200: FileUploadResponseSchema, 400: ErrorResponseSchema}, auth=JWTAuth())
+    def upload_profile_picture(request: HttpRequest, organzier_id: int, logo: UploadedFile = File(...)):
+        """
+        Upload a logo for a organzier's profile.
+        """
+        try:
+            organizer = get_object_or_404(Organizer, id=organzier_id)
+            
+            if logo.content_type not in ALLOWED_IMAGE_TYPES:
+                return Response({'error': 'Invalid file type. Only JPEG and PNG are allowed.'}, status=400)
+            
+            if logo.size > MAX_FILE_SIZE:
+                return Response({'error': f'File size exceeds the limit of {MAX_FILE_SIZE / (1024 * 1024)} MB.'}, status=400)
+            
+            # Check if there's an existing image
+            if organizer.logo:
+                old_filename = organizer.logo.url
+                s3_client = boto3.client(
+                    's3',
+                    aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
+                    aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY,
+                    region_name=settings.AWS_S3_REGION_NAME
+                )
+                try:
+                    s3_client.delete_object(Bucket=settings.AWS_STORAGE_BUCKET_NAME, Key=old_filename)
+                    logger.info(f"Deleted old image from S3: {old_filename}")
+                except ClientError as e:
+                    logger.error(f"Failed to delete old image from S3: {str(e)}")
+
+            filename = f'logos/{uuid.uuid4()}{os.path.splitext(logo.name)[1]}'
+            logger.info(f"Starting upload for file: {filename}")
+            try:
+                # Direct S3 upload using boto3
+                s3_client = boto3.client(
+                    's3',
+                    aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
+                    aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY,
+                    region_name=settings.AWS_S3_REGION_NAME
+                )
+
+                # Upload file to S3
+                s3_client.upload_fileobj(
+                    logo.file,
+                    settings.AWS_STORAGE_BUCKET_NAME,
+                    filename,
+                    ExtraArgs={
+                        'ContentType': logo.content_type,
+                    }
+                )
+
+                file_url = f"https://{settings.AWS_S3_CUSTOM_DOMAIN}/{filename}"
+                logger.info(f"Successfully uploaded file to S3: {file_url}")
+                
+                organizer.logo = filename
+                organizer.save()
+            
+                return Response(FileUploadResponseSchema(
+                    file_url=file_url,
+                    message="Upload successful",
+                    file_name=os.path.basename(filename),
+                    uploaded_at=timezone.now()
+                ), status=200)
+            
+            except ClientError as e:
+                logger.error(f"S3 upload error: {str(e)}")
+                return Response({'error': f"S3 upload failed: {str(e)}"}, status=400)
+            
+        except Exception as e:
+            return Response({'error': f"Upload failed: {str(e)}"}, status=400)
+                    
