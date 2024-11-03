@@ -4,11 +4,13 @@ import PageLayout from '../components/PageLayout';
 import { useNavigate } from 'react-router-dom';
 import { ACCESS_TOKEN } from "../constants";
 import HoverPasswordField from '../components/HoverPasswordField'; 
+import EditableField from '../components/EditableField'; // New component for editable fields
 
 function AccountInfo() {
   const [userData, setUserData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [isEditing, setIsEditing] = useState(false); // State to manage edit mode
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -45,13 +47,36 @@ function AccountInfo() {
 
     fetchUserData();
 
-    console.log(userData)
-
     // Cleanup function (if needed)
     return () => {
       // Any cleanup logic can go here
     };
   }, [navigate]);
+
+  const handleEditToggle = () => {
+    setIsEditing(!isEditing);
+  };
+
+  const handleSaveChanges = async (updatedData) => {
+    try {
+      const token = localStorage.getItem(ACCESS_TOKEN);
+      const userId = userData.id; // Assuming userData contains an id field
+
+      console.log(userData.id)
+
+      const response = await api.put(`/edit-profile/${userId}/`, updatedData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      setUserData(response.data);
+      setIsEditing(false);
+    } catch (err) {
+      console.error("Error saving user data:", err);
+      setError(err);
+    }
+  };
 
   if (loading) {
     return (
@@ -107,10 +132,8 @@ function AccountInfo() {
           <div className="space-y-6">
             {/* Personal Info */}
             <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Username</label>
-                <p className="mt-0 text-gray-900">{userData.username || 'N/A'}</p>
-              </div>
+              <EditableField label="Username" value={userData.username} isEditing={isEditing} onSave={handleSaveChanges} fieldName="username" />
+
               <div>
                 <label className="block text-sm font-medium text-gray-700">Status</label>
                 <p className="mt-0 text-gray-900">{userData.status || 'N/A'}</p>
@@ -118,48 +141,24 @@ function AccountInfo() {
             </div>
 
             <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700">First Name</label>
-                <p className="mt-0 text-gray-900">{userData.first_name || 'N/A'}</p>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Last Name</label>
-                <p className="mt-0 text-gray-900">{userData.last_name || 'N/A'}</p>
-              </div>
+              <EditableField label="First Name" value={userData.first_name} isEditing={isEditing} onSave={handleSaveChanges} fieldName="first_name" />
+              <EditableField label="Last Name" value={userData.last_name} isEditing={isEditing} onSave={handleSaveChanges} fieldName="last_name" />
             </div>
 
             <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Email</label>
-                <p className="mt-0 text-gray-900">{userData.email || 'N/A'}</p>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Mobile Phone</label>
-                <p className="mt-0 text-gray-900">{userData.phone_number || 'N/A'}</p>
-              </div>
+              <EditableField label="Email" value={userData.email} isEditing={isEditing} onSave={handleSaveChanges} fieldName="email" />
+              <EditableField label="Mobile Phone" value={userData.phone_number} isEditing={isEditing} onSave={handleSaveChanges} fieldName="phone_number" />
             </div>
 
             <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Birth Date</label>
-                <p className="mt-0 text-gray-900">{userData.birth_date || 'N/A'}</p>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Address</label>
-                <p className="mt-0 text-gray-900">{userData.address || 'N/A'}</p>
-              </div>
+              <EditableField label="Birth Date" value={userData.birth_date} isEditing={isEditing} onSave={handleSaveChanges} fieldName="birth_date" />
+              <EditableField label="Address" value={userData.address} isEditing={isEditing} onSave={handleSaveChanges} fieldName="address" />
             </div>
 
             {/* Social and Event Info */}
             <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Facebook Profile</label>
-                <p className="mt-0 text-gray-900">{userData.facebook_profile || 'N/A'}</p>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Instagram Handle</label>
-                <p className="mt-0 text-gray-900">{userData.instagram_handle || 'N/A'}</p>
-              </div>
+              <EditableField label="Facebook Profile" value={userData.facebook_profile} isEditing={isEditing} onSave={handleSaveChanges} fieldName="facebook_profile" />
+              <EditableField label="Instagram Handle" value={userData.instagram_handle} isEditing={isEditing} onSave={handleSaveChanges} fieldName="instagram_handle" />
             </div>
 
             <div className="grid grid-cols-2 gap-4">
@@ -190,6 +189,11 @@ function AccountInfo() {
             </div>
 
           </div>
+
+          {/* Edit Button */}
+          <button onClick={handleEditToggle} className="mt-6 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition duration-200">
+            {isEditing ? "Cancel" : "Edit"}
+          </button>
         </div>
       </div>
     </PageLayout>
