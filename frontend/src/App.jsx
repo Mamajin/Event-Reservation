@@ -10,7 +10,6 @@ import Navbar from './components/Navbar';
 import CreateEvent from './pages/CreateEvent';
 import AccountInfo from './pages/AccountInfo';
 import AppliedEvents from './pages/AppliedEvents';
-import AcceptedEvents from './pages/AcceptedEvents';
 import ApplyOrganizer from './pages/ApplyOrganizer';
 import EventDetailPage from './pages/EventDetailPage';
 import Discover from './pages/Discover';
@@ -64,7 +63,6 @@ function App() {
           {/* Protected Routes */}
           <Route path="/account-info" element={<ProtectedRoute><AccountInfo /></ProtectedRoute>} />
           <Route path="/applied-events" element={<ProtectedRoute><AppliedEvents /></ProtectedRoute>} />
-          <Route path="/accepted-events" element={<ProtectedRoute><AcceptedEvents /></ProtectedRoute>} />
           <Route path="/create-event" element={<ProtectedRoute><CreateEvent /></ProtectedRoute>} />
 
           {/* Fallback Route */}

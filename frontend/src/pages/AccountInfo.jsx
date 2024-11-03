@@ -9,6 +9,7 @@ function AccountInfo() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
+  const [previewImage, setPreviewImage] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -30,6 +31,9 @@ function AccountInfo() {
         }
 
         setUserData(response.data);
+        if (response.data.profile_picture) {
+          setPreviewImage(response.data.profile_picture);
+        }
       } catch (err) {
         console.error("Error fetching user data:", err.message);
         if (err.message.includes("No access token found")) {
@@ -78,6 +82,33 @@ function AccountInfo() {
     }
   };
 
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setPreviewImage(URL.createObjectURL(file)); // Show selected image preview
+      uploadProfilePicture(file); // Upload image
+    }
+  };
+
+  const uploadProfilePicture = async (file) => {
+    const token = localStorage.getItem(ACCESS_TOKEN);
+    const formData = new FormData();
+    formData.append("profile_picture", file);
+
+    try {
+      const response = await api.post(`/users/${userData.id}/upload/profile-picture/`, formData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+      setPreviewImage(`http://127.0.0.1:8000${response.data.file_url}`);
+    } catch (err) {
+      console.error("Error uploading profile picture:", err.message);
+      alert("Failed to upload profile picture. Please try again.");
+    }
+  };
+
   if (loading) {
     return (
       <PageLayout>
@@ -103,18 +134,19 @@ function AccountInfo() {
 
           {/* Profile Image */}
           <div className="flex items-center mb-6">
-            <div className="w-24 h-24 bg-gray-200 rounded-full flex justify-center items-center">
-              <svg 
-                className="w-12 h-12 text-gray-400" 
-                xmlns="http://www.w3.org/2000/svg" 
-                fill="none" 
-                viewBox="0 0 24 24" 
-                stroke="currentColor" 
-                aria-label="User Icon"
-              >
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 12c2.667 0 4.667-2 4.667-4.667S14.667 2.667 12 2.667 7.333 4.667 7.333 7.333 9.333 12 12 12zm0 0v7.333m0 0c-1.567 0-5.333 1-5.333 2.333V21h10.667v-1.334c0-1.333-3.767-2.333-5.333-2.333z" />
-              </svg>
+            <div className="w-24 h-24 rounded-full overflow-hidden flex justify-center items-center bg-gray-200">
+              {previewImage ? (
+                <img src={previewImage} alt="Profile" className="w-full h-full object-cover" />
+              ) : (
+                <div className="w-24 h-24 bg-white rounded-full"></div>
+              )}
             </div>
+            <input
+              type="file"
+              accept="image/*"
+              onChange={handleImageChange}
+              className="ml-4"
+            />
           </div>
 
           <div className="space-y-6">
