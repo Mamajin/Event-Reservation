@@ -10,8 +10,6 @@ function Sidebar() {
     const Menus = [
         { title: "Discover", path: "/discover" },
         { title: "Applied Event", path: "/applied-events" },
-        { title: "Accepted Event", path: "/accepted-events" },
-        { title: "Invitation", path: "/invitation" },
         { title: "Become Organizer", path: "/become-organizer" },
     ];
     useEffect(() => {
