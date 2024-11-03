@@ -154,6 +154,10 @@ function AccountInfo() {
               <label className="block text-sm font-medium text-gray-700">ID</label>
               <p className="mt-0 text-gray-900">{userData.id.toLocaleString() || 'N/A'}</p>
             </div>
+            <div className="grid grid-cols-2 gap-4">
+              <label className="block text-sm font-medium text-gray-700">Status</label>
+              <p className="mt-0 text-gray-900">{userData.status.toLocaleString() || 'N/A'}</p>
+            </div>
 
 
             {/* User Fields */}
