@@ -3,6 +3,7 @@ import api from '../api';
 import PageLayout from '../components/PageLayout';
 import { useNavigate } from 'react-router-dom';
 import { ACCESS_TOKEN } from "../constants";
+import HoverPasswordField from '../components/HoverPasswordField'; 
 
 function AccountInfo() {
   const [userData, setUserData] = useState(null);
@@ -44,6 +45,8 @@ function AccountInfo() {
 
     fetchUserData();
 
+    console.log(userData)
+
     // Cleanup function (if needed)
     return () => {
       // Any cleanup logic can go here
@@ -82,7 +85,7 @@ function AccountInfo() {
       <div className="flex-1 p-6 bg-white rounded-lg shadow-lg w-full max-w-screen-lg mx-auto">
         <div className="max-w-3xl mx-auto">
           <h1 className="text-2xl font-bold mb-6 text-dark-purple">Account Details</h1>
-          <p className="text-gray-600 mb-6">See your user login details.</p>
+          <p className="text-gray-600 mb-6">See or edit your user login details.</p>
 
           {/* Profile Image */}
           <div className="flex items-center mb-6">
@@ -147,11 +150,6 @@ function AccountInfo() {
               </div>
             </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Company</label>
-              <p className="mt-0 text-gray-900">{userData.company || 'N/A'}</p>
-            </div>
-
             {/* Social and Event Info */}
             <div className="grid grid-cols-2 gap-4">
               <div>
@@ -190,6 +188,7 @@ function AccountInfo() {
                 <p className="mt-0 text-gray-900">{new Date(userData.updated_at).toLocaleString() || 'N/A'}</p>
               </div>
             </div>
+
           </div>
         </div>
       </div>
