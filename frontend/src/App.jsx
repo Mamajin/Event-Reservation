@@ -24,6 +24,7 @@ import Advertisement from './pages/footerpage/Advertisement';
 import Branding from './pages/footerpage/Branding';
 import Design from './pages/footerpage/Design';
 import Marketing from './pages/footerpage/Marketing';
+import MyEvents from './pages/MyEvents';
 
 function App() {
   const handleLogout = () => {
@@ -64,6 +65,7 @@ function App() {
           <Route path="/account-info" element={<ProtectedRoute><AccountInfo /></ProtectedRoute>} />
           <Route path="/applied-events" element={<ProtectedRoute><AppliedEvents /></ProtectedRoute>} />
           <Route path="/create-event" element={<ProtectedRoute><CreateEvent /></ProtectedRoute>} />
+          <Route path="/my-events" element={<ProtectedRoute><MyEvents /></ProtectedRoute>} />
 
           {/* Fallback Route */}
           <Route path="*" element={<NotFound />} />
