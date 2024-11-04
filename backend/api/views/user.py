@@ -14,6 +14,8 @@ class UserAPI:
             return Response({"error": "Passwords do not match"}, status=400)
         if AttendeeUser.objects.filter(username = form.username).exists():
             return Response({"error": "Username already taken"}, status=400)
+        if AttendeeUser.objects.filter(email = form.email).exists():
+            return Response({"error": "This email already taken"}, status=400)
         try:
             user = AttendeeUser(username = form.username, password =make_password(form.password), birth_date = form.birth_date, 
                                            phone_number = form.phone_number, email = form.email, first_name = form.first_name, last_name = form.last_name)
@@ -31,18 +33,29 @@ class UserAPI:
             settings.SOCIAL_AUTH_GOOGLE_OAUTH2_KEY,
             clock_skew_in_seconds=10
             )
+            
             email = idinfo.get('email')
             first_name  = idinfo.get('given_name')
             last_name = idinfo.get('family_name')
             picture = idinfo.get('picture')
-            user, created = AttendeeUser.objects.get_or_create(email=email,
-                                                               defaults={
-                                                                'first_name': first_name,
-                                                                'last_name': last_name,
-                                                                'username': email.split('@')[0],  # Optionally use email prefix as username
-                                                                'password': make_password(get_random_string(8)),  # Generate a random password
-                                                            }                                    
-                                                        )
+    
+            
+            if AttendeeUser.objects.filter(email = email).exists():
+                # User exists; optionally update user details from Google info
+                user=  AttendeeUser.objects.get(email = email)
+                first_name = user.first_name
+                last_name = user.last_name
+                email = user.email
+            else:
+                # Create a new user if one does not exist
+                user = AttendeeUser.objects.create(
+                    email=email,
+                    first_name=first_name,
+                    last_name=last_name,
+                    username=email.split('@')[0],  # Optionally use email prefix as username
+                    password=make_password(get_random_string(8)),  # Generate a random password
+                )
+
             access_token = AccessToken.for_user(user)
             refresh_token = RefreshToken.for_user(user)
             login(request,user)
