@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { ACCESS_TOKEN, USER_STATUS, USER_NAME } from '../constants';
+import { ACCESS_TOKEN, USER_STATUS, USER_NAME, PROFILE_PICTURE } from '../constants';
 import { StarIcon } from '@heroicons/react/24/solid';
 
 function Navbar() {
@@ -14,6 +14,9 @@ function Navbar() {
   const isLoggedIn = localStorage.getItem(ACCESS_TOKEN) !== null;
   const isOrganizer = localStorage.getItem(USER_STATUS) === "Organizer";
   const username = localStorage.getItem(USER_NAME);
+  const profilePicture = localStorage.getItem(PROFILE_PICTURE);
+
+  console.log("Profile Picture URL:", profilePicture); // Debugging line
 
   return (
     <nav className="navbar bg-dark-purple fixed top-0 left-0 right-0 z-50">
@@ -36,9 +39,13 @@ function Navbar() {
                 tabIndex={0}
                 className="bg-gradient-to-r from-slate-300 to-amber-500 text-neutral-content w-9 h-9 flex items-center justify-center rounded-full cursor-pointer"
               >
-                <span className="text-md text-dark-purple">
-                  {/* {username.charAt(0)} */}
-                </span>
+                {profilePicture ? (
+                  <img src={profilePicture} alt="Profile" className="rounded-full w-9 h-9" />
+                ) : (
+                  <span className="text-md text-dark-purple">
+                    {username ? username.charAt(0) : "?"}
+                  </span>
+                )}
               </div>
               <ul
                 tabIndex={0}

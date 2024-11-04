@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import api from "../api";
 import { GoogleLogin } from '@react-oauth/google';
-import { ACCESS_TOKEN, REFRESH_TOKEN,USER_NAME,USER_STATUS } from "../constants";
+import { ACCESS_TOKEN, REFRESH_TOKEN,USER_NAME,USER_STATUS, PROFILE_PICTURE } from "../constants";
 import "../style/index.css";
 import qs from "qs";
 
@@ -21,9 +21,10 @@ function LoginForm() {
             });
 
             // Store tokens in localStorage
+            localStorage.setItem(PROFILE_PICTURE, authResponse.data.picture);
             localStorage.setItem(ACCESS_TOKEN, authResponse.data.access_token);
             localStorage.setItem(REFRESH_TOKEN, authResponse.data.refresh_token);
-
+            console.log(authResponse.data.picture)
             // Navigate to the dashboard or home after successful login
             navigate("/");
         } catch (error) {
