@@ -61,7 +61,6 @@ AWS_S3_CUSTOM_DOMAIN = f'{AWS_STORAGE_BUCKET_NAME}.s3.{AWS_S3_REGION_NAME}.amazo
 STATIC_URL = f'/static/'
 MEDIA_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/'
 
-
     
 GOOGLE_OAUTH_SCOPES = [
     'openid',
@@ -98,6 +97,7 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     'corsheaders.middleware.CorsMiddleware',
+    "whitenoise.middleware.WhiteNoiseMiddleware",
 ]
 
 ROOT_URLCONF = "backend.urls"
