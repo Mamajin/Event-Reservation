@@ -18,7 +18,7 @@ function CreateEventForm() {
         max_attendee: "",
         address: '',
         latitude: 0,
-        longtitude: 0,
+        longitude: 0,
     });
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);

@@ -2,11 +2,18 @@ import React, { useState } from 'react';
 import api from '../api';
 import { useNavigate } from 'react-router-dom';
 import { ACCESS_TOKEN, USER_STATUS } from '../constants';
-
+import SelectInput from './SelectInput';
 function OrganizerForm() {
+    const ORGANIZER_TYPE =[
+        {value:'INDIVIDUAL', label:"Individual"},
+        {value:'COMPANY',label:"Company"},
+        {value:'NONPROFIT',label:"Nonprofit"},
+        {value:'EDUCATIONAL',label:"Education"},
+        {value:'GOVERNMENT',label:"Government"},
+    ]
     const [formData, setFormData] = useState({
         organizer_name: '',
-        email: '',
+        organization_type:"",
     });
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
@@ -28,6 +35,7 @@ function OrganizerForm() {
                 },
             });
             alert('Application to become an organizer submitted successfully!');
+            localStorage.setItem(USER_STATUS, "Organizer");
             navigate('/');
         } catch (error) {
             console.error("Error applying to become an organizer", error);
@@ -39,7 +47,6 @@ function OrganizerForm() {
 
             alert(errorMessage);
         } finally {
-            localStorage.setItem(USER_STATUS, "Organizer");
             setLoading(false);
         }
     };
@@ -82,6 +89,15 @@ function OrganizerForm() {
                         required
                     />
                 </div>
+                <div className="form-control w-full pt-4">   
+                <SelectInput
+                label="Organizer Type"
+                name="organization_type"
+                value={formData.organization_type}
+                onChange={handleChange}
+                options={ORGANIZER_TYPE}
+              />
+              </div>
                 <button
                     type="submit"
                     className={`btn bg-amber-300 text-dark-purple w-full mt-4 ${loading ? 'loading' : ''}`}
