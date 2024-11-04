@@ -1,19 +1,45 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import api from "../api";
-import { ACCESS_TOKEN, REFRESH_TOKEN, USER_NAME, USER_STATUS } from "../constants";
-import qs from "qs";
+import { GoogleLogin } from '@react-oauth/google';
+import { ACCESS_TOKEN, REFRESH_TOKEN,USER_NAME,USER_STATUS, PROFILE_PICTURE } from "../constants";
 import "../style/index.css";
+import qs from "qs";
 
 function LoginForm() {
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
-    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState('');
+    const [isLoading, setIsLoading] = useState(false);
     const navigate = useNavigate();
 
+    const handleGoogleSuccess = async (credentialResponse) => {
+        try {
+            setIsLoading(true);
+            const authResponse = await api.post('users/auth/google', {
+                token: credentialResponse.credential
+            });
+
+            // Store tokens in localStorage
+            localStorage.setItem(PROFILE_PICTURE, authResponse.data.picture);
+            localStorage.setItem(ACCESS_TOKEN, authResponse.data.access_token);
+            localStorage.setItem(REFRESH_TOKEN, authResponse.data.refresh_token);
+            console.log(authResponse.data.picture)
+            // Navigate to the dashboard or home after successful login
+            navigate("/");
+        } catch (error) {
+            console.error('Authentication Error:', error);
+            setError(
+                error.response?.data?.detail || 
+                'Authentication failed. Please try again.'
+            );
+        } finally {
+            setIsLoading(false);
+        }
+    };
     const handleSubmit = async (e) => {
         e.preventDefault();
-        setLoading(true);
+        setIsLoading(true);
 
         try {
             const payload = { username, password };
@@ -23,10 +49,19 @@ function LoginForm() {
                     "Content-Type": "application/x-www-form-urlencoded",
                 },
             });
-            localStorage.setItem(ACCESS_TOKEN, res.data.access_token);
-            localStorage.setItem(REFRESH_TOKEN, res.data.refresh_token);
+            const token = await api.post("/token/pair", payload, {
+                headers: {
+                    'Content-Type': 'application/json',
+                }});
+
+            localStorage.setItem(ACCESS_TOKEN, token.data.access);
+            localStorage.setItem(REFRESH_TOKEN, token.data.refresh);
             localStorage.setItem(USER_NAME, res.data.username);
             localStorage.setItem(USER_STATUS, res.data.status);
+            console.log("Ninja access token",token.data.access)
+            console.log("Our api access token",res.data.access_token)
+            console.log("Ninja refresh token",token.data.refresh)
+            console.log("Our api refresh token",res.data.refresh_token)
             navigate("/");
         } catch (error) {
             console.error("Login error:", error);
@@ -37,42 +72,109 @@ function LoginForm() {
     
             alert(errorMessage); // Show the alert with error message
         } finally {
-            setLoading(false); // Reset loading state
+            setIsLoading(false); // Reset loading state
         }
     };
-
     return (
-        <div className="flex items-center justify-center min-h-screen bg-gradient-to-r from-red-500 to-purple-600">
-            <div className="max-w-md w-full bg-white shadow-lg rounded-lg p-8 space-y-6">
-                <h1 className="text-3xl font-bold text-center text-gray-700">Login</h1>
-                <form onSubmit={handleSubmit} className="space-y-4">
-                    <input
-                        className="input w-full p-4 border bg-white border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200"
-                        type="text"
-                        value={username}
-                        onChange={(e) => setUsername(e.target.value)}
-                        placeholder="Username"
-                        required
-                    />
-                    <input
-                        className="input w-full p-4 bg-white border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200"
-                        type="password"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        placeholder="Password"
-                        required
-                    />
-                    <button
-                        className={`btn w-full p-4 rounded-lg text-white font-semibold transition duration-200 
-                        ${loading ? "bg-pink-400 cursor-not-allowed" : "bg-blue-600 hover:bg-blue-700"}`}
-                        type="submit"
-                        disabled={loading}
-                    >
-                        {loading ? "Loading..." : "Login"}
-                    </button>
-                </form>
-                <div className="text-center">
-                    <Link to="/register" className="text-blue-600 hover:underline">Don't have an account? Sign up</Link>
+        <div className="min-h-screen bg-base-200 flex flex-col items-center justify-center p-4">
+            <div className="card w-full max-w-md bg-base-100 shadow-xl relative">
+                {isLoading && (
+                    <div className="absolute inset-0 bg-base-100/50 backdrop-blur-sm flex items-center justify-center z-50 rounded-2xl">
+                        <span className="loading loading-spinner loading-lg text-primary"></span>
+                    </div>
+                )}
+
+                <div className="card-body">
+                    {/* Logo Section */}
+                    <div className="flex flex-col items-center gap-2 mb-4">
+                        <div className="avatar">
+                        </div>
+                        <h2 className="card-title text-2xl font-bold">Welcome Back!</h2>
+                        <p className="text-base-content/60 text-center">
+                            Sign in to access your account
+                        </p>
+                    </div>
+
+                    {/* Error Alert */}
+                    {error && (
+                        <div className="alert alert-error shadow-lg mb-4">
+                            <svg xmlns="http://www.w3.org/2000/svg" className="stroke-current flex-shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            <span>{error}</span>
+                            <button 
+                                className="btn btn-ghost btn-xs"
+                                onClick={() => setError('')}
+                            >
+                                ✕
+                            </button>
+                        </div>
+                    )}
+
+                    {/* Sign In Options */}
+                    <div className="space-y-4">
+                        <div className="relative">
+                            <GoogleLogin
+                                onSuccess={handleGoogleSuccess}
+                                onError={() => {
+                                    setError('Google Sign In was unsuccessful. Please try again.');
+                                }}
+                                useOneTap
+                                theme="filled_black"
+                                shape="circle"
+                                size="large"
+                            />
+                        </div>
+
+                        {/* Divider */}
+                        <div className="divider">OR</div>
+
+                        {/* Email Input */}
+                        <div className="form-control">
+                            <input 
+                                type="email" 
+                                placeholder="Username" 
+                                className="input input-bordered" 
+                                onChange={(e) => setUsername(e.target.value)}
+                                
+                            />
+                        </div>
+
+                        {/* Password Input */}
+                        <div className="form-control">
+                            <input 
+                                type="password" 
+                                placeholder="Password" 
+                                className="input input-bordered" 
+                                onChange={(e) => setPassword(e.target.value)}
+                            />
+                            <label className="label">
+                                <a href="#" className="label-text-alt link link-hover">
+                                    Forgot password?
+                                </a>
+                            </label>
+                        </div>
+
+                        {/* Login Button */}
+                        <button className="btn btn-primary w-full" onClick={handleSubmit}>
+                            Login with Email
+                        </button>
+
+                        {/* Sign Up Link */}
+                        <p className="text-center text-sm">
+                            Don't have an account?{' '}
+                            <Link to="/register"  className="link link-primary">
+                                Sign up
+                            </Link>
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            {/* Success Toast (optional display on login success) */}
+            <div id="success-toast" className="toast toast-end hidden">
+                <div className="alert alert-success">
+                    <span>Successfully logged in!</span>
                 </div>
             </div>
         </div>

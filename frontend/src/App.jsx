@@ -1,4 +1,5 @@
 import React from 'react';
+import { GoogleOAuthProvider } from '@react-oauth/google';
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Login from './pages/Login';
 import Register from './pages/Register';
@@ -9,7 +10,6 @@ import Navbar from './components/Navbar';
 import CreateEvent from './pages/CreateEvent';
 import AccountInfo from './pages/AccountInfo';
 import AppliedEvents from './pages/AppliedEvents';
-import AcceptedEvents from './pages/AcceptedEvents';
 import ApplyOrganizer from './pages/ApplyOrganizer';
 import EventDetailPage from './pages/EventDetailPage';
 import Discover from './pages/Discover';
@@ -24,6 +24,7 @@ import Advertisement from './pages/footerpage/Advertisement';
 import Branding from './pages/footerpage/Branding';
 import Design from './pages/footerpage/Design';
 import Marketing from './pages/footerpage/Marketing';
+import MyEvents from './pages/MyEvents';
 
 function App() {
   const handleLogout = () => {
@@ -31,6 +32,7 @@ function App() {
   };
 
   return (
+    <GoogleOAuthProvider clientId="987028649849-8uhmhr5qrkg494ren8um9prtdsavd6uv.apps.googleusercontent.com">
     <BrowserRouter>
       <div className="flex flex-col min-h-screen">
         <Navbar />  
@@ -62,14 +64,15 @@ function App() {
           {/* Protected Routes */}
           <Route path="/account-info" element={<ProtectedRoute><AccountInfo /></ProtectedRoute>} />
           <Route path="/applied-events" element={<ProtectedRoute><AppliedEvents /></ProtectedRoute>} />
-          <Route path="/accepted-events" element={<ProtectedRoute><AcceptedEvents /></ProtectedRoute>} />
           <Route path="/create-event" element={<ProtectedRoute><CreateEvent /></ProtectedRoute>} />
+          <Route path="/my-events" element={<ProtectedRoute><MyEvents /></ProtectedRoute>} />
 
           {/* Fallback Route */}
           <Route path="*" element={<NotFound />} />
         </Routes>
       </div>
     </BrowserRouter>
+    </GoogleOAuthProvider>
   );
 }
 
