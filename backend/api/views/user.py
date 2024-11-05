@@ -22,6 +22,8 @@ class UserAPI:
             return Response({"error": "Passwords do not match"}, status=400)
         if AttendeeUser.objects.filter(username=form.username).exists():
             return Response({"error": "Username already taken"}, status=400)
+        if AttendeeUser.objects.filter(email = form.email).exists():
+            return Response({"error": "This email already taken"}, status=400)
         try:
             user = AttendeeUser(
                 username=form.username,
@@ -54,36 +56,46 @@ class UserAPI:
             requests.Request(),
             settings.SOCIAL_AUTH_GOOGLE_OAUTH2_KEY,
             clock_skew_in_seconds=10
-        )
+            )
+            
         email = idinfo.get('email')
-        first_name = idinfo.get('given_name')
+        first_name  = idinfo.get('given_name')
         last_name = idinfo.get('family_name')
         picture = idinfo.get('picture')
-        user, created = AttendeeUser.objects.get_or_create(
-            email=email,
-            defaults={
-                'first_name': first_name,
-                'last_name': last_name,
-                'username': email.split('@')[0],
-                'password': make_password(get_random_string(8)),
-            }
-        )
+
+        
+        if AttendeeUser.objects.filter(email = email).exists():
+            # User exists; optionally update user details from Google info
+            user=  AttendeeUser.objects.get(email = email)
+            first_name = user.first_name
+            last_name = user.last_name
+            email = user.email
+        else:
+            # Create a new user if one does not exist
+            user = AttendeeUser.objects.create(
+                email=email,
+                first_name=first_name,
+                last_name=last_name,
+                username=email.split('@')[0],  # Optionally use email prefix as username
+                password=make_password(get_random_string(8)),  # Generate a random password
+            )
+
         access_token = AccessToken.for_user(user)
         refresh_token = RefreshToken.for_user(user)
-        login(request, user)
+        login(request,user)
         return Response(
-            {
-                'status': user.status,
+            {'status': user.status,
                 'refresh_token': str(refresh_token),
                 'access_token': str(access_token),
-                'first_name': first_name,
-                'last_name': last_name,
-                'picture': picture,
-                'email': email
-            }
+                'first_name': str(first_name),
+                'last_name': str(last_name),
+                'picture': str(picture),
+                'email' : str(email)
+                }
         )
-
-    @router.post('/login', response=LoginResponseSchema)
+                    
+    
+    @router.post('/login', response = LoginResponseSchema)
     def login(request, form: LoginSchema = Form(...)):
         """
         Log in a user with username and password, returning access and refresh tokens.
