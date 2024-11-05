@@ -4,5 +4,6 @@ from api.models.organizer import Organizer
 from api.models.session import Session
 from api.models.ticket import Ticket
 from api.models.bookmarks import Bookmarks
+from api.models.like import Like
 
-__all__ = ['AttendeeUser', 'Event', 'Organizer', 'Session', 'Ticket', 'Bookmarks']
+__all__ = ['AttendeeUser', 'Event', 'Organizer', 'Session', 'Ticket', 'Bookmarks', 'Like']
