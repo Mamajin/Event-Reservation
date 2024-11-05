@@ -77,14 +77,29 @@ class GoogleAuthSchema(Schema):
     token: str
 
 
+class EventEngagementSchema(Schema):
+    total_likes: int
+    total_bookmarks: int
+    
+
 class EventResponseSchema(ModelSchema):
     category : EventCategory
     dress_code : DressCode
     visibility: EventVisibility
     organizer : OrganizerResponseSchema
+    engagement: Optional[Dict] = None
+    
+    @classmethod
+    def resolve_engagement(cls, event: Event) -> Dict:
+        return EventEngagementSchema(
+            total_likes=event.like_count,  # Example, adjust based on your model
+            total_bookmarks=event.bookmark_count,  # Example, adjust based on your model
+        ).dict()
+    
     class Meta:
         model = Event
         fields = '__all__'
+        
  
 # Schema for User                
 class UserSchema(ModelSchema):
@@ -191,5 +206,3 @@ class FileUploadResponseSchema(Schema):
     message: str = "Upload successful"
     file_name: str
     uploaded_at: datetime
-
-
