@@ -14,6 +14,7 @@ from ninja_jwt.authentication import JWTAuth
 from ninja_jwt.tokens import AccessToken, RefreshToken
 from api.models.user import *
 from api.models.event import *
+from api.models.bookmarks import *
 from api.models.organizer import *
 from api.models.ticket import *
 from api.models.session import *

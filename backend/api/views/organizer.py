@@ -102,12 +102,12 @@ class OrganizerAPI:
         return Response(OrganizerResponseSchema(**organizer_dict), status=200)
         
     @router.post('/{organizer_id}/upload/logo/', response={200: FileUploadResponseSchema, 400: ErrorResponseSchema}, auth=JWTAuth())
-    def upload_profile_picture(request: HttpRequest, organzier_id: int, logo: UploadedFile = File(...)):
+    def upload_profile_picture(request: HttpRequest, organizer_id: int, logo: UploadedFile = File(...)):
         """
         Upload a logo for a organzier's profile.
         """
         try:
-            organizer = get_object_or_404(Organizer, id=organzier_id)
+            organizer = get_object_or_404(Organizer, id=organizer_id)
             
             if logo.content_type not in ALLOWED_IMAGE_TYPES:
                 return Response({'error': 'Invalid file type. Only JPEG and PNG are allowed.'}, status=400)
