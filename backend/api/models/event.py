@@ -145,7 +145,24 @@ class Event(models.Model):
     # Existing methods remain the same
     @property
     def current_number_attendee(self):
+        """
+        Get the total Event's ticket number.
+        """
         return self.ticket_set.count()
+    
+    @property
+    def like_count(self):
+        """
+        Get the total Event's likes.
+        """
+        return self.likes.count()
+    
+    @property
+    def bookmark_count(self):
+        """
+        Get the total Event's bookmarks.
+        """
+        return self.bookmarks_set.count() 
     
     def get_event_status(self) -> str:
         """
