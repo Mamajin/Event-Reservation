@@ -1,4 +1,4 @@
-from .schemas import EventInputSchema, ErrorResponseSchema, EventResponseSchema, FileUploadResponseSchema
+from .schemas import EventInputSchema, ErrorResponseSchema, EventResponseSchema, FileUploadResponseSchema, EventEngagementSchema
 from .modules import *
 
 router = Router()
@@ -55,7 +55,12 @@ class EventAPI:
         try:
             organizer = Organizer.objects.get(user=request.user)
             events = Event.objects.filter(organizer=organizer)
-            event_list = [EventInputSchema.from_orm(event) for event in events]
+            event_list = []
+            for event in events:
+                engagement = EventResponseSchema.resolve_engagement(event)
+                event_data = EventResponseSchema.from_orm(event)
+                event_data.engagement = engagement
+                event_list.append(event_data)
             logger.info(f"Organizer {organizer.organizer_name} retrieved their events.")
             return Response(event_list, status=200)
         except Organizer.DoesNotExist:
@@ -69,7 +74,12 @@ class EventAPI:
     def list_all_events(request: HttpRequest):
         try:
             events = Event.objects.filter(event_create_date__lte=timezone.now()).order_by("-event_create_date")
-            event_list = [EventResponseSchema.from_orm(event) for event in events]
+            event_list = []
+            for event in events:
+                engagement = EventResponseSchema.resolve_engagement(event)
+                event_data = EventResponseSchema.from_orm(event)
+                event_data.engagement = engagement
+                event_list.append(event_data)
             logger.info("Retrieved all events for the homepage.")
             return event_list
         except Exception as e:
@@ -104,7 +114,10 @@ class EventAPI:
     def event_detail(request: HttpRequest, event_id: int):
         logger.info(f"Fetching details for event ID: {event_id} by user {request.user.username}.")
         event = get_object_or_404(Event, id=event_id)
-        return EventResponseSchema.from_orm(event)
+        engagement_data = EventResponseSchema.resolve_engagement(event)
+        event_data = EventResponseSchema.from_orm(event)
+        event_data.engagement = engagement_data
+        return event_data
     
     @router.post('/{event_id}/upload/event-image/', response={200: FileUploadResponseSchema, 400: ErrorResponseSchema}, auth=JWTAuth())
     def upload_event_image(request: HttpRequest, event_id: int, file: UploadedFile = File(...)):
@@ -181,4 +194,16 @@ class EventAPI:
             return Response({'error': 'User is not an organizer'}, status=404)
         except Exception as e:
             return Response({'error': f"Upload failed: {str(e)}"}, status=400)
+        
+    @router.get('/{event_id}/engagement', response={200: dict})
+    def get_event_engagements(request: HttpRequest, event_id: int):
+        """_summary_
+
+        Args:
+            request (HttpRequest): _description_
+            event_id (int): _description_
+        """
+        event = get_object_or_404(Event, id=event_id)
+        engagement_data = EventResponseSchema.resolve_engagement(event)
+        return engagement_data
                 
