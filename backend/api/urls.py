@@ -7,6 +7,7 @@ from api.views.event import router as event_router
 from api.views.ticket import router as ticket_router
 from api.views.session import router as session_router
 from api.views.bookmarks import router as bookmark_router
+from api.views.like import router as like_router
 from django.conf import settings
 from django.conf.urls.static import static
 
@@ -19,7 +20,8 @@ api.add_router("/organizers/", organizer_router)
 api.add_router("/events/", event_router)
 api.add_router("/tickets/", ticket_router)
 api.add_router("/sessions/", session_router)
-api.add_router('/bookmark/', bookmark_router)
+api.add_router('/bookmarks/', bookmark_router)
+api.add_router('/likes/', like_router)
 
 urlpatterns = [
     path("", api.urls),  # Prefix all API routes with /api/
