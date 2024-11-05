@@ -30,7 +30,11 @@ class DressCode(str, Enum):
     THEMED = 'THEMED'
     OUTDOOR_BEACH_CASUAL = 'OUTDOOR_BEACH_CASUAL'
     
-
+    
+class EventVisibility(str, Enum):
+    PUBLIC = 'PUBLIC'
+    PRIVATE = 'PRIVATE'
+    
 # Schema for Organizer
 class OrganizerSchema(Schema):
     organizer_name: Optional[str]
@@ -54,8 +58,8 @@ class ErrorResponseSchema(Schema):
 class EventInputSchema(ModelSchema):
     category : EventCategory
     dress_code : DressCode
-
-    # not include Organizer Information
+    visibility: EventVisibility = EventVisibility.PUBLIC
+    allowed_email_domains: Optional[str] = None
     class Meta:
         model = Event
         exclude = ('organizer', 'id', 'status_registeration','tags','status')
@@ -74,9 +78,9 @@ class GoogleAuthSchema(Schema):
 
 
 class EventResponseSchema(ModelSchema):
-    # Include Organizer information
     category : EventCategory
     dress_code : DressCode
+    visibility: EventVisibility
     organizer : OrganizerResponseSchema
     class Meta:
         model = Event
