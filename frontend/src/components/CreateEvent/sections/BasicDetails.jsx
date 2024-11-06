@@ -56,6 +56,26 @@ export default function BasicDetails({ form }) {
           />
         </div>
       </div>
+      <div className="grid gap-4">
+      <div className="form-control">
+        <label className="label font-medium text-dark-purple">Short Description</label>
+        <textarea
+          className="textarea textarea-bordered h-24 bg-white"
+          placeholder="Brief overview of your event"
+          {...form.register('description', { required: true })}
+        />
+      </div>
+
+      <div className="form-control">
+        <label className="label font-medium text-dark-purple">Detailed Description</label>
+        <textarea
+          className="textarea textarea-bordered h-32 bg-white"
+          placeholder="Provide detailed information about your event"
+          {...form.register('detailed_description', { required: true })}
+        />
+      </div>
     </div>
+    </div>
+    
   );
 }
