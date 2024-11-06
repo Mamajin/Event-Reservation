@@ -13,4 +13,27 @@ export default function TicketingDetails({ form }) {
           <span className="label-text font-medium text-dark-purple">Free Event</span>
         </label>
       </div>
+      {!isFree && (
+        <div className="grid grid-cols-2 gap-4">
+          <div className="form-control">
+            <label className="label font-medium text-dark-purple">Ticket Price</label>
+            <input
+              type="number"
+              className="input input-bordered bg-white"
+              placeholder="Enter ticket price"
+              {...form.register('ticket_price', { valueAsNumber: true })}
+            />
+          </div>
+
+          <div className="form-control">
+            <label className="label font-medium text-dark-purple">Expected Price</label>
+            <input
+              type="number"
+              className="input input-bordered bg-white"
+              placeholder="Enter expected price"
+              {...form.register('expected_price', { valueAsNumber: true })}
+            />
+          </div>
+        </div>
+      )}
       </div>)}
