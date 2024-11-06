@@ -280,8 +280,63 @@ class EventTest(EventModelsTest):
         
         response  = self.client.get(self.list_event_url)
         self.assertEqual(response.status_code, 400)
+        
+        
+        
+    def test_get_detail(self):
+        response = self.client.get(self.get_event_detail_url + str(self.event_test.id))
+        self.assertEqual(response.status_code , 200)
+        self.assertTrue(len([response.json()]), 1)
+        
+        
+    def test_upload_image_event(self):
+        token = self.get_token_for_user(self.test_user)
+        image_file = SimpleUploadedFile(
+            name='test_image.png',
+            content=b'some content',
+            content_type='image/png'
+        )
+        
+        response = self.client.post(f"/{self.event_test.id}"+ self.upload_image_url, 
+                                    headers={'Authorization': f'Bearer {token}'},
+                                    FILES = {'file': image_file})
+        self.assertTrue(response.status_code , 200)
+        
+        
+    def test_invalid_upload_image_event(self):
+        user = self.create_user("test","test")
+        
+        token = self.get_token_for_user(user)
+        
+        image_file = SimpleUploadedFile(
+            name='test_image.png',
+            content=b'some content',
+            content_type='image/png'
+        )
+        response = self.client.post(f"/{self.event_test.id}"+ self.upload_image_url, 
+                                    headers={'Authorization': f'Bearer {token}'},
+                                    FILES = {'file': image_file})
+        print(response.json())
+        
 
-            
+    # Test edit event function:
+    # def test_valid_edit_event(self):
+    #     new_data = {
+    #         "event_name": fake.company(),
+    #         "start_date_register": timezone.now() - datetime.timedelta(days = 2),
+    #         "end_date_register": timezone.now() - datetime.timedelta(days = 1),
+    #         "start_date_event": timezone.now(),
+    #         "end_date_event": timezone.now() + datetime.timedelta(days = 1),
+    #         "max_attendee": 1,
+    #         "description": fake.text(max_nb_chars=200),
+    #         'category': "CONFERENCE"
+    #     }
+    #     token = self.get_token_for_user(self.test_user)
+        
+    #     response = self.client.put(self.edit_event_url + str(self.event_test.id), json = new_data ,headers={'Authorization': f'Bearer {token}'})
+    #     print(response.json())
+    #     self.assertEqual(response.status_code, 204)
+        
         
     
 
@@ -325,21 +380,6 @@ class EventTest(EventModelsTest):
     #     response = self.client.get(self.get_event_detail_url + str(self.event_test.id))
     #     self.assertEqual(response.status_code, 200)
         
-        
-    # def test_valid_edit_event(self):
-    #     new_data = {
-    #         "event_name": fake.company(),
-    #         "start_date_register": timezone.now() - datetime.timedelta(days = 2),
-    #         "end_date_register": timezone.now() - datetime.timedelta(days = 1),
-    #         "start_date_event": timezone.now(),
-    #         "end_date_event": timezone.now() + datetime.timedelta(days = 1),
-    #         "max_attendee": 1,
-    #         "description": fake.text(max_nb_chars=200)
-    #     }
-    #     token = self.get_token_for_user(self.test_user)
-        
-    #     response = self.client.put(self.edit_event_url + str(self.event_test.id), json = new_data ,headers={'Authorization': f'Bearer {token}'})
-    #     self.assertEqual(response.status_code, 204)
         
         
     # def test_invalid_organizer_edit_event(self):

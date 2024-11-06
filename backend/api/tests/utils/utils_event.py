@@ -27,6 +27,7 @@ class EventModelsTest(TestCase):
         self.list_event_url = '/events'
         self.get_event_detail_url = '/'
         self.edit_event_url = '/edit-event-'
+        self.upload_image_url = '/upload/event-image/'
         self.test_user = AttendeeUser.objects.create(
             username='attendeeuser4',
             password='password123',
