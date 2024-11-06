@@ -7,7 +7,7 @@ router = Router()
 
 class LikeAPI:
     
-    @router.post('/like', response={200: dict}, auth=JWTAuth())
+    @router.post('/like/', response={200: dict}, auth=JWTAuth())
     def like_event(request: HttpRequest, event_id: int):
         """_summary_
 
@@ -26,7 +26,7 @@ class LikeAPI:
             return {"message": "You have already liked this event."}
         
         
-    @router.delete("/unlike", response={200: dict}, auth=JWTAuth())
+    @router.delete("/unlike/", response={200: dict}, auth=JWTAuth())
     def unlike_event(request, event_id: int):
         user = request.user 
         event = get_object_or_404(Event, id=event_id)
