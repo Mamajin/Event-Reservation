@@ -7,7 +7,7 @@ router = Router()
 class EventAPI:
 
     @router.post('/create-event', response=EventResponseSchema, auth=JWTAuth())
-    def create_event(request, data: EventInputSchema, image: UploadedFile = File(None)):
+    def create_event(request, data: EventInputSchema = Form(...), image: UploadedFile = File(None)):
         """
         Create a new event with optional image upload.
 
