@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import Map from '../../Map';
 
 export default function LocationDetails({ form }) {
   const isOnline = form.watch('is_online');
@@ -16,7 +17,7 @@ export default function LocationDetails({ form }) {
         </label>
       </div>
 
-      {isOnline && (
+      {isOnline ? (
         <div className="form-control">
           <label className="label font-medium text-dark-purple">Meeting Link</label>
           <input
@@ -26,6 +27,21 @@ export default function LocationDetails({ form }) {
             {...form.register('meeting_link')}
           />
         </div>
+      ) : (
+        <>
+          <div className="form-control">
+            <label className="label font-medium text-dark-purple">Address</label>
+            <input
+              id="address-input"
+              type="text"
+              className="input input-bordered bg-white"
+              placeholder="Enter venue address"
+              {...form.register('address')}
+            />
+          </div>
+
+          <Map form={form} />
+        </>
       )}
     </div>
   );
