@@ -77,7 +77,7 @@ class EventAPI:
             events = Event.objects.filter(organizer=organizer)
             event_list = []
             for event in events:
-                engagement = EventResponseSchema.resolve_engagement(event)
+                engagement = EventResponseSchema.resolve_engagement(event, organizer.user)
                 event_data = EventResponseSchema.from_orm(event)
                 event_data.engagement = engagement
                 event_list.append(event_data)
@@ -105,7 +105,7 @@ class EventAPI:
             events = Event.objects.filter(event_create_date__lte=timezone.now()).order_by("-event_create_date")
             event_list = []
             for event in events:
-                engagement = EventResponseSchema.resolve_engagement(event)
+                engagement = EventResponseSchema.resolve_engagement(event, request.user)
                 event_data = EventResponseSchema.from_orm(event)
                 event_data.engagement = engagement
                 event_list.append(event_data)
@@ -115,7 +115,7 @@ class EventAPI:
             logger.error(f"Error while retrieving events for the homepage: {str(e)}")
             return Response({'error': str(e)}, status=400)
 
-    @router.put('/edit-event-{event_id}', response={204: EventResponseSchema, 401: ErrorResponseSchema, 404: ErrorResponseSchema}, auth=JWTAuth())
+    @router.put('/{event_id}/edit', response={204: EventResponseSchema, 401: ErrorResponseSchema, 404: ErrorResponseSchema}, auth=JWTAuth())
     def edit_event(request: HttpRequest, event_id: int, data: EventInputSchema):
         """
         Edit an existing event by ID if the user is the organizer.
@@ -136,7 +136,6 @@ class EventAPI:
                 return Response({'error': 'You are not allowed to edit this event.'}, status=403)
             
             Event.objects.filter(id = event_id).update(**data.dict())
-                        
             event_data = EventResponseSchema.from_orm(event).dict()
             logger.info(f"Organizer {organizer.organizer_name} edited their event {event_id}.")
             return Response(event_data, status=204)
@@ -164,7 +163,7 @@ class EventAPI:
         """
         logger.info(f"Fetching details for event ID: {event_id} by user {request.user.username}.")
         event = get_object_or_404(Event, id=event_id)
-        engagement_data = EventResponseSchema.resolve_engagement(event)
+        engagement_data = EventResponseSchema.resolve_engagement(event, request.user)
         event_data = EventResponseSchema.from_orm(event)
         event_data.engagement = engagement_data
         return event_data
@@ -266,7 +265,7 @@ class EventAPI:
             Response (dict): A dictionary containing engagement metrics for the event.
         """
         event = get_object_or_404(Event, id=event_id)
-        engagement_data = EventResponseSchema.resolve_engagement(event)
+        engagement_data = EventResponseSchema.resolve_engagement(event, request.user)
         return engagement_data                
     
     @router.get('/{event_id}/comments', response=List[CommentResponseSchema])
