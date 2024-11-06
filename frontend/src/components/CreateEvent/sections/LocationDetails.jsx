@@ -15,6 +15,18 @@ export default function LocationDetails({ form }) {
           <span className="label-text font-medium text-dark-purple">Online Event</span>
         </label>
       </div>
+
+      {isOnline && (
+        <div className="form-control">
+          <label className="label font-medium text-dark-purple">Meeting Link</label>
+          <input
+            type="url"
+            className="input input-bordered bg-white"
+            placeholder="Enter meeting URL"
+            {...form.register('meeting_link')}
+          />
+        </div>
+      )}
     </div>
   );
 }
