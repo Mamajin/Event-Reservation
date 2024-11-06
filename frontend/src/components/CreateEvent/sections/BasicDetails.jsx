@@ -25,15 +25,15 @@ export default function BasicDetails({ form }) {
     { value: "OUTDOOR_BEACH_CASUAL", label: "Outdoor Beach Casual" },
   ];
   const handleFileChange = (file) => {
+    // Validate the file type
     if (file.type !== 'image/jpeg' && file.type !== 'image/png') {
       alert('Only JPEG and PNG files are allowed.');
       return;
     }
-    if (file.size > 5 * 1024 * 1024) {
+    if (file.size > 5 * 1024 * 1024) { // 5 MB
       alert('File size exceeds the limit of 5 MB.');
       return;
     }
-
     setValue('event_image', file);
     setEventImage(file);
   };
@@ -68,7 +68,7 @@ export default function BasicDetails({ form }) {
           />
         </div>
       </div>
-      <div className="grid gap-4">
+      <div className="grid gap-4"></div>
       <div className="form-control">
         <label className="label font-medium text-dark-purple">Short Description</label>
         <textarea
@@ -86,8 +86,6 @@ export default function BasicDetails({ form }) {
           {...form.register('detailed_description', { required: true })}
         />
       </div>
-    </div>
-    <div className="grid gap-4">
       <div className="grid grid-cols-2 gap-4">
         <div className="form-control">
           <label className="label font-medium text-dark-purple">Tags</label>
@@ -103,17 +101,16 @@ export default function BasicDetails({ form }) {
           <label className="label font-medium text-dark-purple">Minimum Age Requirement</label>
           <input
             type="number"
-            className="input input-bordered bg-white"
+            className="input input-bordered bg-white  "
             placeholder="Enter minimum age"
             {...form.register('min_age_requirement', { valueAsNumber: true })}
           />
         </div>
       </div>
+      <div className="mt-6 w-full">
+        <FileInput label="Event Banner" name="event_file"
+          onChange={handleFileChange} accept=".jpg,.jpeg,.png,.pdf"/>
+      </div>
     </div>
-    <div className="mt-6 w-full">
-      <FileInput label="Event Banner" name="event_file" onChange={handleFileChange} accept=".jpg,.jpeg,.png,.pdf" />
-    </div>
-    </div>
-    
   );
 }
