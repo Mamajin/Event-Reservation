@@ -7,7 +7,7 @@ router = Router()
 class EventAPI:
 
     @router.post('/create-event', response=EventResponseSchema, auth=JWTAuth())
-    def create_event(request, data: EventInputSchema, image: UploadedFile = File(None)):
+    def create_event(request, data: EventInputSchema = Form(...), image: UploadedFile = File(None)):
         this_user = request.user
         try:
             organizer = Organizer.objects.get(user=this_user)
@@ -44,7 +44,7 @@ class EventAPI:
                 file_url = f"https://{settings.AWS_S3_CUSTOM_DOMAIN}/{filename}"
                 logger.info(f"Uploaded event image for event ID {event.id}: {file_url}")
             except ClientError as e:
-                return Response({'error': f"S3 upload failed: {str(e)}"}, status=400)
+                return Response({'error': f"S3 upload failed"}, status=400)
         
         # Save event and return response
         event.save()

@@ -8,7 +8,10 @@ from ninja_jwt.tokens import RefreshToken
 from faker import Faker
 import datetime
 from django.utils import timezone
-from unittest.mock import patch
+from unittest.mock import patch, MagicMock
+from botocore.exceptions import ClientError
+from django.core.files.uploadedfile import SimpleUploadedFile
+ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/jpg']
 
 fake = Faker()
 
@@ -56,8 +59,50 @@ class EventModelsTest(TestCase):
         self.organizer, created = Organizer.objects.get_or_create(
             user= user,
             organizer_name = organizer_name,
+            email = "test@exmaple.com",
+            organization_type = 'INDIVIDUAL',
+            description = "",
+            facebook_url = "",
+            twitter_handle = "",
+            instagram_handle = "",
+            youtube_channel = "",
         )
         return self.organizer
+    
+    def get_valid_data(self):
+        data = {
+            "category": "CONFERENCE",
+            "dress_code": "CASUAL",
+            "event_name": "Annual Tech Conference",
+            "event_create_date": timezone.now().isoformat(),
+            "start_date_event": (timezone.now() + datetime.timedelta(days=2)).isoformat(),
+            "end_date_event": (timezone.now() + datetime.timedelta(days=3)).isoformat(),
+            "start_date_register": timezone.now().isoformat(),
+            "end_date_register": (timezone.now() + datetime.timedelta(days=1)).isoformat(),
+            "description": "A tech event for showcasing new innovations.",
+            "max_attendee": 100,
+            "address": "Tech Park, Downtown",
+            "latitude": 0.0,
+            "longitude": 0.0,
+            "is_free": True,
+            "ticket_price": 0.00,
+            "expected_price": 0.00,
+            "detailed_description": "Join us for an exciting event!",
+            "contact_email": "info@techconference.com",
+            "contact_phone": "+1234567890",
+            "updated_at": timezone.now().isoformat(),
+
+        }
+        return data
+    
+    def create_test_image(self):
+        """Helper method to create a test image file"""
+        return SimpleUploadedFile(
+            name='test_image.png',
+            content=b'some content',
+            content_type='image/png'
+        )
+
     
     def create_user(self, username, first_name):
         return AttendeeUser.objects.create_user(
@@ -67,7 +112,7 @@ class EventModelsTest(TestCase):
             last_name = 'Doe',
             birth_date='1995-06-15',
             phone_number='9876543210',
-            email='jane.doe@example.com'
+            email='jane1.doe@example.com'
         )
             
     
