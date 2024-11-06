@@ -3,6 +3,12 @@ import Map from '../../Map';
 
 export default function LocationDetails({ form }) {
   const isOnline = form.watch('is_online');
+  const [error, setError] = useState('');
+  const [formData, setFormData] = useState({
+    address: '',
+    latitude: null,
+    longitude: null,
+  });
 
   return (
     <div className="space-y-4">
@@ -39,8 +45,7 @@ export default function LocationDetails({ form }) {
               {...form.register('address')}
             />
           </div>
-
-          <Map form={form} />
+          <Map form={form} setError={setError} />
         </>
       )}
     </div>
