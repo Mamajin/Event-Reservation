@@ -36,4 +36,27 @@ export default function TicketingDetails({ form }) {
           </div>
         </div>
       )}
-      </div>)}
+      <div className="grid grid-cols-2 gap-4">
+        <div className="form-control">
+          <label className="label font-medium text-dark-purple">Maximum Attendees</label>
+          <input
+            type="number"
+            className="input input-bordered bg-white"
+            placeholder="Enter max attendees"
+            {...form.register('max_attendee', { valueAsNumber: true })}
+          />
+        </div>
+
+        <div className="form-control">
+          <label className="label font-medium text-dark-purple">Allowed Email Domains</label>
+          <input
+            type="text"
+            className="input input-bordered bg-white"
+            placeholder="Enter allowed domains (comma-separated)"
+            {...form.register('allowed_email_domains')}
+          />
+        </div>
+      </div>
+    </div>
+  );
+}
