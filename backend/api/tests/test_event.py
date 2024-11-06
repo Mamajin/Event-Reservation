@@ -226,8 +226,10 @@ class EventTest(EventModelsTest):
         
         # Verify the event was not created
         self.assertFalse(Event.objects.filter(event_name=event_data['event_name']).exists())
+        
+        
 
-
+    ## Test get_my_events function
     def test_invalid_organizer_get_my_events(self):
         normal_user  = self.create_user("test","test")
         token = self.get_token_for_user(normal_user)
@@ -261,14 +263,28 @@ class EventTest(EventModelsTest):
 
         # Check that the response status code is 400
         self.assertEqual(response.status_code, 400)
-        print(response.json())
 
         # Check that the response contains the correct error message
         self.assertEqual(response.json(), {'error': 'Unexpected error occurred'})
 
+    
+    ## Test list all event function
+    def test_valid_list_all_event(self):
+        response  = self.client.get(self.list_event_url)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.json()), 1)
+    
+    @patch("api.models.Event.objects.filter")
+    def test_excpetion_list_all_event(self, mock_filter):
+        mock_filter.side_effect = Exception("Unexpected error occurred")
+        
+        response  = self.client.get(self.list_event_url)
+        self.assertEqual(response.status_code, 400)
 
+            
         
-        
+    
+
     # def test_can_register(self):
     #     event_test = Event.objects.create(
     #         event_name=fake.company(),
