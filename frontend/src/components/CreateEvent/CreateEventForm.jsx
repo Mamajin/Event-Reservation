@@ -20,6 +20,12 @@ const EventForm = () => {
     },
   });
 
+  const formatDateTime = (dateTime) => {
+    const date = new Date(dateTime);
+    return date.toISOString(); // Formats to "YYYY-MM-DDTHH:MM:SS.sssZ"
+  };
+
+
   const renderTabContent = () => {
     switch (activeTab) {
       case 'basic':
@@ -41,6 +47,46 @@ const EventForm = () => {
         return <BasicDetails form={form} />;
     }
   };
+  const onSubmit = async (formValues) => {
+    setLoading(true);
+    try {
+      const formData = new FormData();
+      formData.append('event_name', formValues.event_name);
+      formData.append('start_date_register', formatDateTime(formValues.start_date_register) || '');
+      formData.append('end_date_register', formatDateTime(formValues.end_date_register) || '');
+      formData.append('start_date_event', formatDateTime(formValues.start_date_event) || '');
+      formData.append('end_date_event', formatDateTime(formValues.end_date_event) || '');
+      formData.append('max_attendee', formValues.max_attendee);
+      formData.append('description', formValues.description);
+      formData.append('is_online', formValues.is_online);
+      formData.append('category', formValues.category);
+      formData.append('visibility', formValues.visibility);
+      formData.append('ticketing_type', formValues.ticketing_type);
+
+      if (formValues.image && formValues.image[0]) {
+        formData.append('image', formValues.image[0]);
+      }
+
+      const token = localStorage.getItem(ACCESS_TOKEN);
+      const headers = {
+        'Authorization': `Bearer ${token}`,
+      };
+
+      const response = await api.post('/events/create-event', formData, { headers });
+      alert("Event created successfully!");
+      navigate("/"); // Redirect after success
+    } catch (error) {
+      console.error("Error creating event:", error);
+      let errorMessage = "Failed to create event. Please try again.";
+      if (error.response) {
+        console.error("Error response data:", error.response.data);
+        errorMessage = error.response.data?.error || errorMessage;
+      }
+      alert(errorMessage);
+    } finally {
+      setLoading(false);
+    }
+  };  
 
   return (
     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
