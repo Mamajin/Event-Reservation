@@ -206,3 +206,24 @@ class FileUploadResponseSchema(Schema):
     message: str = "Upload successful"
     file_name: str
     uploaded_at: datetime
+    
+    
+class UserProfileSchema(Schema):
+    id: int
+    username: str
+    profile_picture: Optional[str]
+    
+
+class CommentSchema(Schema):
+    parent_id: Optional[int] = None
+    content: str
+
+    
+class CommentResponseSchema(Schema):
+    id: int
+    user: UserProfileSchema
+    content: str
+    created_at: datetime
+    status: str
+    reactions: List[Dict] = []
+    replies: List['CommentResponseSchema'] = []
