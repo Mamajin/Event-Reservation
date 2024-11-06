@@ -75,6 +75,29 @@ export default function BasicDetails({ form }) {
         />
       </div>
     </div>
+    <div className="grid gap-4">
+      <div className="grid grid-cols-2 gap-4">
+        <div className="form-control">
+          <label className="label font-medium text-dark-purple">Tags</label>
+          <input
+            type="text"
+            className="input input-bordered bg-white"
+            placeholder="Enter tags (comma-separated)"
+            {...form.register('tags')}
+          />
+        </div>
+
+        <div className="form-control">
+          <label className="label font-medium text-dark-purple">Minimum Age Requirement</label>
+          <input
+            type="number"
+            className="input input-bordered bg-white"
+            placeholder="Enter minimum age"
+            {...form.register('min_age_requirement', { valueAsNumber: true })}
+          />
+        </div>
+      </div>
+    </div>
     </div>
     
   );
