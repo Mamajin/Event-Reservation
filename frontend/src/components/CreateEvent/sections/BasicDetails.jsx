@@ -24,7 +24,19 @@ export default function BasicDetails({ form }) {
     { value: "THEMED", label: "Themed" },
     { value: "OUTDOOR_BEACH_CASUAL", label: "Outdoor Beach Casual" },
   ];
+  const handleFileChange = (file) => {
+    if (file.type !== 'image/jpeg' && file.type !== 'image/png') {
+      alert('Only JPEG and PNG files are allowed.');
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      alert('File size exceeds the limit of 5 MB.');
+      return;
+    }
 
+    setValue('event_image', file);
+    setEventImage(file);
+  };
   return (
     <div className="grid gap-4">
       <div className="form-control">
@@ -97,6 +109,9 @@ export default function BasicDetails({ form }) {
           />
         </div>
       </div>
+    </div>
+    <div className="mt-6 w-full">
+      <FileInput label="Event Banner" name="event_file" onChange={handleFileChange} accept=".jpg,.jpeg,.png,.pdf" />
     </div>
     </div>
     
