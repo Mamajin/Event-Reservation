@@ -153,6 +153,43 @@ class EventTest(EventModelsTest):
         self.assertEqual(response.json()['detail'], "You are not an organizer.")
         
     
+    def test_date_input_invalid(self):
+        data = {
+            "category": "CONFERENCE",
+            "dress_code": "CASUAL",
+            "event_name": "Annual Tech Conference",
+            "event_create_date": timezone.now().isoformat(),
+            "start_date_event": (timezone.now() + datetime.timedelta(days=2)).isoformat(),
+            "end_date_event": (timezone.now() + datetime.timedelta(days=3)).isoformat(),
+            "start_date_register": timezone.now().isoformat(),
+            "end_date_register": (timezone.now() - datetime.timedelta(days=3)).isoformat(),
+            "description": "A tech event for showcasing new innovations.",
+            "max_attendee": 100,
+            "address": "Tech Park, Downtown",
+            "latitude": 0.0,
+            "longitude": 0.0,
+            "is_free": True,
+            "ticket_price": 0.00,
+            "expected_price": 0.00,
+            "detailed_description": "Join us for an exciting event!",
+            "contact_email": "info@techconference.com",
+            "contact_phone": "+1234567890",
+            "updated_at": timezone.now().isoformat(),
+
+        }
+        normal_user = self.create_user("test", "test")
+        organizer = self.become_organizer(normal_user, "test")
+        token  = self.get_token_for_user(normal_user)
+        response = self.client.post(
+            self.event_create_url,
+            data= data,  # Wrap the data in a 'data' key
+            content_type='multipart/form-data',  # Ensure the correct content type
+            headers={'Authorization': f'Bearer {token}'}
+        )
+        self.assertEqual(response.status_code, 400)
+        self.assertIn('Please enter valid date', response.json().get("error", ""))
+        
+    
     @patch('boto3.client')
     def test_s3_upload_failure(self, mock_boto3_client):
         """Test handling of S3 upload failure"""
@@ -221,41 +258,7 @@ class EventTest(EventModelsTest):
     #     response = self.client.post(self.event_create_url, json=event_data, headers={'Authorization': f'Bearer {token}'})
     #     self.assertEqual(response.status_code, 200)
         
-    def test_date_input_invalid(self):
-        data = {
-            "category": "CONFERENCE",
-            "dress_code": "CASUAL",
-            "event_name": "Annual Tech Conference",
-            "event_create_date": timezone.now().isoformat(),
-            "start_date_event": (timezone.now() + datetime.timedelta(days=2)).isoformat(),
-            "end_date_event": (timezone.now() + datetime.timedelta(days=3)).isoformat(),
-            "start_date_register": timezone.now().isoformat(),
-            "end_date_register": (timezone.now() - datetime.timedelta(days=3)).isoformat(),
-            "description": "A tech event for showcasing new innovations.",
-            "max_attendee": 100,
-            "address": "Tech Park, Downtown",
-            "latitude": 0.0,
-            "longitude": 0.0,
-            "is_free": True,
-            "ticket_price": 0.00,
-            "expected_price": 0.00,
-            "detailed_description": "Join us for an exciting event!",
-            "contact_email": "info@techconference.com",
-            "contact_phone": "+1234567890",
-            "updated_at": timezone.now().isoformat(),
 
-        }
-        normal_user = self.create_user("test", "test")
-        organizer = self.become_organizer(normal_user, "test")
-        token  = self.get_token_for_user(normal_user)
-        response = self.client.post(
-            self.event_create_url,
-            data= data,  # Wrap the data in a 'data' key
-            content_type='multipart/form-data',  # Ensure the correct content type
-            headers={'Authorization': f'Bearer {token}'}
-        )
-        self.assertEqual(response.status_code, 400)
-        self.assertIn('Please enter valid date', response.json().get("error", ""))
         
     # def test_invalid_organizer_get_my_events(self):
     #     normal_user  = self.create_user("test","test")
