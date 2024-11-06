@@ -12,7 +12,6 @@ class TicketAPI:
             tickets = Ticket.objects.filter(attendee=user, register_date__lte=timezone.now()).order_by("-register_date")
             return [
                 TicketResponseSchema(
-                    id=ticket.id,
                     **ticket.get_ticket_details()
                 ) for ticket in tickets
             ]
@@ -39,6 +38,11 @@ class TicketAPI:
                 {'error': 'Registration for this event is not allowed'},
                 status=400
             )
+            
+        if event.visibility == 'PRIVATE' and not event.is_email_allowed(user.email):
+            return Response({
+                'error': 'Your email domain is not authorized to register for this event'
+            }, status=403)
             
         ticket = Ticket(
             event=event,

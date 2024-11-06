@@ -1,4 +1,4 @@
-from .schemas import EventInputSchema, ErrorResponseSchema, EventResponseSchema, FileUploadResponseSchema
+from .schemas import EventInputSchema, ErrorResponseSchema, EventResponseSchema, FileUploadResponseSchema, EventEngagementSchema, CommentResponseSchema
 from .modules import *
 
 router = Router()
@@ -52,10 +52,24 @@ class EventAPI:
 
     @router.get('/my-events', response=List[EventResponseSchema], auth=JWTAuth())
     def get_my_events(request: HttpRequest):
+        """
+        Retrieve events created by the logged-in organizer.
+
+        Args:
+            request (HttpRequest): The HTTP request object.
+
+        Returns:
+            List[EventResponseSchema]: List of events created by the organizer.
+        """
         try:
             organizer = Organizer.objects.get(user=request.user)
             events = Event.objects.filter(organizer=organizer)
-            event_list = [EventInputSchema.from_orm(event) for event in events]
+            event_list = []
+            for event in events:
+                engagement = EventResponseSchema.resolve_engagement(event)
+                event_data = EventResponseSchema.from_orm(event)
+                event_data.engagement = engagement
+                event_list.append(event_data)
             logger.info(f"Organizer {organizer.organizer_name} retrieved their events.")
             return Response(event_list, status=200)
         except Organizer.DoesNotExist:
@@ -67,9 +81,23 @@ class EventAPI:
 
     @router.get('/events', response=List[EventResponseSchema])
     def list_all_events(request: HttpRequest):
+        """
+        Retrieve all public events for the homepage.
+
+        Args:
+            request (HttpRequest): The HTTP request object.
+
+        Returns:
+            List[EventResponseSchema]: List of all events.
+        """
         try:
             events = Event.objects.filter(event_create_date__lte=timezone.now()).order_by("-event_create_date")
-            event_list = [EventResponseSchema.from_orm(event) for event in events]
+            event_list = []
+            for event in events:
+                engagement = EventResponseSchema.resolve_engagement(event)
+                event_data = EventResponseSchema.from_orm(event)
+                event_data.engagement = engagement
+                event_list.append(event_data)
             logger.info("Retrieved all events for the homepage.")
             return event_list
         except Exception as e:
@@ -78,6 +106,17 @@ class EventAPI:
 
     @router.put('/edit-event-{event_id}', response={204: EventResponseSchema, 401: ErrorResponseSchema, 404: ErrorResponseSchema}, auth=JWTAuth())
     def edit_event(request: HttpRequest, event_id: int, data: EventInputSchema):
+        """
+        Edit an existing event by ID if the user is the organizer.
+
+        Args:
+            request (HttpRequest): The HTTP request object.
+            event_id (int): ID of the event to edit.
+            data (EventInputSchema): Updated event data.
+
+        Returns:
+            EventResponseSchema: Updated event details or error response.
+        """
         try:
             event = Event.objects.get(id=event_id)
             organizer = Organizer.objects.get(user=request.user)
@@ -102,14 +141,35 @@ class EventAPI:
 
     @router.get('/{event_id}', response=EventResponseSchema)
     def event_detail(request: HttpRequest, event_id: int):
+        """
+        Retrieve detailed information for a specific event.
+
+        Args:
+            request (HttpRequest): The HTTP request object.
+            event_id (int): The ID of the event.
+
+        Returns:
+            EventResponseSchema: Details of the specified event.
+        """
         logger.info(f"Fetching details for event ID: {event_id} by user {request.user.username}.")
         event = get_object_or_404(Event, id=event_id)
-        return EventResponseSchema.from_orm(event)
+        engagement_data = EventResponseSchema.resolve_engagement(event)
+        event_data = EventResponseSchema.from_orm(event)
+        event_data.engagement = engagement_data
+        return event_data
     
     @router.post('/{event_id}/upload/event-image/', response={200: FileUploadResponseSchema, 400: ErrorResponseSchema}, auth=JWTAuth())
     def upload_event_image(request: HttpRequest, event_id: int, file: UploadedFile = File(...)):
         """
         Upload an image for a specific event.
+
+        Args:
+            request (HttpRequest): The HTTP request object.
+            event_id (int): The ID of the event to upload an image for.
+            file (UploadedFile): Image file to upload.
+
+        Returns:
+            FileUploadResponseSchema: Details of the uploaded image, including URL, or an error response.
         """
         try:
             event = get_object_or_404(Event, id=event_id)
@@ -181,4 +241,38 @@ class EventAPI:
             return Response({'error': 'User is not an organizer'}, status=404)
         except Exception as e:
             return Response({'error': f"Upload failed: {str(e)}"}, status=400)
+        
+    @router.get('/{event_id}/engagement', response={200: dict})
+    def get_event_engagements(request: HttpRequest, event_id: int):
+        """
+        Retrieve engagement metrics for a specific event.
+
+        Args:
+            request (HttpRequest): The HTTP request object, containing user and request metadata.
+            event_id (int): The ID of the event for which engagement metrics are requested.
+
+        Returns:
+            Response (dict): A dictionary containing engagement metrics for the event.
+        """
+        event = get_object_or_404(Event, id=event_id)
+        engagement_data = EventResponseSchema.resolve_engagement(event)
+        return engagement_data                
+    
+    @router.get('/{event_id}/comments', response=List[CommentResponseSchema])
+    def get_events_comments(request: HttpRequest, event_id: int):
+        """
+        Retrieve all comments for a specific event, including nested replies.
+        
+        Args:
+            request (HttpRequest): The HTTP request object, containing user and request metadata.
+            event_id (int): The ID of the event for which comments are requested.
+
+        Returns:
+            Response (dict): A dictionary containing comments for the event.
+        """
+        event = get_object_or_404(Event, id=event_id)
+        comments = Comment.objects.filter(event=event, parent=None).select_related('user').prefetch_related('replies', 'reactions').order_by('-created_at')
+        response_data = [CommentResponseSchema.from_orm(comment) for comment in comments]
+        logger.info(f"Retrieved {len(comments)} comments for event {event_id}.")
+        return Response(response_data, status=200)
                 

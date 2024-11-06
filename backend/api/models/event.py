@@ -2,7 +2,25 @@ from django.db import models
 from django.utils import timezone
 from django.core.files.storage import default_storage
 from django.core.validators import MinValueValidator, MaxValueValidator, FileExtensionValidator
+from django.core.exceptions import ValidationError
 from api.models.organizer import Organizer
+import re
+
+
+class EventManager(models.Manager):
+    def public(self):
+        return self.filter(visibility='PUBLIC')
+
+    def private(self):
+        return self.filter(visibility='PRIVATE')
+    
+    def filter_by_category(self, category):
+        return self.filter(category=category)
+    
+    def within_date_range(self, start_date, end_date):
+        return self.filter(start_date_event__gte=start_date, end_date_event__lte=end_date)
+
+
 class Event(models.Model):
     """
     Represents an event with enhanced fields for better event management.
@@ -34,7 +52,7 @@ class Event(models.Model):
         ('WHITE_TIE', 'White Tie'),
         ('THEMED', 'Themed Dress Code'),
         ('OUTDOOR_BEACH_CASUAL', 'Outdoor/Beach Casual'),
-        ]
+    ]
     STATUS_OF_REGISTRATION = [
         ('OPEN', 'Open'),
         ('CLOSED', 'Closed'),
@@ -42,6 +60,10 @@ class Event(models.Model):
         ('PENDING', 'Pending'),
         ('CANCELLED', 'Cancelled'),
         ('WAITLIST', 'Waitlist'),
+    ]
+    EVENT_VISIBILITY = [
+        ('PUBLIC', 'Public'),
+        ('PRIVATE', 'Private')
     ]
     # Existing fields
     event_name = models.CharField(max_length=100)
@@ -73,10 +95,24 @@ class Event(models.Model):
     
     # Online events
     is_online = models.BooleanField(default=False)
+    meeting_link = models.TextField(max_length=500, null=True, blank=True)
 
     # Categorization
     category = models.CharField(max_length=50, choices=EVENT_CATEGORIES, default='OTHER')
     tags = models.CharField(max_length=200, blank=True, help_text="Comma-separated tags")
+    
+    # Privacy settings
+    visibility = models.CharField(
+        max_length=20,
+        choices=EVENT_VISIBILITY,
+        default='PUBLIC',
+        help_text='Choose whether the event is public or private'
+    )
+    allowed_email_domains = models.TextField(
+        null=True,
+        blank=True,
+        help_text="Comma-separated list of allowed email domains (e.g., 'ku.th, example.com')"
+    )
 
     # Additional details
     detailed_description = models.TextField(blank=True, help_text="Full event details including schedule")
@@ -103,11 +139,30 @@ class Event(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
     
     terms_and_conditions = models.TextField(null=True, blank=True)
+    
+    objects = EventManager()
 
     # Existing methods remain the same
     @property
     def current_number_attendee(self):
+        """
+        Get the total Event's ticket number.
+        """
         return self.ticket_set.count()
+    
+    @property
+    def like_count(self):
+        """
+        Get the total Event's likes.
+        """
+        return self.likes.count()
+    
+    @property
+    def bookmark_count(self):
+        """
+        Get the total Event's bookmarks.
+        """
+        return self.bookmarks_set.count() 
     
     def get_event_status(self) -> str:
         """
@@ -167,7 +222,44 @@ class Event(models.Model):
         """
         now = timezone.now()
         return self.start_date_register <= now < self.end_date_register
+    
+    def is_email_allowed(self, email: str) -> bool:
+        """
+        Check if an email address is allowed to register for this event
+        based on the domain restrictions.
+
+        Args:
+            email (str): Email address to check
+
+        Returns:
+            bool: True if email is allowed, False otherwise
+        """
+        if self.visibility == 'PUBLIC' or not self.allowed_email_domains:
+            return True
+        try:
+            domain = email.split('@')[1].lower()
+        except IndexError:
+            return False
+        allowed_domains = [
+            d.strip().lower()
+            for d in self.allowed_email_domains.split(',')
+            if d.strip()
+        ]
+
+        return domain in allowed_domains
+
+    def clean(self):
+        super().clean()
+        if self.visibility == 'PRIVATE' and self.allowed_email_domains:
+            domains = [d.strip() for d in self.allowed_email_domains.split(',')]
+            invalid_domains = [d for d in domains if not re.match(r'^[a-zA-Z0-9-]+(\.[a-zA-Z0-9-]+)*$', d)]
+            if invalid_domains:
+                raise ValidationError({
+                    'allowed_email_domains': f"Invalid domain(s): {', '.join(invalid_domains)}"
+                })
+        if self.start_date_event >= self.end_date_event:
+            raise ValidationError("End date must be after start date.")
+
 
     def __str__(self) -> str:
         return f"Event: {self.event_name}"
-

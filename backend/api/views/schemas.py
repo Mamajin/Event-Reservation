@@ -30,7 +30,11 @@ class DressCode(str, Enum):
     THEMED = 'THEMED'
     OUTDOOR_BEACH_CASUAL = 'OUTDOOR_BEACH_CASUAL'
     
-
+    
+class EventVisibility(str, Enum):
+    PUBLIC = 'PUBLIC'
+    PRIVATE = 'PRIVATE'
+    
 # Schema for Organizer
 class OrganizerSchema(Schema):
     organizer_name: Optional[str]
@@ -54,8 +58,8 @@ class ErrorResponseSchema(Schema):
 class EventInputSchema(ModelSchema):
     category : EventCategory
     dress_code : DressCode
-
-    # not include Organizer Information
+    visibility: EventVisibility = EventVisibility.PUBLIC
+    allowed_email_domains: Optional[str] = None
     class Meta:
         model = Event
         exclude = ('organizer', 'id', 'status_registeration','tags','status')
@@ -73,14 +77,29 @@ class GoogleAuthSchema(Schema):
     token: str
 
 
+class EventEngagementSchema(Schema):
+    total_likes: int
+    total_bookmarks: int
+    
+
 class EventResponseSchema(ModelSchema):
-    # Include Organizer information
     category : EventCategory
     dress_code : DressCode
+    visibility: EventVisibility
     organizer : OrganizerResponseSchema
+    engagement: Optional[Dict] = None
+    
+    @classmethod
+    def resolve_engagement(cls, event: Event) -> Dict:
+        return EventEngagementSchema(
+            total_likes=event.like_count,  # Example, adjust based on your model
+            total_bookmarks=event.bookmark_count,  # Example, adjust based on your model
+        ).dict()
+    
     class Meta:
         model = Event
         fields = '__all__'
+        
  
 # Schema for User                
 class UserSchema(ModelSchema):
@@ -187,5 +206,24 @@ class FileUploadResponseSchema(Schema):
     message: str = "Upload successful"
     file_name: str
     uploaded_at: datetime
+    
+    
+class UserProfileSchema(Schema):
+    id: int
+    username: str
+    profile_picture: Optional[str]
+    
 
+class CommentSchema(Schema):
+    parent_id: Optional[int] = None
+    content: str
 
+    
+class CommentResponseSchema(Schema):
+    id: int
+    user: UserProfileSchema
+    content: str
+    created_at: datetime
+    status: str
+    reactions: List[Dict] = []
+    replies: List['CommentResponseSchema'] = []
