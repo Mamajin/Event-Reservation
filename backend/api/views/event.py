@@ -8,6 +8,17 @@ class EventAPI:
 
     @router.post('/create-event', response=EventResponseSchema, auth=JWTAuth())
     def create_event(request, data: EventInputSchema = Form(...), image: UploadedFile = File(None)):
+        """
+        Create a new event with optional image upload.
+
+        Args:
+            request (HttpRequest): The HTTP request object.
+            data (EventInputSchema): Event data from the user.
+            image (UploadedFile, optional): Image file for the event.
+
+        Returns:
+            EventResponseSchema: The created event details or error response.
+        """
         this_user = request.user
         try:
             organizer = Organizer.objects.get(user=this_user)
