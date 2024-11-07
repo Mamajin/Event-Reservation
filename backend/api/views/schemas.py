@@ -62,7 +62,7 @@ class EventInputSchema(ModelSchema):
     allowed_email_domains: Optional[str] = None
     class Meta:
         model = Event
-        exclude = ('organizer', 'id', 'status_registeration','tags','status')
+        exclude = ('organizer', 'id', 'status_registeration','tags','status', 'event_image')
     
 class AuthResponseSchema(Schema):
     access_token: str
@@ -80,6 +80,7 @@ class GoogleAuthSchema(Schema):
 class EventEngagementSchema(Schema):
     total_likes: int
     total_bookmarks: int
+    has_user_liked: bool
     
 
 class EventResponseSchema(ModelSchema):
@@ -90,10 +91,11 @@ class EventResponseSchema(ModelSchema):
     engagement: Optional[Dict] = None
     
     @classmethod
-    def resolve_engagement(cls, event: Event) -> Dict:
+    def resolve_engagement(cls, event: Event, user: AttendeeUser) -> Dict:
         return EventEngagementSchema(
             total_likes=event.like_count,  # Example, adjust based on your model
-            total_bookmarks=event.bookmark_count,  # Example, adjust based on your model
+            total_bookmarks=event.bookmark_count,
+            has_user_liked=event.likes.has_user_liked(event=event, user=user)
         ).dict()
     
     class Meta:
@@ -206,3 +208,24 @@ class FileUploadResponseSchema(Schema):
     message: str = "Upload successful"
     file_name: str
     uploaded_at: datetime
+    
+    
+class UserProfileSchema(Schema):
+    id: int
+    username: str
+    profile_picture: Optional[str]
+    
+
+class CommentSchema(Schema):
+    parent_id: Optional[int] = None
+    content: str
+
+    
+class CommentResponseSchema(Schema):
+    id: int
+    user: UserProfileSchema
+    content: str
+    created_at: datetime
+    status: str
+    reactions: List[Dict] = []
+    replies: List['CommentResponseSchema'] = []

@@ -19,6 +19,7 @@ from api.models.like import *
 from api.models.organizer import *
 from api.models.ticket import *
 from api.models.session import *
+from api.models.comment import *
 from botocore.exceptions import ClientError
 from django.conf import settings
 from pydantic import EmailStr, HttpUrl, constr, conint, Field
