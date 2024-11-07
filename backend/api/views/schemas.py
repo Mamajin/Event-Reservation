@@ -49,6 +49,15 @@ class OrganizerResponseSchema(Schema):
     organization_type: OrganizerType
     logo: Optional[str]
     is_verified: bool
+    
+
+class EmailVerificationSchema(Schema):
+    token: str
+
+
+class EmailVerificationResponseSchema(Schema):
+    message: str
+    verified: bool
 
 
 class ErrorResponseSchema(Schema):
