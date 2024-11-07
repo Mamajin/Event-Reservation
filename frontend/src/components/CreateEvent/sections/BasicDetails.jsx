@@ -1,8 +1,10 @@
+import { useState, useEffect } from 'react';
 import FileInput from "../../FileInput";
 import SelectInput from "../../SelectInput";
 
 export default function BasicDetails({ form }) {
   const { watch, setValue } = form;
+  const [eventImage, setEventImage] = useState(null);
 
   const CATEGORY_OPTION = [
     { value: 'CONFERENCE', label: "Conference" },
@@ -24,18 +26,51 @@ export default function BasicDetails({ form }) {
     { value: "THEMED", label: "Themed" },
     { value: "OUTDOOR_BEACH_CASUAL", label: "Outdoor Beach Casual" },
   ];
-  const handleFileChange = (file) => {
-    // Validate the file type
-    if (file.type !== 'image/jpeg' && file.type !== 'image/png') {
+
+
+
+  useEffect(() => {
+    return () => {
+      if (eventImage) {
+        URL.revokeObjectURL(eventImage);
+      }
+    };
+  }, [eventImage]);
+
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    
+    if (!file) {
+      if (eventImage) {
+        URL.revokeObjectURL(eventImage);
+      }
+      setEventImage(null);
+      setValue('event_image', null);
+      return;
+    }
+
+    const allowedTypes = ['image/jpeg', 'image/png'];
+  
+    if (!allowedTypes.includes(file.type)) {
       alert('Only JPEG and PNG files are allowed.');
+      e.target.value = '';
       return;
     }
-    if (file.size > 5 * 1024 * 1024) { // 5 MB
+    
+    if (file.size > 5 * 1024 * 1024) {
       alert('File size exceeds the limit of 5 MB.');
+      e.target.value = '';
       return;
     }
+    
+    if (eventImage) {
+      URL.revokeObjectURL(eventImage);
+    }
+    
+    const previewUrl = URL.createObjectURL(file);
+    setEventImage(previewUrl);
     setValue('event_image', file);
-    setEventImage(file);
+    console.log(file)
   };
   return (
     <div className="grid gap-4">
@@ -101,15 +136,20 @@ export default function BasicDetails({ form }) {
           <label className="label font-medium text-dark-purple">Minimum Age Requirement</label>
           <input
             type="number"
-            className="input input-bordered bg-white  "
+            className="input input-bordered bg-white"
             placeholder="Enter minimum age"
             {...form.register('min_age_requirement', { valueAsNumber: true })}
           />
         </div>
       </div>
       <div className="mt-6 w-full">
-        <FileInput label="Event Banner" name="event_file"
-          onChange={handleFileChange} accept=".jpg,.jpeg,.png,.pdf"/>
+        <FileInput 
+          label="Event Banner" 
+          name="event_file"
+          onChange={handleFileChange} 
+          accept=".jpg,.jpeg,.png"
+          preview={eventImage}
+        />
       </div>
     </div>
   );
