@@ -35,49 +35,45 @@ export function CreateEventForm() {
   const onSubmit = async (formValues) => {
     setLoading(true);
     try {
+      console.log(formValues.event_image[0])
       const formData = new FormData();
-  
-      // Append form data fields
-      formData.append('event_name', formValues.event_name);
-      formData.append('start_date_register', formatDateTime(formValues.start_date_register) || '');
-      formData.append('end_date_register', formatDateTime(formValues.end_date_register) || '');
-      formData.append('start_date_event', formatDateTime(formValues.start_date_event) || '');
-      formData.append('end_date_event', formatDateTime(formValues.end_date_event) || '');
-      formData.append('max_attendee', parseInt(formValues.max_attendee, 10) || 0);
-      formData.append('description', formValues.description || '');
-      formData.append('category', formValues.category || 'CONFERENCE');
-      formData.append('dress_code', formValues.dress_code || 'CASUAL');
-      formData.append('visibility', formValues.visibility || 'PUBLIC');
-      formData.append('is_online', Boolean(formValues.is_online));
-      formData.append('is_free', Boolean(formValues.is_free));
-      formData.append('ticket_price', formValues.is_free ? 0 : parseFloat(formValues.ticket_price || 0));
-      formData.append('expected_price', formValues.is_free ? 0 : parseFloat(formValues.expected_price || 0));
-      formData.append('address', formValues.address || '');
-      formData.append('latitude', parseFloat(formValues.latitude || 0));
-      formData.append('longitude', parseFloat(formValues.longitude || 0));
-      formData.append('meeting_link', formValues.is_online ? (formValues.meeting_link || '') : '');
-      formData.append('allowed_email_domains', formValues.allowed_email_domains || '');
-      formData.append('detailed_description', formValues.detailed_description || '');
-      formData.append('contact_email', formValues.contact_email || '');
-      formData.append('contact_phone', formValues.contact_phone || '');
-      formData.append('website_url', formValues.website_url || '');
-      formData.append('facebook_url', formValues.facebook_url || '');
-      formData.append('twitter_url', formValues.twitter_url || '');
-      formData.append('instagram_url', formValues.instagram_url || '');
-      formData.append('min_age_requirement', parseInt(formValues.min_age_requirement || 0, 10));
-      formData.append('terms_and_conditions', formValues.terms_and_conditions || '');
-      formData.append('tags', formValues.tags || '');
-  
-      // Optional fields
-      formData.append('event_create_date', formatDateTime(new Date()));
-      formData.append('engagement', JSON.stringify({}));
-      formData.append('organizer', JSON.stringify(formValues.organizer || {}));
-      formData.append('status', formValues.status || '');
-      formData.append('status_registeration', formValues.status_registeration || '');
-  
-      // Handle image upload if provided
-      if (formValues.image && formValues.image[0]) {
-        formData.append('image', formValues.image[0]);
+
+      const data = {
+        event_name: formValues.event_name,
+        start_date_register: formatDateTime(formValues.start_date_register) || '',
+        end_date_register: formatDateTime(formValues.end_date_register) || '',
+        start_date_event: formatDateTime(formValues.start_date_event) || '',
+        end_date_event: formatDateTime(formValues.end_date_event) || '',
+        max_attendee: parseInt(formValues.max_attendee, 10) || 0,
+        description: formValues.description || '',
+        category: formValues.category || 'CONFERENCE',
+        dress_code: formValues.dress_code || 'CASUAL',
+        visibility: formValues.visibility || 'PUBLIC',
+        is_online: Boolean(formValues.is_online),
+        is_free: Boolean(formValues.is_free),
+        ticket_price: formValues.is_free ? 0 : parseFloat(formValues.ticket_price || 0),
+        expected_price: formValues.is_free ? 0 : parseFloat(formValues.expected_price || 0),
+        address: formValues.address || '',
+        latitude: parseFloat(formValues.latitude || 0),
+        longitude: parseFloat(formValues.longitude || 0),
+        meeting_link: formValues.is_online ? (formValues.meeting_link || '') : '',
+        allowed_email_domains: formValues.allowed_email_domains || '',
+        detailed_description: formValues.detailed_description || '',
+        contact_email: formValues.contact_email || '',
+        contact_phone: formValues.contact_phone || '',
+        website_url: formValues.website_url || '',
+        facebook_url: formValues.facebook_url || '',
+        twitter_url: formValues.twitter_url || '',
+        instagram_url: formValues.instagram_url || '',
+        min_age_requirement: parseInt(formValues.min_age_requirement || 0, 10),
+        terms_and_conditions: formValues.terms_and_conditions || '',
+        tags: formValues.tags || '',
+        updated_at:  formatDateTime(new Date())
+      };
+      formData.append('data', JSON.stringify(data));
+
+      if (formValues.event_image) {
+        formData.append('image', formValues.event_image);
       }
   
       const token = localStorage.getItem(ACCESS_TOKEN);
@@ -194,10 +190,7 @@ export function CreateEventForm() {
             </div>
 
             <div className="flex justify-end space-x-4 border-t pt-4">
-              <button type="button" className="btn btn-outline">
-                Save as Draft
-              </button>
-              <button type="submit" className="btn btn-primary">
+              <button type="submit" className="btn bg-amber-300 text-dark-purple">
                 {loading ? "Creating..." : "Create Event"}
               </button>
             </div>
