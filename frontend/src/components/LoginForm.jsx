@@ -24,6 +24,8 @@ function LoginForm() {
             localStorage.setItem(PROFILE_PICTURE, authResponse.data.picture);
             localStorage.setItem(ACCESS_TOKEN, authResponse.data.access_token);
             localStorage.setItem(REFRESH_TOKEN, authResponse.data.refresh_token);
+            localStorage.setItem(USER_STATUS, authResponse.data.status);
+            localStorage.setItem(USER_NAME, authResponse.data.username);
             console.log(authResponse.data.picture)
             // Navigate to the dashboard or home after successful login
             navigate("/");
