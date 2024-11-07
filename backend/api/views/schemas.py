@@ -91,11 +91,25 @@ class EventResponseSchema(ModelSchema):
     engagement: Optional[Dict] = None
     
     @classmethod
-    def resolve_engagement(cls, event: Event, user: AttendeeUser) -> Dict:
+    def resolve_engagement(cls, event: Event, user: Optional[AttendeeUser]) -> Dict:
+        """
+        Resolve engagement information for the event.
+
+        Args:
+            event (Event): The event for which engagement data is being retrieved.
+            user (Optional[AttendeeUser]): The user for whom the engagement data is resolved.
+
+        Returns:
+            Dict: Engagement data including total likes, total bookmarks, and user's like status.
+        """
+        has_user_liked = (
+            event.likes.has_user_liked(event=event, user=user)
+            if user and user.is_authenticated else False
+        )
         return EventEngagementSchema(
             total_likes=event.like_count,  # Example, adjust based on your model
             total_bookmarks=event.bookmark_count,
-            has_user_liked=event.likes.has_user_liked(event=event, user=user)
+            has_user_liked=has_user_liked
         ).dict()
     
     class Meta:
