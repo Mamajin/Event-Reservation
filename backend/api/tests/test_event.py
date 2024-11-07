@@ -303,7 +303,7 @@ class EventTest(EventModelsTest):
         self.assertTrue(response.status_code , 200)
         
         
-    def test_invalid_upload_image_event(self):
+    def test_invalid_user_upload_image_event(self):
         user = self.create_user("test","test")
         
         token = self.get_token_for_user(user)
@@ -313,10 +313,108 @@ class EventTest(EventModelsTest):
             content=b'some content',
             content_type='image/png'
         )
+        response = self.client.post(f"/{self.event_test.id}" + self.upload_image_url, 
+                                    headers={'Authorization': f'Bearer {token}'},
+                                    FILES = {'file': image_file})
+        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.json()['error'], 'User is not an organizer')
+        
+        
+    def test_invalid_organizer_upload_image_event(self):
+        user = self.create_user("test","test")
+        token = self.get_token_for_user(user)
+        organizer=  self.become_organizer(user ,"test")
+        
+        image_file = self.create_test_image()
+        response = self.client.post(f"/{self.event_test.id}" + self.upload_image_url, 
+                                    headers={'Authorization': f'Bearer {token}'},
+                                    FILES = {'file': image_file})
+        self.assertEqual(response.status_code, 403)
+        self.assertEqual(response.json()['error'], 'You are not allowed to upload an image for this event.')
+        
+    def test_invalid_image_format(self):
+        token = self.get_token_for_user(self.test_user)
+        
+        image_file = SimpleUploadedFile(
+            name='test_image.gif',
+            content=b'some content',
+            content_type='image/gif'
+        )
+        
         response = self.client.post(f"/{self.event_test.id}"+ self.upload_image_url, 
                                     headers={'Authorization': f'Bearer {token}'},
                                     FILES = {'file': image_file})
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.json()['error'], 'Invalid file type. Only JPEG and PNG are allowed.' )
+        
+    def test_invalid_exceed_size_image(self):
+        EXCEED_SIZE = 10 * 1024 * 1024
+        token = self.get_token_for_user(self.test_user)
+        
+        image_file = SimpleUploadedFile(
+            name='test_image.jpg',
+            content=b'some content' * EXCEED_SIZE,
+            content_type='image/jpg'
+        )
+        
+        response = self.client.post(f"/{self.event_test.id}"+ self.upload_image_url, 
+                                    headers={'Authorization': f'Bearer {token}'},
+                                    FILES = {'file': image_file})
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.json()['error'], 'File size exceeds the limit of 10.0 MB.')
+        
+    def test_set_image_url_event(self):
+        token = self.get_token_for_user(self.test_user)
+        image_file = SimpleUploadedFile(
+            name='test_image.png',
+            content=b'some content',
+            content_type='image/png'
+        )
+        
+        
+        response = self.client.post(f"/{self.event_test.id}"+ self.upload_image_url, 
+                                    headers={'Authorization': f'Bearer {token}'},
+                                    FILES = {'file': image_file})
+        
+        self.assertEqual(response.status_code, 200)
+        
+        
+    @patch("boto3.client")
+    def test_upload_event_image_s3_client_error(self, mock_boto_client):
+        # Set up a mock S3 client and simulate ClientError on delete_object and upload_fileobj
+        mock_s3_client = MagicMock()
+        mock_s3_client.delete_object.side_effect = ClientError(
+            {"Error": {"Code": "NoSuchKey", "Message": "The specified key does not exist."}},
+            "DeleteObject"
+        )
+        mock_s3_client.upload_fileobj.side_effect = ClientError(
+            {"Error": {"Code": "InternalError", "Message": "Internal error"}},
+            "UploadFileObject"
+        )
+        mock_boto_client.return_value = mock_s3_client
+
+        # Set up a mock image file
+        image_file = SimpleUploadedFile(
+            name='test_image.png',
+            content=b'some content',
+            content_type='image/png'
+        )
+
+        # Call the view that handles the S3 object deletion and upload
+        token = self.get_token_for_user(self.test_user)
+        response = self.client.post(
+            f"/{self.event_test.id}{self.upload_image_url}",
+            FILES={'file': image_file},
+            headers={'Authorization': f'Bearer {token}'},
+            format='multipart'
+        )
         print(response.json())
+        # Assert that the response has a 400 status code and contains the expected error messages
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.json()['error'], 'S3 upload failed: An error occurred (InternalError) when calling the UploadFileObject operation: Internal error')
+
+        # Assert that the delete_object and upload_fileobj methods were called as expected
+
         
 
     # Test edit event function:

@@ -46,7 +46,8 @@ class EventModelsTest(TestCase):
             start_date_register=timezone.now() - datetime.timedelta(days = 2),  # Example for registration start
             end_date_register=timezone.now() + datetime.timedelta(days = 3),  # Registration ends when the event starts
             max_attendee=fake.random_int(min=10, max=500),
-            description=fake.text(max_nb_chars=200)
+            description=fake.text(max_nb_chars=200),
+            event_image = fake.file_name()
         )
         
     
