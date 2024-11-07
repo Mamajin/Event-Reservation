@@ -4,6 +4,7 @@ from django.contrib.auth.hashers import make_password
 from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
 from django.conf import settings
+from django.db import IntegrityError
 from django.shortcuts import get_object_or_404
 from django.http import HttpRequest
 from ninja import Schema, ModelSchema, Form, Router, File
@@ -12,6 +13,7 @@ from ninja.errors import HttpError
 from ninja.files import UploadedFile
 from ninja_jwt.authentication import JWTAuth
 from ninja_jwt.tokens import AccessToken, RefreshToken
+from api.utils import *
 from api.models.user import *
 from api.models.event import *
 from api.models.bookmarks import *
@@ -21,7 +23,6 @@ from api.models.ticket import *
 from api.models.session import *
 from api.models.comment import *
 from botocore.exceptions import ClientError
-from django.conf import settings
 from pydantic import EmailStr, HttpUrl, constr, conint, Field
 from datetime import datetime, date
 from typing import List, Optional
