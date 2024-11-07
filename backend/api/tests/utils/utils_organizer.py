@@ -6,12 +6,16 @@ from ninja.testing import TestClient
 from api.urls import organizer_router
 from ninja_jwt.tokens import RefreshToken
 from faker import Faker
+from unittest.mock import patch
+from django.core.files.uploadedfile import SimpleUploadedFile
 import datetime
 from django.utils import timezone
 
+ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/jpg']
 fake = Faker()
 
 class OrganizerModelsTest(TestCase):
+    EXCEED_SIZE = 10 * 1024 * 1024
 
     def setUp(self):
         """
@@ -24,6 +28,7 @@ class OrganizerModelsTest(TestCase):
         self.update_organizer_url = '/update-organizer'
         self.revoke_organizer_url = '/revoke-organizer'
         self.view_organizer_url = "/view-organizer"
+        self.upload_logo_organizer_url = '/upload/logo/'
         self.test_user = AttendeeUser.objects.create_user(
             username='attendeeuser3',
             password='password123',
@@ -36,7 +41,7 @@ class OrganizerModelsTest(TestCase):
         
         self.event_test = Event.objects.create(
             event_name=fake.company(),
-            organizer= self.become_organizer(self.test_user, "test_user"),
+            organizer= self.become_organizer(self.test_user, "test_user", "test"),
             start_date_event=timezone.now(),
             end_date_event= timezone.now() + datetime.timedelta(days = 1),  # Ensure it ends after it starts
             start_date_register=timezone.now() - datetime.timedelta(days = 2),  # Example for registration start
@@ -50,15 +55,17 @@ class OrganizerModelsTest(TestCase):
         refresh = RefreshToken.for_user(user)
         return str(refresh.access_token)
     
-    def become_organizer(self,user, organizer_name):
-        self.organizer, created = Organizer.objects.get_or_create(
+    def become_organizer(self,user, organizer_name, email):
+        organizer = Organizer.objects.create(
             user= user,
             organizer_name = organizer_name,
+            email = str(email) + "@example.com",
+            organization_type = "INDIVIDUAL",
         )
-        return self.organizer
+        return organizer
 
     
-    def create_user(self, username, first_name):
+    def create_user(self, username, first_name, email):
         return AttendeeUser.objects.create_user(
             username = username, 
             password = "password123",
@@ -66,7 +73,7 @@ class OrganizerModelsTest(TestCase):
             last_name = 'Doe',
             birth_date='1995-06-15',
             phone_number='9876543210',
-            email='jane.doe@example.com'
+            email= str(email)+'.doe@example.com'
         )
           
         
