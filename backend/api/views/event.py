@@ -115,7 +115,7 @@ class EventAPI:
             logger.error(f"Error while retrieving events for the homepage: {str(e)}")
             return Response({'error': str(e)}, status=400)
 
-    @router.put('/{event_id}/edit', response={204: EventResponseSchema, 401: ErrorResponseSchema, 404: ErrorResponseSchema}, auth=JWTAuth())
+    @router.put('/{event_id}/edit', response={200: EventResponseSchema, 401: ErrorResponseSchema, 404: ErrorResponseSchema}, auth=JWTAuth())
     def edit_event(request: HttpRequest, event_id: int, data: EventInputSchema):
         """
         Edit an existing event by ID if the user is the organizer.
@@ -136,9 +136,10 @@ class EventAPI:
                 return Response({'error': 'You are not allowed to edit this event.'}, status=403)
             
             Event.objects.filter(id = event_id).update(**data.dict())
+            event.refresh_from_db()
             event_data = EventResponseSchema.from_orm(event).dict()
             logger.info(f"Organizer {organizer.organizer_name} edited their event {event_id}.")
-            return Response(event_data, status=204)
+            return Response(event_data, status=200)
         except Event.DoesNotExist:
             logger.error(f"Event with ID {event_id} does not exist.")
             return Response({'error': 'Event not found'}, status=404)

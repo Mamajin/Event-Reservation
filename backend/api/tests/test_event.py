@@ -402,175 +402,208 @@ class EventTest(EventModelsTest):
 
         # Call the view that handles the S3 object deletion and upload
         token = self.get_token_for_user(self.test_user)
-        response = self.client.post(
-            f"/{self.event_test.id}{self.upload_image_url}",
-            FILES={'file': image_file},
-            headers={'Authorization': f'Bearer {token}'},
-            format='multipart'
-        )
-        print(response.json())
+        response = self.client.post(f"/{self.event_test.id}"+ self.upload_image_url, 
+                                    headers={'Authorization': f'Bearer {token}'},
+                                    FILES = {'file': image_file})
+        
         # Assert that the response has a 400 status code and contains the expected error messages
         self.assertEqual(response.status_code, 400)
         self.assertEqual(response.json()['error'], 'S3 upload failed: An error occurred (InternalError) when calling the UploadFileObject operation: Internal error')
 
         # Assert that the delete_object and upload_fileobj methods were called as expected
+        
+    @patch("boto3.client")
+    def test_upload_image_caught_exception(self, mock_boto_client):
+        mock_boto_client.side_effect = Exception("Some unexpected error")
 
-        
+        # Make a request
+        image_file = self.create_test_image()
+        token = self.get_token_for_user(self.test_user)
 
-    # Test edit event function:
-    # def test_valid_edit_event(self):
-    #     new_data = {
-    #         "event_name": fake.company(),
-    #         "start_date_register": timezone.now() - datetime.timedelta(days = 2),
-    #         "end_date_register": timezone.now() - datetime.timedelta(days = 1),
-    #         "start_date_event": timezone.now(),
-    #         "end_date_event": timezone.now() + datetime.timedelta(days = 1),
-    #         "max_attendee": 1,
-    #         "description": fake.text(max_nb_chars=200),
-    #         'category': "CONFERENCE"
-    #     }
-    #     token = self.get_token_for_user(self.test_user)
+        # Call the API endpoint
+        response = self.client.post(
+            f"/{self.event_test.id}{self.upload_image_url}",
+            FILES={'file': image_file},
+            headers={'Authorization': f'Bearer {token}'},
+        )
+        # Assert that the error message is in the response
+        self.assertEqual(response.status_code, 400)
+        self.assertIn("Upload failed", response.data["error"])
         
-    #     response = self.client.put(self.edit_event_url + str(self.event_test.id), json = new_data ,headers={'Authorization': f'Bearer {token}'})
-    #     print(response.json())
-    #     self.assertEqual(response.status_code, 204)
         
+    def test_get_engagement(self):
+        
+        response = self.client.get(f"/{self.event_test.id}" + self.get_engagement_url)
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(len(response.json()) == 3)
+        
+    def test_get_comment(self):
+        response = self.client.get(f"/{self.event_test.id}" + self.get_comment_url)
+        self.assertEqual(response.status_code , 200)
+        self.assertEqual(response.json(),[])
+        
+        
+    def test_edit_event(self):
+        token = self.get_token_for_user(self.test_user)
+        data = {
+            "category": "CONFERENCE",
+            "dress_code": "CASUAL",
+            "event_name": "Test edit",
+            "event_create_date": timezone.now().isoformat(),
+            "start_date_event": (timezone.now() + datetime.timedelta(days=2)).isoformat(),
+            "end_date_event": (timezone.now() + datetime.timedelta(days=3)).isoformat(),
+            "start_date_register": timezone.now().isoformat(),
+            "end_date_register": (timezone.now() + datetime.timedelta(days=1)).isoformat(),
+            "description": "A tech event for showcasing new innovations.",
+            "max_attendee": 100,
+            "address": "Tech Park, Downtown",
+            "latitude": 0.0,
+            "longitude": 0.0,
+            "is_free": True,
+            "ticket_price": 0.00,
+            "expected_price": 0.00,
+            "detailed_description": "Join us for an exciting event!",
+            "contact_email": "info@techconference.com",
+            "contact_phone": "+1234567890",
+            "updated_at": timezone.now().isoformat(),
+        }
+        response = self.client.put(f"/{self.event_test.id}" + self.edit_event_url, headers={'Authorization': f'Bearer {token}'}, json  = data )
+        self.assertTrue(response.status_code, 200)
+        self.assertEqual(response.json()['event_name'], "Test edit")
+        
+        
+    def test_invalid_organizer_edit(self):
+        user = self.create_user("test","test")
+        token = self.get_token_for_user(user)
+        organizer = self.become_organizer(user, "test")
+        data = {
+            "category": "CONFERENCE",
+            "dress_code": "CASUAL",
+            "event_name": "Test edit",
+            "event_create_date": timezone.now().isoformat(),
+            "start_date_event": (timezone.now() + datetime.timedelta(days=2)).isoformat(),
+            "end_date_event": (timezone.now() + datetime.timedelta(days=3)).isoformat(),
+            "start_date_register": timezone.now().isoformat(),
+            "end_date_register": (timezone.now() + datetime.timedelta(days=1)).isoformat(),
+            "description": "A tech event for showcasing new innovations.",
+            "max_attendee": 100,
+            "address": "Tech Park, Downtown",
+            "latitude": 0.0,
+            "longitude": 0.0,
+            "is_free": True,
+            "ticket_price": 0.00,
+            "expected_price": 0.00,
+            "detailed_description": "Join us for an exciting event!",
+            "contact_email": "info@techconference.com",
+            "contact_phone": "+1234567890",
+            "updated_at": timezone.now().isoformat(),
+        }
+        response = self.client.put(f"/{self.event_test.id}" + self.edit_event_url, headers={'Authorization': f'Bearer {token}'}, json  = data )
+        self.assertEqual(response.status_code, 403)
+        self.assertEqual(response.json()['error'],'You are not allowed to edit this event.')
+        
+        
+    def test_edit_not_exist_event(self):
+        token = self.get_token_for_user(self.test_user)
+        data = {
+            "category": "CONFERENCE",
+            "dress_code": "CASUAL",
+            "event_name": "Test edit",
+            "event_create_date": timezone.now().isoformat(),
+            "start_date_event": (timezone.now() + datetime.timedelta(days=2)).isoformat(),
+            "end_date_event": (timezone.now() + datetime.timedelta(days=3)).isoformat(),
+            "start_date_register": timezone.now().isoformat(),
+            "end_date_register": (timezone.now() + datetime.timedelta(days=1)).isoformat(),
+            "description": "A tech event for showcasing new innovations.",
+            "max_attendee": 100,
+            "address": "Tech Park, Downtown",
+            "latitude": 0.0,
+            "longitude": 0.0,
+            "is_free": True,
+            "ticket_price": 0.00,
+            "expected_price": 0.00,
+            "detailed_description": "Join us for an exciting event!",
+            "contact_email": "info@techconference.com",
+            "contact_phone": "+1234567890",
+            "updated_at": timezone.now().isoformat(),
+        }
+        
+        response = self.client.put(f"/{100}" + self.edit_event_url, headers={'Authorization': f'Bearer {token}'}, json  = data )
+        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.json()['error'], 'Event not found')
+        
+    def test_organizer_does_not_exist(self):
+        user = self.create_user("test", "Test")
+        token = self.get_token_for_user(user)
+        data = {
+            "category": "CONFERENCE",
+            "dress_code": "CASUAL",
+            "event_name": "Test edit",
+            "event_create_date": timezone.now().isoformat(),
+            "start_date_event": (timezone.now() + datetime.timedelta(days=2)).isoformat(),
+            "end_date_event": (timezone.now() + datetime.timedelta(days=3)).isoformat(),
+            "start_date_register": timezone.now().isoformat(),
+            "end_date_register": (timezone.now() + datetime.timedelta(days=1)).isoformat(),
+            "description": "A tech event for showcasing new innovations.",
+            "max_attendee": 100,
+            "address": "Tech Park, Downtown",
+            "latitude": 0.0,
+            "longitude": 0.0,
+            "is_free": True,
+            "ticket_price": 0.00,
+            "expected_price": 0.00,
+            "detailed_description": "Join us for an exciting event!",
+            "contact_email": "info@techconference.com",
+            "contact_phone": "+1234567890",
+            "updated_at": timezone.now().isoformat(),
+        }
+        
+        response = self.client.put(f"/{self.event_test.id}" + self.edit_event_url, headers={'Authorization': f'Bearer {token}'}, json  = data )
+        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.json()['error'], 'User is not an organizer')
         
     
+    @patch('api.models.Event.objects.get')
+    def test_edit_caught_exception(self, mock_event_get):
+        mock_event_get.side_effect = Exception("Some unexpected error")
+        token = self.get_token_for_user(self.test_user)
+        
+        data = {
+            "category": "CONFERENCE",
+            "dress_code": "CASUAL",
+            "event_name": "Test edit",
+            "event_create_date": timezone.now().isoformat(),
+            "start_date_event": (timezone.now() + datetime.timedelta(days=2)).isoformat(),
+            "end_date_event": (timezone.now() + datetime.timedelta(days=3)).isoformat(),
+            "start_date_register": timezone.now().isoformat(),
+            "end_date_register": (timezone.now() + datetime.timedelta(days=1)).isoformat(),
+            "description": "A tech event for showcasing new innovations.",
+            "max_attendee": 100,
+            "address": "Tech Park, Downtown",
+            "latitude": 0.0,
+            "longitude": 0.0,
+            "is_free": True,
+            "ticket_price": 0.00,
+            "expected_price": 0.00,
+            "detailed_description": "Join us for an exciting event!",
+            "contact_email": "info@techconference.com",
+            "contact_phone": "+1234567890",
+            "updated_at": timezone.now().isoformat(),
+        }
 
-    # def test_can_register(self):
-    #     event_test = Event.objects.create(
-    #         event_name=fake.company(),
-    #         organizer= self.become_organizer(self.test_user, "test_user"),
-    #         start_date_register=timezone.now() - datetime.timedelta(days = 2),  # Example for registration start
-    #         end_date_register=timezone.now() + datetime.timedelta(days = 1),  # Registration ends when the event starts
-    #         start_date_event=timezone.now() + datetime.timedelta(days = 3),
-    #         end_date_event= timezone.now() + datetime.timedelta(days = 4),  # Ensure it ends after it starts
-    #         max_attendee=fake.random_int(min=10, max=500),
-    #         description=fake.text(max_nb_chars=200)
-    #     )
-    #     self.assertTrue(event_test.can_register())
-        
-    # def test_date_input_is_valid(self):
-    #     event_data = {
-    #         'event_name': 'Annual Tech Conference',
-    #         'start_date_register': timezone.now(),                    # Registration starts now
-    #         'end_date_register': timezone.now() + datetime.timedelta(days=1), # Registration ends in 5 days
-    #         'start_date_event': timezone.now() + datetime.timedelta(days=2),  # Start tomorrow
-    #         'end_date_event': timezone.now() + datetime.timedelta(days=3),    # End the day after
-    #         'description': 'A tech event for showcasing new innovations.',
-    #         'max_attendee': 100
-    #     }
-    #     normal_user = self.create_user("test", "test")
-    #     organizer = self.become_organizer(normal_user, "test")
-    #     token  = self.get_token_for_user(normal_user)
-    #     response = self.client.post(self.event_create_url, json=event_data, headers={'Authorization': f'Bearer {token}'})
-    #     self.assertEqual(response.status_code, 200)
-        
-
-        
-        
-    # def test_valid_get_all_events(self):
-    #     response = self.client.get(self.list_event_url)
-    #     self.assertEqual(response.status_code, 200)
-        
-    # def test_valid_get_event_detail(self):
-    #     response = self.client.get(self.get_event_detail_url + str(self.event_test.id))
-    #     self.assertEqual(response.status_code, 200)
-        
-        
-        
-    # def test_invalid_organizer_edit_event(self):
-    #     new_data = {
-    #         "event_name": fake.company(),
-    #         "start_date_register": timezone.now() - datetime.timedelta(days = 2),
-    #         "end_date_register": timezone.now() - datetime.timedelta(days = 1),
-    #         "start_date_event": timezone.now(),
-    #         "end_date_event": timezone.now() + datetime.timedelta(days = 1),
-    #         "max_attendee": 1,
-    #         "description": fake.text(max_nb_chars=200)
-    #     }
-    #     normal_user = self.create_user("test","test")
-    #     token = self.get_token_for_user(normal_user)
-    #     response = self.client.put(self.edit_event_url + str(self.event_test.id), json = new_data ,headers={'Authorization': f'Bearer {token}'})
-    #     self.assertEqual(response.status_code, 404)
-    #     normal_user1  = self.create_user("test1","test1")
-    #     organizer = self.become_organizer(normal_user1, "test_organizer")
-    #     token1 = self.get_token_for_user(normal_user1)
-    #     response = self.client.put(self.edit_event_url + str(self.event_test.id), json = new_data ,headers={'Authorization': f'Bearer {token1}'})
-    #     self.assertIn('You are not allowed to edit this event.', response.json().get("error", ""))
-    #     self.assertTrue(response.status_code, 403)
-        
-        
-    # def test_edit_does_not_exist(self):
-    #     normal_user = self.create_user("test","test")
-    #     token = self.get_token_for_user(normal_user)
-    #     new_data = {
-    #         "event_name": fake.company(),
-    #         "start_date_register": timezone.now() - datetime.timedelta(days = 2),
-    #         "end_date_register": timezone.now() - datetime.timedelta(days = 1),
-    #         "start_date_event": timezone.now(),
-    #         "end_date_event": timezone.now() + datetime.timedelta(days = 1),
-    #         "max_attendee": 1,
-    #         "description": fake.text(max_nb_chars=200)
-    #     }
-    #     response = self.client.put(self.edit_event_url + str(2), json = new_data ,headers={'Authorization': f'Bearer {token}'})
-    #     self.assertTrue(response.status_code, 404)
-    #     self.assertIn('Event not found', response.json().get("error", ""))
-        
-        
-    # @patch("api.models.Organizer.objects.get")
-    # def test_get_my_events_unexpected_exception(self, mock_get_organizer):
-    #     # Mock Organizer.objects.get to raise an unexpected exception
-    #     mock_get_organizer.side_effect = Exception(f"Error while retrieving events for organizer {self.test_user.id}")
-    #     token = self.get_token_for_user(self.test_user)
-
-    #     # Make the request with a JWT token in the header
-    #     response = self.client.get(
-    #         self.organizer_get_events,  # Replace with the actual URL name for your endpoint
-    #         headers={'Authorization': f'Bearer {token}'}
-    #     )
-  
-    #     # Assert that the response status is 400 (Bad Request)
-    #     self.assertEqual(response.status_code,  400)
-
-    #     # Assert that the response contains the error message
-    #     self.assertEqual(response.data['error'], f"Error while retrieving events for organizer {self.test_user.id}")
-        
-    # @patch("api.models.Event.objects.filter")
-    # def test_list_event_unexpected_exception(self,mock_filter):
-    #         # Simulate a DatabaseError
-    #     mock_filter.side_effect = Exception(f"Error while retrieving events for the homepage")
-
-    #     response = self.client.get(self.list_event_url)
-    #     self.assertEqual(response.status_code,400)
-    #     self.assertIn(f"Error while retrieving events for the homepage", response.json().get("error", ""))
-        
-    # @patch("api.models.Event.objects.get")
-    # def test_edit_evnt_unexpected_exception(self, mock_get_event):
-    #     new_data = {
-    #         "event_name": fake.company(),
-    #         "start_date_register": timezone.now() - datetime.timedelta(days = 2),
-    #         "end_date_register": timezone.now() - datetime.timedelta(days = 1),
-    #         "start_date_event": timezone.now(),
-    #         "end_date_event": timezone.now() + datetime.timedelta(days = 1),
-    #         "max_attendee": 1,
-    #         "description": fake.text(max_nb_chars=200)
-    #     }
-    #     mock_get_event.side_effect = Exception(f"Error while editing event {self.event_test.id}")
-    #     token = self.get_token_for_user(self.test_user)
-        
-    #     response = self.client.put(self.edit_event_url + str(2), json = new_data ,headers={'Authorization': f'Bearer {token}'})
-    #     self.assertEqual(response.status_code,400)
-    #     self.assertIn(f"Error while editing event {self.event_test.id}", response.json().get("error", ""))
-        
-
-        
-        
+        response = self.client.put(
+            f"/{self.event_test.id}" + self.edit_event_url,
+            headers={'Authorization': f'Bearer {token}'},
+            json= data
+        )
+        self.assertEqual(response.status_code, 400)
+        self.assertIn("Some unexpected error", response.json().get("error"))
+    
         
         
         
 
+   
         
         
         

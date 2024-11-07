@@ -26,8 +26,10 @@ class EventModelsTest(TestCase):
         self.organizer_get_events = '/my-events'
         self.list_event_url = '/events'
         self.get_event_detail_url = '/'
-        self.edit_event_url = '/edit-event-'
+        self.edit_event_url = '/edit'
         self.upload_image_url = '/upload/event-image/'
+        self.get_engagement_url = '/engagement'
+        self.get_comment_url = '/comments'
         self.test_user = AttendeeUser.objects.create(
             username='attendeeuser4',
             password='password123',
