@@ -1,4 +1,4 @@
-from .utils.utils_organizer import OrganizerModelsTest, Organizer, Event,fake, patch, SimpleUploadedFile, ALLOWED_IMAGE_TYPES
+from .utils.utils_organizer import OrganizerModelsTest, Organizer, Event,fake, patch, SimpleUploadedFile, ALLOWED_IMAGE_TYPES, Mock, ClientError, MagicMock
 import logging
 logging.disable(logging.CRITICAL)
 
@@ -178,7 +178,83 @@ class OrganizerTestAPI(OrganizerModelsTest):
         self.assertEqual(response.json()['error'], 'File size exceeds the limit of 10.0 MB.')
         
     
+    def test_set_new_image(self):
+        user = self.create_user("test","test","test")
+        token = self.get_token_for_user(user)
+        organizer = self.become_organizer(user, "win", "win")
+        image_file = SimpleUploadedFile(
+            name='test_image.png',
+            content=b'some content',
+            content_type='image/png'
+        )
+        response = self.client.post(f"/{organizer.id}" + self.upload_logo_organizer_url, headers={'Authorization': f'Bearer {token}'}, FILES = {'logo': image_file})
+    
+    
+    @patch("boto3.client")
+    def test_upload_logo_image_s3_client_error(self, mock_boto_client):
+        # Set up a mock S3 client and simulate ClientError on delete_object and upload_fileobj
+        mock_s3_client = MagicMock()
+        mock_s3_client.delete_object.side_effect = ClientError(
+            {"Error": {"Code": "NoSuchKey", "Message": "The specified key does not exist."}},
+            "DeleteObject"
+        )
+        mock_s3_client.upload_fileobj.side_effect = ClientError(
+            {"Error": {"Code": "InternalError", "Message": "Internal error"}},
+            "UploadFileObject"
+        )
+        mock_boto_client.return_value = mock_s3_client
         
+        user = self.create_user("test","test","test")
+        token = self.get_token_for_user(user)
+        organizer = self.become_organizer(user, "win", "win")
+  
+
+        # Set up a mock image file
+        image_file = SimpleUploadedFile(
+            name='test_image.png',
+            content=b'some content',
+            content_type='image/png'
+        )
+
+        # Call the view that handles the S3 object deletion and upload
+        token = self.get_token_for_user(self.test_user)
+        response = self.client.post(f"/{organizer.id}"+ self.upload_logo_organizer_url, 
+                                    headers={'Authorization': f'Bearer {token}'},
+                                    FILES = {'logo': image_file})
+    
+        # Assert that the response has a 400 status code and contains the expected error messages
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.json()['error'], 'S3 upload failed: An error occurred (InternalError) when calling the UploadFileObject operation: Internal error')
+
+        # Assert that the delete_object and upload_fileobj methods were called as expected
+        
+        
+        
+    @patch('boto3.client')
+    def test_general_exception_handling(self, mock_boto3_client):
+        """Test general exception handling during upload"""
+        # Mock S3 client to raise a general exception
+        mock_s3 = MagicMock()
+        mock_boto3_client.return_value = mock_s3
+        mock_s3.upload_fileobj.side_effect = Exception("Unexpected error")
+        
+        user = self.create_user("test","test","test")
+        token = self.get_token_for_user(user)
+        organizer = self.become_organizer(user, "win", "win")
+        
+        image_file = SimpleUploadedFile(
+            name='test_image.png',
+            content=b'some content',
+            content_type='image/png'
+        )
+
+        response = self.client.post(f"/{organizer.id}"+ self.upload_logo_organizer_url, 
+                                    headers={'Authorization': f'Bearer {token}'},
+                                    FILES = {'logo': image_file})
+
+        self.assertEqual(response.status_code, 400)
+        self.assertIn('Upload failed', response.json()['error'])
+
         
         
         

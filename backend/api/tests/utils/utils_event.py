@@ -70,6 +70,7 @@ class EventModelsTest(TestCase):
             twitter_handle = "",
             instagram_handle = "",
             youtube_channel = "",
+            logo = fake.file_name()
         )
         return self.organizer
     
