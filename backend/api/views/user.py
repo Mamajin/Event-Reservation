@@ -35,7 +35,7 @@ class UserAPI:
                 last_name=form.last_name
             )
         except Exception as e:
-            return Exception
+            return Response({'error': str(e)}, status=400)
         user.save()
         return Response(UserSchema.from_orm(user), status=201)
 

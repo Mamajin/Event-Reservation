@@ -42,14 +42,14 @@ class UserModelsTest(TestCase):
         )
         return self.organizer
     
-    def create_user(self, username, first_name):
+    def create_user(self, username, first_name, email):
         user = AttendeeUser.objects.create(
             username = username, 
             first_name = first_name,
             last_name = 'Doe',
             birth_date='1995-06-15',
             phone_number='9876543210',
-            email='jane.doe@example.com'
+            email= str(email) +'@example.com'
         )
         user.set_password("password123")
         user.save()

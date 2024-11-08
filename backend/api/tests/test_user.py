@@ -4,55 +4,85 @@ from .utils.utils_user import UserModelsTest
 from django.contrib.auth import authenticate
 from django.contrib.sessions.middleware import SessionMiddleware
 from django.contrib.auth import get_user_model
-from unittest.mock import Mock
+from unittest.mock import Mock, patch
 
 User = get_user_model() 
 
 class UserAPITests(UserModelsTest):
-    pass
     
              
-    # def test_user_creation(self):
-    #     response = self.client.post(self.user_create_url, data={
-    #         'username': 'attendeeuser1',
-    #         'first_name': 'Jane',
-    #         'last_name': 'Doe',
-    #         'birth_date': '1995-06-15',
-    #         'phone_number': '9876543210',
-    #         'password': 'password123',
-    #         'password2': 'password123',
-    #         'email': "jane@example.com"
-    #     })
-    #     self.assertEqual(response.status_code, 201)
-    #     user = AttendeeUser.objects.get(username = 'attendeeuser1')
-    #     self.assertTrue(AttendeeUser.objects.filter(username = user.username).exists())
+    def test_user_creation(self):
+        response = self.client.post(self.user_create_url, data={
+            'username': 'attendeeuser1',
+            'first_name': 'Jane',
+            'last_name': 'Doe',
+            'birth_date': '1995-06-15',
+            'phone_number': '9876543210',
+            'password': 'password123',
+            'password2': 'password123',
+            'email': "jane@example.com"
+        })
+        self.assertEqual(response.status_code, 201)
+        user = AttendeeUser.objects.get(username = 'attendeeuser1')
+        self.assertTrue(AttendeeUser.objects.filter(username = user.username).exists())
         
-    # def test_invalid_creation(self):
-    #     response = self.client.post(self.user_create_url, data={
-    #         'username': 'attendeeuser1',
-    #         'first_name': 'Jane',
-    #         'last_name': 'Doe',
-    #         'birth_date': '1995-06-15',
-    #         'phone_number': '9876543210',
-    #         'password': 'password123',
-    #         'password2': 'password1234',
-    #         'email': "jane@example.com"
-    #     })
-    #     self.assertEqual(response.status_code, 400)
-    #     self.assertEqual(response.json()['error'], 'Passwords do not match')
-    #     same_user = self.create_user("test1","test1")
-    #     response1 = self.client.post(self.user_create_url, data={
-    #         'username': 'test1',
-    #         'first_name': 'Jane',
-    #         'last_name': 'Doe',
-    #         'birth_date': '1995-06-15',
-    #         'phone_number': '9876543210',
-    #         'password': 'password123',
-    #         'password2': 'password123',
-    #         'email': "jane@example.com"
-    #     })
-    #     self.assertEqual(response1.status_code,400)
-    #     self.assertEqual(response1.json()['error'], 'Username already taken')
+    def test_invalid_creation(self):
+        response = self.client.post(self.user_create_url, data={
+            'username': 'attendeeuser1',
+            'first_name': 'Jane',
+            'last_name': 'Doe',
+            'birth_date': '1995-06-15',
+            'phone_number': '9876543210',
+            'password': 'password123',
+            'password2': 'password1234',
+            'email': "jane123@example.com"
+        })
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.json()['error'], 'Passwords do not match')
+        same_user = self.create_user("test1","test1", "win")
+        response1 = self.client.post(self.user_create_url, data={
+            'username': 'test1',
+            'first_name': 'Jane',
+            'last_name': 'Doe',
+            'birth_date': '1995-06-15',
+            'phone_number': '9876543210',
+            'password': 'password123',
+            'password2': 'password123',
+            'email': "jane1234@example.com"
+        })
+        self.assertEqual(response1.status_code,400)
+        self.assertEqual(response1.json()['error'], 'Username already taken')
+        same_emal_user=  self.create_user("win","win","jane1234")
+        response2 = self.client.post(self.user_create_url, data={
+            'username': 'test123',
+            'first_name': 'Jane',
+            'last_name': 'Doe',
+            'birth_date': '1995-06-15',
+            'phone_number': '9876543210',
+            'password': 'password123',
+            'password2': 'password123',
+            'email': "jane1234@example.com"
+        })
+        self.assertTrue(response2.status_code, 400)
+        self.assertEqual(response2.json()['error'], 'This email already taken')
+        
+    @patch('api.views.AttendeeUser.save')
+    def test_exception_during_user_creation(self, mock_save):
+        mock_save.side_effect = Exception('Something went wrong')
+        response = self.client.post(self.user_create_url, data={
+            'username': 'test123',
+            'first_name': 'Jane',
+            'last_name': 'Doe',
+            'birth_date': '1995-06-15',
+            'phone_number': '9876543210',
+            'password': 'password123',
+            'password2': 'password123',
+            'email': "jane1234@example.com"
+        })
+        self.assertEqual(response.status_code, 400)
+        self.assertIn('error', response.json())
+        self.assertIn('Something went wrong', response.data['error'])
+        
         
         
     # def test_if_user_is_organizer(self):
