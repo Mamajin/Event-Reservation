@@ -30,7 +30,13 @@ function EventDetail() {
   if (error) return <div>Error loading event details.</div>;
   if (!event) return <div>No event found.</div>;
 
-  return 
+  return (
+    <div className="min-h-screen bg-base-200">
+      <EventHeader event={event} />
+      {event.organizer && <OrganizerInfo organizer={event.organizer} />}
+      <EventDetails event={event} />
+    </div>
+  );
 }
 
 export default EventDetail;
