@@ -21,6 +21,26 @@ export function EventHeader({ event }) {
             <h1 className="text-4xl font-bold text-white">
               {event.event_name}
             </h1>
+            <div className="flex flex-wrap gap-6 text-white/90">
+              <div className="flex items-center gap-2">
+                <FaCalendarAlt className="h-5 w-5" />
+                <span className="text-lg">
+                  {format(new Date(event.start_date_event), 'MMM d, yyyy')}
+                </span>
+              </div>
+              <div className="flex items-center gap-2">
+                <FaClock className="h-5 w-5" />
+                <span className="text-lg">
+                  {format(new Date(event.start_date_event), 'h:mm a')}
+                </span>
+              </div>
+              {!event.is_online && (
+                <div className="flex items-center gap-2">
+                  <FaMapMarkerAlt className="h-5 w-5" />
+                  <span className="text-lg">{event.address}</span>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>
