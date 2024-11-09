@@ -24,6 +24,11 @@ class UserAPI:
             return Response({"error": "Username already taken"}, status=400)
         if AttendeeUser.objects.filter(email = form.email).exists():
             return Response({"error": "This email already taken"}, status=400)
+        if len(form.phone_number) != 10:
+            return Response({'error' : 'Phone number must be 10 digits long'})
+        if form.phone_number.isdigit():
+            return Response({'error' : 'Phone number must be digit'})
+        
         user = AttendeeUser(
             username=form.username,
             password=make_password(form.password),
@@ -33,7 +38,6 @@ class UserAPI:
             first_name=form.first_name,
             last_name=form.last_name
         )
-      
         user.save()
         return Response(UserSchema.from_orm(user), status=201)
 
