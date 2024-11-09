@@ -25,9 +25,9 @@ class UserAPI:
         if AttendeeUser.objects.filter(email = form.email).exists():
             return Response({"error": "This email already taken"}, status=400)
         if len(form.phone_number) != 10:
-            return Response({'error' : 'Phone number must be 10 digits long'})
-        if form.phone_number.isdigit():
-            return Response({'error' : 'Phone number must be digit'})
+            return Response({'error' : 'Phone number must be 10 digits long'}, status = 400)
+        if not form.phone_number.isdigit():
+            return Response({'error' : 'Phone number must be digit'}, status = 400)
         
         user = AttendeeUser(
             username=form.username,
