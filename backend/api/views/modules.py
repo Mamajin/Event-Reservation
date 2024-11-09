@@ -3,6 +3,8 @@ from django.contrib.auth.models import User
 from django.contrib.auth.hashers import make_password
 from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
+from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
+from django.utils.encoding import force_bytes, force_str
 from django.utils.crypto import get_random_string
 from django.conf import settings
 from django.db import IntegrityError
