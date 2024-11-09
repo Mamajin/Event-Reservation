@@ -175,8 +175,8 @@ class UserAPI:
         user.refresh_from_db()
         return UserResponseSchema.from_orm(user)
 
-    @router.delete('delete/{user_id}/', auth=JWTAuth())
-    def delete_profile(request, user_id: int):
+    @router.delete('delete/', auth=JWTAuth())
+    def delete_profile(request):
         """
         Delete a user profile by user ID.
 
@@ -188,12 +188,10 @@ class UserAPI:
             Response: Success message upon successful deletion.
         """
         user = request.user
-        if AttendeeUser.objects.filter(id=user_id).exists():
-            user = AttendeeUser.objects.get(id=user_id)
-            user.delete()
-            if Organizer.objects.filter(user=user).exists():
-                organizer = Organizer.objects.get(user=user)
-                organizer.delete()
+        get_user = AttendeeUser.objects.get(id = user.id)
+
+        get_user.delete()
+            
         return Response({'success': 'Your account has been deleted'})
 
     @router.post('/{user_id}/upload/profile-picture/', response={200: FileUploadResponseSchema, 400: ErrorResponseSchema}, auth=JWTAuth())
