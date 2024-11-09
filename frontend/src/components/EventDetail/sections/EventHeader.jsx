@@ -1,4 +1,11 @@
+import { FaCalendarAlt, FaClock, FaMapMarkerAlt, FaUsers, FaTicketAlt } from 'react-icons/fa';
+import { format } from 'date-fns';
+
+
 export function EventHeader({ event }) {
+  const isRegistrationOpen = new Date(event.end_date_register) > new Date();
+  const isFreeEvent = event.is_free || event.ticket_price === 0;
+
   return (
     <div className="relative h-[40vh] min-h-[400px] w-full">
       <div 
@@ -40,6 +47,14 @@ export function EventHeader({ event }) {
                   <span className="text-lg">{event.address}</span>
                 </div>
               )}
+              <div className="flex items-center gap-2">
+                <FaUsers className="h-5 w-5" />
+                <span className="text-lg">{event.max_attendee} attendees max</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <FaTicketAlt className="h-5 w-5" />
+                <span className="text-lg">{isFreeEvent ? 'Free' : `$${event.ticket_price}`}</span>
+              </div>
             </div>
           </div>
         </div>
