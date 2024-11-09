@@ -24,18 +24,16 @@ class UserAPI:
             return Response({"error": "Username already taken"}, status=400)
         if AttendeeUser.objects.filter(email = form.email).exists():
             return Response({"error": "This email already taken"}, status=400)
-        try:
-            user = AttendeeUser(
-                username=form.username,
-                password=make_password(form.password),
-                birth_date=form.birth_date,
-                phone_number=form.phone_number,
-                email=form.email,
-                first_name=form.first_name,
-                last_name=form.last_name
-            )
-        except Exception as e:
-            return Response({'error': str(e)}, status=400)
+        user = AttendeeUser(
+            username=form.username,
+            password=make_password(form.password),
+            birth_date=form.birth_date,
+            phone_number=form.phone_number,
+            email=form.email,
+            first_name=form.first_name,
+            last_name=form.last_name
+        )
+      
         user.save()
         return Response(UserSchema.from_orm(user), status=201)
 

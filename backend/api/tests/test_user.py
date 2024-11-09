@@ -66,7 +66,7 @@ class UserAPITests(UserModelsTest):
         self.assertTrue(response2.status_code, 400)
         self.assertEqual(response2.json()['error'], 'This email already taken')
         
-    @patch('api.views.AttendeeUser.save')
+    @patch('api.models.AttendeeUser.objects.filter')
     def test_exception_during_user_creation(self, mock_save):
         mock_save.side_effect = Exception('Something went wrong')
         response = self.client.post(self.user_create_url, data={
