@@ -18,8 +18,8 @@ class TicketModelsTest(TestCase):
         Set up initial test data for models.
         """
         self.client = TestClient(ticket_router)
-        self.user_list_event_url = 'event/'
-        self.user_reserve_event_url = 'event/'
+        self.user_list_event_url = '/user/'
+        self.user_reserve_event_url = '/event/'
         self.user_cancel_event_url = 'delete-event/'
         self.test_user = AttendeeUser.objects.create_user(
             username='attendeeuser3',
@@ -28,7 +28,7 @@ class TicketModelsTest(TestCase):
             last_name='Doe',
             birth_date='1995-06-15',
             phone_number='9876543210',
-            email='jane.doe@example.com'
+            email='jane123.doe@example.com'
         )
         
         self.organizer = self.become_organizer(self.test_user, "test_user")
