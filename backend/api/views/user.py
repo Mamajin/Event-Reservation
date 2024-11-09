@@ -308,26 +308,22 @@ class UserAPI:
                 "error": "User not found or already verified"
             }, status=400)
             
-    @router.post("/send-email")
-    def send_email(request):
-        subject = "Test Email"
-        message = "This is a test email sent from Django Ninja."
-        html_message = f"""
-        <html>
-            <body>
-                <p>Hi,</p>
-                <p>Thank you for registering! Please click the link below to verify your email address:</p>
-                <a href="">Verify Email</a>
-                <p>If you didn’t sign up, please ignore this email.</p>
-            </body>
-        </html>
-        """
-        from_email = settings.DEFAULT_FROM_EMAIL
-        recipient_list = ['ganzch04@gmail.com']  # Replace with actual recipient
+    # @router.post("/send-email")
+    # def send_email(request, subject, body, to_email):
+    #     msg = MIMEMultipart()
+    #     msg['From'] = settings.EMAIL_HOST_USER
+    #     msg['To'] = to_email
+    #     msg['Subject'] = subject
 
-        # Attempt to send the email
-        try:
-            send_mail(subject, message, from_email, recipient_list, fail_silently=False)
-            return {"status": "Email sent successfully"}
-        except Exception as e:
-            return {"status": "Email failed to send", "error": str(e)}
+    #     # Attach the body with the msg instance
+    #     msg.attach(MIMEText(body, 'plain'))
+
+    #     try:
+    #         # Create a secure SSL context and connect to the server
+    #         with smtplib.SMTP(settings.EMAIL_HOST, settings.EMAIL_PORT) as server:
+    #             server.starttls()  # Upgrade to secure connection
+    #             server.login(settings.EMAIL_HOST_USER, settings.EMAIL_HOST_PASSWORD)
+    #             server.sendmail(msg['From'], msg['To'], msg.as_string())
+    #         print("Email sent successfully.")
+    #     except Exception as e:
+    #         print(f"Failed to send email: {e}")
