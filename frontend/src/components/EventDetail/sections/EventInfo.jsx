@@ -1,3 +1,5 @@
+import { CiMail } from "react-icons/ci";
+import { FiPhone } from "react-icons/fi";
 import { format } from 'date-fns';
 
 export function EventDetails({ event }) {
@@ -42,6 +44,30 @@ export function EventDetails({ event }) {
                     </p>
                   </div>
                 </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="card bg-white">
+            <div className="card-body">
+              <h3 className="font-semibold text-dark-purple text-lg mb-4">Contact Information</h3>
+              <div className="space-y-4">
+                {event.contact_email && (
+                  <div className="flex items-center gap-3">
+                    <CiMail className="h-5 w-5 text-primary" />
+                    <a href={`mailto:${event.contact_email}`} className="link link-primary">
+                      {event.contact_email}
+                    </a>
+                  </div>
+                )}
+                {event.contact_phone && (
+                  <div className="flex items-center gap-3">
+                    <FiPhone className="h-5 w-5 text-primary" />
+                    <a href={`tel:${event.contact_phone}`} className="link link-primary">
+                      {event.contact_phone}
+                    </a>
+                  </div>
+                )}
               </div>
             </div>
           </div>
