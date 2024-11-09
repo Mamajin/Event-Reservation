@@ -35,7 +35,6 @@ export function CreateEventForm() {
   const onSubmit = async (formValues) => {
     setLoading(true);
     try {
-      console.log(formValues.event_image[0])
       const formData = new FormData();
 
       const data = {
@@ -70,8 +69,11 @@ export function CreateEventForm() {
         tags: formValues.tags || '',
         updated_at:  formatDateTime(new Date())
       };
-      formData.append('data', JSON.stringify(data));
 
+      Object.entries(data).forEach(([key, value]) => {
+        formData.append(key, value);
+      });
+      
       if (formValues.event_image) {
         formData.append('image', formValues.event_image);
       }
@@ -83,6 +85,7 @@ export function CreateEventForm() {
       };
   
       const response = await api.post('/events/create-event', formData, { headers });
+      console.log(response)
       alert("Event created successfully!");
       navigate("/"); // Redirect after success
     } catch (error) {
