@@ -301,9 +301,33 @@ class UserAPI:
             
             return Response({
                 "message": "Verification email sent successfully",
-                "verified": False
+                "verified": user.is_email_verified
             }, status=200)
         except AttendeeUser.DoesNotExist:
             return Response({
                 "error": "User not found or already verified"
             }, status=400)
+            
+    @router.post("/send-email")
+    def send_email(request):
+        subject = "Test Email"
+        message = "This is a test email sent from Django Ninja."
+        html_message = f"""
+        <html>
+            <body>
+                <p>Hi,</p>
+                <p>Thank you for registering! Please click the link below to verify your email address:</p>
+                <a href="">Verify Email</a>
+                <p>If you didn’t sign up, please ignore this email.</p>
+            </body>
+        </html>
+        """
+        from_email = settings.DEFAULT_FROM_EMAIL
+        recipient_list = ['ganzch04@gmail.com']  # Replace with actual recipient
+
+        # Attempt to send the email
+        try:
+            send_mail(subject, message, from_email, recipient_list, fail_silently=False)
+            return {"status": "Email sent successfully"}
+        except Exception as e:
+            return {"status": "Email failed to send", "error": str(e)}

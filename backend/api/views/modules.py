@@ -3,6 +3,7 @@ from django.contrib.auth.models import User
 from django.contrib.auth.hashers import make_password
 from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
+from django.utils.crypto import get_random_string
 from django.conf import settings
 from django.db import IntegrityError
 from django.shortcuts import get_object_or_404
@@ -30,7 +31,6 @@ from decimal import Decimal
 from enum import Enum
 from google.oauth2 import id_token
 from google.auth.transport import requests
-from django.utils.crypto import get_random_string
 import logging
 import os
 import uuid

@@ -72,14 +72,21 @@ GOOGLE_OAUTH_SCOPES = [
 ]
 
 
+SITE_URL = 'http://127.0.0.1:8000/'
+
+
 # Email Configuration
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_BACKEND = 'django_ses.SESBackend'
 EMAIL_HOST = config('EMAIL_HOST', default='smtp.gmail.com')
 EMAIL_PORT = config('EMAIL_PORT', default=587, cast=int)
 EMAIL_USE_TLS = config('EMAIL_USE_TLS', default=True, cast=bool)
-EMAIL_HOST_USER = config('EMAIL_HOST_USER')  # your email address
-EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD')  # your email password
-DEFAULT_FROM_EMAIL = config('DEFAULT_FROM_EMAIL', default='webmaster@localhost')
+EMAIL_HOST_USER = config('EMAIL_HOST_USER') 
+EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD') 
+
+DEFAULT_FROM_EMAIL = config('EMAIL_HOST_USER')
+SERVER_EMAIL = config('SERVER_EMAIL')
+EMAIL_TIMEOUT = 20
+
 
 
 # Application definition
