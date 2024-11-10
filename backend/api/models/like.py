@@ -18,17 +18,17 @@ class LikeManager(models.Manager):
         """
         return self.filter(event=event, user=user).exists()
 
-    def like_count_for_event(self, event):
-        """
-        Get the total number of likes for a specified event.
+    # def like_count_for_event(self, event):
+    #     """
+    #     Get the total number of likes for a specified event.
 
-        Args:
-            event (Event): The event to check.
+    #     Args:
+    #         event (Event): The event to check.
 
-        Returns:
-            int: The total number of likes.
-        """
-        return self.filter(event=event).count()
+    #     Returns:
+    #         int: The total number of likes.
+    #     """
+    #     return self.filter(event=event).count()
 
 
 class Like(models.Model):
@@ -52,21 +52,21 @@ class Like(models.Model):
     def __str__(self):
         return f"{self.user.username} liked {self.event.event_name} at {self.liked_at}"
 
-    @staticmethod
-    def toggle_like(event, user):
-        """
-        Toggle the like status for an event by a user. If the user has already liked the event,
-        it will unlike it; otherwise, it will add a like.
+    # @staticmethod
+    # def toggle_like(event, user):
+    #     """
+    #     Toggle the like status for an event by a user. If the user has already liked the event,
+    #     it will unlike it; otherwise, it will add a like.
 
-        Args:
-            event (Event): The event to like or unlike.
-            user (AttendeeUser): The user performing the action.
+    #     Args:
+    #         event (Event): The event to like or unlike.
+    #         user (AttendeeUser): The user performing the action.
 
-        Returns:
-            str: A message indicating whether the event was liked or unliked.
-        """
-        like, created = Like.objects.get_or_create(event=event, user=user)
-        if not created:
-            like.delete()
-            return "Unliked the event."
-        return "Liked the event."
+    #     Returns:
+    #         str: A message indicating whether the event was liked or unliked.
+    #     """
+    #     like, created = Like.objects.get_or_create(event=event, user=user)
+    #     if not created:
+    #         like.delete()
+    #         return "Unliked the event."
+    #     return "Liked the event."

@@ -255,6 +255,27 @@ class OrganizerTestAPI(OrganizerModelsTest):
         self.assertEqual(response.status_code, 400)
         self.assertIn('Upload failed', response.json()['error'])
 
+
+    def test_is_organizer(self):
+        user = self.create_user("test","test","Test")
+        token = self.get_token_for_user(user)
+        organizer = self.become_organizer(user, "test","test123")
+        self.assertTrue(organizer.is_organizer(user))
+    
+
+    def test_logo_url(self):
+        user = self.create_user("test","test",'test')
+        orgainzer = self.become_organizer(user, "test",'test123')
+        organizer1 = Organizer.objects.create(
+            user= user,
+            organizer_name = "WwIN",
+            email = str("win") + "@example.com",
+            organization_type = "INDIVIDUAL",
+        )
+        self.assertEqual(type(orgainzer.logo_image_url) , str)
+        self.assertEqual(organizer1.logo_image_url, None)
+        
+
         
         
         

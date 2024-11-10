@@ -1,4 +1,4 @@
-from .utils.utils_event import EventModelsTest, timezone,datetime, Event, Organizer, fake, patch, ALLOWED_IMAGE_TYPES, MagicMock, ClientError, SimpleUploadedFile
+from .utils.utils_event import EventModelsTest, timezone,datetime, Event, Organizer, fake, patch, ALLOWED_IMAGE_TYPES, MagicMock, ClientError, SimpleUploadedFile,ValidationError
 
 from django.http import QueryDict
 import tempfile
@@ -272,7 +272,7 @@ class EventTest(EventModelsTest):
     def test_valid_list_all_event(self):
         response  = self.client.get(self.list_event_url)
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(len(response.json()), 1)
+        self.assertEqual(len(response.json()), 3)
     
     @patch("api.models.Event.objects.filter")
     def test_excpetion_list_all_event(self, mock_filter):
@@ -599,23 +599,7 @@ class EventTest(EventModelsTest):
         self.assertEqual(response.status_code, 400)
         self.assertIn("Some unexpected error", response.json().get("error"))
         
-        
-        
-    def test_get_event_status(self):
-        upcoming_event = self.create_event(timezone.now() - datetime.timedelta(days = 2), 
-                                  timezone.now() - datetime.timedelta(days = 1), 
-                                  timezone.now() + datetime.timedelta(days  = 1 ),
-                                  timezone.now() + datetime.timedelta(days = 2))
-        
-        finished_event = self.create_event(timezone.now() - datetime.timedelta(days = 4),
-                                           timezone.now() - datetime.timedelta(days = 3),
-                                           timezone.now() - datetime.timedelta(days = 2),
-                                           timezone.now() - datetime.timedelta(days = 1))
-        
-        
-        self.assertEqual(upcoming_event.get_event_status(), "Upcoming")
-        self.assertEqual(self.event_test.get_event_status(), "Ongoing")
-        self.assertEqual(finished_event.get_event_status(), "Finished")
+
         
     def test_available_spot(self):
         event = Event.objects.create(
@@ -632,6 +616,66 @@ class EventTest(EventModelsTest):
         self.assertEqual(event.available_spot() , 100)
         
         
+    def test_public_event_no_domain_restrictions(self):
+        email = "user@anydomain.com"
+        self.assertTrue(self.public_event.is_email_allowed(email))
+
+    def test_private_event_no_domain_restrictions(self):
+        self.private_event.allowed_email_domains = ""
+        email = "user@anydomain.com"
+        self.assertTrue(self.private_event.is_email_allowed(email))
+
+    def test_private_event_with_allowed_domain(self):
+        email = "user@example.com"
+        self.assertTrue(self.private_event.is_email_allowed(email))
+
+    def test_private_event_with_disallowed_domain(self):
+        email = "user@notallowed.com"
+        self.assertFalse(self.private_event.is_email_allowed(email))
+
+    def test_invalid_email_format(self):
+        email = "invalid-email-format"
+        self.assertFalse(self.private_event.is_email_allowed(email))
+        
+        
+    def test_private_event_with_invalid_email_domains(self):
+        # Create an event with invalid email domains for a private event
+        event = Event(
+            event_name="Private Event",
+            organizer=self.organizer,
+            start_date_event=timezone.now() + datetime.timedelta(days=10),
+            end_date_event=timezone.now() + datetime.timedelta(days=11),
+            start_date_register=timezone.now(),
+            end_date_register=timezone.now() + datetime.timedelta(days=9),
+            visibility="PRIVATE",
+            allowed_email_domains="example..com, valid.com"
+        )
+
+        # Attempt to clean and expect a ValidationError due to invalid domain format
+        with self.assertRaises(ValidationError) as cm:
+            event.clean()
+        
+        # Check if the error message contains "Invalid domain(s)"
+        self.assertIn("Invalid domain(s)", str(cm.exception))
+        
+    def test_event_with_start_date_after_end_date(self):
+        # Create an event where the start date is after the end date
+        event = Event(
+            event_name="Invalid Date Event",
+            organizer=self.organizer,
+            start_date_event=timezone.now() + datetime.timedelta(days=10),
+            end_date_event=timezone.now() + datetime.timedelta(days=9),  # End date is before start date
+            start_date_register=timezone.now(),
+            end_date_register=timezone.now() + datetime.timedelta(days=5),
+            visibility="PUBLIC"
+        )
+
+        # Attempt to clean and expect a ValidationError due to invalid date order
+        with self.assertRaises(ValidationError) as cm:
+            event.clean()
+        
+        # Check if the error message is "End date must be after start date."
+        self.assertIn("End date must be after start date.", str(cm.exception))
     
         
         

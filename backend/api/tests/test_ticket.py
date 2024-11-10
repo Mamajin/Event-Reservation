@@ -1,4 +1,4 @@
-from .utils.utils_ticket import TicketModelsTest, Organizer, Event, Ticket, fake, timezone,datetime,AttendeeUser,patch
+from .utils.utils_ticket import TicketModelsTest, Organizer, Event, Ticket, fake, timezone,datetime,AttendeeUser,patch, ValidationError
 import logging
 logging.disable(logging.CRITICAL)
 
@@ -16,6 +16,15 @@ class TicketTestAPI(TicketModelsTest):
         response = self.client.get(self.user_list_event_url+ str(1000000),  headers={'Authorization': f'Bearer {token}'})
         self.assertTrue(response.status_code , 404)
         self.assertEqual(response.json()['error'], 'User not found')
+        
+        
+    def test_user_register_same_event(self):
+        user=  self.create_user("test","test")
+        token = self.get_token_for_user(user)
+        ticket = Ticket.objects.create(attendee= user , event=  self.event_test)    
+        response = self.client.post(self.user_reserve_event_url + str(self.event_test.id) + '/register',  headers={'Authorization': f'Bearer {token}'})
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.json()['error'], 'User has already registered for this event.')
         
         
         
@@ -222,7 +231,50 @@ class TicketTestAPI(TicketModelsTest):
         self.assertEqual(response.json()['error'], 'Internal server error')
         
         
+        
+    def test_ticket_number_generation_on_save(self):
+        # Create a ticket without a ticket number and save it
+        ticket = Ticket(event=self.event_test, attendee=self.test_user)
+        ticket.save()
+        # Ensure the ticket number was generated and is unique
+        self.assertTrue(ticket.ticket_number)
+        self.assertEqual(Ticket.objects.filter(ticket_number=ticket.ticket_number).count(), 1)
+        
+        
+    def test_cancellation_date_not_changed_if_already_set(self):
+        # Create a ticket with a pre-set cancellation date and save it
+        cancellation_date = timezone.now() - timezone.timedelta(days=1)
+        ticket = Ticket(event=self.event_test, attendee=self.test_user, status='CANCELLED', cancellation_date=cancellation_date)
+        ticket.save()
+        
+        # Ensure the pre-set cancellation date remains unchanged
+        self.assertEqual(ticket.cancellation_date, cancellation_date)
     
+    
+    def test_cancellation_date_set_on_cancelled_status(self):
+        # Create a ticket with status set to 'CANCELLED' and no cancellation date
+        ticket = Ticket(event=self.event_test, attendee=self.test_user, status='CANCELLED')
+        ticket.save()
+        
+        # Ensure the cancellation date was set to the current date and time
+        self.assertIsNotNone(ticket.cancellation_date)
+        self.assertAlmostEqual(ticket.cancellation_date, timezone.now(), delta=timezone.timedelta(seconds=1))
+        
+        
+    def test_cannot_cancel_already_cancelled_ticket(self):
+        # Cancel the ticket once
+        ticket = Ticket.objects.create(attendee = self.test_user, event = self.event_test, )
+        ticket.cancel_ticket(reason="No longer attending")
+
+        # Try cancelling it again, which should raise a ValidationError
+        with self.assertRaises(ValidationError) as e:
+            ticket.cancel_ticket(reason="Attempted second cancellation")
+        
+        # Check that the correct error message is in the exception
+        self.assertIn("Ticket is already cancelled.", str(e.exception))
+        
+    
+   
 
         
         

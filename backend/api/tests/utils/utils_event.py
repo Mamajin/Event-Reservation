@@ -11,6 +11,7 @@ from django.utils import timezone
 from unittest.mock import patch, MagicMock
 from botocore.exceptions import ClientError
 from django.core.files.uploadedfile import SimpleUploadedFile
+from django.core.exceptions import ValidationError
 ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/jpg']
 
 fake = Faker()
@@ -39,6 +40,15 @@ class EventModelsTest(TestCase):
             phone_number='9876543210',
             email='jane.doe@example.com'
         )
+        self.test_user1 = AttendeeUser.objects.create(
+            username='attendeeuser5',
+            password='password123',
+            first_name='Jane',
+            last_name='Doe',
+            birth_date='1995-06-15',
+            phone_number='9876543210',
+            email='jane123.doe@example.com'
+        )
         
         self.event_test = Event.objects.create(
             event_name=fake.company(),
@@ -50,6 +60,31 @@ class EventModelsTest(TestCase):
             max_attendee=fake.random_int(min=10, max=500),
             description=fake.text(max_nb_chars=200),
             event_image = fake.file_name()
+        )
+        
+        self.organizer1 = Organizer.objects.create(user = self.test_user1, organizer_name = "win", 
+                                                    email = "test@example.com", 
+                                                    organization_type = "INDIVIDUAL")
+        
+        self.public_event = Event.objects.create(
+            event_name="Public Event",
+            organizer= self.organizer1,
+            start_date_event=timezone.now(),
+            end_date_event=timezone.now(),
+            start_date_register=timezone.now(),
+            end_date_register=timezone.now(),
+            visibility="PUBLIC",
+        )
+        
+        self.private_event = Event.objects.create(
+            event_name="Private Event",
+            organizer= self.organizer1,
+            start_date_event=timezone.now(),
+            end_date_event=timezone.now(),
+            start_date_register=timezone.now(),
+            end_date_register=timezone.now(),
+            visibility="PRIVATE",
+            allowed_email_domains="example.com, ku.th"
         )
         
     

@@ -7,18 +7,18 @@ from api.models.organizer import Organizer
 import re
 
 
-class EventManager(models.Manager):
-    def public(self):
-        return self.filter(visibility='PUBLIC')
+# class EventManager(models.Manager):
+#     def public(self):
+#         return self.filter(visibility='PUBLIC')
 
-    def private(self):
-        return self.filter(visibility='PRIVATE')
+#     def private(self):
+#         return self.filter(visibility='PRIVATE')
     
-    def filter_by_category(self, category):
-        return self.filter(category=category)
+#     def filter_by_category(self, category):
+#         return self.filter(category=category)
     
-    def within_date_range(self, start_date, end_date):
-        return self.filter(start_date_event__gte=start_date, end_date_event__lte=end_date)
+#     def within_date_range(self, start_date, end_date):
+#         return self.filter(start_date_event__gte=start_date, end_date_event__lte=end_date)
 
 
 class Event(models.Model):
@@ -140,7 +140,7 @@ class Event(models.Model):
     
     terms_and_conditions = models.TextField(null=True, blank=True)
     
-    objects = EventManager()
+    # objects = EventManager()
 
     # Existing methods remain the same
     @property
@@ -164,20 +164,6 @@ class Event(models.Model):
         """
         return self.bookmarks_set.count() 
     
-    def get_event_status(self) -> str:
-        """
-        Get current event Status
-
-        Returns:
-            str: String of the current status of the event
-        """
-        now = timezone.now()
-        if now < self.start_date_event:
-            return "Upcoming"
-        elif self.start_date_event <= now <= self.end_date_event:
-            return "Ongoing"
-        else:
-            return "Finished"
 
     def available_spot(self) -> int:
         """

@@ -6,6 +6,7 @@ from datetime import datetime
 from ninja.testing import TestClient
 from api.urls import ticket_router
 from ninja_jwt.tokens import RefreshToken
+from django.core.exceptions import ValidationError
 from faker import Faker
 from django.contrib.auth import get_user_model
 import datetime
