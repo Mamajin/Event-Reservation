@@ -1,5 +1,5 @@
 import { EventHeader } from './sections/EventHeader';
-import { EventDetails } from './sections/EventInfo';
+import { EventInfo } from './sections/EventInfo';
 import { OrganizerInfo } from './sections/OrganizerInfo';
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
@@ -31,10 +31,10 @@ function EventDetail() {
   if (!event) return <div>No event found.</div>;
 
   return (
-    <div className="min-h-screen bg-base-200">
+    <div className="min-h-screen bg-white w-full relative ">
       <EventHeader event={event} />
       {event.organizer && <OrganizerInfo organizer={event.organizer} />}
-      <EventDetails event={event} />
+      <EventInfo event={event} />
     </div>
   );
 }

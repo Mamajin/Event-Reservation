@@ -7,7 +7,7 @@ export function EventHeader({ event }) {
   const isFreeEvent = event.is_free || event.ticket_price === 0;
 
   return (
-    <div className="relative h-[40vh] min-h-[400px] w-full">
+    <div className="relative h-[40vh] min-h-[400px] w-full pr-5">
       <div 
         className="absolute inset-0 bg-cover bg-center"
         style={{ 
@@ -18,7 +18,7 @@ export function EventHeader({ event }) {
       </div>
       <div className="absolute inset-0 flex items-end">
         <div className="container pb-8">
-          <div className="flex flex-col gap-4">
+          <div className="flex flex-col pl-5 gap-4">
             <div className="flex items-center gap-2">
               <div className="badge badge-primary badge-lg">{event.category}</div>
               {event.is_online && (
