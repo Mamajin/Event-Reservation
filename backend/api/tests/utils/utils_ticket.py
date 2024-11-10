@@ -1,6 +1,7 @@
 from django.test import TestCase
 from django.utils import timezone
 from api.models import AttendeeUser, Organizer, Event, Ticket
+from unittest.mock import patch
 from datetime import datetime
 from ninja.testing import TestClient
 from api.urls import ticket_router
@@ -20,7 +21,7 @@ class TicketModelsTest(TestCase):
         self.client = TestClient(ticket_router)
         self.user_list_event_url = '/user/'
         self.user_reserve_event_url = '/event/'
-        self.user_cancel_event_url = 'delete-event/'
+        self.user_cancel_event_url = '/cancel'
         self.test_user = AttendeeUser.objects.create_user(
             username='attendeeuser3',
             password='password123',

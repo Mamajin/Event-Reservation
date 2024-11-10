@@ -1,4 +1,4 @@
-from .utils.utils_ticket import TicketModelsTest, Organizer, Event, Ticket, fake, timezone,datetime,AttendeeUser
+from .utils.utils_ticket import TicketModelsTest, Organizer, Event, Ticket, fake, timezone,datetime,AttendeeUser,patch
 import logging
 logging.disable(logging.CRITICAL)
 
@@ -45,25 +45,7 @@ class TicketTestAPI(TicketModelsTest):
         response = self.client.post(self.user_reserve_event_url + str(self.event_test.id) + '/register',  headers={'Authorization': f'Bearer {token}'})
         self.assertEqual(response.status_code, 400)
         self.assertIn('Organizer cannot register for their own event.', response.json().get("error", ""))
-        
-
-    # def test_user_cancel_event(self):
-    #     normal_user = self.create_user("test","test")
-    #     token = self.get_token_for_user(normal_user)
-    #     ticket = Ticket.objects.create(attendee = normal_user, event = self.event_test)
-    #     response = self.client.delete(self.user_cancel_event_url + str(ticket.id), headers={'Authorization': f'Bearer {token}'})
-    #     self.assertEqual(response.status_code, 200)
-        
-    # def test_user_can_only_cancel_their_own_registration(self):
-    #     normal_user1 = self.create_user("test","test")
-    #     normal_user2 = self.create_user("test1", "test2")
-    #     token2 = self.get_token_for_user(normal_user2)
-    #     ticket = Ticket.objects.create(attendee = normal_user1, event = self.event_test)
-    #     response = self.client.delete(self.user_cancel_event_url + str(ticket.id), headers={'Authorization': f'Bearer {token2}'})
-    #     self.assertEqual(response.status_code, 400)
-    #     self.assertTrue(Ticket.objects.filter(attendee = normal_user1).exists())
-        
-        
+                
     def test_user_cannot_register_full_event(self):
         event_test = Event.objects.create(
             event_name=fake.company(),
@@ -82,27 +64,6 @@ class TicketTestAPI(TicketModelsTest):
         self.assertEqual(response.status_code, 400)
         self.assertIn('This event has reached the maximum number of attendees', response.json().get("error", ""))
         
-    # def test_invalid_list_my_events(self):
-    #     normal_user=  self.create_user("test", "test")
-    #     token = self.get_token_for_user(normal_user)
-    #     response = self.client.get(self.user_list_event_url+str(0),  headers={'Authorization': f'Bearer {token}'})
-    #     self.assertEqual(response.status_code, 400)
-    #     self.assertEqual(response.json()['error'], "This user does not exists")
-        
-    # def test_register_with_event_that_does_not_exist(self):
-    #     normal_user = self.create_user("test","test")
-    #     token = self.get_token_for_user(normal_user)
-    #     response = self.client.post(self.user_reserve_event_url+ str(0)+"/reserve",  headers={'Authorization': f'Bearer {token}'})
-    #     self.assertEqual(response.status_code, 404)
-    #     self.assertEqual(response.json()['error'], "This event does not exists")
-    
-    # def test_user_register_same_event(self):
-    #     normal_user = self.create_user("test","test")
-    #     ticket = Ticket.objects.create(event = self.event_test, attendee =normal_user)
-    #     token = self.get_token_for_user(normal_user)
-    #     response = self.client.post(self.user_reserve_event_url+ str(self.event_test.id)+"/reserve",  headers={'Authorization': f'Bearer {token}'})
-    #     self.assertEqual(response.status_code, 400)
-    #     self.assertEqual(response.json()['error'], 'You have registered this event already')
         
     def test_user_not_falls_in_register_dates(self):
         normal_user = self.create_user("test","test")
@@ -147,6 +108,123 @@ class TicketTestAPI(TicketModelsTest):
         response = self.client.post(self.user_reserve_event_url + str(event_test.id) + '/register',  headers={'Authorization': f'Bearer {token}'})
         self.assertEqual(response.status_code, 400)
         self.assertEqual(response.json()['error'], 'You must be at least 20 years old to attend this event.')
+        
+    def test_invalid_register_private_event(self):
+        event_test = Event.objects.create(
+            event_name=fake.company(),
+            organizer= self.become_organizer(self.test_user, "test_user"),
+            start_date_register=timezone.now(),  # Example for registration start
+            end_date_register=timezone.now() + datetime.timedelta(days = 1),  # Registration ends when the event starts
+            start_date_event=timezone.now()+ datetime.timedelta(days = 2),
+            end_date_event= timezone.now() + datetime.timedelta(days = 3),  # Ensure it ends after it starts
+            max_attendee=100,
+            description=fake.text(max_nb_chars=200),
+            min_age_requirement = 20,
+            visibility =  "PRIVATE",
+            allowed_email_domains = "ku.th"
+        )
+        user = self.create_user("test","test")
+        token = self.get_token_for_user(user)
+        response = self.client.post(self.user_reserve_event_url + str(event_test.id) + '/register',  headers={'Authorization': f'Bearer {token}'})
+        self.assertEqual(response.status_code , 403)
+        self.assertEqual(response.json()['error'], 'Your email domain is not authorized to register for this event' )
+        
+        
+        
+    def test_cancel_ticket(self):
+        user = self.create_user("test","test")
+        token = self.get_token_for_user(user)
+        event_test = Event.objects.create(
+            event_name=fake.company(),
+            organizer= self.become_organizer(self.test_user, "test_user"),
+            start_date_register=timezone.now(),  # Example for registration start
+            end_date_register=timezone.now() + datetime.timedelta(days = 1),  # Registration ends when the event starts
+            start_date_event=timezone.now()+ datetime.timedelta(days = 2),
+            end_date_event= timezone.now() + datetime.timedelta(days = 3),  # Ensure it ends after it starts
+            max_attendee=100,
+            description=fake.text(max_nb_chars=200),
+        )
+        ticket = Ticket.objects.create(event = event_test, attendee = user)
+        response = self.client.delete(f"/{ticket.id}" + self.user_cancel_event_url,  headers={'Authorization': f'Bearer {token}'})
+        self.assertEqual(response.status_code , 200)
+        self.assertEqual(response.json()['success'], f"Ticket with ID {ticket.id} has been canceled.")
+        self.assertFalse(Ticket.objects.filter(event = event_test, attendee = user).exists())
+        
+        
+    def test_invalid_cancel_ticket(self):
+        user = self.create_user("test","test")
+        token = self.get_token_for_user(user)
+        event_test = Event.objects.create(
+            event_name=fake.company(),
+            organizer= self.become_organizer(self.test_user, "test_user"),
+            start_date_register=timezone.now(),  # Example for registration start
+            end_date_register=timezone.now() + datetime.timedelta(days = 1),  # Registration ends when the event starts
+            start_date_event=timezone.now()+ datetime.timedelta(days = 2),
+            end_date_event= timezone.now() + datetime.timedelta(days = 3),  # Ensure it ends after it starts
+            max_attendee=100,
+            description=fake.text(max_nb_chars=200),
+            min_age_requirement = 20
+        )
+        ticket = Ticket.objects.create(event = event_test, attendee = user)
+        response = self.client.delete(f"/{100}" + self.user_cancel_event_url,  headers={'Authorization': f'Bearer {token}'})
+        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.json()['error'],  'Ticket with ID 100 does not exist or you do not have permission to cancel it.')
+        
+        
+    def test_get_ticket_detail(self):
+        user = self.create_user("test","test")
+        token = self.get_token_for_user(user)
+        event_test = Event.objects.create(
+            event_name=fake.company(),
+            organizer= self.become_organizer(self.test_user, "test_user"),
+            start_date_register=timezone.now(),  # Example for registration start
+            end_date_register=timezone.now() + datetime.timedelta(days = 1),  # Registration ends when the event starts
+            start_date_event=timezone.now()+ datetime.timedelta(days = 2),
+            end_date_event= timezone.now() + datetime.timedelta(days = 3),  # Ensure it ends after it starts
+            max_attendee=100,
+            description=fake.text(max_nb_chars=200),
+            min_age_requirement = 20
+        )
+        ticket = Ticket.objects.create(event = event_test, attendee = user)
+        response = self.client.get(f"/{ticket.id}",  headers={'Authorization': f'Bearer {token}'})
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()['id'], ticket.id)
+        
+    
+    def test_invalid_get__ticket_detail(self):
+        user = self.create_user("test","test")
+        token = self.get_token_for_user(user)
+        response = self.client.get(f"/{100}",  headers={'Authorization': f'Bearer {token}'})
+        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.json()['error'], "Ticket not found")
+        
+        
+    @patch("api.views.ticket.get_object_or_404")
+    def test_internal_server_error(self, mock_get_object_or_404):
+        
+        mock_get_object_or_404.side_effect = Exception("Simulated server error")
+        user = self.create_user("test","test")
+        token = self.get_token_for_user(user)
+        event_test = Event.objects.create(
+            event_name=fake.company(),
+            organizer= self.become_organizer(self.test_user, "test_user"),
+            start_date_register=timezone.now(),  # Example for registration start
+            end_date_register=timezone.now() + datetime.timedelta(days = 1),  # Registration ends when the event starts
+            start_date_event=timezone.now()+ datetime.timedelta(days = 2),
+            end_date_event= timezone.now() + datetime.timedelta(days = 3),  # Ensure it ends after it starts
+            max_attendee=100,
+            description=fake.text(max_nb_chars=200),
+            min_age_requirement = 20
+        )
+        ticket = Ticket.objects.create(event = event_test, attendee = user)
+        response = self.client.get(f"/{ticket.id}",  headers={'Authorization': f'Bearer {token}'})
+        self.assertEqual(response.status_code, 500)
+        self.assertEqual(response.json()['error'], 'Internal server error')
+        
+        
+    
+
+        
         
         
         
