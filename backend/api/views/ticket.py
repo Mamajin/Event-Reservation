@@ -53,7 +53,7 @@ class TicketAPI:
         )
         
         if not ticket.is_valid_min_age_requirement():
-            return Response({'error': f"You must be at least {event.min_age_requirement} years old to attend this event."}, 400)
+            return Response({'error': f"You must be at least {event.min_age_requirement} years old to attend this event."}, status = 400)
 
         try:
             ticket.clean()
