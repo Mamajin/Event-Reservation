@@ -25,6 +25,7 @@ import Branding from './pages/footerpage/Branding';
 import Design from './pages/footerpage/Design';
 import Marketing from './pages/footerpage/Marketing';
 import MyEvents from './pages/MyEvents';
+import OrganizerInfo from './pages/OrganizerInfo';
 
 function App() {
   const handleLogout = () => {
@@ -63,6 +64,7 @@ function App() {
           
           {/* Protected Routes */}
           <Route path="/account-info" element={<ProtectedRoute><AccountInfo /></ProtectedRoute>} />
+          <Route path="/organizer-info" element={<ProtectedRoute><OrganizerInfo /></ProtectedRoute>} />
           <Route path="/applied-events" element={<ProtectedRoute><AppliedEvents /></ProtectedRoute>} />
           <Route path="/create-event" element={<ProtectedRoute><CreateEvent /></ProtectedRoute>} />
           <Route path="/my-events" element={<ProtectedRoute><MyEvents /></ProtectedRoute>} />
