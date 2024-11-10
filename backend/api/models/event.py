@@ -200,15 +200,6 @@ class Event(models.Model):
             return True
         return False
     
-    def is_event_published(self) -> bool:
-        """
-        Check if event is published
-
-        Return:
-            bool: True if event is published  if not return False
-        """
-        now = timezone.now()
-        return self.event_create_date <= now
     
     def is_valid_date(self) -> bool:
         return self.start_date_register <= self.end_date_register <= self.start_date_event <= self.end_date_event

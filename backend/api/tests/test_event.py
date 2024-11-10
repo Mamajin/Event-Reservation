@@ -598,6 +598,40 @@ class EventTest(EventModelsTest):
         )
         self.assertEqual(response.status_code, 400)
         self.assertIn("Some unexpected error", response.json().get("error"))
+        
+        
+        
+    def test_get_event_status(self):
+        upcoming_event = self.create_event(timezone.now() - datetime.timedelta(days = 2), 
+                                  timezone.now() - datetime.timedelta(days = 1), 
+                                  timezone.now() + datetime.timedelta(days  = 1 ),
+                                  timezone.now() + datetime.timedelta(days = 2))
+        
+        finished_event = self.create_event(timezone.now() - datetime.timedelta(days = 4),
+                                           timezone.now() - datetime.timedelta(days = 3),
+                                           timezone.now() - datetime.timedelta(days = 2),
+                                           timezone.now() - datetime.timedelta(days = 1))
+        
+        
+        self.assertEqual(upcoming_event.get_event_status(), "Upcoming")
+        self.assertEqual(self.event_test.get_event_status(), "Ongoing")
+        self.assertEqual(finished_event.get_event_status(), "Finished")
+        
+    def test_available_spot(self):
+        event = Event.objects.create(
+            event_name=fake.company(),
+            organizer= self.become_organizer(self.test_user, "test_user"),
+            start_date_event=timezone.now(),
+            end_date_event= timezone.now() + datetime.timedelta(days = 1),  # Ensure it ends after it starts
+            start_date_register=timezone.now() - datetime.timedelta(days = 2),  # Example for registration start
+            end_date_register=timezone.now() + datetime.timedelta(days = 3),  # Registration ends when the event starts
+            max_attendee= 100,
+            description=fake.text(max_nb_chars=200),
+            event_image = fake.file_name()
+        )
+        self.assertEqual(event.available_spot() , 100)
+        
+        
     
         
         

@@ -121,5 +121,18 @@ class EventModelsTest(TestCase):
         )
             
     
+    def create_event(self, start_register, end_register , start_event, end_event):
+        return Event.objects.create(
+            event_name=fake.company(),
+            organizer= self.become_organizer(self.test_user, "test_user"),
+            start_date_event= start_event,
+            end_date_event= end_event,  # Ensure it ends after it starts
+            start_date_register= start_register,  # Example for registration start
+            end_date_register= end_register,  # Registration ends when the event starts
+            max_attendee=fake.random_int(min=10, max=500),
+            description=fake.text(max_nb_chars=200),
+            event_image = fake.file_name()
+        )
+        
     
         
