@@ -17,24 +17,31 @@ function AppliedEvents() {
         const fetchAppliedEvents = async () => {
             try {
                 console.log('Fetching applied events...');
+                
+                // Log access token and user ID to verify they are available
                 const token = localStorage.getItem(ACCESS_TOKEN);
+                console.log('Access token:', token);
+                console.log('User ID:', userId);
+                
                 if (!token || !userId) {
                     throw new Error('No access token or user ID found');
                 }
 
                 // Fetch all events from the API
-                const eventsResponse = await axios.get(`http://localhost:8000/api/events/events`, {
+                const eventsResponse = await axios.get(`/events/events`, {
                     headers: {
                         Authorization: `Bearer ${token}`,
                     },
                 });
+                console.log('Fetched events:', eventsResponse.data);
 
                 // Fetch tickets for the user
-                const ticketsResponse = await axios.get(`http://localhost:8000/api/tickets/event/${userId}`, {
+                const ticketsResponse = await axios.get(`/tickets/event/${userId}`, {
                     headers: {
                         Authorization: `Bearer ${token}`,
                     },
                 });
+                console.log('Fetched tickets:', ticketsResponse.data);
 
                 // Extract event IDs from tickets
                 const eventIds = ticketsResponse.data.map(ticket => ticket.event);
@@ -43,7 +50,7 @@ function AppliedEvents() {
                 const appliedEvents = eventsResponse.data.filter(event => eventIds.includes(event.id));
 
                 setEvents(appliedEvents);
-                console.log('Fetched applied events:', appliedEvents);
+                console.log('Filtered applied events:', appliedEvents);
             } catch (err) {
                 console.error('Error fetching applied events:', err);
                 setError(err);
@@ -82,6 +89,7 @@ function AppliedEvents() {
                         <h2 className="text-2xl font-bold mb-4 text-center text-dark-purple">Error</h2>
                         <div className="text-center">
                             <div>Error fetching applied events: {error?.message || userError?.message}</div>
+                            <div>Details: {JSON.stringify(error) || JSON.stringify(userError)}</div>
                         </div>
                     </div>
                 </div>
@@ -109,7 +117,7 @@ function AppliedEvents() {
             <div className="flex justify-center items-start min-h-screen p-4">
                 <div className="w-full max-w-[900px] bg-white rounded-lg shadow-lg p-6 space-y-4">
                     <h1 className="text-2xl font-bold mb-6 text-center text-dark-purple">Applied Events</h1>
-                    <div className="grid grid-cols-1 gap-4"> {/* Stacks EventCard components vertically with spacing */}
+                    <div className="grid grid-cols-1 gap-4">
                         {events.map((event) => (
                             <EventCard key={event.id} event={event} />
                         ))}

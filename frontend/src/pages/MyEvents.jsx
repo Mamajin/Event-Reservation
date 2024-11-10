@@ -22,15 +22,14 @@ function MyEvents() {
                     throw new Error('No access token or user ID found');
                 }
 
-                // Fetch organizer events from the API
                 const response = await axios.get(`/events/my-events`, {
                     headers: {
                         Authorization: `Bearer ${token}`,
                     },
                 });
 
-                setEvents(response.data);
-                console.log('Fetched organizer events:', response.data);
+                console.log('API response:', response.data);
+                setEvents(Array.isArray(response.data) ? response.data : []);
             } catch (err) {
                 console.error('Error fetching organizer events:', err);
                 setError(err);

@@ -1,31 +1,32 @@
 import { useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../api';
 import { ACCESS_TOKEN } from '../constants';
 import { useNavigate } from 'react-router-dom';
 
-function useUserProfile(navigate) {
+function useUserProfile() {
     const [userId, setUserId] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const navigate = useNavigate();
 
     useEffect(() => {
         const fetchUserProfile = async () => {
             try {
-                // console.log("Fetching user profile...");
                 const token = localStorage.getItem(ACCESS_TOKEN);
-
                 if (!token) {
-                    navigate('/login');
-                    return;
+                    throw new Error("No access token found");
                 }
 
-                const response = await axios.get('http://localhost:8000/api/users/profile', {
+                const response = await api.get('/users/profile', {
                     headers: {
                         Authorization: `Bearer ${token}`,
                     },
                 });
 
-                // console.log("API response data:", response.data);
+                // Validate response content-type to ensure it's JSON
+                if (!response.headers['content-type'].includes('application/json')) {
+                    throw new Error("Expected JSON but received HTML response");
+                }
 
                 // Validate the response data structure
                 if (!response.data || !response.data.username || !response.data.id) {
@@ -33,20 +34,25 @@ function useUserProfile(navigate) {
                 }
 
                 setUserId(response.data.id);
-                // console.log("User profile response:", response.data);
             } catch (err) {
-                console.error("Error fetching user profile:", err);
-                setError(err);
+                console.error("Error fetching user profile:", err.message);
+
+                if (err.message.includes("No access token found") || err.response?.status === 401) {
+                    alert("You are not logged in. Redirecting to login page...");
+                    navigate("/login");
+                } else {
+                    setError(err);
+                }
             } finally {
                 setLoading(false);
-                console.log("Finished fetching user profile.");
             }
         };
 
-        if (!userId && loading) {
+        if (loading) {
             fetchUserProfile();
         }
-    }, [userId, navigate]);
+    }, [loading, navigate]);
+
 
     return { userId, loading, error };
 }
