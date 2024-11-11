@@ -151,37 +151,124 @@ export function CommentSection({ event }) {
       setIsLoading(false);
     }
   };
+
+  if (!event?.id) {
+    return <div>No event selected</div>;
+  }
+
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="mb-8">
-  <textarea
-    {...register('content', { 
-      required: 'Comment cannot be empty',
-      maxLength: {
-        value: 500,
-        message: 'Comment is too long'
-      }
-    })}
-    placeholder="Share your thoughts..."
-    className="textarea textarea-bordered bg-white w-full mb-2"
-    disabled={isLoading}
-  />
-  {errors.content && (
-    <p className="text-sm text-red-500 mb-2">{errors.content.message}</p>
-  )}
-  <button 
-    type="submit" 
-    className="btn bg-amber-300"
-    disabled={isLoading}
-  >
-    {isLoading ? 'Posting...' : 'Post Comment'}
-  </button>
-  <button
-  className="btn btn-ghost btn-xs"
-  onClick={() => handleDelete(comment.id)}
-  disabled={isLoading}
->
-  <LuTrash2 className="h-4 w-4" />
-</button>
-</form>
-  )
+    <div className="container mx-auto py-8">
+      <div className="card p-6 shadow-lg">
+        <div className="flex items-center gap-2 mb-6">
+          <FiMessageSquare className="h-5 w-5" />
+          <h2 className="text-2xl font-semibold">Comments</h2>
+        </div>
+
+        {error && (
+          <div className="alert alert-error mb-4">
+            <p>{error}</p>
+          </div>
+        )}
+
+        {/* Comment Form */}
+        <form onSubmit={handleSubmit(onSubmit)} className="mb-8">
+          <textarea
+            {...register('content', { 
+              required: 'Comment cannot be empty',
+              maxLength: {
+                value: 500,
+                message: 'Comment is too long'
+              }
+            })}
+            placeholder="Share your thoughts..."
+            className="textarea textarea-bordered w-full mb-2"
+            disabled={isLoading}
+          />
+          {errors.content && (
+            <p className="text-sm text-red-500 mb-2">{errors.content.message}</p>
+          )}
+          <button 
+            type="submit" 
+            className="btn bg-amber-300"
+            disabled={isLoading}
+          >
+            {isLoading ? 'Posting...' : 'Post Comment'}
+          </button>
+        </form>
+
+        {/* Comments List */}
+        <div className="space-y-6">
+          {comments.map(comment => (
+            <div key={comment.id} className="flex gap-4">
+              <div className="avatar w-10 h-10">
+                <div className="rounded-full ring ring-amber-300 ring-offset-base-100 ring-offset-2">
+                  <img src={comment.user.avatar} alt={comment.user.username} />
+                </div>
+              </div>
+              <div className="flex-1">
+                <div className="flex items-center justify-between">
+                  <h3 className="font-medium text-black text-xl">{comment.user.username}</h3>
+                  <div className="flex items-center gap-2">
+                    <button
+                      className="btn btn-ghost btn-xs"
+                      onClick={() => setEditingId(comment.id)}
+                      disabled={isLoading}
+                    >
+                      <FiEdit2 className="h-4 w-4" />
+                    </button>
+                    <button
+                      className="btn btn-ghost btn-xs"
+                      onClick={() => handleDelete(comment.id)}
+                      disabled={isLoading}
+                    >
+                      <LuTrash2 className="h-4 w-4" />
+                    </button>
+                  </div>
+                </div>
+                {editingId === comment.id ? (
+                  <form
+                    onSubmit={e => {
+                      e.preventDefault();
+                      const formData = new FormData(e.currentTarget);
+                      handleEdit(comment.id, formData.get('content'));
+                    }}
+                    className="mt-2"
+                  >
+                    <textarea
+                      name="content"
+                      defaultValue={comment.content}
+                      className="textarea textarea-bordered w-full mb-2"
+                      disabled={isLoading}
+                    />
+                    <div className="flex gap-2">
+                      <button 
+                        type="submit" 
+                        className="btn bg-amber-300 btn-xs"
+                        disabled={isLoading}
+                      >
+                        {isLoading ? 'Saving...' : 'Save'}
+                      </button>
+                      <button
+                        type="button"
+                        className="btn btn-outline btn-xs"
+                        onClick={() => setEditingId(null)}
+                        disabled={isLoading}
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  </form>
+                ) : (
+                  <p className="text-muted mt-1">{comment.content}</p>
+                )}
+                <span className="text-sm text-muted mt-1">
+                  {new Date(comment.created_at).toLocaleDateString()}
+                </span>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
 }
