@@ -7,7 +7,7 @@ function EventDetail() {
   const { eventId } = useParams();
   const navigate = useNavigate();
   const [event, setEvent] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [applyError, setApplyError] = useState(null);
   const [applySuccess, setApplySuccess] = useState(false);
