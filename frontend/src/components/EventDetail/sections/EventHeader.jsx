@@ -5,25 +5,25 @@ import { format } from 'date-fns';
 export function EventHeader({ event }) {
   const isRegistrationOpen = new Date(event.end_date_register) > new Date();
   const isFreeEvent = event.is_free || event.ticket_price === 0;
-  
+
   const handleLocation = () => {
     const latitude = event.latitude;
     const longitude = event.longitude;
     const address = event.address;
-  
+
     // Check if the address is available and use it, otherwise fall back to coordinates
     const googleMapsLink = address
       ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}`
       : `https://www.google.com/maps/search/?api=1&query=${latitude},${longitude}`;
-    
+
     window.open(googleMapsLink, "_blank");
   };
-  
+
   return (
     <div className="relative h-[40vh] min-h-[400px] w-full pr-5">
-      <div 
+      <div
         className="absolute inset-0 bg-cover bg-center"
-        style={{ 
+        style={{
           backgroundImage: `url(${event.event_image || 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?q=80&w=2070'})`,
         }}
       >
@@ -33,7 +33,7 @@ export function EventHeader({ event }) {
         <div className="container pb-8">
           <div className="flex flex-col pl-5 gap-4">
             <div className="flex items-center gap-2">
-             <div className="badge bg-dark-purple text-sm text-white font-medium badge-lg">{event.category}</div>
+              <div className="badge bg-dark-purple text-sm text-black font-medium badge-lg">{event.category}</div>
               {event.is_online && (
                 <div className="badge badge-outline badge-lg">Online Event</div>
               )}
@@ -61,7 +61,7 @@ export function EventHeader({ event }) {
                     className="text-lg cursor-pointer"
                     onClick={handleLocation}
                   >
-                     {event.address ? (event.address.length > 50 ? event.address.slice(0, 50) + "..." : event.address) : "View Location"}
+                    {event.address ? (event.address.length > 50 ? event.address.slice(0, 50) + "..." : event.address) : "View Location"}
                   </p>
 
                 </div>

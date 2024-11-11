@@ -1,6 +1,6 @@
 export default function TicketingDetails({ form }) {
   const isFree = form.watch('is_free');
-  
+
   return (
     <div className="space-y-4">
       <div className="form-control ">

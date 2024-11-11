@@ -15,7 +15,7 @@ export function OrganizerInfo({ organizer }) {
               <div className="flex items-center gap-2">
                 <h2 className="text-xl text-dark-purple font-semibold">{organizer.organizer_name}</h2>
                 {organizer.is_verified && (
-                  <LuCheckCircle2  className="h-5 w-5 text-dark-purple" />
+                  <LuCheckCircle2 className="h-5 w-5 text-dark-purple" />
                 )}
               </div>
               <p className="text-sm text-base-content/70">{organizer.organization_type}</p>

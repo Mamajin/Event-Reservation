@@ -187,7 +187,7 @@ export function CommentSection({ event }) {
             type="text"
             value={editContent}
             onChange={(e) => setEditContent(e.target.value)}
-            className="flex-1 rounded-lg border border-gray-300 px-3 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="flex-1 bg-white rounded-lg border border-gray-300 px-3 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
             autoFocus
           />
           <button
