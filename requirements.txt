@@ -6,7 +6,6 @@ djangorestframework-simplejwt
 PyJWT
 pytz
 sqlparse
-psycopg2-binary
 python-dotenv
 django-ninja
 django-ninja-extra
@@ -20,3 +19,4 @@ django-storages
 boto3
 google-auth
 requests
+django-allauth
