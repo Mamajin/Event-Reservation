@@ -148,7 +148,7 @@ function OrganizerInfo() {
               onClick={goToAccountInfo}
               className="px-4 py-2 bg-amber-300 text-dark-purple rounded hover:bg-yellow-600 transition duration-200"
             >
-              Back to Account Info
+              Back to Account Details
             </button>
           </div>
 
