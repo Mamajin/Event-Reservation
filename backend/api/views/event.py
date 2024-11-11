@@ -110,7 +110,6 @@ class EventAPI:
                 event_data.engagement = engagement
                 event_list.append(event_data)
             logger.info("Retrieved all events for the homepage.")
-            print(len(event_list))
             return event_list
         except Exception as e:
             logger.error(f"Error while retrieving events for the homepage: {str(e)}")
