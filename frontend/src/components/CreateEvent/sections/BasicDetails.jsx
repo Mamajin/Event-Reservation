@@ -39,7 +39,7 @@ export default function BasicDetails({ form }) {
 
   const handleFileChange = (e) => {
     const file = e.target.files[0];
-    
+
     if (!file) {
       if (eventImage) {
         URL.revokeObjectURL(eventImage);
@@ -50,23 +50,23 @@ export default function BasicDetails({ form }) {
     }
 
     const allowedTypes = ['image/jpeg', 'image/png'];
-  
+
     if (!allowedTypes.includes(file.type)) {
       alert('Only JPEG and PNG files are allowed.');
       e.target.value = '';
       return;
     }
-    
+
     if (file.size > 5 * 1024 * 1024) {
       alert('File size exceeds the limit of 5 MB.');
       e.target.value = '';
       return;
     }
-    
+
     if (eventImage) {
       URL.revokeObjectURL(eventImage);
     }
-    
+
     const previewUrl = URL.createObjectURL(file);
     setEventImage(previewUrl);
     setValue('event_image', file);
@@ -143,10 +143,10 @@ export default function BasicDetails({ form }) {
         </div>
       </div>
       <div className="mt-6 w-full">
-        <FileInput 
-          label="Event Banner" 
+        <FileInput
+          label="Event Banner"
           name="event_file"
-          onChange={handleFileChange} 
+          onChange={handleFileChange}
           accept=".jpg,.jpeg,.png"
           preview={eventImage}
         />
