@@ -131,6 +131,26 @@ export function CommentSection({ event }) {
       setIsLoading(false);
     }
   };
+  
+  const handleEdit = async (commentId, newContent) => {
+    try {
+      setIsLoading(true);
+      setError(null);
+      
+      const updatedComment = await end_point.editComment(commentId, newContent);
+      setComments(prev =>
+        prev.map(comment =>
+          comment.id === commentId ? updatedComment : comment
+        )
+      );
+      setEditingId(null);
+      
+    } catch (error) {
+      setError(error.message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="mb-8">
   <textarea
