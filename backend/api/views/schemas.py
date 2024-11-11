@@ -156,7 +156,6 @@ class OrganizerUpdateSchema(Schema):
 
 class EventUpdateSchema(Schema):
     event_name: Optional[str] = None
-    organizer_id: Optional[int] = None
     event_create_date: Optional[datetime] = None
     start_date_event: Optional[datetime] = None
     end_date_event: Optional[datetime] = None
@@ -165,7 +164,6 @@ class EventUpdateSchema(Schema):
     description: Optional[str] = None
     max_attendee: Optional[int] = 0
     address: Optional[str] = None
-    event_image: Optional[str] = None
     is_free: Optional[bool] = True
     ticket_price: Optional[Decimal] = Decimal('0.00')
     expected_price: Optional[Decimal] = Decimal('0.00')
