@@ -1,6 +1,7 @@
 import { EventHeader } from './sections/EventHeader';
 import { EventInfo } from './sections/EventInfo';
 import { OrganizerInfo } from './sections/OrganizerInfo';
+import { CommentSection } from './sections/Comment';
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import api from '../../api';
@@ -31,10 +32,11 @@ function EventDetail() {
   if (!event) return <div>No event found.</div>;
 
   return (
-    <div className="min-h-screen bg-white w-full relative ">
+    <div className="min-h-screen bg-gray-50 w-full relative ">
       <EventHeader event={event} />
       {event.organizer && <OrganizerInfo organizer={event.organizer} />}
       <EventInfo event={event} />
+      <CommentSection event={event}/>
     </div>
   );
 }
