@@ -79,4 +79,23 @@ export function CommentSection({ event }) {
       }
     }
   };
+  useEffect(() => {
+    const fetchComments = async () => {
+      if (!event?.id) return;
+      
+      try {
+        setIsLoading(true);
+        setError(null);
+        const fetchedComments = await end_point.getEventComments(event.id);
+        setComments(fetchedComments);
+      } catch (error) {
+        setError(error.message);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+  
+    fetchComments();
+  }, [event?.id]);
+  
 }
