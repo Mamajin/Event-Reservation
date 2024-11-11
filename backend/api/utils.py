@@ -83,6 +83,7 @@ class TicketEmailService:
             logger.error(f"Failed to send email to {to_email}: {str(e)}")
             return False
 
+
 class TicketNotificationManager:
     """
     Manages ticket notifications for different events
@@ -123,23 +124,11 @@ class TicketNotificationManager:
         
     def send_reminder_notification(self) -> bool:
         """Send reminder email before the event."""
-        subject = f"Event Reminder - {self.event.event_name}"
-        message = f"""
-        Hello {self.attendee.first_name},
-
-        Thank you for purchasing a ticket for {self.event.event_name}!
-
-        Your ticket number is: {self.ticket_number}
-        Status: {self.status}
-        
-        We look forward to seeing you at the event!
-
-        Best regards,
-        The Event Team
-        """
+        subject = f'Reminder: Event {self.ticket.event.event_name} is tomorrow!'
+        message = f"Dear {self.ticket.attendee.full_name}, don't forget about {self.ticket.event.event_name} happening tomorrow!"
         
         return self.email_service.send_email(
-            to_email=self.attendee.email,
+            to_email='napoldej.p@gmail.com',
             subject=subject,
             html_content=message
         )
