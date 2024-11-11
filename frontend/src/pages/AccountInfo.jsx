@@ -109,6 +109,10 @@ function AccountInfo() {
     }
   };
 
+  const goToOrganizerInfo = () => {
+    navigate('/organizer-info');
+  };
+
   if (loading) {
     return (
       <PageLayout>
@@ -130,8 +134,18 @@ function AccountInfo() {
       <div className="flex-1 p-6 bg-white rounded-lg shadow-lg w-full max-w-screen-lg mx-auto">
         <div className="max-w-3xl mx-auto">
           <h1 className="text-2xl font-bold mb-6 text-dark-purple">Account Details</h1>
-          
-          <p className="text-gray-600 mb-6">View or edit your user login details.</p>
+
+            {/* Navigate to Organizer Info Button */}
+            <div className="mt-6">
+              <button
+                onClick={goToOrganizerInfo}
+                className="px-4 py-2 bg-amber-300 text-dark-purple rounded hover:bg-yellow-600 transition duration-200"
+              >
+                Go to Organizer Info
+              </button>
+            </div>
+
+          <p className="mt-6 text-gray-600 mb-6">View or edit your user login details.</p>
 
           {/* Profile Image */}
           <div className="flex items-center mb-6">

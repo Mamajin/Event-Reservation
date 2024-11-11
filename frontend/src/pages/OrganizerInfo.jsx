@@ -61,25 +61,39 @@ function OrganizerInfo() {
   const handleSaveChanges = async () => {
     try {
       const token = localStorage.getItem(ACCESS_TOKEN);
-
-      const updatedData = {
-        ...organizerData,
-        updated_at: new Date().toISOString(),
-      };
-
+  
+      // Create an object that will store the fields that have been edited
+      const updatedData = {};
+  
+      // Add only the changed fields to updatedData
+      Object.keys(organizerData).forEach((field) => {
+        if (organizerData[field] !== undefined && organizerData[field] !== null) {
+          updatedData[field] = organizerData[field];
+        }
+      });
+  
+      // Check if there are any changes, if not, alert the user
+      if (Object.keys(updatedData).length === 0) {
+        alert("No changes were made.");
+        return;
+      }
+  
+      // Make the PUT request to save the changes
       const response = await api.put('/organizers/update-organizer', updatedData, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       });
-
+  
       console.log("Organizer data updated successfully:", response.data);
-      setIsEditing(false);
+      setIsEditing(false);  // Turn off the editing mode after saving
     } catch (err) {
       console.error("Error saving organizer data:", err.message);
       alert("Failed to save changes. Please try again.");
     }
   };
+  
+  
 
   const handleLogoChange = (e) => {
     const file = e.target.files[0];
@@ -108,20 +122,8 @@ function OrganizerInfo() {
     }
   };
 
-  const handleRevokeOrganizer = async () => {
-    try {
-      const token = localStorage.getItem(ACCESS_TOKEN);
-      await api.delete('/organizers/revoke-organizer', {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      alert("Your organizer role has been revoked.");
-      navigate("/profile"); // Redirect to profile or another page
-    } catch (err) {
-      console.error("Error revoking organizer role:", err.message);
-      alert("Failed to revoke organizer role. Please try again.");
-    }
+  const goToAccountInfo = () => {
+    navigate('/account-info');
   };
 
   const organizerTypes = [
@@ -149,7 +151,18 @@ function OrganizerInfo() {
       <div className="flex-1 p-6 bg-white rounded-lg shadow-lg w-full max-w-screen-lg mx-auto">
         <div className="max-w-3xl mx-auto">
           <h1 className="text-2xl font-bold mb-6 text-dark-purple">Organizer Profile</h1>
-          <p className="text-gray-600 mb-6">View or edit your organizer profile details.</p>
+
+            {/* Navigate to Organizer Info Button */}
+            <div className="mt-6">
+              <button
+                onClick={goToAccountInfo}
+                className="px-4 py-2 bg-amber-300 text-dark-purple rounded hover:bg-yellow-600 transition duration-200"
+              >
+                Back to Account Info
+              </button>
+            </div>
+
+          <p className="mt-6 text-gray-600 mb-6">View or edit your organizer profile details.</p>
 
           {/* Organizer Logo */}
           <div className="flex items-center mb-6">
