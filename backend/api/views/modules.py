@@ -21,7 +21,7 @@ from api.models.ticket import *
 from api.models.comment import *
 from botocore.exceptions import ClientError
 from django.conf import settings
-from pydantic import EmailStr, HttpUrl, constr, conint, Field
+from pydantic import EmailStr, HttpUrl, constr, conint, Field, condecimal
 from datetime import datetime, date
 from typing import List, Optional
 from decimal import Decimal

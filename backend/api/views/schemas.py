@@ -1,3 +1,4 @@
+
 from .modules import *
 
 
@@ -151,6 +152,39 @@ class OrganizerUpdateSchema(Schema):
     organizer_name: Optional[str] =Field(None)
     email: Optional[EmailStr]= ""
     organization_type: Optional[OrganizerType] = "INDIVIDUAL"
+    
+
+class EventUpdateSchema(Schema):
+    event_name: Optional[str] = None
+    organizer_id: Optional[int] = None
+    event_create_date: Optional[datetime] = None
+    start_date_event: Optional[datetime] = None
+    end_date_event: Optional[datetime] = None
+    start_date_register: Optional[datetime] = None
+    end_date_register: Optional[datetime] = None
+    description: Optional[str] = None
+    max_attendee: Optional[int] = 0
+    address: Optional[str] = None
+    event_image: Optional[str] = None
+    is_free: Optional[bool] = True
+    ticket_price: Optional[Decimal] = Decimal('0.00')
+    expected_price: Optional[Decimal] = Decimal('0.00')
+    is_online: Optional[bool] = False
+    meeting_link: Optional[str] = None
+    category: Optional[str] = 'OTHER'
+    visibility: Optional[str] = 'PUBLIC'
+    allowed_email_domains: Optional[str] = None
+    detailed_description: Optional[str] = None
+    dress_code: Optional[str] = 'CASUAL'
+    contact_email: Optional[str] = None
+    contact_phone: Optional[str] = None
+    website_url: Optional[str] = None
+    facebook_url: Optional[str] = None
+    twitter_url: Optional[str] = None
+    instagram_url: Optional[str] = None
+    min_age_requirement: Optional[int] = 0
+    terms_and_conditions: Optional[str] = None
+    
     
     
 
