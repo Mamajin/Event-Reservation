@@ -116,6 +116,21 @@ export function CommentSection({ event }) {
       setIsLoading(false);
     }
   };
+
+  const handleDelete = async (commentId) => {
+    try {
+      setIsLoading(true);
+      setError(null);
+      
+      await end_point.deleteComment(commentId);
+      setComments(prev => prev.filter(comment => comment.id !== commentId));
+      
+    } catch (error) {
+      setError(error.message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="mb-8">
   <textarea
@@ -140,6 +155,13 @@ export function CommentSection({ event }) {
   >
     {isLoading ? 'Posting...' : 'Post Comment'}
   </button>
+  <button
+  className="btn btn-ghost btn-xs"
+  onClick={() => handleDelete(comment.id)}
+  disabled={isLoading}
+>
+  <LuTrash2 className="h-4 w-4" />
+</button>
 </form>
   )
 }
