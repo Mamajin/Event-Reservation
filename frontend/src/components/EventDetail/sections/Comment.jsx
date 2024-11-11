@@ -16,4 +16,67 @@ export function CommentSection({ event }) {
     reset,
     formState: { errors }
   } = useForm();
+
+  const end_point = {
+    getEventComments: async (eventId) => {
+      try {
+        const response = await api.get(`/events/${eventId}/comments`, {
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+        return response.data;
+      } catch (error) {
+        throw new Error('Error fetching comments: ' + (error.response.data?.error));
+      }
+    },
+  
+    writeComment: async (content, eventId) => {
+      try {
+        const formData = new FormData();
+        formData.append('content', content);
+    
+        const response = await api.post(`/comments/write-comment/?event_id=${eventId}`, formData, {
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+    
+        return response.data;
+      } catch (error) {
+        throw new Error('Error creating comment: ' + (error.response.data?.error));
+      }
+    },
+  
+    deleteComment: async (commentId) => {
+      try {
+        const response = await api.delete(`/comments/${commentId}/delete/`, {
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+  
+        return response.status === 204;
+      } catch (error) {
+        throw new Error('Error deleting comment: ' + (error.response?.data?.error));
+      }
+    },
+  
+    editComment: async (commentId, content) => {
+      try {
+        const formData = new FormData();
+        formData.append('content', content);
+  
+        const response = await api.put(`/comments/${commentId}/edit/`, formData, {
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+  
+        return response.data;
+      } catch (error) {
+        throw new Error('Error editing comment: ' + (error.response?.data?.error));
+      }
+    }
+  };
 }
