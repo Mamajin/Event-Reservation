@@ -1,4 +1,4 @@
-from .schemas import UserSchema, LoginResponseSchema, UserResponseSchema, LoginSchema, ErrorResponseSchema, FileUploadResponseSchema, AuthResponseSchema, GoogleAuthSchema
+from .schemas import UserSchema, LoginResponseSchema, UserResponseSchema, LoginSchema, ErrorResponseSchema, FileUploadResponseSchema, AuthResponseSchema, GoogleAuthSchema, UserupdateSchema
 from .modules import *
 
 router = Router()
@@ -154,8 +154,8 @@ class UserAPI:
         profile_data = UserResponseSchema(**profile_dict)
         return profile_data
 
-    @router.put('/edit-profile/{user_id}/', response=UserResponseSchema, auth=JWTAuth())
-    def edit_profile(request, user_id: int, new_data: UserResponseSchema):
+    @router.patch('/edit-profile/{user_id}/', response=UserupdateSchema, auth=JWTAuth())
+    def edit_profile(request, user_id: int, new_data: UserupdateSchema):
         """
         Update the profile information of a user by user ID.
 
@@ -168,12 +168,12 @@ class UserAPI:
             UserResponseSchema: Updated user profile details.
         """
         user = get_object_or_404(AttendeeUser, id=user_id)
-        update_fields = new_data.dict(exclude={'profile_picture'})
+        update_fields = new_data.dict(exclude={'profile_picture'}, exclude_unset = True)
         for field, value in update_fields.items():
             setattr(user, field, value)
         user.save()
         user.refresh_from_db()
-        return UserResponseSchema.from_orm(user)
+        return UserupdateSchema.from_orm(user)
 
     @router.delete('delete/', auth=JWTAuth())
     def delete_profile(request):
