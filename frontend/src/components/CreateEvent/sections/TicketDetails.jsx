@@ -57,6 +57,14 @@ export default function TicketingDetails({ form }) {
           />
         </div>
       </div>
+      <div className="form-control">
+        <label className="label font-medium text-dark-purple">Terms and Conditions</label>
+        <textarea
+          className="textarea textarea-bordered h-24 bg-white"
+          placeholder="Fill in the terms and condition for your event"
+          {...form.register('terms_and_conditions')}
+        />
+      </div>
     </div>
   );
 }
