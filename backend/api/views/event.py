@@ -74,7 +74,7 @@ class EventAPI:
         """
         try:
             organizer = Organizer.objects.get(user=request.user)
-            events = Event.objects.filter(organizer=organizer)
+            events = Event.objects.filter(organizer=organizer, event_create_date__lte=timezone.now()).order_by("-event_create_date")
             event_list = []
             for event in events:
                 engagement = EventResponseSchema.resolve_engagement(event, organizer.user)
