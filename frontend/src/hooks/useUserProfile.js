@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { ACCESS_TOKEN } from '../constants';
 import { useNavigate } from 'react-router-dom';
+import api from '../api';
 
 function useUserProfile(navigate) {
     const [userId, setUserId] = useState(null);
@@ -19,7 +20,7 @@ function useUserProfile(navigate) {
                     return;
                 }
 
-                const response = await axios.get('http://localhost:8000/api/users/profile', {
+                const response = await api.get('/users/profile', {
                     headers: {
                         Authorization: `Bearer ${token}`,
                     },
