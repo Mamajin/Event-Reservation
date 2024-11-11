@@ -5,7 +5,20 @@ import { format } from 'date-fns';
 export function EventHeader({ event }) {
   const isRegistrationOpen = new Date(event.end_date_register) > new Date();
   const isFreeEvent = event.is_free || event.ticket_price === 0;
-
+  
+  const handleLocation = () => {
+    const latitude = event.latitude;
+    const longitude = event.longitude;
+    const address = event.address;
+  
+    // Check if the address is available and use it, otherwise fall back to coordinates
+    const googleMapsLink = address
+      ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}`
+      : `https://www.google.com/maps/search/?api=1&query=${latitude},${longitude}`;
+    
+    window.open(googleMapsLink, "_blank");
+  };
+  
   return (
     <div className="relative h-[40vh] min-h-[400px] w-full pr-5">
       <div 
@@ -20,7 +33,7 @@ export function EventHeader({ event }) {
         <div className="container pb-8">
           <div className="flex flex-col pl-5 gap-4">
             <div className="flex items-center gap-2">
-              <div className="badge badge-primary badge-lg">{event.category}</div>
+             <div className="badge bg-dark-purple text-sm text-black font-medium badge-lg">{event.category}</div>
               {event.is_online && (
                 <div className="badge badge-outline badge-lg">Online Event</div>
               )}
@@ -44,7 +57,13 @@ export function EventHeader({ event }) {
               {!event.is_online && (
                 <div className="flex items-center gap-2">
                   <FaMapMarkerAlt className="h-5 w-5" />
-                  <span className="text-lg">{event.address}</span>
+                  <p
+                    className="text-lg cursor-pointer"
+                    onClick={handleLocation}
+                  >
+                     {event.address ? (event.address.length > 50 ? event.address.slice(0, 50) + "..." : event.address) : "View Location"}
+                  </p>
+
                 </div>
               )}
               <div className="flex items-center gap-2">

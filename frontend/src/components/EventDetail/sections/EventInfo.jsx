@@ -21,7 +21,7 @@ import { format } from 'date-fns';
             <div className="card bg-white flex-grow">
               <div className="card-body">
                 <h2 className="card-title text-2xl mb-4 text-dark-purple">About the Event</h2>
-                <p className="whitespace-pre-wrap text-base-content/80 leading-relaxed">
+                <p className="whitespace-pre-wrap break-word text-base-content/80 leading-relaxed">
                   {event.detailed_description || event.description}
                 </p>
               </div>
@@ -100,7 +100,7 @@ import { format } from 'date-fns';
     
             {/* Social Links */}
             {socialLinks.length > 0 && (
-              <div className="card bg-base-100 flex-grow">
+              <div className="card bg-white flex-grow">
                 <div className="card-body">
                   <h3 className="font-semibold text-lg mb-4">Social Media</h3>
                   <div className="flex flex-wrap gap-4">
