@@ -145,6 +145,15 @@ class UserupdateSchema(Schema):
     instagram_handle: Optional[str] = Field(None)
     company: Optional[str] = Field(None)
     profile_picture: Optional[str] = Field(None)
+    
+    
+class OrganizerUpdateSchema(Schema):
+    organizer_name: Optional[str] =Field(None)
+    email: Optional[EmailStr]= ""
+    organization_type: Optional[OrganizerType] = "INDIVIDUAL"
+    
+    
+
 
     
 class LoginSchema(Schema):
