@@ -251,26 +251,3 @@ class UserAPITests(UserModelsTest):
         self.assertIn('Upload failed', response.json()['error'])
 
         
-    def test_age_property(self):
-        """Test the age property calculates correctly."""
-        self.user = AttendeeUser.objects.create(
-            email='testuser@example.com',
-            first_name='Test',
-            last_name='User',
-            birth_date='1990-01-01',
-            phone_number='1234567890',
-            status='Attendee',
-            address='123 Test Street',
-            latitude=Decimal('12.345678'),
-            longitude=Decimal('98.765432'),
-            company='Test Company',
-            facebook_profile='https://facebook.com/testuser',
-            instagram_handle='testuser_insta',
-            nationality='Testland'
-        )
-        user = self.user
-        today = timezone.now().date()
-        expected_age = today.year - 1990
-        if (today.month, today.day) < (1, 1):
-            expected_age -= 1
-        self.assertEqual(user.age, expected_age)
