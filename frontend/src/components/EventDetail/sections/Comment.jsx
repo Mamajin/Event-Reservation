@@ -36,7 +36,7 @@ export function CommentSection({ event }) {
         const formData = new FormData();
         formData.append('content', content);
     
-        const response = await api.post(`/comments/write-comment/?event_id=${eventId}`, formData, {
+        const response = await api.post(`/comments/write-comment/${eventId}`, formData, {
           headers: {
             'Content-Type': 'application/json',
           },
@@ -98,4 +98,48 @@ export function CommentSection({ event }) {
     fetchComments();
   }, [event?.id]);
   
+
+  const onSubmit = async (data) => {
+    if (!event?.id) return;
+  
+    try {
+      setIsLoading(true);
+      setError(null);
+      
+      const newComment = await end_point.writeComment(data.content, event.id);
+      setComments(prev => [newComment, ...prev]);
+      reset();
+      
+    } catch (error) {
+      setError(error.message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  return (
+    <form onSubmit={handleSubmit(onSubmit)} className="mb-8">
+  <textarea
+    {...register('content', { 
+      required: 'Comment cannot be empty',
+      maxLength: {
+        value: 500,
+        message: 'Comment is too long'
+      }
+    })}
+    placeholder="Share your thoughts..."
+    className="textarea textarea-bordered bg-white w-full mb-2"
+    disabled={isLoading}
+  />
+  {errors.content && (
+    <p className="text-sm text-red-500 mb-2">{errors.content.message}</p>
+  )}
+  <button 
+    type="submit" 
+    className="btn bg-amber-300"
+    disabled={isLoading}
+  >
+    {isLoading ? 'Posting...' : 'Post Comment'}
+  </button>
+</form>
+  )
 }
