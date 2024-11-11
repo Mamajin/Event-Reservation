@@ -45,7 +45,7 @@ function EventDetail() {
     setApplySuccess(false);
 
     try {
-      const response = await api.post(`/tickets/event/${event.id}/reserve`);
+      const response = await api.post(`/tickets/event/${event.id}/register`);
       alert("Event apply successfully!");
       navigate("/applied-events");
     } catch (error) {

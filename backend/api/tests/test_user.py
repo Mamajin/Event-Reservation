@@ -1,3 +1,4 @@
+from decimal import Decimal
 from api.urls import api  
 from api.models import AttendeeUser, Organizer
 from .utils.utils_user import UserModelsTest, SimpleUploadedFile, ClientError
@@ -7,6 +8,7 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth import get_user
 from unittest.mock import Mock, patch, MagicMock
 from google.oauth2 import id_token
+from django.utils import timezone
 from requests import Request
 
 User = get_user_model() 
@@ -249,32 +251,26 @@ class UserAPITests(UserModelsTest):
         self.assertIn('Upload failed', response.json()['error'])
 
         
-        
-    # def test_if_user_is_organizer(self):
-    #     normal_user = self.create_user("test","test")
-    #     organizer = self.become_organizer(normal_user, "test")
-    #     token = self.get_token_for_user(normal_user)
-    #     response = self.client.get(self.user_profile_url, 
-    #                                headers={"Authorization": f"Bearer {token}"})
-    #     self.assertEqual(response.json()['status'], 'Organizer')
-        
-        
-        
-        
-        
-    
-    # def test_is_Attendeeuser(self):
-    #     user = self.create_user("test","test_user")
-    #     self.assertTrue(AttendeeUser.objects.filter(username = user.username))
-        
-    # def test_is_Organizer(self):
-    #     user = self.create_user("user_test", "test_user1")
-    #     self.assertFalse(Organizer.objects.filter(user = user))
-    #     organizer = self.become_organizer(user, "test_user")
-    #     self.assertTrue(Organizer.objects.filter(organizer_name = organizer.organizer_name).exists())
-        
-    
-
-        
-        
-        
+    def test_age_property(self):
+        """Test the age property calculates correctly."""
+        self.user = AttendeeUser.objects.create(
+            email='testuser@example.com',
+            first_name='Test',
+            last_name='User',
+            birth_date='1990-01-01',
+            phone_number='1234567890',
+            status='Attendee',
+            address='123 Test Street',
+            latitude=Decimal('12.345678'),
+            longitude=Decimal('98.765432'),
+            company='Test Company',
+            facebook_profile='https://facebook.com/testuser',
+            instagram_handle='testuser_insta',
+            nationality='Testland'
+        )
+        user = self.user
+        today = timezone.now().date()
+        expected_age = today.year - 1990
+        if (today.month, today.day) < (1, 1):
+            expected_age -= 1
+        self.assertEqual(user.age, expected_age)
