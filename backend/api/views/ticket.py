@@ -51,6 +51,8 @@ class TicketAPI:
             status='ACTIVE',
             created_at=timezone.now()
         )
+        if user.age == None:
+            return Response({'error' : f" Please set your birth date in accountinfo"})
         
         if not ticket.is_valid_min_age_requirement():
             return Response({'error': f"You must be at least {event.min_age_requirement} years old to attend this event."}, status = 400)

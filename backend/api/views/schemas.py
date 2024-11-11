@@ -132,6 +132,19 @@ class UserSchema(ModelSchema):
             "phone_number",
             "profile_picture"
         )
+        
+class UserupdateSchema(Schema):
+    first_name: Optional[str] = Field(None)
+    last_name: Optional[str] = ""
+    birth_date: Optional[date] = Field(None)
+    phone_number: Optional[str] = Field(None)
+    email: Optional[str]  = ""
+    address: Optional[str] = Field(None)
+    nationality: Optional[str] = Field(None)
+    facebook_profile: Optional[str] = Field(None)
+    instagram_handle: Optional[str] = Field(None)
+    company: Optional[str] = Field(None)
+    profile_picture: Optional[str] = Field(None)
 
     
 class LoginSchema(Schema):
