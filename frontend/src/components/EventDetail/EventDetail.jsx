@@ -36,7 +36,6 @@ function EventDetail() {
       <EventHeader event={event} />
       {event.organizer && <OrganizerInfo organizer={event.organizer} />}
       <EventInfo event={event} />
-      <CommentSection event={event}/>
     </div>
   );
 }
