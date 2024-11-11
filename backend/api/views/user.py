@@ -291,7 +291,6 @@ class UserAPI:
                 "error": "Invalid verification token"
             }, status=400)
 
-
     @router.post('/resend-verification', response={200: EmailVerificationResponseSchema, 400: ErrorResponseSchema})
     def resend_verification(request, email: str):
         """Resend verification email if user is not verified."""
@@ -307,23 +306,3 @@ class UserAPI:
             return Response({
                 "error": "User not found or already verified"
             }, status=400)
-            
-    # @router.post("/send-email")
-    # def send_email(request, subject, body, to_email):
-    #     msg = MIMEMultipart()
-    #     msg['From'] = settings.EMAIL_HOST_USER
-    #     msg['To'] = to_email
-    #     msg['Subject'] = subject
-
-    #     # Attach the body with the msg instance
-    #     msg.attach(MIMEText(body, 'plain'))
-
-    #     try:
-    #         # Create a secure SSL context and connect to the server
-    #         with smtplib.SMTP(settings.EMAIL_HOST, settings.EMAIL_PORT) as server:
-    #             server.starttls()  # Upgrade to secure connection
-    #             server.login(settings.EMAIL_HOST_USER, settings.EMAIL_HOST_PASSWORD)
-    #             server.sendmail(msg['From'], msg['To'], msg.as_string())
-    #         print("Email sent successfully.")
-    #     except Exception as e:
-    #         print(f"Failed to send email: {e}")
