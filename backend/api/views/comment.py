@@ -7,7 +7,7 @@ router = Router()
 
 class CommentAPI:
     
-    @router.post('/write-comment/', response={201: CommentResponseSchema, 400: ErrorResponseSchema, 404: ErrorResponseSchema}, auth=JWTAuth())
+    @router.post('/write-comment/{event_id}', response={201: CommentResponseSchema, 400: ErrorResponseSchema, 404: ErrorResponseSchema}, auth=JWTAuth())
     def create_comment(request: HttpRequest, event_id: int, comment: CommentSchema):
         """
         Create a new comment for a specific event.
@@ -33,9 +33,9 @@ class CommentAPI:
             logger.info(f"Comment created for event {event_id} by {user.username}.")
             return Response(CommentResponseSchema.from_orm(comment), status=200)
         
-        except Event.DoesNotExist:
+        except Http404:
             logger.error(f"Event {event_id} doesn't exist.")
-            return Response({'error': "Event {event_id} doesn't exist."}, status=404)
+            return Response({'error': f"Event {event_id} doesn't exist."}, status=404)
         
     @router.delete('/{comment_id}/delete/', response={204: None, 404: ErrorResponseSchema}, auth=JWTAuth())
     def delete_comment(request: HttpRequest, comment_id: int):
@@ -61,7 +61,7 @@ class CommentAPI:
             logger.info(f"Comment {comment_id} deleted by user {request.user.username}")
             return Response({'message': 'Delete comment successfully.'}, status=204)
         
-        except Comment.DoesNotExist:
+        except Http404:
             logger.error(f"Comment {comment_id} not found for deletion.")
             return Response({'error': 'Comment not found'}, status=404)
             
@@ -91,7 +91,7 @@ class CommentAPI:
             logger.info(f"Comment {comment_id} edited by user {request.user.username}")
             return Response(CommentResponseSchema.from_orm(comment), status=200)
 
-        except Comment.DoesNotExist:
+        except Http404:
             logger.error(f"Comment {comment_id} not found for edit.")
             return Response({'error': 'Comment not found'}, status=404)
 

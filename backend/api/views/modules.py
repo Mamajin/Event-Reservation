@@ -18,7 +18,6 @@ from api.models.bookmarks import *
 from api.models.like import *
 from api.models.organizer import *
 from api.models.ticket import *
-from api.models.session import *
 from api.models.comment import *
 from botocore.exceptions import ClientError
 from django.conf import settings
@@ -30,6 +29,7 @@ from enum import Enum
 from google.oauth2 import id_token
 from google.auth.transport import requests
 from django.utils.crypto import get_random_string
+from django.http import Http404
 import logging
 import os
 import uuid

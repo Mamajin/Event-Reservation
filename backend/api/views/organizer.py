@@ -69,13 +69,16 @@ class OrganizerAPI:
     def update_organizer(request: HttpRequest, data: OrganizerSchema):
         """Update the profile information of the authenticated organizer."""
 
-        Organizer.objects.filter(user=request.user).update(**data.dict())
         organizer = Organizer.objects.get(user=request.user)
-        organize_data = OrganizerResponseSchema.from_orm(organizer).dict()
         
         if organizer.organizer_name_is_taken(data.organizer_name):
             logger.info(f"Organizer name '{data.organizer_name}' is already taken.")
             return Response({'error': 'Organizer name is already taken'}, status=400)
+        
+        
+        Organizer.objects.filter(user=request.user).update(**data.dict())
+        organizer.refresh_from_db()
+        organize_data = OrganizerResponseSchema.from_orm(organizer).dict()
 
         logger.info(f"User {request.user.id} updated their organizer profile.")
         

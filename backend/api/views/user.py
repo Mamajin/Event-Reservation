@@ -24,18 +24,20 @@ class UserAPI:
             return Response({"error": "Username already taken"}, status=400)
         if AttendeeUser.objects.filter(email = form.email).exists():
             return Response({"error": "This email already taken"}, status=400)
-        try:
-            user = AttendeeUser(
-                username=form.username,
-                password=make_password(form.password),
-                birth_date=form.birth_date,
-                phone_number=form.phone_number,
-                email=form.email,
-                first_name=form.first_name,
-                last_name=form.last_name
-            )
-        except Exception as e:
-            return Exception
+        if len(form.phone_number) != 10:
+            return Response({'error' : 'Phone number must be 10 digits long'}, status = 400)
+        if not form.phone_number.isdigit():
+            return Response({'error' : 'Phone number must be digit'}, status = 400)
+        
+        user = AttendeeUser(
+            username=form.username,
+            password=make_password(form.password),
+            birth_date=form.birth_date,
+            phone_number=form.phone_number,
+            email=form.email,
+            first_name=form.first_name,
+            last_name=form.last_name
+        )
         user.save()
         return Response(UserSchema.from_orm(user), status=201)
 
@@ -173,8 +175,8 @@ class UserAPI:
         user.refresh_from_db()
         return UserResponseSchema.from_orm(user)
 
-    @router.delete('delete/{user_id}/', auth=JWTAuth())
-    def delete_profile(request, user_id: int):
+    @router.delete('delete/', auth=JWTAuth())
+    def delete_profile(request):
         """
         Delete a user profile by user ID.
 
@@ -186,12 +188,10 @@ class UserAPI:
             Response: Success message upon successful deletion.
         """
         user = request.user
-        if AttendeeUser.objects.filter(id=user_id).exists():
-            user = AttendeeUser.objects.get(id=user_id)
-            user.delete()
-            if Organizer.objects.filter(user=user).exists():
-                organizer = Organizer.objects.get(user=user)
-                organizer.delete()
+        get_user = AttendeeUser.objects.get(id = user.id)
+
+        get_user.delete()
+            
         return Response({'success': 'Your account has been deleted'})
 
     @router.post('/{user_id}/upload/profile-picture/', response={200: FileUploadResponseSchema, 400: ErrorResponseSchema}, auth=JWTAuth())

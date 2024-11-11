@@ -7,7 +7,7 @@ router = Router()
 
 class LikeAPI:
     
-    @router.post('/like/', response={200: dict}, auth=JWTAuth())
+    @router.post('/like/{event_id}', response={200: dict}, auth=JWTAuth())
     def like_event(request: HttpRequest, event_id: int):
         """_summary_
 
@@ -21,20 +21,19 @@ class LikeAPI:
         like, created = Like.objects.get_or_create(event=event, user=user)
         
         if created:
-            return {"message": "Event liked successfully."}
+            return Response({"success": "Event liked successfully."}, status = 200)
         else:
-            return {"message": "You have already liked this event."}
+            return Response({"error": "You have already liked this event."}, status = 400)
         
         
-    @router.delete("/unlike/", response={200: dict}, auth=JWTAuth())
+    @router.delete("/unlike/{event_id}", response={200: dict}, auth=JWTAuth())
     def unlike_event(request, event_id: int):
         user = request.user 
         event = get_object_or_404(Event, id=event_id)
-
         try:
             like = Like.objects.get(event=event, user=user)
             like.delete()
-            return {"message": "Event unliked successfully."}
+            return Response({"message": "Event unliked successfully."}, status = 200)
         except Like.DoesNotExist:
-            return {"message": "You have not liked this event yet."}
+            return Response({"message": "You have not liked this event yet."} , status = 400)
             
