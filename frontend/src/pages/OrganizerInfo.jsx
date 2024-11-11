@@ -8,6 +8,7 @@ function OrganizerInfo() {
   const [organizerData, setOrganizerData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [nameError, setNameError] = useState(null); // New state for name error message
   const [isEditing, setIsEditing] = useState(false);
   const [previewLogo, setPreviewLogo] = useState(null);
   const navigate = useNavigate();
@@ -52,6 +53,7 @@ function OrganizerInfo() {
 
   const handleEditToggle = () => {
     setIsEditing(!isEditing);
+    setNameError(null); // Clear name error on edit toggle
   };
 
   const handleInputChange = (field, value) => {
@@ -61,39 +63,28 @@ function OrganizerInfo() {
   const handleSaveChanges = async () => {
     try {
       const token = localStorage.getItem(ACCESS_TOKEN);
-  
-      // Create an object that will store the fields that have been edited
-      const updatedData = {};
-  
-      // Add only the changed fields to updatedData
-      Object.keys(organizerData).forEach((field) => {
-        if (organizerData[field] !== undefined && organizerData[field] !== null) {
-          updatedData[field] = organizerData[field];
-        }
-      });
-  
-      // Check if there are any changes, if not, alert the user
-      if (Object.keys(updatedData).length === 0) {
-        alert("No changes were made.");
-        return;
-      }
-  
-      // Make the PUT request to save the changes
+      const updatedData = { ...organizerData };
+
       const response = await api.put('/organizers/update-organizer', updatedData, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       });
-  
+
       console.log("Organizer data updated successfully:", response.data);
-      setIsEditing(false);  // Turn off the editing mode after saving
+      setIsEditing(false);  // Turn off editing mode after saving
     } catch (err) {
-      console.error("Error saving organizer data:", err.message);
-      alert("Failed to save changes. Please try again.");
+      const status = err.response?.status;
+      const errorMessage = err.response?.data?.error;
+
+      if (status === 400 && errorMessage === "Organizer name is already taken") {
+        setNameError("The organizer name is already taken. Please choose a different name.");
+      } else {
+        console.error("Error saving organizer data:", err.message);
+        alert("Failed to save changes. Please try again.");
+      }
     }
   };
-  
-  
 
   const handleLogoChange = (e) => {
     const file = e.target.files[0];
@@ -152,15 +143,14 @@ function OrganizerInfo() {
         <div className="max-w-3xl mx-auto">
           <h1 className="text-2xl font-bold mb-6 text-dark-purple">Organizer Profile</h1>
 
-            {/* Navigate to Organizer Info Button */}
-            <div className="mt-6">
-              <button
-                onClick={goToAccountInfo}
-                className="px-4 py-2 bg-amber-300 text-dark-purple rounded hover:bg-yellow-600 transition duration-200"
-              >
-                Back to Account Info
-              </button>
-            </div>
+          <div className="mt-6">
+            <button
+              onClick={goToAccountInfo}
+              className="px-4 py-2 bg-amber-300 text-dark-purple rounded hover:bg-yellow-600 transition duration-200"
+            >
+              Back to Account Info
+            </button>
+          </div>
 
           <p className="mt-6 text-gray-600 mb-6">View or edit your organizer profile details.</p>
 
@@ -196,13 +186,16 @@ function OrganizerInfo() {
                     type="text"
                     value={organizerData[field] || ''}
                     onChange={(e) => handleInputChange(field, e.target.value)}
-                    className="mt-1 p-2 border border-gray-300 rounded w-full"
+                    className="mt-1 p-2 text-gray-600 bg-gray-100 border border-gray-300 rounded w-full"
                   />
                 ) : (
                   <p className="mt-0 text-gray-900">{organizerData[field] || 'N/A'}</p>
                 )}
               </div>
             ))}
+
+            {/* Show name error if it exists */}
+            {nameError && <p className="text-red-500">{nameError}</p>}
 
             {/* Organization Type Dropdown */}
             <div className="grid grid-cols-2 gap-4">
@@ -211,7 +204,7 @@ function OrganizerInfo() {
                 <select
                   value={organizerData.organization_type || ''}
                   onChange={(e) => handleInputChange('organization_type', e.target.value)}
-                  className="mt-1 p-2 border border-gray-300 rounded w-full"
+                  className="mt-1 p-2 text-gray-600 bg-gray-100 border border-gray-300 rounded w-full"
                 >
                   <option value="">Select an organization type</option>
                   {organizerTypes.map((type) => (
@@ -226,16 +219,25 @@ function OrganizerInfo() {
             {/* Edit and Save/Cancel Buttons */}
             {isEditing ? (
               <div className="flex mt-6 space-x-4">
-                <button onClick={handleSaveChanges} className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 transition duration-200">
-                  Confirm
+                <button
+                  onClick={handleSaveChanges}
+                  className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-700 transition duration-200"
+                >
+                  Save Changes
                 </button>
-                <button onClick={handleEditToggle} className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition duration-200">
+                <button
+                  onClick={handleEditToggle}
+                  className="px-4 py-2 bg-red-500 text-white rounded hover:bg-gray-400 transition duration-200"
+                >
                   Cancel
                 </button>
               </div>
             ) : (
-              <button onClick={handleEditToggle} className="mt-6 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition duration-200">
-                Edit
+              <button
+                onClick={handleEditToggle}
+                className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-700 transition duration-200 mt-6"
+              >
+                Edit Profile
               </button>
             )}
           </div>
