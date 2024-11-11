@@ -16,8 +16,6 @@ function Navbar() {
   const username = localStorage.getItem(USER_NAME);
   const profilePicture = localStorage.getItem(PROFILE_PICTURE);
 
-  console.log("Profile Picture URL:", profilePicture); // Debugging line
-
   return (
     <nav className="navbar bg-dark-purple fixed top-0 left-0 right-0 z-50">
       <StarIcon className="bg-amber-300 text-xl h-8 w-9 text-dark-purple rounded cursor-pointer mr-2" />
