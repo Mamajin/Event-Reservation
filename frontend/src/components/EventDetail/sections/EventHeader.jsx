@@ -33,7 +33,7 @@ export function EventHeader({ event }) {
         <div className="container pb-8">
           <div className="flex flex-col pl-5 gap-4">
             <div className="flex items-center gap-2">
-             <div className="badge bg-dark-purple text-sm text-black font-medium badge-lg">{event.category}</div>
+             <div className="badge bg-dark-purple text-sm text-white font-medium badge-lg">{event.category}</div>
               {event.is_online && (
                 <div className="badge badge-outline badge-lg">Online Event</div>
               )}
@@ -68,7 +68,10 @@ export function EventHeader({ event }) {
               )}
               <div className="flex items-center gap-2">
                 <FaUsers className="h-5 w-5" />
-                <span className="text-lg">{event.max_attendee} attendees max</span>
+                <span className="text-lg">
+                  {event.max_attendee === 0 ? "No attendees limit" : `${event.max_attendee} attendees max`}
+                </span>
+
               </div>
               <div className="flex items-center gap-2">
                 <FaTicketAlt className="h-5 w-5" />

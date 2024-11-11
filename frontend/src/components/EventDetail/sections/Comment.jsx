@@ -1,91 +1,67 @@
 import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
-import { LuTrash2 } from "react-icons/lu";
+import { LuTrash2, LuSend, LuCheck, LuX } from "react-icons/lu";
 import { FiEdit2, FiMessageSquare } from "react-icons/fi";
 import api from '../../../api';
+import { USER_ID } from '../../../constants';
+import { HiOutlineDotsVertical } from "react-icons/hi";
 
 export function CommentSection({ event }) {
   const [comments, setComments] = useState([]);
   const [editingId, setEditingId] = useState(null);
+  const [editContent, setEditContent] = useState(''); 
+  const [comment, setComment] = useState('');
   const [error, setError] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
-
+  const userId = localStorage.getItem(USER_ID);
   const {
-    register,
     handleSubmit,
     reset,
     formState: { errors }
   } = useForm();
 
+  // API endpoints
   const end_point = {
     getEventComments: async (eventId) => {
       try {
-        const response = await api.get(`/events/${eventId}/comments`, {
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        });
+        const response = await api.get(`/events/${eventId}/comments`);
         return response.data;
       } catch (error) {
-        throw new Error('Error fetching comments: ' + (error.response.data?.error));
+        throw new Error('Error fetching comments: ' + (error.response?.data?.detail));
       }
     },
-  
     writeComment: async (content, eventId) => {
       try {
-        const formData = new FormData();
-        formData.append('content', content);
-    
-        const response = await api.post(`/comments/write-comment/${eventId}`, formData, {
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        });
-    
+        const response = await api.post(`/comments/write-comment/${eventId}`, { content });
         return response.data;
       } catch (error) {
-        throw new Error('Error creating comment: ' + (error.response.data?.error));
+        throw new Error('Error creating comment: ' + (error.response?.data?.detail));
       }
     },
-  
     deleteComment: async (commentId) => {
       try {
-        const response = await api.delete(`/comments/${commentId}/delete/`, {
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        });
-  
+        const response = await api.delete(`/comments/${commentId}/delete/`);
         return response.status === 204;
       } catch (error) {
-        throw new Error('Error deleting comment: ' + (error.response?.data?.error));
+        throw new Error('Error deleting comment: ' + (error.response?.data?.detail));
       }
     },
-  
     editComment: async (commentId, content) => {
       try {
-        const formData = new FormData();
-        formData.append('content', content);
-  
-        const response = await api.put(`/comments/${commentId}/edit/`, formData, {
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        });
-  
+        const response = await api.put(`/comments/${commentId}/edit/`, { content });
         return response.data;
       } catch (error) {
-        throw new Error('Error editing comment: ' + (error.response?.data?.error));
+        throw new Error('Error editing comment: ' + (error.response?.data?.detail));
       }
     }
   };
+
+  // Fetch comments on component mount or when event changes
   useEffect(() => {
     const fetchComments = async () => {
       if (!event?.id) return;
-      
       try {
         setIsLoading(true);
-        setError(null);
         const fetchedComments = await end_point.getEventComments(event.id);
         setComments(fetchedComments);
       } catch (error) {
@@ -94,22 +70,17 @@ export function CommentSection({ event }) {
         setIsLoading(false);
       }
     };
-  
     fetchComments();
   }, [event?.id]);
-  
 
-  const onSubmit = async (data) => {
-    if (!event?.id) return;
-  
+  // Handle form submission for new comment
+  const onSubmit = async () => {
+    if (!event?.id || !comment.trim()) return;
     try {
       setIsLoading(true);
-      setError(null);
-      
-      const newComment = await end_point.writeComment(data.content, event.id);
+      const newComment = await end_point.writeComment(comment, event.id);
       setComments(prev => [newComment, ...prev]);
-      reset();
-      
+      setComment(''); // Clear input field
     } catch (error) {
       setError(error.message);
     } finally {
@@ -117,34 +88,33 @@ export function CommentSection({ event }) {
     }
   };
 
+  // Handle delete
   const handleDelete = async (commentId) => {
     try {
       setIsLoading(true);
-      setError(null);
-      
       await end_point.deleteComment(commentId);
       setComments(prev => prev.filter(comment => comment.id !== commentId));
-      
     } catch (error) {
       setError(error.message);
     } finally {
       setIsLoading(false);
     }
   };
-  
-  const handleEdit = async (commentId, newContent) => {
+
+  // Handle edit
+  const startEditing = (comment) => {
+    setEditingId(comment.id);
+    setEditContent(comment.content);
+  };
+
+  const saveEdit = async (commentId) => {
     try {
       setIsLoading(true);
-      setError(null);
-      
-      const updatedComment = await end_point.editComment(commentId, newContent);
+      const updatedComment = await end_point.editComment(commentId, editContent);
       setComments(prev =>
-        prev.map(comment =>
-          comment.id === commentId ? updatedComment : comment
-        )
+        prev.map(comment => (comment.id === commentId ? updatedComment : comment))
       );
       setEditingId(null);
-      
     } catch (error) {
       setError(error.message);
     } finally {
@@ -152,123 +122,114 @@ export function CommentSection({ event }) {
     }
   };
 
-  if (!event?.id) {
-    return <div>No event selected</div>;
-  }
+  const cancelEditing = () => {
+    setEditingId(null);
+    setEditContent('');
+  };
 
+  // JSX rendering the component
   return (
-    <div className="container mx-auto py-8">
-      <div className="card p-6 shadow-lg">
-        <div className="flex items-center gap-2 mb-6">
-          <FiMessageSquare className="h-5 w-5" />
-          <h2 className="text-2xl font-semibold">Comments</h2>
-        </div>
+    <div className="bg-white rounded-xl p-6 shadow-sm">
+      <div className="flex items-center gap-2 mb-6">
+        <FiMessageSquare className="w-5 h-5 text-dark-purple" />
+        <h2 className="text-2xl font-semibold text-dark-purple">Comments</h2>
+      </div>
 
-        {error && (
-          <div className="alert alert-error mb-4">
-            <p>{error}</p>
-          </div>
-        )}
+      {error && <div className="text-red-500 mb-4">{error}</div>}
 
-        {/* Comment Form */}
-        <form onSubmit={handleSubmit(onSubmit)} className="mb-8">
-          <textarea
-            {...register('content', { 
-              required: 'Comment cannot be empty',
-              maxLength: {
-                value: 500,
-                message: 'Comment is too long'
-              }
-            })}
-            placeholder="Share your thoughts..."
-            className="textarea textarea-bordered w-full mb-2"
-            disabled={isLoading}
-          />
-          {errors.content && (
-            <p className="text-sm text-red-500 mb-2">{errors.content.message}</p>
-          )}
-          <button 
-            type="submit" 
-            className="btn bg-amber-300"
-            disabled={isLoading}
-          >
-            {isLoading ? 'Posting...' : 'Post Comment'}
-          </button>
-        </form>
-
-        {/* Comments List */}
-        <div className="space-y-6">
-          {comments.map(comment => (
-            <div key={comment.id} className="flex gap-4">
-              <div className="avatar w-10 h-10">
-                <div className="rounded-full ring ring-amber-300 ring-offset-base-100 ring-offset-2">
-                  <img src={comment.user.avatar} alt={comment.user.username} />
-                </div>
-              </div>
-              <div className="flex-1">
-                <div className="flex items-center justify-between">
-                  <h3 className="font-medium text-black text-xl">{comment.user.username}</h3>
-                  <div className="flex items-center gap-2">
-                    <button
-                      className="btn btn-ghost btn-xs"
-                      onClick={() => setEditingId(comment.id)}
-                      disabled={isLoading}
-                    >
-                      <FiEdit2 className="h-4 w-4" />
-                    </button>
-                    <button
-                      className="btn btn-ghost btn-xs"
-                      onClick={() => handleDelete(comment.id)}
-                      disabled={isLoading}
-                    >
-                      <LuTrash2 className="h-4 w-4" />
-                    </button>
-                  </div>
-                </div>
-                {editingId === comment.id ? (
-                  <form
-                    onSubmit={e => {
-                      e.preventDefault();
-                      const formData = new FormData(e.currentTarget);
-                      handleEdit(comment.id, formData.get('content'));
-                    }}
-                    className="mt-2"
-                  >
-                    <textarea
-                      name="content"
-                      defaultValue={comment.content}
-                      className="textarea textarea-bordered w-full mb-2"
-                      disabled={isLoading}
-                    />
-                    <div className="flex gap-2">
-                      <button 
-                        type="submit" 
-                        className="btn bg-amber-300 btn-xs"
-                        disabled={isLoading}
-                      >
-                        {isLoading ? 'Saving...' : 'Save'}
-                      </button>
-                      <button
-                        type="button"
-                        className="btn btn-outline btn-xs"
-                        onClick={() => setEditingId(null)}
-                        disabled={isLoading}
-                      >
-                        Cancel
-                      </button>
-                    </div>
-                  </form>
-                ) : (
-                  <p className="text-muted mt-1">{comment.content}</p>
-                )}
-                <span className="text-sm text-muted mt-1">
-                  {new Date(comment.created_at).toLocaleDateString()}
-                </span>
-              </div>
+      <div className="space-y-6 mb-6">
+      {comments.map((comment) => (
+  <div key={comment.id} className="border-b pb-4 last:border-0 flex items-start space-x-4">
+    <div className="avatar h-10 w-10">
+      <img
+        src={comment.user.profile_picture}
+        alt={comment.user.name}
+        className="rounded-full w-10 h-10"
+      />
+    </div>
+    <div className="flex-1">
+      {/* User info and date */}
+      <div className="flex justify-between mb-1">
+        <span className="font-medium text-gray-800">{comment.user.username}</span>
+        <div className="flex items-center gap-2">
+          <span className="text-sm text-gray-500">
+            {new Date(comment.created_at).toLocaleDateString()}
+          </span>
+          {comment.user.id == userId && (
+            <div className="dropdown dropdown-end">
+              <label tabIndex={0} className="btn btn-ghost btn-circle">
+                <HiOutlineDotsVertical className="w-5 h-5 text-gray-500" />
+              </label>
+              <ul
+                tabIndex={0}
+                className="dropdown-content menu p-2 shadow bg-white rounded-box w-32"
+              >
+                <li>
+                  <button onClick={() => startEditing(comment)} className="flex items-center gap-2 text-gray-600">
+                    <FiEdit2 className="w-4 h-4" /> Edit
+                  </button>
+                </li>
+                <li>
+                  <button onClick={() => handleDelete(comment.id)} className="flex items-center gap-2 text-red-600">
+                    <LuTrash2 className="w-4 h-4" /> Delete
+                  </button>
+                </li>
+              </ul>
             </div>
-          ))}
+          )}
         </div>
       </div>
+      
+      {/* Comment content and edit input */}
+      {editingId === comment.id ? (
+        <div className="flex gap-2 mt-2">
+          <input
+            type="text"
+            value={editContent}
+            onChange={(e) => setEditContent(e.target.value)}
+            className="flex-1 rounded-lg border border-gray-300 px-3 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            autoFocus
+          />
+          <button
+            onClick={() => saveEdit(comment.id)}
+            className="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors"
+            title="Save"
+          >
+            <LuCheck className="w-4 h-4" />
+          </button>
+          <button
+            onClick={cancelEditing}
+            className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+            title="Cancel"
+          >
+            <LuX className="w-4 h-4" />
+          </button>
+        </div>
+      ) : (
+        <p className="text-gray-600 mt-2">{comment.content}</p>
+      )}
+    </div>
+  </div>
+))}
+
+    </div>
+
+      <form onSubmit={handleSubmit(onSubmit)} className="flex gap-2">
+        <input
+          type="text"
+          value={comment}
+          onChange={(e) => setComment(e.target.value)}
+          placeholder="Add a comment..."
+          className="flex-1 bg-white rounded-lg border border-gray-300 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+        />
+        <button
+          type="submit"
+          className="bg-dark-purple text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2"
+        >
+          <LuSend className="w-4 h-4" />
+          Send
+        </button>
+      </form>
     </div>
   );
 }
