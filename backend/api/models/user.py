@@ -4,6 +4,7 @@ from django.utils import timezone
 from django.core.validators import FileExtensionValidator
 from django.utils.translation import gettext_lazy as _
 from django.core.files.storage import default_storage
+from api.utils import EmailVerification
 
 
 class AttendeeUser(AbstractUser):
@@ -46,6 +47,9 @@ class AttendeeUser(AbstractUser):
         blank=False,
         default='',
     )
+    
+    is_email_verified = models.BooleanField(default=False)
+    email_verification_token_sent_at = models.DateTimeField(null=True, blank=True)
     
     attended_events_count = models.PositiveIntegerField(default=0)
     cancelled_events_count = models.PositiveIntegerField(default=0)
@@ -111,6 +115,14 @@ class AttendeeUser(AbstractUser):
             event__end_date_event__lt=timezone.now()
         ).count()
         self.save()
+        
+    def send_verification_email(self):
+        """Generate and send verification email with a secure token."""
+        token = EmailVerification.generate_verification_token(self)
+        self.email_verification_token_sent_at = timezone.now()
+        self.save()
+        
+        EmailVerification.send_verification_email(self, token)
 
     def __str__(self):
         return f"{self.full_name} ({self.email})"
