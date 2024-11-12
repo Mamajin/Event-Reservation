@@ -65,6 +65,11 @@ class Event(models.Model):
         ('PUBLIC', 'Public'),
         ('PRIVATE', 'Private')
     ]
+    VERIFICATION_STATUS_CHOICES = [
+        ('PENDING', 'Pending'),
+        ('VERIFIED', 'Verified'),
+        ('REJECTED', 'Rejected'),
+    ]
     # Existing fields
     event_name = models.CharField(max_length=100)
     organizer = models.ForeignKey(Organizer, on_delete=models.CASCADE, related_name='events')
@@ -137,6 +142,13 @@ class Event(models.Model):
     )
     # Timestamps
     updated_at = models.DateTimeField(auto_now=True)
+    
+    is_verified = models.BooleanField(default=False)
+    verification_status = models.CharField(
+        max_length=20,
+        choices=VERIFICATION_STATUS_CHOICES,
+        default='PENDING'
+    )
     
     terms_and_conditions = models.TextField(null=True, blank=True)
     
