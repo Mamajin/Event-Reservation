@@ -65,7 +65,7 @@ function OrganizerInfo() {
       const token = localStorage.getItem(ACCESS_TOKEN);
       const updatedData = { ...organizerData };
 
-      const response = await api.put('/organizers/update-organizer', updatedData, {
+      const response = await api.patch('/organizers/update-organizer', updatedData, {
         headers: {
           Authorization: `Bearer ${token}`,
         },

@@ -16,8 +16,9 @@ function Sidebar() {
     const Menus = [
         { title: "Discover", path: "/discover" },
         { title: "Applied Events", path: "/applied-events" },
-        { title: "Become Organizer", path: "/become-organizer" },
         ...(isLoggedIn && isOrganizer ? [{ title: "My Events", path: "/my-events" }] : []),  // Only show if the user is an organizer
+        { title: "Become Organizer", path: "/become-organizer" },
+        
     ];
 
     useEffect(() => {

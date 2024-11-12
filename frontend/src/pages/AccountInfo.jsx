@@ -2,10 +2,13 @@ import React, { useEffect, useState } from 'react';
 import api from '../api';
 import PageLayout from '../components/PageLayout';
 import DateInput from '../components/DateInput'; // Import DateTimeInput component
+import Map from '../components/Map';
+import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 import { ACCESS_TOKEN } from "../constants";
 
 function AccountInfo() {
+  const { register, setValue, handleSubmit, watch } = useForm();
   const [userData, setUserData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -32,6 +35,13 @@ function AccountInfo() {
         }
 
         setUserData(response.data);
+
+
+        setValue('address', response.data.address);
+        setValue('latitude', response.data.latitude);
+        setValue('longitude', response.data.longitude);
+
+
         if (response.data.profile_picture) {
           setPreviewImage(response.data.profile_picture);
         }
@@ -66,10 +76,13 @@ function AccountInfo() {
 
       const updatedData = {
         ...userData,
+        address: watch('address'),
+        latitude: watch('latitude'),
+        longitude: watch('longitude'),
         updated_at: new Date().toISOString(),
       };
 
-      const response = await api.put(`users/edit-profile/${userId}/`, updatedData, {
+      const response = await api.patch(`users/edit-profile/${userId}/`, updatedData, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -77,6 +90,8 @@ function AccountInfo() {
 
       console.log("User data updated successfully:", response.data);
       setIsEditing(false);
+
+      window.location.reload();
     } catch (err) {
       console.error("Error saving user data:", err.message);
       alert("Failed to save changes. Please try again.");
@@ -108,6 +123,19 @@ function AccountInfo() {
       console.error("Error uploading profile picture:", err.message);
       alert("Failed to upload profile picture. Please try again.");
     }
+  };
+
+  const handleMapClick = (address, latitude, longitude) => {
+    // Update form and user data on map click
+    setValue('address', address);
+    setValue('latitude', latitude);
+    setValue('longitude', longitude);
+    setUserData((prevData) => ({
+      ...prevData,
+      address,
+      latitude,
+      longitude,
+    }));
   };
 
   const goToOrganizerInfo = () => {
@@ -176,7 +204,7 @@ function AccountInfo() {
             </div>
 
             {/* User Fields */}
-            {['username', 'first_name', 'last_name'].map((field) => (
+            {['username', 'first_name', 'last_name', 'email', 'phone_number'].map((field) => (
               <div key={field} className="grid grid-cols-2 gap-4">
                 <label className="block text-sm font-medium text-gray-700 capitalize">{field.replace('_', ' ')}</label>
                 {isEditing ? (
@@ -210,8 +238,30 @@ function AccountInfo() {
                 )}
               </div>
 
+              <div className="grid grid-cols-2 gap-4">
+              <label className="block text-sm font-medium text-gray-700">Address</label>
+              {isEditing ? (
+                <input
+                  id="address-input"
+                  type="text"
+                  placeholder="Enter venue address"
+                  className="input input-bordered bg-white"
+                  {...register('address')}
+                />
+              ) : (
+                <p className="mt-0 text-gray-900">{userData.address || 'N/A'}</p>
+              )}
+            </div>
+
+            {isEditing && (
+              <Map onMapClick={handleMapClick} setError={setError} />
+            )}
+
+            {error && <div className="text-red-500">{error}</div>}
+
+
             {/* User Fields */}
-            {['email', 'phone_number', 'address', 'facebook_profile', 'instagram_handle', 'nationality'].map((field) => (
+            {['nationality', 'facebook_profile', 'instagram_handle'].map((field) => (
               <div key={field} className="grid grid-cols-2 gap-4">
                 <label className="block text-sm font-medium text-gray-700 capitalize">{field.replace('_', ' ')}</label>
                 {isEditing ? (
