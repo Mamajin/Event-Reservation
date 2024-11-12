@@ -1,4 +1,4 @@
-from .schemas import UserSchema, LoginResponseSchema, UserResponseSchema, LoginSchema, ErrorResponseSchema, FileUploadResponseSchema, AuthResponseSchema, GoogleAuthSchema, EmailVerification, EmailVerificationResponseSchema
+from .schemas import UserSchema, LoginResponseSchema, UserResponseSchema, LoginSchema, ErrorResponseSchema, FileUploadResponseSchema, AuthResponseSchema, GoogleAuthSchema, EmailVerification, EmailVerificationResponseSchema, UserupdateSchema
 from .modules import *
 
 router = Router()

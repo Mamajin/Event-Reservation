@@ -14,6 +14,7 @@ from pathlib import Path
 from datetime import timedelta
 from decouple import config,Csv
 from dotenv import load_dotenv
+from celery.schedules import crontab
 import os
 
 load_dotenv()
@@ -106,6 +107,7 @@ INSTALLED_APPS = [
     "ninja_extra",
     "ninja_jwt",
     "storages",
+    "django_celery_beat"
 ]
 
 
@@ -247,12 +249,15 @@ ACCOUNT_UNIQUE_EMAIL = True
 LOGIN_REDIRECT_URL = '/' 
 
 
-# CELERY_BROKER_URL = 'amqp://guest:guest@localhost:5672//'  # RabbitMQ broker URL
-# CELERY_RESULT_BACKEND = 'rpc://'  # Use RPC as the result backend
-# CELERY_ACCEPT_CONTENT = ['json']
-# CELERY_TASK_SERIALIZER = 'json'
-# CELERY_RESULT_SERIALIZER = 'json'
-# CELERY_TIMEZONE = 'Asia/Bangkok'
+CELERY_BROKER_URL = 'redis://localhost:6379/0' 
+CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
+
+CELERY_BEAT_SCHEDULE = {
+    'send-daily-reminders': {
+        'task': 'utils.send_reminder_emails',
+        'schedule': crontab(hour=9, minute=0), 
+    },
+}
 
 
 # settings.py

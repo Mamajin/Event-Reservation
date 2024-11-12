@@ -7,6 +7,9 @@ from django.utils import timezone
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from datetime import timedelta
+from celery import shared_task
+from django.utils import timezone
+from datetime import timedelta
 import logging
 import smtplib
 
@@ -214,4 +217,18 @@ class TicketNotificationManager:
             </div>
         </div>
         """
+
+@shared_task
+def send_reminder_emails():
+    """Send reminder emails."""
+    from api.models.ticket import Ticket
+    tomorrow = timezone.now() + timedelta(days=1)
+    tickets = Ticket.objects.filter(
+        event__start_date_event__date=tomorrow.date(),
+        email_sent=True
+    )
+
+    for ticket in tickets:
+        notification_manager = TicketNotificationManager(ticket)
+        notification_manager.send_reminder_notification()
         

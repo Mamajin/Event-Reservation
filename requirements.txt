@@ -21,4 +21,5 @@ google-auth
 requests
 django-allauth
 celery 
-RabbitMQ
+redis
+django-celery-beat
