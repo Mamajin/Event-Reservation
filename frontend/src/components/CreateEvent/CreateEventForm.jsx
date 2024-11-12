@@ -53,8 +53,8 @@ export function CreateEventForm() {
         ticket_price: formValues.is_free ? 0 : parseFloat(formValues.ticket_price || 0),
         expected_price: formValues.is_free ? 0 : parseFloat(formValues.expected_price || 0),
         address: formValues.address || '',
-        latitude: parseFloat(formValues.latitude || 0),
-        longitude: parseFloat(formValues.longitude || 0),
+        latitude: parseFloat(formValues.latitude || 13.848186926276574),
+        longitude: parseFloat(formValues.longitude || 100.57228692526716),
         meeting_link: formValues.is_online ? (formValues.meeting_link || '') : '',
         allowed_email_domains: formValues.allowed_email_domains || '',
         detailed_description: formValues.detailed_description || '',
@@ -67,23 +67,23 @@ export function CreateEventForm() {
         min_age_requirement: parseInt(formValues.min_age_requirement || 0, 10),
         terms_and_conditions: formValues.terms_and_conditions || '',
         tags: formValues.tags || '',
-        updated_at:  formatDateTime(new Date())
+        updated_at: formatDateTime(new Date())
       };
 
       Object.entries(data).forEach(([key, value]) => {
         formData.append(key, value);
       });
-      
+
       if (formValues.event_image) {
         formData.append('image', formValues.event_image);
       }
-  
+
       const token = localStorage.getItem(ACCESS_TOKEN);
       const headers = {
         'Content-Type': 'multipart/form-data',
         'Authorization': `Bearer ${token}`,
       };
-  
+
       const response = await api.post('/events/create-event', formData, { headers });
       console.log(response)
       alert("Event created successfully!");
@@ -100,7 +100,7 @@ export function CreateEventForm() {
       setLoading(false);
     }
   };
-  
+
 
   const renderTabContent = () => {
     switch (activeTab) {
@@ -135,7 +135,7 @@ export function CreateEventForm() {
               <button
                 type="button"
                 className={`tab transition-all duration-200 hover:bg-gray-100 hover:text-purple-700 flex items-center
-                  ${activeTab === 'basic' 
+                  ${activeTab === 'basic'
                     ? 'bg-dark-purple text-white shadow-md ring-2'
                     : 'text-gray-600 hover:text-purple-700'}`}
                 onClick={() => setActiveTab('basic')}
@@ -146,7 +146,7 @@ export function CreateEventForm() {
               <button
                 type="button"
                 className={`tab transition-all duration-200 hover:bg-gray-100 hover:text-purple-700 flex items-center
-                  ${activeTab === 'location' 
+                  ${activeTab === 'location'
                     ? 'bg-dark-purple text-white shadow-md ring-2 '
                     : 'text-gray-600 hover:text-purple-700'}`}
                 onClick={() => setActiveTab('location')}
@@ -157,7 +157,7 @@ export function CreateEventForm() {
               <button
                 type="button"
                 className={`tab transition-all duration-200 hover:bg-gray-100 hover:text-purple-700 flex items-center
-                  ${activeTab === 'datetime' 
+                  ${activeTab === 'datetime'
                     ? 'bg-dark-purple text-white shadow-md ring-2 '
                     : 'text-gray-600 hover:text-purple-700'}`}
                 onClick={() => setActiveTab('datetime')}
@@ -168,7 +168,7 @@ export function CreateEventForm() {
               <button
                 type="button"
                 className={`tab transition-all duration-200 hover:bg-gray-100 hover:text-purple-700 flex items-center
-                  ${activeTab === 'ticketing' 
+                  ${activeTab === 'ticketing'
                     ? 'bg-dark-purple text-white shadow-md ring-2'
                     : 'text-gray-600 hover:text-purple-700'}`}
                 onClick={() => setActiveTab('ticketing')}
@@ -179,7 +179,7 @@ export function CreateEventForm() {
               <button
                 type="button"
                 className={`tab transition-all duration-200 hover:bg-gray-100 hover:text-purple-700 flex items-center
-                  ${activeTab === 'contact' 
+                  ${activeTab === 'contact'
                     ? 'bg-dark-purple text-white shadow-md ring-2'
                     : 'text-gray-600 hover:text-purple-700'}`}
                 onClick={() => setActiveTab('contact')}

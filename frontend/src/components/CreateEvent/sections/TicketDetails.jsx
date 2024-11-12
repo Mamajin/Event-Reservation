@@ -1,6 +1,6 @@
 export default function TicketingDetails({ form }) {
   const isFree = form.watch('is_free');
-  
+
   return (
     <div className="space-y-4">
       <div className="form-control ">
@@ -56,6 +56,14 @@ export default function TicketingDetails({ form }) {
             {...form.register('allowed_email_domains')}
           />
         </div>
+      </div>
+      <div className="form-control">
+        <label className="label font-medium text-dark-purple">Terms and Conditions</label>
+        <textarea
+          className="textarea textarea-bordered h-24 bg-white"
+          placeholder="Fill in the terms and condition for your event"
+          {...form.register('terms_and_conditions')}
+        />
       </div>
     </div>
   );
