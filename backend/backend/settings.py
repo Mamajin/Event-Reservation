@@ -247,6 +247,14 @@ ACCOUNT_UNIQUE_EMAIL = True
 LOGIN_REDIRECT_URL = '/' 
 
 
+# CELERY_BROKER_URL = 'amqp://guest:guest@localhost:5672//'  # RabbitMQ broker URL
+# CELERY_RESULT_BACKEND = 'rpc://'  # Use RPC as the result backend
+# CELERY_ACCEPT_CONTENT = ['json']
+# CELERY_TASK_SERIALIZER = 'json'
+# CELERY_RESULT_SERIALIZER = 'json'
+# CELERY_TIMEZONE = 'Asia/Bangkok'
+
+
 # settings.py
 LOGGING = {
     'version': 1,

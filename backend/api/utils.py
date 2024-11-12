@@ -1,10 +1,12 @@
 from django.conf import settings
+from celery import shared_task
 from django.utils.http import urlsafe_base64_encode
 from django.utils.encoding import force_bytes
 from django.contrib.auth.tokens import default_token_generator
 from django.utils import timezone
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
+from datetime import timedelta
 import logging
 import smtplib
 
@@ -121,17 +123,45 @@ class TicketNotificationManager:
             subject=subject,
             html_content=html_content
         )
-        
+    
     def send_reminder_notification(self) -> bool:
-        """Send reminder email before the event."""
-        subject = f'Reminder: Event {self.ticket.event.event_name} is tomorrow!'
-        message = f"Dear {self.ticket.attendee.full_name}, don't forget about {self.ticket.event.event_name} happening tomorrow!"
-        
-        return self.email_service.send_email(
-            to_email='napoldej.p@gmail.com',
+        """Send reminder email one day before the event."""
+        if not self.ticket.email_sent:
+            return False  
+        subject = f'Reminder: {self.ticket.event.event_name} is tomorrow!'
+        message = self._generate_reminder_html()
+        success = self.email_service.send_email(
+            to_email=self.ticket.attendee.email,
             subject=subject,
             html_content=message
         )
+        if success:
+            self.ticket.email_sent = False
+            self.ticket.save(update_fields=['email_sent'])
+        return success
+
+    def _generate_reminder_html(self) -> str:
+        """Generate HTML content for reminder email."""
+        return f"""
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+            <h2 style="color: #333;">Event Reminder</h2>
+            <p>Dear {self.attendee.full_name},</p>
+            <p>This is a reminder that <strong>{self.event.event_name}</strong> will take place tomorrow.</p>
+            
+            <div style="background-color: #f8f9fa; padding: 20px; margin: 20px 0; border-radius: 5px;">
+                <h3 style="margin-top: 0;">Event Details</h3>
+                <p><strong>Event:</strong> {self.event.event_name}</p>
+                <p><strong>Date:</strong> {self.event.start_date_event.strftime('%B %d, %Y %I:%M %p')}</p>
+                <p><strong>Location:</strong> {self.event.address}</p>
+            </div>
+            
+            <p>We look forward to seeing you there!</p>
+            
+            <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee;">
+                <small style="color: #666;">This is an automated message, please do not reply directly to this email.</small>
+            </div>
+        </div>
+        """
 
     def _generate_registration_html(self) -> str:
         """Generate HTML content for registration confirmation"""
@@ -184,3 +214,4 @@ class TicketNotificationManager:
             </div>
         </div>
         """
+        

@@ -260,6 +260,5 @@ class Event(models.Model):
         if self.start_date_event >= self.end_date_event:
             raise ValidationError("End date must be after start date.")
 
-
     def __str__(self) -> str:
         return f"Event: {self.event_name}"
