@@ -1,4 +1,4 @@
-from .schemas import OrganizerResponseSchema, ErrorResponseSchema, OrganizerSchema, FileUploadResponseSchema
+from .schemas import OrganizerResponseSchema, ErrorResponseSchema, OrganizerSchema, FileUploadResponseSchema, OrganizerUpdateSchema
 from .modules import *
 
 router = Router()
@@ -65,20 +65,25 @@ class OrganizerAPI:
             logger.error(f"Organizer {organizer.organizer_name} attempted to delete non-existing event {event_id}.")
             return Response({'error': 'Event does not exist or you do not have permission to delete it'}, status=404)
 
-    @router.put('/update-organizer', response={200: OrganizerResponseSchema, 401: ErrorResponseSchema, 404: ErrorResponseSchema}, auth=JWTAuth())
-    def update_organizer(request: HttpRequest, data: OrganizerSchema):
+    @router.patch('/update-organizer', response={200: OrganizerUpdateSchema, 401: ErrorResponseSchema, 404: ErrorResponseSchema}, auth=JWTAuth())
+    def update_organizer(request: HttpRequest, data: OrganizerUpdateSchema):
         """Update the profile information of the authenticated organizer."""
 
         organizer = Organizer.objects.get(user=request.user)
-        
-        if organizer.organizer_name_is_taken(data.organizer_name):
+
+        # Check if organizer_name is being updated and if the new name is already taken
+        if data.organizer_name != organizer.organizer_name and organizer.organizer_name_is_taken(data.organizer_name):
             logger.info(f"Organizer name '{data.organizer_name}' is already taken.")
             return Response({'error': 'Organizer name is already taken'}, status=400)
         
         
-        Organizer.objects.filter(user=request.user).update(**data.dict())
-        organizer.refresh_from_db()
-        organize_data = OrganizerResponseSchema.from_orm(organizer).dict()
+        update_fields = data.dict(exclude_unset = True)
+        for field, value in update_fields.items():
+            setattr(organizer, field, value)
+            
+        organizer.save()
+    
+        organize_data = OrganizerUpdateSchema.from_orm(organizer).dict()
 
         logger.info(f"User {request.user.id} updated their organizer profile.")
         

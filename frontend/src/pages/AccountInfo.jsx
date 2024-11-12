@@ -1,10 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import api from '../api';
 import PageLayout from '../components/PageLayout';
+import DateInput from '../components/DateInput'; // Import DateTimeInput component
+import Map from '../components/Map';
+import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 import { ACCESS_TOKEN } from "../constants";
 
 function AccountInfo() {
+  const { register, setValue, handleSubmit, watch } = useForm();
   const [userData, setUserData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -31,6 +35,13 @@ function AccountInfo() {
         }
 
         setUserData(response.data);
+
+
+        setValue('address', response.data.address);
+        setValue('latitude', response.data.latitude);
+        setValue('longitude', response.data.longitude);
+
+
         if (response.data.profile_picture) {
           setPreviewImage(response.data.profile_picture);
         }
@@ -65,10 +76,13 @@ function AccountInfo() {
 
       const updatedData = {
         ...userData,
+        address: watch('address'),
+        latitude: watch('latitude'),
+        longitude: watch('longitude'),
         updated_at: new Date().toISOString(),
       };
 
-      const response = await api.put(`users/edit-profile/${userId}/`, updatedData, {
+      const response = await api.patch(`users/edit-profile/${userId}/`, updatedData, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -76,6 +90,8 @@ function AccountInfo() {
 
       console.log("User data updated successfully:", response.data);
       setIsEditing(false);
+
+      window.location.reload();
     } catch (err) {
       console.error("Error saving user data:", err.message);
       alert("Failed to save changes. Please try again.");
@@ -109,6 +125,23 @@ function AccountInfo() {
     }
   };
 
+  const handleMapClick = (address, latitude, longitude) => {
+    // Update form and user data on map click
+    setValue('address', address);
+    setValue('latitude', latitude);
+    setValue('longitude', longitude);
+    setUserData((prevData) => ({
+      ...prevData,
+      address,
+      latitude,
+      longitude,
+    }));
+  };
+
+  const goToOrganizerInfo = () => {
+    navigate('/organizer-info');
+  };
+
   if (loading) {
     return (
       <PageLayout>
@@ -130,7 +163,18 @@ function AccountInfo() {
       <div className="flex-1 p-6 bg-white rounded-lg shadow-lg w-full max-w-screen-lg mx-auto">
         <div className="max-w-3xl mx-auto">
           <h1 className="text-2xl font-bold mb-6 text-dark-purple">Account Details</h1>
-          <p className="text-gray-600 mb-6">View or edit your user login details.</p>
+
+          {/* Navigate to Organizer Info Button */}
+          <div className="mt-6">
+            <button
+              onClick={goToOrganizerInfo}
+              className="px-4 py-2 bg-amber-300 text-dark-purple rounded hover:bg-yellow-600 transition duration-200"
+            >
+              Go to Organizer Profile
+            </button>
+          </div>
+
+          <p className="mt-6 text-gray-600 mb-6">View or edit your user login details.</p>
 
           {/* Profile Image */}
           <div className="flex items-center mb-6">
@@ -159,9 +203,8 @@ function AccountInfo() {
               <p className="mt-0 text-gray-900">{userData.status.toLocaleString() || 'N/A'}</p>
             </div>
 
-
             {/* User Fields */}
-            {['username', 'first_name', 'last_name', 'email', 'phone_number', 'birth_date', 'address', 'facebook_profile', 'instagram_handle', 'nationality'].map((field) => (
+            {['username', 'first_name', 'last_name', 'email', 'phone_number'].map((field) => (
               <div key={field} className="grid grid-cols-2 gap-4">
                 <label className="block text-sm font-medium text-gray-700 capitalize">{field.replace('_', ' ')}</label>
                 {isEditing ? (
@@ -169,7 +212,7 @@ function AccountInfo() {
                     type="text"
                     value={userData[field] || ''}
                     onChange={(e) => handleInputChange(field, e.target.value)}
-                    className="mt-1 p-2 border border-gray-300 rounded w-full"
+                    className="mt-1 p-2 text-gray-600 bg-gray-100 border border-gray-300 rounded w-full"
                   />
                 ) : (
                   <p className="mt-0 text-gray-900">{userData[field] || 'N/A'}</p>
@@ -177,29 +220,100 @@ function AccountInfo() {
               </div>
             ))}
 
-            {/* Non-editable fields */}
+            {/*User Birthdate Field*/}
+              <div className="grid grid-cols-2 gap-4">
+                <label className="block text-sm font-medium text-gray-700">Birth Date</label>
+                {isEditing ? (
+                  <DateInput
+                    name="birth_date"
+                    value={userData.birth_date || ''}
+                    onChange={(e) => handleInputChange('birth_date', e.target.value)}
+                    required
+                    type="date"
+                  />
+                ) : (
+                  <p className="mt-0 text-gray-900">
+                    {userData.birth_date ? new Date(userData.birth_date).toLocaleDateString() : 'N/A'}
+                  </p>
+                )}
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+              <label className="block text-sm font-medium text-gray-700">Address</label>
+              {isEditing ? (
+                <input
+                  id="address-input"
+                  type="text"
+                  placeholder="Enter venue address"
+                  className="input input-bordered bg-white"
+                  {...register('address')}
+                />
+              ) : (
+                <p className="mt-0 text-gray-900">{userData.address || 'N/A'}</p>
+              )}
+            </div>
+
+            {isEditing && (
+              <Map onMapClick={handleMapClick} setError={setError} />
+            )}
+
+            {error && <div className="text-red-500">{error}</div>}
+
+
+            {/* User Fields */}
+            {['nationality', 'facebook_profile', 'instagram_handle'].map((field) => (
+              <div key={field} className="grid grid-cols-2 gap-4">
+                <label className="block text-sm font-medium text-gray-700 capitalize">{field.replace('_', ' ')}</label>
+                {isEditing ? (
+                  <input
+                    type="text"
+                    value={userData[field] || ''}
+                    onChange={(e) => handleInputChange(field, e.target.value)}
+                    className="mt-1 p-2 text-gray-600 bg-gray-100 border border-gray-300 rounded w-full"
+                  />
+                ) : (
+                  <p className="mt-0 text-gray-900">{userData[field] || 'N/A'}</p>
+                )}
+              </div>
+            ))}
+
             <div className="grid grid-cols-2 gap-4">
               <label className="block text-sm font-medium text-gray-700">Attended Events</label>
-              <p className="mt-0 text-gray-900">{userData.attended_events_count || 0}</p>
+              <p className="mt-0 text-gray-900">{userData.attended_events_count.toLocaleString() || 'N/A'}</p>
             </div>
             <div className="grid grid-cols-2 gap-4">
               <label className="block text-sm font-medium text-gray-700">Cancelled Events</label>
-              <p className="mt-0 text-gray-900">{userData.cancelled_events_count || 0}</p>
+              <p className="mt-0 text-gray-900">{userData.cancelled_events_count.toLocaleString() || 'N/A'}</p>
             </div>
+
             <div className="grid grid-cols-2 gap-4">
-              <label className="block text-sm font-medium text-gray-700">Created At</label>
-              <p className="mt-0 text-gray-900">{new Date(userData.created_at).toLocaleString() || 'N/A'}</p>
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <label className="block text-sm font-medium text-gray-700">Updated At</label>
-              <p className="mt-0 text-gray-900">{new Date(userData.updated_at).toLocaleString() || 'N/A'}</p>
-            </div>
+            <label className="block text-sm font-medium text-gray-700">Account Created</label>
+            <p className="mt-0 text-gray-900">
+              {userData.created_at ? 
+                new Date(userData.created_at).toLocaleDateString("en-US", { year: 'numeric', month: 'long', day: 'numeric' }) + 
+                " " + 
+                new Date(userData.created_at).toLocaleTimeString("en-US", { hour: '2-digit', minute: '2-digit' }) 
+                : 'N/A'}
+            </p>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <label className="block text-sm font-medium text-gray-700">Account Updated</label>
+            <p className="mt-0 text-gray-900">
+              {userData.updated_at ? 
+                new Date(userData.updated_at).toLocaleDateString("en-US", { year: 'numeric', month: 'long', day: 'numeric' }) + 
+                " " + 
+                new Date(userData.updated_at).toLocaleTimeString("en-US", { hour: '2-digit', minute: '2-digit' }) 
+                : 'N/A'}
+            </p>
+          </div>
+
 
             {/* Edit and Save/Cancel Buttons */}
             {isEditing ? (
               <div className="flex mt-6 space-x-4">
                 <button onClick={handleSaveChanges} className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 transition duration-200">
-                  Confirm
+                  Save Changes
                 </button>
                 <button onClick={handleEditToggle} className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition duration-200">
                   Cancel
@@ -207,7 +321,7 @@ function AccountInfo() {
               </div>
             ) : (
               <button onClick={handleEditToggle} className="mt-6 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition duration-200">
-                Edit
+                Edit Profile
               </button>
             )}
           </div>

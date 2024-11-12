@@ -24,28 +24,22 @@ class UserAPI:
             return Response({"error": "Username already taken"}, status=400)
         if AttendeeUser.objects.filter(email = form.email).exists():
             return Response({"error": "This email already taken"}, status=400)
-        try:
-            user = AttendeeUser(
-                username=form.username,
-                password=make_password(form.password),
-                birth_date=form.birth_date,
-                phone_number=form.phone_number,
-                email=form.email,
-                first_name=form.first_name,
-                last_name=form.last_name,
-                is_active=False
-            )
-            user.save()
-            user.send_verification_email()
-            return Response({
-                **UserSchema.from_orm(user).dict(),
-                "message": "Registration successful. Please check your email to verify your account."
-            }, status=201)
-        except IntegrityError:
-            return Response({"error": "A user with this email or username already exists."}, status=400)
-        except Exception as e:
-            return Response({"error": str(e)}, status=400)
-        # return Response(UserSchema.from_orm(user), status=201)
+        if len(form.phone_number) != 10:
+            return Response({'error' : 'Phone number must be 10 digits long'}, status = 400)
+        if not form.phone_number.isdigit():
+            return Response({'error' : 'Phone number must be digit'}, status = 400)
+        
+        user = AttendeeUser(
+            username=form.username,
+            password=make_password(form.password),
+            birth_date=form.birth_date,
+            phone_number=form.phone_number,
+            email=form.email,
+            first_name=form.first_name,
+            last_name=form.last_name
+        )
+        user.save()
+        return Response(UserSchema.from_orm(user), status=201)
 
     @router.post('/auth/google', response=AuthResponseSchema)
     def google_auth(request, data: GoogleAuthSchema):
@@ -160,8 +154,8 @@ class UserAPI:
         profile_data = UserResponseSchema(**profile_dict)
         return profile_data
 
-    @router.put('/edit-profile/{user_id}/', response=UserResponseSchema, auth=JWTAuth())
-    def edit_profile(request, user_id: int, new_data: UserResponseSchema):
+    @router.patch('/edit-profile/{user_id}/', response=UserupdateSchema, auth=JWTAuth())
+    def edit_profile(request, user_id: int, new_data: UserupdateSchema):
         """
         Update the profile information of a user by user ID.
 
@@ -174,15 +168,15 @@ class UserAPI:
             UserResponseSchema: Updated user profile details.
         """
         user = get_object_or_404(AttendeeUser, id=user_id)
-        update_fields = new_data.dict(exclude={'profile_picture'})
+        update_fields = new_data.dict(exclude={'profile_picture'}, exclude_unset = True)
         for field, value in update_fields.items():
             setattr(user, field, value)
         user.save()
         user.refresh_from_db()
-        return UserResponseSchema.from_orm(user)
+        return UserupdateSchema.from_orm(user)
 
-    @router.delete('delete/{user_id}/', auth=JWTAuth())
-    def delete_profile(request, user_id: int):
+    @router.delete('delete/', auth=JWTAuth())
+    def delete_profile(request):
         """
         Delete a user profile by user ID.
 
@@ -194,12 +188,10 @@ class UserAPI:
             Response: Success message upon successful deletion.
         """
         user = request.user
-        if AttendeeUser.objects.filter(id=user_id).exists():
-            user = AttendeeUser.objects.get(id=user_id)
-            user.delete()
-            if Organizer.objects.filter(user=user).exists():
-                organizer = Organizer.objects.get(user=user)
-                organizer.delete()
+        get_user = AttendeeUser.objects.get(id = user.id)
+
+        get_user.delete()
+            
         return Response({'success': 'Your account has been deleted'})
 
     @router.post('/{user_id}/upload/profile-picture/', response={200: FileUploadResponseSchema, 400: ErrorResponseSchema}, auth=JWTAuth())

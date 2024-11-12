@@ -16,8 +16,9 @@ function Sidebar() {
     const Menus = [
         { title: "Discover", path: "/discover" },
         { title: "Applied Events", path: "/applied-events" },
-        { title: "Become Organizer", path: "/become-organizer" },
         ...(isLoggedIn && isOrganizer ? [{ title: "My Events", path: "/my-events" }] : []),  // Only show if the user is an organizer
+        { title: "Become Organizer", path: "/become-organizer" },
+        
     ];
 
     useEffect(() => {
@@ -41,7 +42,7 @@ function Sidebar() {
                 </div>
                 <ul className="pt-6">
                     {Menus.map((menu, index) => (
-                        <li key={index} className="text-gray-300 text-sm flex items-center gap-x-4 cursor-pointer p-6">
+                        <li key={index} className="text-white text-md flex items-center gap-x-4 cursor-pointer p-6">
                             <Link to={menu.path} className="flex items-center w-full">
                                 <span className={`text-base font-medium flex-1 ${!open && "hidden"}`}>{menu.title}</span>
                             </Link>

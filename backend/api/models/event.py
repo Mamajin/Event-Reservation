@@ -7,18 +7,18 @@ from api.models.organizer import Organizer
 import re
 
 
-class EventManager(models.Manager):
-    def public(self):
-        return self.filter(visibility='PUBLIC')
+# class EventManager(models.Manager):
+#     def public(self):
+#         return self.filter(visibility='PUBLIC')
 
-    def private(self):
-        return self.filter(visibility='PRIVATE')
+#     def private(self):
+#         return self.filter(visibility='PRIVATE')
     
-    def filter_by_category(self, category):
-        return self.filter(category=category)
+#     def filter_by_category(self, category):
+#         return self.filter(category=category)
     
-    def within_date_range(self, start_date, end_date):
-        return self.filter(start_date_event__gte=start_date, end_date_event__lte=end_date)
+#     def within_date_range(self, start_date, end_date):
+#         return self.filter(start_date_event__gte=start_date, end_date_event__lte=end_date)
 
 
 class Event(models.Model):
@@ -64,6 +64,11 @@ class Event(models.Model):
     EVENT_VISIBILITY = [
         ('PUBLIC', 'Public'),
         ('PRIVATE', 'Private')
+    ]
+    VERIFICATION_STATUS_CHOICES = [
+        ('PENDING', 'Pending'),
+        ('VERIFIED', 'Verified'),
+        ('REJECTED', 'Rejected'),
     ]
     # Existing fields
     event_name = models.CharField(max_length=100)
@@ -138,9 +143,16 @@ class Event(models.Model):
     # Timestamps
     updated_at = models.DateTimeField(auto_now=True)
     
+    is_verified = models.BooleanField(default=False)
+    verification_status = models.CharField(
+        max_length=20,
+        choices=VERIFICATION_STATUS_CHOICES,
+        default='PENDING'
+    )
+    
     terms_and_conditions = models.TextField(null=True, blank=True)
     
-    objects = EventManager()
+    # objects = EventManager()
 
     # Existing methods remain the same
     @property
@@ -164,20 +176,6 @@ class Event(models.Model):
         """
         return self.bookmarks_set.count() 
     
-    def get_event_status(self) -> str:
-        """
-        Get current event Status
-
-        Returns:
-            str: String of the current status of the event
-        """
-        now = timezone.now()
-        if now < self.start_date_event:
-            return "Upcoming"
-        elif self.start_date_event <= now <= self.end_date_event:
-            return "Ongoing"
-        else:
-            return "Finished"
 
     def available_spot(self) -> int:
         """
@@ -200,15 +198,6 @@ class Event(models.Model):
             return True
         return False
     
-    def is_event_published(self) -> bool:
-        """
-        Check if event is published
-
-        Return:
-            bool: True if event is published  if not return False
-        """
-        now = timezone.now()
-        return self.event_create_date <= now
     
     def is_valid_date(self) -> bool:
         return self.start_date_register <= self.end_date_register <= self.start_date_event <= self.end_date_event

@@ -49,6 +49,8 @@ class TicketAPI:
             status='ACTIVE',
             created_at=timezone.now(),
         )
+        if user.age == None:
+            return Response({'error' : f" Please set your birth date in accountinfo"})
         
         if not ticket.is_valid_min_age_requirement():
             return Response({
@@ -107,7 +109,7 @@ class TicketAPI:
             return Response(TicketResponseSchema(
                 **ticket.get_ticket_details()), status=200)
             
-        except Ticket.DoesNotExist:
+        except Http404:
             logger.error(f"Ticket with ID {ticket_id} does not exist.")
             return Response({'error': 'Ticket not found'}, status=404)
         except Exception as e:

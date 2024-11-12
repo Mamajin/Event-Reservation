@@ -7,7 +7,7 @@ function EventDetail() {
   const { eventId } = useParams();
   const navigate = useNavigate();
   const [event, setEvent] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [applyError, setApplyError] = useState(null);
   const [applySuccess, setApplySuccess] = useState(false);
@@ -45,7 +45,7 @@ function EventDetail() {
     setApplySuccess(false);
 
     try {
-      const response = await api.post(`/tickets/event/${event.id}/reserve`);
+      const response = await api.post(`/tickets/event/${event.id}/register`);
       alert("Event apply successfully!");
       navigate("/applied-events");
     } catch (error) {

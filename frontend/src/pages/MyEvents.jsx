@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import EventCard from '../components/EventCard';
 import { ACCESS_TOKEN } from "../constants";
 import useUserProfile from '../hooks/useUserProfile';
+import api from '../api';
 
 function MyEvents() {
     const [events, setEvents] = useState([]);
@@ -23,9 +24,10 @@ function MyEvents() {
                 }
 
                 // Fetch organizer events from the API
-                const response = await axios.get(`/events/my-events`, {
+                const response = await api.get(`/events/my-events`, {
                     headers: {
                         Authorization: `Bearer ${token}`,
+                        "Content-Type": "application/json"
                     },
                 });
 
