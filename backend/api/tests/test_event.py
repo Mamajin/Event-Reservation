@@ -467,7 +467,7 @@ class EventTest(EventModelsTest):
             "contact_phone": "+1234567890",
             "updated_at": timezone.now().isoformat(),
         }
-        response = self.client.put(f"/{self.event_test.id}" + self.edit_event_url, headers={'Authorization': f'Bearer {token}'}, json  = data )
+        response = self.client.patch(f"/{self.event_test.id}" + self.edit_event_url, headers={'Authorization': f'Bearer {token}'}, json  = data )
         self.assertTrue(response.status_code, 200)
         self.assertEqual(response.json()['event_name'], "Test edit")
         
@@ -498,7 +498,7 @@ class EventTest(EventModelsTest):
             "contact_phone": "+1234567890",
             "updated_at": timezone.now().isoformat(),
         }
-        response = self.client.put(f"/{self.event_test.id}" + self.edit_event_url, headers={'Authorization': f'Bearer {token}'}, json  = data )
+        response = self.client.patch(f"/{self.event_test.id}" + self.edit_event_url, headers={'Authorization': f'Bearer {token}'}, json  = data )
         self.assertEqual(response.status_code, 403)
         self.assertEqual(response.json()['error'],'You are not allowed to edit this event.')
         
@@ -528,7 +528,7 @@ class EventTest(EventModelsTest):
             "updated_at": timezone.now().isoformat(),
         }
         
-        response = self.client.put(f"/{100}" + self.edit_event_url, headers={'Authorization': f'Bearer {token}'}, json  = data )
+        response = self.client.patch(f"/{100}" + self.edit_event_url, headers={'Authorization': f'Bearer {token}'}, json  = data )
         self.assertEqual(response.status_code, 404)
         self.assertEqual(response.json()['error'], 'Event not found')
         
@@ -558,7 +558,7 @@ class EventTest(EventModelsTest):
             "updated_at": timezone.now().isoformat(),
         }
         
-        response = self.client.put(f"/{self.event_test.id}" + self.edit_event_url, headers={'Authorization': f'Bearer {token}'}, json  = data )
+        response = self.client.patch(f"/{self.event_test.id}" + self.edit_event_url, headers={'Authorization': f'Bearer {token}'}, json  = data )
         self.assertEqual(response.status_code, 404)
         self.assertEqual(response.json()['error'], 'User is not an organizer')
         
@@ -591,7 +591,7 @@ class EventTest(EventModelsTest):
             "updated_at": timezone.now().isoformat(),
         }
 
-        response = self.client.put(
+        response = self.client.patch(
             f"/{self.event_test.id}" + self.edit_event_url,
             headers={'Authorization': f'Bearer {token}'},
             json= data

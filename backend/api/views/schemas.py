@@ -50,6 +50,15 @@ class OrganizerResponseSchema(Schema):
     organization_type: OrganizerType
     logo: Optional[str]
     is_verified: bool
+    
+
+class EmailVerificationSchema(Schema):
+    token: str
+
+
+class EmailVerificationResponseSchema(Schema):
+    message: str
+    verified: bool
 
 
 class ErrorResponseSchema(Schema):
@@ -63,7 +72,7 @@ class EventInputSchema(ModelSchema):
     allowed_email_domains: Optional[str] = None
     class Meta:
         model = Event
-        exclude = ('organizer', 'id', 'status_registeration','tags','status', 'event_image')
+        exclude = ('organizer', 'id', 'status_registeration','tags','status', 'event_image','updated_at')
     
 class AuthResponseSchema(Schema):
     access_token: str
@@ -112,6 +121,11 @@ class EventResponseSchema(ModelSchema):
             total_bookmarks=event.bookmark_count,
             has_user_liked=has_user_liked
         ).dict()
+        
+    @classmethod
+    def set_status_event(cls, event: Event):
+        event.set_registeration_status()
+        event.set_status_event()
     
     class Meta:
         model = Event

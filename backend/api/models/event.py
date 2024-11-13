@@ -57,13 +57,15 @@ class Event(models.Model):
         ('OPEN', 'Open'),
         ('CLOSED', 'Closed'),
         ('FULL', 'Full'),
-        ('PENDING', 'Pending'),
-        ('CANCELLED', 'Cancelled'),
-        ('WAITLIST', 'Waitlist'),
     ]
     EVENT_VISIBILITY = [
         ('PUBLIC', 'Public'),
         ('PRIVATE', 'Private')
+    ]
+    VERIFICATION_STATUS_CHOICES = [
+        ('PENDING', 'Pending'),
+        ('VERIFIED', 'Verified'),
+        ('REJECTED', 'Rejected'),
     ]
     # Existing fields
     event_name = models.CharField(max_length=100)
@@ -118,8 +120,7 @@ class Event(models.Model):
     detailed_description = models.TextField(blank=True, help_text="Full event details including schedule")
     status = models.CharField(max_length=20, default='')
     dress_code = models.CharField(max_length=20, choices = DRESS_CODES, null = False, blank = False, default= "CASUAL")
-    status_registeration = models.CharField(max_length=20, choices= STATUS_OF_REGISTRATION, null = False, blank= False)
-
+    status_registeration = models.CharField(max_length=20, choices= STATUS_OF_REGISTRATION, null = False, blank= False, default= "OPEN")
     # Contact information
     contact_email = models.EmailField(blank=True)
     contact_phone = models.CharField(max_length=20, blank=True)
@@ -138,11 +139,21 @@ class Event(models.Model):
     # Timestamps
     updated_at = models.DateTimeField(auto_now=True)
     
+    is_verified = models.BooleanField(default=False)
+    verification_status = models.CharField(
+        max_length=20,
+        choices=VERIFICATION_STATUS_CHOICES,
+        default='PENDING'
+    )
+    
     terms_and_conditions = models.TextField(null=True, blank=True)
     
     # objects = EventManager()
 
     # Existing methods remain the same
+    
+
+        
     @property
     def current_number_attendee(self):
         """
@@ -175,6 +186,7 @@ class Event(models.Model):
         return self.max_attendee - self.current_number_attendee
     
     
+    
     def is_max_attendee(self) -> bool:
         """
         Check if event is slots are full
@@ -200,6 +212,36 @@ class Event(models.Model):
         now = timezone.now()
         return self.start_date_register <= now < self.end_date_register
     
+    def is_registration_status_allowed(self) -> bool:
+        """Check if the registration status is allowed to register."""
+        return self.status_registeration not in ('CLOSED', 'FULL')
+    
+    def set_status_event(self):
+        """
+        Set the status of the event based on the current date and time.
+
+        The status can be 'UPCOMING', 'ONGOING', or 'ENDED' depending on
+        whether the current time is before the event start, during the event,
+        or after the event has ended.
+        """
+        now = timezone.now()  
+        
+        if now < self.start_date_event:
+            self.status = 'UPCOMING'  
+        elif now < self.end_date_event:
+            self.status = 'ONGOING'  
+        else:
+            self.status = 'ENDED'
+            
+    def set_registeration_status(self):
+        now = timezone.now()
+        if now > self.end_date_register:
+            self.status_registeration = "CLOSED"
+        elif self.current_number_attendee >= self.max_attendee:
+            self.status_registeration = "FULL"
+        self.save()
+            
+ 
     def is_email_allowed(self, email: str) -> bool:
         """
         Check if an email address is allowed to register for this event
@@ -236,7 +278,6 @@ class Event(models.Model):
                 })
         if self.start_date_event >= self.end_date_event:
             raise ValidationError("End date must be after start date.")
-
 
     def __str__(self) -> str:
         return f"Event: {self.event_name}"
