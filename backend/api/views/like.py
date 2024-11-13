@@ -52,6 +52,5 @@ class LikeAPI:
             like.save()
         except Like.DoesNotExist:
             like = Like.objects.create(event=event, user=user, status='like')
-
         return Response({"message": "Like toggled successfully."}, status=200)
             
