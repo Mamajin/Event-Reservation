@@ -101,19 +101,17 @@ class EventAPI:
         Returns:
             List[EventResponseSchema]: List of all events.
         """
-        try:
-            events = Event.objects.filter(event_create_date__lte=timezone.now()).order_by("-event_create_date")
-            event_list = []
-            for event in events:
-                engagement = EventResponseSchema.resolve_engagement(event, request.user)
-                event_data = EventResponseSchema.from_orm(event)
-                event_data.engagement = engagement
-                event_list.append(event_data)
-            logger.info("Retrieved all events for the homepage.")
-            return event_list
-        except Exception as e:
-            logger.error(f"Error while retrieving events for the homepage: {str(e)}")
-            return Response({'error': str(e)}, status=400)
+        events = Event.objects.filter(event_create_date__lte=timezone.now()).order_by("-event_create_date")
+        event_list = []
+        for event in events:
+            engagement = EventResponseSchema.resolve_engagement(event)
+            user_engaged = EventResponseSchema.resolve_user_engagement(event, request.user)
+            event_data = EventResponseSchema.from_orm(event)
+            event_data.engagement = engagement
+            event_data.user_engaged = user_engaged
+            event_list.append(event_data)
+        logger.info(f"Retrieved all public events for the homepage.")
+        return Response(event_list, status=200)
 
     @router.patch('/{event_id}/edit', response={200: EventUpdateSchema, 401: ErrorResponseSchema, 404: ErrorResponseSchema}, auth=JWTAuth())
     def edit_event(request: HttpRequest, event_id: int, data: EventUpdateSchema):

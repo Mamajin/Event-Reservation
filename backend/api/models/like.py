@@ -18,18 +18,6 @@ class LikeManager(models.Manager):
         """
         return self.filter(event=event, user=user).exists()
 
-    # def like_count_for_event(self, event):
-    #     """
-    #     Get the total number of likes for a specified event.
-
-    #     Args:
-    #         event (Event): The event to check.
-
-    #     Returns:
-    #         int: The total number of likes.
-    #     """
-    #     return self.filter(event=event).count()
-
 
 class Like(models.Model):
     """

@@ -90,7 +90,11 @@ class GoogleAuthSchema(Schema):
 class EventEngagementSchema(Schema):
     total_likes: int
     total_bookmarks: int
-    has_user_liked: bool
+    
+    
+class UserEngagementSchema(Schema):
+    is_liked: bool
+    is_bookmarked: bool
     
 
 class EventResponseSchema(ModelSchema):
@@ -99,27 +103,39 @@ class EventResponseSchema(ModelSchema):
     visibility: EventVisibility
     organizer : OrganizerResponseSchema
     engagement: Optional[Dict] = None
+    user_engaged: Optional[Dict] = None
     
     @classmethod
-    def resolve_engagement(cls, event: Event, user: Optional[AttendeeUser]) -> Dict:
+    def resolve_engagement(cls, event: Event) -> Dict:
         """
         Resolve engagement information for the event.
 
         Args:
-            event (Event): The event for which engagement data is being retrieved.
+            event (Optional[Event]): The event for which engagement data is being retrieved.
             user (Optional[AttendeeUser]): The user for whom the engagement data is resolved.
 
         Returns:
             Dict: Engagement data including total likes, total bookmarks, and user's like status.
         """
-        has_user_liked = (
-            event.likes.has_user_liked(event=event, user=user)
-            if user and user.is_authenticated else False
-        )
         return EventEngagementSchema(
-            total_likes=event.like_count,  # Example, adjust based on your model
+            total_likes=event.like_count,
             total_bookmarks=event.bookmark_count,
-            has_user_liked=has_user_liked
+        ).dict()
+        
+    @classmethod
+    def resolve_user_engagement(cls, event: Event, user: Optional[AttendeeUser]) -> Dict:
+        """
+        
+        """
+        if not user.is_authenticated:
+            return UserEngagementSchema(
+            is_liked=False,
+            is_bookmarked=False
+        ).dict()
+            
+        return UserEngagementSchema(
+            is_liked=event.likes.has_user_liked(event, user),
+            is_bookmarked=Bookmarks.objects.filter(event=event, attendee=user).exists()
         ).dict()
     
     class Meta:
