@@ -4,9 +4,9 @@ import api from '../../api';
 import { ACCESS_TOKEN } from '../../constants';
 
 const LikeButton = ({ eventId, isInitiallyLiked }) => {
-  const [liked, setLiked] = useState(null); // Initially null until we know the state
-  const [loading, setLoading] = useState(false); // Track loading state
-  const [errorMessage, setErrorMessage] = useState(null); // Track errors
+  const [liked, setLiked] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState(null);
 
   // Sync the like state when the component mounts or when the 'isInitiallyLiked' prop changes
   useEffect(() => {
