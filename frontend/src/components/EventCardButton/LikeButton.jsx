@@ -4,16 +4,22 @@ import api from '../../api';
 import { ACCESS_TOKEN } from '../../constants';
 
 const LikeButton = ({ eventId, isInitiallyLiked }) => {
-  const [liked, setLiked] = useState(null); // Initially set to null until we know the state
+  const [liked, setLiked] = useState(null); // Initially null until we know the state
   const [loading, setLoading] = useState(false); // Track loading state
   const [errorMessage, setErrorMessage] = useState(null); // Track errors
 
   // Sync the like state when the component mounts or when the 'isInitiallyLiked' prop changes
   useEffect(() => {
-    if (isInitiallyLiked !== undefined) {
-      setLiked(isInitiallyLiked); // Set the state based on the initial prop value
+    // Check localStorage to see if this event has been liked
+    const storedLiked = localStorage.getItem(`liked-${eventId}`);
+    
+    // If we have a stored value, use it, otherwise use the initial prop
+    if (storedLiked !== null) {
+      setLiked(JSON.parse(storedLiked)); // Use stored value from localStorage
+    } else {
+      setLiked(isInitiallyLiked); // Use prop if no stored value
     }
-  }, [isInitiallyLiked]); // Update when the prop changes (e.g., after a page refresh)
+  }, [eventId, isInitiallyLiked]);
 
   const handleLike = async () => {
     if (loading) return; // Prevent clicking while loading
@@ -37,7 +43,11 @@ const LikeButton = ({ eventId, isInitiallyLiked }) => {
       }
 
       if (response.status === 200) {
-        setLiked(!liked); // Toggle the liked state after a successful request
+        const newLikedState = !liked;
+        setLiked(newLikedState); // Toggle the liked state after a successful request
+
+        // Store the new state in localStorage to persist it after page refresh
+        localStorage.setItem(`liked-${eventId}`, JSON.stringify(newLikedState));
       }
     } catch (error) {
       // Handle errors, show error message if any
@@ -52,7 +62,7 @@ const LikeButton = ({ eventId, isInitiallyLiked }) => {
   };
 
   if (liked === null) {
-    // If we haven't received the state yet, return nothing or a loading state
+    // If we haven't received the state yet, return a loading state or a placeholder
     return <div className="animate-pulse">...</div>;
   }
 
