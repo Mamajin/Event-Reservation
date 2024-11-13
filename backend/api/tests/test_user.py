@@ -1,6 +1,7 @@
 from decimal import Decimal
 from api.urls import api  
 from api.models import AttendeeUser, Organizer
+from api.utils import EmailVerification
 from .utils.utils_user import UserModelsTest, SimpleUploadedFile, ClientError
 from django.contrib.auth import authenticate
 from django.contrib.sessions.middleware import SessionMiddleware
@@ -251,5 +252,22 @@ class UserAPITests(UserModelsTest):
 
         self.assertEqual(response.status_code, 400)
         self.assertIn('Upload failed', response.json()['error'])
+        
+        
+    @patch.object(EmailVerification, 'send_verification_email')
+    
+    def test_resend_verification_unverified_user(self, mock_send_verification_email):
+        user = self.create_user("test","test","test")
+
+        response = self.client.post('/resend-verification?email=test@example.com')
+        
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()['message'], 'Verification email sent successfully')
+        
+        response1 = self.client.post('/resend-verification?email=verification@example.com')
+        self.assertEqual(response1.status_code, 400)
+        self.assertEqual(response1.json()['error'], "User not found or already verified")
+        
+        mock_send_verification_email.assert_called_once()
 
         
