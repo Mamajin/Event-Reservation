@@ -2,12 +2,17 @@ from django.contrib import admin
 from api.models import AttendeeUser,Organizer,Event,Ticket,Comment,Bookmarks
 
 # Register your models here.
-admin.site.register(AttendeeUser)
 admin.site.register(Ticket)
 admin.site.register(Comment)
 admin.site.register(Bookmarks)
 
 
+@admin.register(AttendeeUser)
+class AttendeeAdmin(admin.ModelAdmin):
+    list_display = ('id', 'first_name', 'last_name', 'email')
+    search_fields = ('first_name', 'last_name', 'email')
+    
+    
 @admin.register(Organizer)
 class OrganizerAdmin(admin.ModelAdmin):
     list_display = ('id', 'organizer_name', 'email', 'verification_status', 'is_verified')
