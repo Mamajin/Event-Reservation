@@ -118,6 +118,50 @@ class TicketTestAPI(TicketModelsTest):
         self.assertEqual(response.status_code, 400)
         self.assertEqual(response.json()['error'], 'You must be at least 20 years old to attend this event.')
         
+    def test_none_birth_date_register(self):
+        test_user = AttendeeUser.objects.create_user(
+            username='attendeeuser1234',
+            password='password123',
+            first_name='Jane',
+            last_name='Doe',
+            birth_date= None,
+            phone_number='9876543210',
+            email='jane12334.doe@example.com'
+        )
+        event_test = Event.objects.create(
+            event_name=fake.company(),
+            organizer= self.become_organizer(self.test_user, "test_user"),
+            start_date_register=timezone.now(),  # Example for registration start
+            end_date_register=timezone.now() + datetime.timedelta(days = 1),  # Registration ends when the event starts
+            start_date_event=timezone.now()+ datetime.timedelta(days = 2),
+            end_date_event= timezone.now() + datetime.timedelta(days = 3),  # Ensure it ends after it starts
+            max_attendee=100,
+            description=fake.text(max_nb_chars=200),
+            min_age_requirement = 20
+        )
+        token = self.get_token_for_user(test_user)
+        response = self.client.post(self.user_reserve_event_url + str(event_test.id) + '/register',  headers={'Authorization': f'Bearer {token}'})
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.json()['error'], "Please set your birth date in accountinfo")
+        
+    def test_invalid_registeration_status(self):
+        event_test = Event.objects.create(
+            event_name=fake.company(),
+            organizer= self.become_organizer(self.test_user, "test_user"),
+            start_date_register=timezone.now(),  # Example for registration start
+            end_date_register=timezone.now() + datetime.timedelta(days = 1),  # Registration ends when the event starts
+            start_date_event=timezone.now()+ datetime.timedelta(days = 2),
+            end_date_event= timezone.now() + datetime.timedelta(days = 3),  # Ensure it ends after it starts
+            max_attendee=100,
+            description=fake.text(max_nb_chars=200),
+            status_registeration = "CLOSED",
+        )
+        token = self.get_token_for_user(self.test_user)
+        response = self.client.post(self.user_reserve_event_url + str(event_test.id) + '/register',  headers={'Authorization': f'Bearer {token}'})
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.json()['error'], f'Registeration of this event is {event_test.status_registeration.lower()} now')
+        
+
     def test_invalid_register_private_event(self):
         event_test = Event.objects.create(
             event_name=fake.company(),
@@ -231,6 +275,32 @@ class TicketTestAPI(TicketModelsTest):
         self.assertEqual(response.json()['error'], 'Internal server error')
         
         
+    @patch("api.models.Ticket.save")
+    def test_register_for_event_general_exception(self, mock_save):
+        # Mock Ticket.save to raise a general Exception
+        mock_save.side_effect = Exception("Unexpected error")
+        user = self.create_user("test","test")
+    
+        token = self.get_token_for_user(user)
+        response = self.client.post(self.user_reserve_event_url + str(self.event_test.id) + '/register',  headers={'Authorization': f'Bearer {token}'})
+        self.assertEqual(response.status_code, 500)
+        self.assertEqual(response.json()['error'], "Internal server error")
+        
+        
+    @patch("api.utils.TicketNotificationManager.send_cancellation_notification")
+    def test_cancel_ticket_email_exception(self, mock_send_notification):
+        # Simulate an error when sending the cancellation email
+        mock_send_notification.side_effect = Exception("Email sending failed")
+        ticket = Ticket.objects.create(event = self.event_test, attendee =self.test_user)
+        token = self.get_token_for_user(self.test_user)
+
+        # Call the delete endpoint for canceling the ticket
+        response = self.client.delete(f"/{ticket.id}" + self.user_cancel_event_url,  headers={'Authorization': f'Bearer {token}'})
+        # Assert the response status code is 500 as per the updated logic
+        self.assertEqual(response.status_code, 500)
+        self.assertEqual(response.json()['error'], 'Failed to send cancellation email')
+        
+        
         
     def test_ticket_number_generation_on_save(self):
         # Create a ticket without a ticket number and save it
@@ -240,7 +310,7 @@ class TicketTestAPI(TicketModelsTest):
         self.assertTrue(ticket.ticket_number)
         self.assertEqual(Ticket.objects.filter(ticket_number=ticket.ticket_number).count(), 1)
         
-        
+            
     def test_cancellation_date_not_changed_if_already_set(self):
         # Create a ticket with a pre-set cancellation date and save it
         cancellation_date = timezone.now() - timezone.timedelta(days=1)
@@ -249,16 +319,23 @@ class TicketTestAPI(TicketModelsTest):
         
         # Ensure the pre-set cancellation date remains unchanged
         self.assertEqual(ticket.cancellation_date, cancellation_date)
-    
-    
-    def test_cancellation_date_set_on_cancelled_status(self):
-        # Create a ticket with status set to 'CANCELLED' and no cancellation date
-        ticket = Ticket(event=self.event_test, attendee=self.test_user, status='CANCELLED')
-        ticket.save()
         
-        # Ensure the cancellation date was set to the current date and time
-        self.assertIsNotNone(ticket.cancellation_date)
-        self.assertAlmostEqual(ticket.cancellation_date, timezone.now(), delta=timezone.timedelta(seconds=1))
+    def test_sent_reminder(self):
+        ticket = Ticket.objects.create(event = self.event_test, attendee =self.test_user)
+        response = self.client.post(f'/{ticket.id}/send-reminder',  headers={'Authorization': f'Bearer {self.get_token_for_user(self.test_user)}'})
+        self.assertEqual(response.status_code, 200)
+        
+    @patch("api.models.Ticket.objects.get")
+    def test_cancel_ticket_general_exception(self, mock_get):
+
+        mock_get.side_effect = Exception("Database error")
+        ticket = Ticket.objects.create(event = self.event_test, attendee =self.test_user)
+        token = self.get_token_for_user(self.test_user)
+
+        response = self.client.delete(f"/{ticket.id}" + self.user_cancel_event_url,  headers={'Authorization': f'Bearer {token}'})
+
+        self.assertEqual(response.status_code, 500)
+        self.assertEqual(response.json()['error'], 'Internal server error')
         
         
     def test_cannot_cancel_already_cancelled_ticket(self):

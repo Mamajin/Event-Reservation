@@ -74,11 +74,13 @@ class AttendeeUser(AbstractUser):
 
     @property
     def age(self):
-        today = timezone.now().date()
-        age = today.year - self.birth_date.year
-        if (today.month, today.day) < (self.birth_date.month, self.birth_date.day):
-            age -= 1
-        return age
+        if self.birth_date:
+            today = timezone.now().date()
+            age = today.year - self.birth_date.year
+            if (today.month, today.day) < (self.birth_date.month, self.birth_date.day):
+                age -= 1
+            return age
+        return None
 
     @property
     def full_name(self):
