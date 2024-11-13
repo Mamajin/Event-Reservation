@@ -36,7 +36,18 @@ class TicketAPI:
                 {'error': 'Registration for this event is not allowed'},
                 status=400
             )
-            
+        if not event.is_registration_status_allowed():
+            if event.status_registeration  == 'CLOSED':
+                return Response(
+                {'error': 'Registeration of this event is closed now'},
+                status=400
+                ) 
+            elif event.status_registeration  == 'FULL':
+                return Response(
+                {'error': 'Registeration of this event is fulled now'},
+                status=400
+                ) 
+                
         if event.visibility == 'PRIVATE' and not event.is_email_allowed(user.email):
             return Response({
                 'error': 'Your email domain is not authorized to register for this event'

@@ -1,14 +1,13 @@
 
-import { FaGlobe, FaFacebook, FaTwitter, FaInstagram, FaClock } from 'react-icons/fa';
+import { FaGlobe, FaFacebook, FaTwitter, FaInstagram, FaClock, FaRegCheckCircle  } from 'react-icons/fa';
 import { CiMail } from "react-icons/ci";
 import { FiPhone } from "react-icons/fi";
 import { LuCalendarDays, LuUsers } from "react-icons/lu";
 import { format } from 'date-fns';
 import { CommentSection } from './Comment';
 import { useState } from 'react';
-import { Navigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import api from '../../../api';
-import { IoVideocam } from "react-icons/io5";
 
 
 export function EventInfo({ event }) {
@@ -17,7 +16,7 @@ export function EventInfo({ event }) {
   const [applyError, setApplyError] = useState(null);
   const [applySuccess, setApplySuccess] = useState(false);
   const [isApplied, setIsApplied] = useState(false);
-  const navigate = Navigate
+  const navigate = useNavigate();
 
   const socialLinks = [
     { icon: FaGlobe, url: event.website_url, label: 'Website' },
@@ -133,7 +132,7 @@ export function EventInfo({ event }) {
             >
               {isApplied ? (
                 <>
-                  <CheckCircle className="w-5 h-5" />
+                  <FaRegCheckCircle className="w-5 h-5" />
                   Applied Successfully
                 </>
               ) : (
