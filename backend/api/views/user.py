@@ -39,6 +39,7 @@ class UserAPI:
             last_name=form.last_name
         )
         user.save()
+        user.send_verification_email()
         return Response(UserSchema.from_orm(user), status=201)
     
     @router.post('/logout', response={200: dict})
