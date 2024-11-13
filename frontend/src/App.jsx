@@ -26,6 +26,7 @@ import Design from './pages/footerpage/Design';
 import Marketing from './pages/footerpage/Marketing';
 import MyEvents from './pages/MyEvents';
 import OrganizerInfo from './pages/OrganizerInfo';
+import Bookmark from './pages/BookMark';
 
 function App() {
   const handleLogout = () => {
@@ -68,6 +69,7 @@ function App() {
           <Route path="/applied-events" element={<ProtectedRoute><AppliedEvents /></ProtectedRoute>} />
           <Route path="/create-event" element={<ProtectedRoute><CreateEvent /></ProtectedRoute>} />
           <Route path="/my-events" element={<ProtectedRoute><MyEvents /></ProtectedRoute>} />
+          <Route path="/bookmarks" element={<ProtectedRoute><Bookmark /></ProtectedRoute>} />
 
           {/* Fallback Route */}
           <Route path="*" element={<NotFound />} />

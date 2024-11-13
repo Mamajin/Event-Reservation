@@ -4,7 +4,7 @@ module.exports = {
   ],
   theme: {
     extend: {colors:{
-      "dark-purple":"#75B9BE",
+      "dark-purple":"black",
       "light-white":"rgba(255,255,255,0.18)"}},
   },
   fontFamily: {
