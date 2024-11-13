@@ -29,6 +29,8 @@ class EventAPI:
         event = Event(**data.dict(), organizer=organizer)
         if not event.is_valid_date():
             return Response({'error': 'Please enter valid date'}, status=400)
+        
+        
 
         # If an image is provided, upload it
         if image:
@@ -56,7 +58,7 @@ class EventAPI:
                 logger.info(f"Uploaded event image for event ID {event.id}: {file_url}")
             except ClientError as e:
                 return Response({'error': f"S3 upload failed"}, status=400)
-        
+            
         # Save event and return response
         event.save()
         return EventResponseSchema.from_orm(event)
@@ -77,9 +79,12 @@ class EventAPI:
             events = Event.objects.filter(organizer=organizer, event_create_date__lte=timezone.now()).order_by("-event_create_date")
             event_list = []
             for event in events:
-                engagement = EventResponseSchema.resolve_engagement(event, organizer.user)
+                engagement = EventResponseSchema.resolve_engagement(event)
+                user_engaged = EventResponseSchema.resolve_user_engagement(event, request.user)
+                EventResponseSchema.set_status_event(event)
                 event_data = EventResponseSchema.from_orm(event)
                 event_data.engagement = engagement
+                event_data.user_engaged = user_engaged
                 event_list.append(event_data)
             logger.info(f"Organizer {organizer.organizer_name} retrieved their events.")
             return Response(event_list, status=200)
@@ -101,19 +106,18 @@ class EventAPI:
         Returns:
             List[EventResponseSchema]: List of all events.
         """
-        try:
-            events = Event.objects.filter(event_create_date__lte=timezone.now()).order_by("-event_create_date")
-            event_list = []
-            for event in events:
-                engagement = EventResponseSchema.resolve_engagement(event, request.user)
-                event_data = EventResponseSchema.from_orm(event)
-                event_data.engagement = engagement
-                event_list.append(event_data)
-            logger.info("Retrieved all events for the homepage.")
-            return event_list
-        except Exception as e:
-            logger.error(f"Error while retrieving events for the homepage: {str(e)}")
-            return Response({'error': str(e)}, status=400)
+        events = Event.objects.filter(event_create_date__lte=timezone.now()).order_by("-event_create_date")
+        event_list = []
+        for event in events:
+            engagement = EventResponseSchema.resolve_engagement(event)
+            user_engaged = EventResponseSchema.resolve_user_engagement(event, request.user)
+            EventResponseSchema.set_status_event(event)
+            event_data = EventResponseSchema.from_orm(event)
+            event_data.engagement = engagement
+            event_data.user_engaged = user_engaged
+            event_list.append(event_data)
+        logger.info(f"Retrieved all public events for the homepage.")
+        return Response(event_list, status=200)
 
     @router.patch('/{event_id}/edit', response={200: EventUpdateSchema, 401: ErrorResponseSchema, 404: ErrorResponseSchema}, auth=JWTAuth())
     def edit_event(request: HttpRequest, event_id: int, data: EventUpdateSchema):
@@ -166,9 +170,13 @@ class EventAPI:
         """
         logger.info(f"Fetching details for event ID: {event_id} by user {request.user.username}.")
         event = get_object_or_404(Event, id=event_id)
-        engagement_data = EventResponseSchema.resolve_engagement(event, request.user)
+        engagement_data = EventResponseSchema.resolve_engagement(event)
+        user_engaged = EventResponseSchema.resolve_user_engagement(event, request.user)
+        EventResponseSchema.set_status_event(event)
+        
         event_data = EventResponseSchema.from_orm(event)
         event_data.engagement = engagement_data
+        event_data.user_engaged = user_engaged
         return event_data
     
     @router.post('/{event_id}/upload/event-image/', response={200: FileUploadResponseSchema, 400: ErrorResponseSchema}, auth=JWTAuth())
@@ -268,8 +276,24 @@ class EventAPI:
             Response (dict): A dictionary containing engagement metrics for the event.
         """
         event = get_object_or_404(Event, id=event_id)
-        engagement_data = EventResponseSchema.resolve_engagement(event, request.user)
-        return engagement_data                
+        engagement_data = EventResponseSchema.resolve_engagement(event)
+        return engagement_data  
+    
+    @router.get('/{event_id}/user-engagement', response={200: dict}, auth=JWTAuth())
+    def get_event_user_engagement(request: HttpRequest, event_id: int):
+        """
+        Retrieve user engagement metrics for a specific event.
+
+        Args:
+            request (HttpRequest): The HTTP request object, containing user and request metadata.
+            event_id (int): The ID of the event for which user engagement metrics are requested.
+
+        Returns:
+            Response (dict): A dictionary containing user engagement metrics for the event.
+        """
+        event = get_object_or_404(Event, id=event_id)
+        user_engaged = EventResponseSchema.resolve_user_engagement(event, request.user)
+        return user_engaged              
     
     @router.get('/{event_id}/comments', response=List[CommentResponseSchema])
     def get_events_comments(request: HttpRequest, event_id: int):

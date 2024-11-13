@@ -1,4 +1,4 @@
-from .schemas import UserSchema, LoginResponseSchema, UserResponseSchema, LoginSchema, ErrorResponseSchema, FileUploadResponseSchema, AuthResponseSchema, GoogleAuthSchema, UserupdateSchema
+from .schemas import UserSchema, LoginResponseSchema, UserResponseSchema, LoginSchema, ErrorResponseSchema, FileUploadResponseSchema, AuthResponseSchema, GoogleAuthSchema, EmailVerification, EmailVerificationResponseSchema, UserupdateSchema
 from .modules import *
 
 router = Router()
@@ -40,6 +40,11 @@ class UserAPI:
         )
         user.save()
         return Response(UserSchema.from_orm(user), status=201)
+    
+    @router.post('/logout', response={200: dict})
+    def logout(request):
+        logout(request)
+        return Response({"message": "Logged out successfully"}, status=200)
 
     @router.post('/auth/google', response=AuthResponseSchema)
     def google_auth(request, data: GoogleAuthSchema):
@@ -256,3 +261,45 @@ class UserAPI:
             
         except Exception as e:
             return Response({'error': f"Upload failed: {str(e)}"}, status=400)
+        
+    @router.get('/verify-email/{user_id}/{token}', response={200: EmailVerificationResponseSchema, 400: ErrorResponseSchema})
+    def verify_email(request, user_id: str, token: str):
+        """Verify user's email address with the secure token."""
+        try:
+            uid = force_str(urlsafe_base64_decode(user_id))
+            user = AttendeeUser.objects.get(pk=uid)
+            
+            # Check if token is valid and user is not yet verified
+            if default_token_generator.check_token(user, token) and not user.is_email_verified:
+                user.is_email_verified = True
+                user.is_active = True
+                user.save()
+                
+                return Response({
+                    "message": "Email verified successfully",
+                    "verified": True
+                }, status=200)
+            else:
+                return Response({
+                    "error": "Invalid or expired token"
+                }, status=400)
+        except (TypeError, ValueError, OverflowError, AttendeeUser.DoesNotExist):
+            return Response({
+                "error": "Invalid verification token"
+            }, status=400)
+
+    @router.post('/resend-verification', response={200: EmailVerificationResponseSchema, 400: ErrorResponseSchema})
+    def resend_verification(request, email: str):
+        """Resend verification email if user is not verified."""
+        try:
+            user = AttendeeUser.objects.get(email=email, is_email_verified=False)
+            user.send_verification_email()
+            
+            return Response({
+                "message": "Verification email sent successfully",
+                "verified": user.is_email_verified
+            }, status=200)
+        except AttendeeUser.DoesNotExist:
+            return Response({
+                "error": "User not found or already verified"
+            }, status=400)

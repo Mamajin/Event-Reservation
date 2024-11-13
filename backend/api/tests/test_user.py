@@ -112,7 +112,7 @@ class UserAPITests(UserModelsTest):
         user = self.create_user("test","test",'test')
         token = self.get_token_for_user(user)
         data= {
-                "id": 0,
+                "id": user.id,
                 "username": "string",
                 "first_name": "win",
                 "last_name": "string",
@@ -133,9 +133,11 @@ class UserAPITests(UserModelsTest):
                 "created_at": "2024-11-09T10:10:45.762Z",
                 "updated_at": "2024-11-09T10:10:45.762Z"
             }
-        response = self.client.put(self.edit_user_url + f"{user.id}/", 
+    
+        response = self.client.patch(self.edit_user_url + f"{user.id}/", 
                                    headers={"Authorization": f"Bearer {token}"}, json = data)
-        self.assertTrue(AttendeeUser.objects.filter(first_name = "win").exists())
+        user.refresh_from_db()
+        self.assertTrue(AttendeeUser.objects.filter(first_name = user.first_name).exists())
         self.assertTrue(response.status_code , 200)
         
         
