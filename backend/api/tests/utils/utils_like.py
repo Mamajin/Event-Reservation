@@ -19,8 +19,6 @@ class LikeModelsTest(TestCase):
         Set up initial test data for models.
         """
         self.client = TestClient(like_router)
-        self.user_like_url = '/like/'
-        self.user_unlike_url = '/unlike/'
         
         self.test_user = AttendeeUser.objects.create_user(
             username='attendeeuser3',

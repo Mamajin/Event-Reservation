@@ -9,41 +9,25 @@ class BookmarkTest(BookmarkModelsTest):
         self.assertTrue(type(response.json()) == list)
         self.assertEqual(response.status_code, 200)
         
-    
-    def test_add_bookmark(self):
-        user = self.create_user("test","test")
-        token = self.get_token_for_user(user)
-        response = self.client.post(f'/{self.event_test.id}/', headers={"Authorization": f"Bearer {token}"})
-        self.assertEqual(response.status_code , 200)
-        self.assertEqual(response.json()['success'], 'This event has been added to your favorites.')
-        self.assertTrue(Bookmarks.objects.filter(event = self.event_test, attendee = user).exists())
-        
-    def test_user_already_bookmark(self):
-        user = self.create_user("test","test")
-        token = self.get_token_for_user(user)
-        bookmark = Bookmarks.objects.create(event = self.event_test, attendee = user)
-        response = self.client.post(f'/{self.event_test.id}/', headers={"Authorization": f"Bearer {token}"})
-        self.assertEqual(response.status_code , 400)
-        self.assertEqual(response.json()['error'], 'This event is already in your favorites')
-        self.assertTrue(Bookmarks.objects.filter(event = self.event_test, attendee = user).exists())
-        
-        
-        
-    def test_delete_bookmark(self):
-        user = self.create_user("test","test")
-        token = self.get_token_for_user(user)
-        bookmark = Bookmarks.objects.create(event = self.event_test, attendee = user)
-        response = self.client.delete(f'/{self.event_test.id}/remove', headers={"Authorization": f"Bearer {token}"})
-        self.assertEqual(response.status_code , 200)
-        self.assertEqual(response.json()['success'],  'This event has been removed from your favorites')
-        self.assertFalse(Bookmarks.objects.filter(event = self.event_test, attendee = user).exists())
-        
-        
-    def test_invalid_delete_bookmark(self):
-        user = self.create_user("test","test")
-        token = self.get_token_for_user(user)
-        response = self.client.delete(f'/{self.event_test.id}/remove', headers={"Authorization": f"Bearer {token}"})
-        self.assertEqual(response.status_code , 404)
-        self.assertEqual(response.json()['error'],  'You are not have permission to delete this')
-        self.assertFalse(Bookmarks.objects.filter(event = self.event_test, attendee = user).exists())
-        
+
+    def test_toggle_bookmark_not_bookmarked(self):
+        token = self.get_token_for_user(self.test_user)
+        response = self.client.put(f'/{self.event_test.id}/toggle-bookmark',headers={"Authorization": f"Bearer {token}"})
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()['message'], 'Bookmark added successfully.')
+        self.assertEqual(Bookmarks.objects.filter(event=self.event_test, attendee=self.test_user).count(), 1)
+
+    def test_toggle_bookmark_already_bookmarked(self):
+        Bookmarks.objects.create(event=self.event_test, attendee=self.test_user)
+        token = self.get_token_for_user(self.test_user)
+        response = self.client.put(f'/{self.event_test.id}/toggle-bookmark',headers={"Authorization": f"Bearer {token}"})
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()['message'], 'Bookmark removed successfully.')
+        self.assertEqual(Bookmarks.objects.filter(event=self.event_test, attendee=self.test_user).count(), 0)
+
+    def test_toggle_bookmark_event_does_not_exist(self):
+        token = self.get_token_for_user(self.test_user)
+        response = self.client.put(f'/{999}/toggle-bookmark',headers={"Authorization": f"Bearer {token}"})
+        self.assertEqual(response.status_code, 404)
+
+  

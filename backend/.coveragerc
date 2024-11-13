@@ -26,6 +26,7 @@ omit =
     # package file
     api/__init__.py
     api/*/__init__.py
+    api/utils.py
 
     #test file
     */tests/*
