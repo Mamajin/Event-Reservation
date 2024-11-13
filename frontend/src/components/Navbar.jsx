@@ -7,8 +7,7 @@ function Navbar() {
   const navigate = useNavigate();
 
   const handleLogout = () => {
-    localStorage.clear();
-    navigate('/login');
+    navigate('/logout');
   };
 
   const isLoggedIn = localStorage.getItem(ACCESS_TOKEN) !== null;

@@ -13,6 +13,7 @@ function Discover() {
     const fetchEvents = async () => {
       try {
         const response = await api.get('/events/events');
+        console.log(response.data);
         setEvents(response.data);
       } catch (err) {
         setError(err);
