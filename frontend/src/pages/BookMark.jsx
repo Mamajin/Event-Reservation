@@ -6,34 +6,34 @@ import { ACCESS_TOKEN } from "../constants";
 import useUserProfile from '../hooks/useUserProfile';
 import api from '../api';
 
-function MyEvents() {
-    const [events, setEvents] = useState([]);
+function Bookmark() {
+    const [bookmarks, setBookmarks] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const navigate = useNavigate();
     const { userId, loading: userLoading, error: userError } = useUserProfile(navigate);
 
     useEffect(() => {
-        const fetchOrganizerEvents = async () => {
+        const fetchBookmarks = async () => {
             try {
-                console.log('Fetching organizer events...');
+                console.log('Fetching bookmarked events...');
                 const token = localStorage.getItem(ACCESS_TOKEN);
                 if (!token || !userId) {
                     throw new Error('No access token or user ID found');
                 }
 
-                // Fetch organizer events from the API
-                const response = await api.get(`/events/my-events`, {
+                // Fetch bookmarked events from the API
+                const response = await api.get(`/bookmarks/my-favorite/`, {
                     headers: {
                         Authorization: `Bearer ${token}`,
                         "Content-Type": "application/json"
                     },
                 });
 
-                setEvents(response.data);
-                console.log('Fetched organizer events:', response.data);
+                setBookmarks(response.data);
+                console.log('Fetched bookmarked events:', response.data);
             } catch (err) {
-                console.error('Error fetching organizer events:', err);
+                console.error('Error fetching bookmarked events:', err);
                 setError(err);
             } finally {
                 setLoading(false);
@@ -41,7 +41,7 @@ function MyEvents() {
         };
 
         if (!userLoading && userId) {
-            fetchOrganizerEvents();
+            fetchBookmarks();
         } else if (userLoading) {
             console.log('Waiting for user profile to load...');
         }
@@ -52,7 +52,7 @@ function MyEvents() {
             <PageLayout>
                 <div className="flex justify-center items-start min-h-screen p-4">
                     <div className="w-full max-w-[1400px] max-w-lg bg-white rounded-lg shadow-lg p-6 space-y-4">
-                        <h2 className="text-2xl font-bold mb-4 text-center text-dark-purple">My Events</h2>
+                        <h2 className="text-2xl font-bold mb-4 text-center text-dark-purple">My Bookmarked Events</h2>
                         <div className="grid grid-cols-1 gap-4">
                             <div className="text-center">Loading...</div>
                         </div>
@@ -69,7 +69,7 @@ function MyEvents() {
                     <div className="w-full max-w-[1400px] max-w-lg bg-white rounded-lg shadow-lg p-6 space-y-4">
                         <h2 className="text-2xl font-bold mb-4 text-center text-dark-purple">Error</h2>
                         <div className="text-center">
-                            <div>Error fetching organizer events: {error?.message || userError?.message}</div>
+                            <div>Error fetching bookmarked events: {error?.message || userError?.message}</div>
                         </div>
                     </div>
                 </div>
@@ -77,14 +77,14 @@ function MyEvents() {
         );
     }
 
-    if (events.length === 0) {
+    if (bookmarks.length === 0) {
         return (
             <PageLayout>
                 <div className="flex justify-center items-start min-h-screen p-4">
                     <div className="w-full max-w-[1400px] max-w-lg bg-white rounded-lg shadow-lg p-6 space-y-4">
-                        <h2 className="text-2xl font-bold mb-4 text-center text-dark-purple">My Events</h2>
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                            <div>No events available</div>
+                        <h2 className="text-2xl font-bold mb-4 text-center text-dark-purple">My Bookmarked Events</h2>
+                        <div className="grid grid-cols-1 gap-4">
+                            <div>No bookmarked events available</div>
                         </div>
                     </div>
                 </div>
@@ -96,9 +96,9 @@ function MyEvents() {
         <PageLayout>
             <div className="flex justify-center items-start min-h-screen p-4">
                 <div className="w-full max-w-[1400px] bg-white rounded-lg shadow-lg p-6 space-y-4">
-                    <h1 className="text-2xl font-bold mb-6 text-center text-dark-purple">My Events</h1>
+                    <h1 className="text-2xl font-bold mb-6 text-center text-dark-purple">My Bookmarked Events</h1>
                     <div className="grid grid-cols-1 gap-4">
-                        {events.map((event) => (
+                        {bookmarks.map((event) => (
                             <EventCard key={event.id} event={event} />
                         ))}
                     </div>
@@ -108,4 +108,4 @@ function MyEvents() {
     );
 }
 
-export default MyEvents;
+export default Bookmark;
