@@ -1,10 +1,11 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FaRegBookmark, FaRegHeart, FaShareAlt } from 'react-icons/fa';
+import { FaRegBookmark, FaShareAlt } from 'react-icons/fa';
+import LikeButton from './EventCardButton/LikeButton';
 
 function EventCard({ event }) {
   const navigate = useNavigate();
-  const maxDescriptionLength = 110; 
+  const maxDescriptionLength = 110;
 
   const handleMoreDetailClick = () => {
     navigate(`/events/${event.id}`);
@@ -28,19 +29,21 @@ function EventCard({ event }) {
           </div>
           <p className="text-sm text-gray-600">{event.organizer.organizer_name}</p>
         </div>
-        <h2 className="text-3xl text-dark-purple font-bold mb-2 cursor-pointer"onClick={handleMoreDetailClick}>{event.event_name}</h2>
+        <h2 className="text-3xl text-dark-purple font-bold mb-2 cursor-pointer" onClick={handleMoreDetailClick}>
+          {event.event_name}
+        </h2>
         <p className="text-sm text-gray-600 mt-1">
           {new Date(event.start_date_event).toLocaleDateString()} - {new Date(event.end_date_event).toLocaleDateString()}
         </p>
         <p className="mt-2 text-gray-700 break-words">
-        {event.description.length > maxDescriptionLength
-          ? `${event.description.substring(0, maxDescriptionLength)}...`
-          : event.description}
+          {event.description.length > maxDescriptionLength ? `${event.description.substring(0, maxDescriptionLength)}...` : event.description}
         </p>
-        <div className="flex items-center mt-4">
-          <FaRegHeart className="text-gray-500 mr-4 cursor-pointer" />
-          <FaRegBookmark className="text-gray-500 mr-4 cursor-pointer ml-3" />
-          <FaShareAlt className="text-gray-500 cursor-pointer ml-3" />
+
+        <div className="flex items-center mt-4 space-x-4">
+          {/* Ensure 'event.engagement.has_user_liked' is correctly passed to LikeButton */}
+          <LikeButton eventId={event.id} isInitiallyLiked={event.engagement.has_user_liked} />
+          <FaRegBookmark className="text-gray-500 cursor-pointer hover:text-blue-500 active:text-blue-600" />
+          <FaShareAlt className="text-gray-500 cursor-pointer hover:text-green-500 active:text-green-600" />
         </div>
       </div>
     </div>
