@@ -95,6 +95,7 @@ class EventEngagementSchema(Schema):
 class UserEngagementSchema(Schema):
     is_liked: bool
     is_bookmarked: bool
+    is_applied: bool
     
 
 class EventResponseSchema(ModelSchema):
@@ -125,17 +126,26 @@ class EventResponseSchema(ModelSchema):
     @classmethod
     def resolve_user_engagement(cls, event: Event, user: Optional[AttendeeUser]) -> Dict:
         """
-        
+        Resolve user engagement information for the event.
+
+        Args:
+            event (Event): The event for which user engagement data is being retrieved.
+            user (Optional[AttendeeUser]): The user for whom the engagement data is resolved.
+
+        Returns:
+            Dict: User engagement data including the user's like status and bookmark status.
         """
         if not user.is_authenticated:
             return UserEngagementSchema(
-            is_liked=False,
-            is_bookmarked=False
-        ).dict()
-            
+                is_liked=False,
+                is_bookmarked=False,
+                is_applied=False
+            ).dict()
+        
         return UserEngagementSchema(
-            is_liked=event.likes.has_user_liked(event, user),
-            is_bookmarked=Bookmarks.objects.filter(event=event, attendee=user).exists()
+            is_liked=event.likes.has_user_liked(),
+            is_bookmarked=Bookmarks.objects.filter(event=event, attendee=user).exists(),
+            is_applied=Ticket.objects.filter(event=event, attendee=user).exists(),
         ).dict()
     
     class Meta:
