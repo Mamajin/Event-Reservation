@@ -121,6 +121,7 @@ class AttendeeUser(AbstractUser):
     def send_verification_email(self):
         """Generate and send verification email with a secure token."""
         token = EmailVerification.generate_verification_token(self)
+
         self.email_verification_token_sent_at = timezone.now()
         self.save()
         
