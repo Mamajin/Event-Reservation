@@ -70,8 +70,9 @@ class OrganizerAPI:
         """Update the profile information of the authenticated organizer."""
 
         organizer = Organizer.objects.get(user=request.user)
-        
-        if organizer.organizer_name_is_taken(data.organizer_name):
+
+        # Check if organizer_name is being updated and if the new name is already taken
+        if data.organizer_name != organizer.organizer_name and organizer.organizer_name_is_taken(data.organizer_name):
             logger.info(f"Organizer name '{data.organizer_name}' is already taken.")
             return Response({'error': 'Organizer name is already taken'}, status=400)
         

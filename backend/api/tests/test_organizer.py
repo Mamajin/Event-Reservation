@@ -94,7 +94,7 @@ class OrganizerTestAPI(OrganizerModelsTest):
             "email": "tes123@example.com",
             "organization_type" : "INDIVIDUAL"
         }
-        response = self.client.put(self.update_organizer_url, json = data ,headers={'Authorization': f'Bearer {token}'} )
+        response = self.client.patch(self.update_organizer_url, json = data ,headers={'Authorization': f'Bearer {token}'} )
         
         self.assertEqual(response.status_code, 200)
  
@@ -111,7 +111,7 @@ class OrganizerTestAPI(OrganizerModelsTest):
             "email": fake.email(),
             "organization_type" : "INDIVIDUAL"
             }
-        response = self.client.put(self.update_organizer_url, json = new_data ,headers={'Authorization': f'Bearer {token}'} )
+        response = self.client.patch(self.update_organizer_url, json = new_data ,headers={'Authorization': f'Bearer {token}'} )
         self.assertEqual(response.status_code, 400)
         self.assertEqual(Organizer.objects.filter(organizer_name = "test").count(), 1)
         self.assertIn('Organizer name is already taken', response.json().get("error", ""))
