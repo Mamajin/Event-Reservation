@@ -5,7 +5,7 @@ from api.models.user import AttendeeUser
 
 
 class LikeManager(models.Manager):
-    def has_user_liked(self, event, user):
+    def has_user_liked(self):
         """
         Check if the user has liked the specified event.
         
@@ -16,19 +16,7 @@ class LikeManager(models.Manager):
         Returns:
             bool: True if the user has liked the event, False otherwise.
         """
-        return self.filter(event=event, user=user).exists()
-
-    # def like_count_for_event(self, event):
-    #     """
-    #     Get the total number of likes for a specified event.
-
-    #     Args:
-    #         event (Event): The event to check.
-
-    #     Returns:
-    #         int: The total number of likes.
-    #     """
-    #     return self.filter(event=event).count()
+        return self.filter(status='like').exists()
 
 
 class Like(models.Model):
@@ -42,6 +30,7 @@ class Like(models.Model):
     """
     event = models.ForeignKey(Event, related_name='likes', on_delete=models.CASCADE)
     user = models.ForeignKey(AttendeeUser, on_delete=models.CASCADE)
+    status = models.CharField(max_length=50, choices=[('like', 'Like'), ('dislike', 'Dislike')], default=None, blank=True, null=True)
     liked_at = models.DateTimeField(auto_now_add=True)
 
     objects = LikeManager()
