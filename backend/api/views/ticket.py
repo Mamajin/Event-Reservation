@@ -37,14 +37,8 @@ class TicketAPI:
                 status=400
             )
         if not event.is_registration_status_allowed():
-            if event.status_registeration  == 'CLOSED':
-                return Response(
-                {'error': 'Registeration of this event is closed now'},
-                status=400
-                ) 
-            elif event.status_registeration  == 'FULL':
-                return Response(
-                {'error': 'Registeration of this event is fulled now'},
+            return Response(
+                {'error': f'Registeration of this event is {event.status_registeration.lower()} now'},
                 status=400
                 ) 
                 
@@ -61,12 +55,12 @@ class TicketAPI:
             created_at=timezone.now(),
         )
         if user.age == None:
-            return Response({'error' : f" Please set your birth date in accountinfo"})
+            return Response({'error' : "Please set your birth date in accountinfo"}, status = 400)
         
         if not ticket.is_valid_min_age_requirement():
             return Response({
                 'error': f"You must be at least {event.min_age_requirement} years old to attend this event."
-            })
+            }, status = 400)
 
         try:
             ticket.clean()
@@ -88,13 +82,13 @@ class TicketAPI:
         this_user = request.user
         try:
             ticket = Ticket.objects.get(id=ticket_id, attendee=this_user)
-            
             # Send cancellation email before deleting the ticket
             try:
                 notification_manager = TicketNotificationManager(ticket)
                 notification_manager.send_cancellation_notification()
             except Exception as email_error:
                 logger.error(f"Failed to send cancellation email: {str(email_error)}")
+                return Response({'error': 'Failed to send cancellation email'}, status=500)
             
             ticket.delete()
             return Response({

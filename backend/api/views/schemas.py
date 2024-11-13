@@ -143,7 +143,7 @@ class EventResponseSchema(ModelSchema):
             ).dict()
         
         return UserEngagementSchema(
-            is_liked=event.likes.has_user_liked(),
+            is_liked=event.likes.has_user_liked(user),
             is_bookmarked=Bookmarks.objects.filter(event=event, attendee=user).exists(),
             is_applied=Ticket.objects.filter(event=event, attendee=user).exists(),
         ).dict()

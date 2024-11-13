@@ -44,6 +44,15 @@ class UserAPI:
     
     @router.post('/logout', response={200: dict})
     def logout(request):
+        """
+        Logs out the current user.
+
+        Args:
+            request: The HTTP request object.
+
+        Returns:
+            Response: A success message with a 200 status code.
+        """
         logout(request)
         return Response({"message": "Logged out successfully"}, status=200)
 

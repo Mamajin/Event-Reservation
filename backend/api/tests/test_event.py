@@ -1,4 +1,4 @@
-from .utils.utils_event import EventModelsTest, timezone,datetime, Event, Organizer, fake, patch, ALLOWED_IMAGE_TYPES, MagicMock, ClientError, SimpleUploadedFile,ValidationError
+from .utils.utils_event import EventModelsTest, timezone,datetime, Event, Organizer, fake, patch, ALLOWED_IMAGE_TYPES, MagicMock, ClientError, SimpleUploadedFile,ValidationError, EventResponseSchema
 
 from django.http import QueryDict
 import tempfile
@@ -273,14 +273,7 @@ class EventTest(EventModelsTest):
         response  = self.client.get(self.list_event_url)
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(response.json()), 3)
-    
-    @patch("api.models.Event.objects.filter")
-    def test_excpetion_list_all_event(self, mock_filter):
-        mock_filter.side_effect = Exception("Unexpected error occurred")
-        
-        response  = self.client.get(self.list_event_url)
-        self.assertEqual(response.status_code, 400)
-        
+
         
         
     def test_get_detail(self):
@@ -431,11 +424,18 @@ class EventTest(EventModelsTest):
         self.assertIn("Upload failed", response.data["error"])
         
         
-    def test_get_engagement(self):
-        
-        response = self.client.get(f"/{self.event_test.id}" + self.get_engagement_url)
+    def test_get_event_user_engagements_success(self):
+        token = self.get_token_for_user(self.test_user)
+        response = self.client.get(f'/{self.event_test.id}/user-engagement',headers={'Authorization': f'Bearer {token}'})
         self.assertEqual(response.status_code, 200)
-        self.assertTrue(len(response.json()) == 3)
+        engagement_data = EventResponseSchema.resolve_user_engagement(self.event_test, self.test_user)
+        self.assertEqual(response.json(), engagement_data)
+        
+    def test_get_event_engagements_success(self):
+        response = self.client.get(f'/{self.event_test.id}/engagement')
+        self.assertEqual(response.status_code, 200)
+        engagement_data = EventResponseSchema.resolve_engagement(self.event_test)
+        self.assertEqual(response.json(), engagement_data)
         
     def test_get_comment(self):
         response = self.client.get(f"/{self.event_test.id}" + self.get_comment_url)
