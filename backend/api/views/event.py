@@ -29,6 +29,8 @@ class EventAPI:
         event = Event(**data.dict(), organizer=organizer)
         if not event.is_valid_date():
             return Response({'error': 'Please enter valid date'}, status=400)
+        
+        
 
         # If an image is provided, upload it
         if image:
@@ -56,7 +58,7 @@ class EventAPI:
                 logger.info(f"Uploaded event image for event ID {event.id}: {file_url}")
             except ClientError as e:
                 return Response({'error': f"S3 upload failed"}, status=400)
-        
+            
         # Save event and return response
         event.save()
         return EventResponseSchema.from_orm(event)
@@ -78,6 +80,7 @@ class EventAPI:
             event_list = []
             for event in events:
                 engagement = EventResponseSchema.resolve_engagement(event, organizer.user)
+                EventResponseSchema.set_status_event(event)
                 event_data = EventResponseSchema.from_orm(event)
                 event_data.engagement = engagement
                 event_list.append(event_data)
@@ -106,6 +109,7 @@ class EventAPI:
             event_list = []
             for event in events:
                 engagement = EventResponseSchema.resolve_engagement(event, request.user)
+                EventResponseSchema.set_status_event(event)
                 event_data = EventResponseSchema.from_orm(event)
                 event_data.engagement = engagement
                 event_list.append(event_data)
@@ -167,6 +171,8 @@ class EventAPI:
         logger.info(f"Fetching details for event ID: {event_id} by user {request.user.username}.")
         event = get_object_or_404(Event, id=event_id)
         engagement_data = EventResponseSchema.resolve_engagement(event, request.user)
+        EventResponseSchema.set_status_event(event)
+        
         event_data = EventResponseSchema.from_orm(event)
         event_data.engagement = engagement_data
         return event_data
