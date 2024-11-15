@@ -34,7 +34,6 @@ export function EventInfo({ event }) {
       const response = await api.post(`/tickets/event/${event.id}/register`);
       alert("Event apply successfully!");
       setIsApplied(true);
-      navigate("/applied-events");
     } catch (error) {
       console.error("Error apply event:", error);
       let errorMessage = "Failed to apply for the event.";

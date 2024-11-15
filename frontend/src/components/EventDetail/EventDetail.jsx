@@ -16,6 +16,7 @@ function EventDetail() {
     const fetchEvent = async () => {
       try {
         const response = await api.get(`/events/${eventId}`);
+        console.log(response.data);
         setEvent(response.data);
       } catch (err) {
         setError(err);

@@ -1,5 +1,9 @@
-from .schemas import EventInputSchema, ErrorResponseSchema, EventResponseSchema, FileUploadResponseSchema, EventEngagementSchema, CommentResponseSchema, EventUpdateSchema
+from .schemas import EventInputSchema, ErrorResponseSchema, EventResponseSchema, FileUploadResponseSchema, CommentResponseSchema, EventUpdateSchema, UserResponseSchema
 from .modules import *
+from django.contrib.auth.models import AnonymousUser
+from typing import Union
+
+
 
 router = Router()
 
@@ -106,19 +110,30 @@ class EventAPI:
         Returns:
             List[EventResponseSchema]: List of all events.
         """
+        
         events = Event.objects.filter(event_create_date__lte=timezone.now()).order_by("-event_create_date")
         event_list = []
+        user = request.user
+        if request.headers.get("Authorization"):
+            token = request.headers.get('Authorization')
+            if token != None and token.startswith('Bearer '):
+                token = token[7:]
+                if JWTAuth().authenticate(request,token):
+                    user = JWTAuth().authenticate(request, token)
+
         for event in events:
             engagement = EventResponseSchema.resolve_engagement(event)
-            user_engaged = EventResponseSchema.resolve_user_engagement(event, request.user)
+            user_engaged = EventResponseSchema.resolve_user_engagement(event, user)
             EventResponseSchema.set_status_event(event)
             event_data = EventResponseSchema.from_orm(event)
             event_data.engagement = engagement
-            event_data.user_engaged = user_engaged
+            event_data.user_engaged = user_engaged  
             event_list.append(event_data)
-        logger.info(f"Retrieved all public events for the homepage.")
-        return Response(event_list, status=200)
 
+        # Conditionally add user-specific engagement data
+
+        logger.info("Retrieved all public events for the homepage.")
+        return Response(event_list, status=200)
     @router.patch('/{event_id}/edit', response={200: EventUpdateSchema, 401: ErrorResponseSchema, 404: ErrorResponseSchema}, auth=JWTAuth())
     def edit_event(request: HttpRequest, event_id: int, data: EventUpdateSchema):
         """
@@ -312,4 +327,30 @@ class EventAPI:
         response_data = [CommentResponseSchema.from_orm(comment) for comment in comments]
         logger.info(f"Retrieved {len(comments)} comments for event {event_id}.")
         return Response(response_data, status=200)
+    
+    @router.get('/{event_id}/attendee-list', response=List[UserResponseSchema], auth=JWTAuth())
+    def get_attendee_list(request: HttpRequest, event_id: int):
+        """
+        Retrieve the list of attendees for a specific event.
+
+        Args:
+            request (HttpRequest): The HTTP request object, containing user and request metadata.
+            event_id (int): The ID of the event for which attendee list is requested.
+
+        Returns:
+            List[UserResponseSchema]: A list of attendee users for the event.
+        """
+        try:
+            organizer = Organizer.objects.get(user=request.user)
+            event = get_object_or_404(Event, id=event_id)
+            if event.organizer != organizer:
+                logger.warning(f"User {request.user.username} tried to access attendee list but is not an organizer.")
+                return Response({'error': 'You are not allowed to access this event.'}, status=403)
+            tickets = Ticket.objects.filter(event=event).order_by('attendee__username')
+            response_data = [UserResponseSchema.from_orm(ticket.attendee) for ticket in tickets]
+            logger.info(f"Retrieved attendee list for event {event_id}.")
+            return Response(response_data, status=200)
+        except Organizer.DoesNotExist:
+            logger.error(f"User {request.user.username} tried to access attendee list but is not an organizer.")
+            return Response({'error': 'User is not an organizer'}, status=403)
                 

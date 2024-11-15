@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import api from '../api';
 import EventCard from '../components/EventCard';
 import PageLayout from '../components/PageLayout';
+import { ACCESS_TOKEN } from '../constants';
 
 function Discover() {
   const [events, setEvents] = useState([]);
@@ -12,7 +13,10 @@ function Discover() {
   useEffect(() => {
     const fetchEvents = async () => {
       try {
-        const response = await api.get('/events/events');
+        const token = localStorage.getItem(ACCESS_TOKEN);
+        const headers = token ? { Authorization: `Bearer ${token}` } : {};
+        const response = await api.get('/events/events', { headers });
+        console.log(response.data);
         setEvents(response.data);
       } catch (err) {
         setError(err);
