@@ -1,4 +1,4 @@
-import { FaCalendarAlt, FaClock, FaMapMarkerAlt, FaUsers, FaTicketAlt } from 'react-icons/fa';
+import { FaCalendarAlt, FaClock, FaMapMarkerAlt, FaUsers, FaTicketAlt, FaArrowLeft } from 'react-icons/fa';
 import { format } from 'date-fns';
 
 
@@ -6,6 +6,11 @@ export function EventHeader({ event }) {
   const isRegistrationOpen = new Date(event.end_date_register) > new Date();
   const isFreeEvent = event.is_free || event.ticket_price === 0;
 
+
+  const handleBackClick = () => {
+    navigate(-1);
+  };
+  
   const handleLocation = () => {
     const latitude = event.latitude;
     const longitude = event.longitude;
@@ -21,6 +26,9 @@ export function EventHeader({ event }) {
 
   return (
     <div className="relative h-[40vh] min-h-[400px] w-full pr-5">
+      <button className="absolute top-4 left-4 p-2" onClick={handleBackClick}>
+        <FaArrowLeft className="text-gray-500" />
+      </button>
       <div
         className="absolute inset-0 bg-cover bg-center"
         style={{

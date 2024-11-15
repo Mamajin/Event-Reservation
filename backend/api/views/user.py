@@ -39,7 +39,22 @@ class UserAPI:
             last_name=form.last_name
         )
         user.save()
+        user.send_verification_email()
         return Response(UserSchema.from_orm(user), status=201)
+    
+    @router.post('/logout', response={200: dict})
+    def logout(request):
+        """
+        Logs out the current user.
+
+        Args:
+            request: The HTTP request object.
+
+        Returns:
+            Response: A success message with a 200 status code.
+        """
+        logout(request)
+        return Response({"message": "Logged out successfully"}, status=200)
 
     @router.post('/auth/google', response=AuthResponseSchema)
     def google_auth(request, data: GoogleAuthSchema):

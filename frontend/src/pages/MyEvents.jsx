@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
 import PageLayout from '../components/PageLayout';
 import { useNavigate } from 'react-router-dom';
 import EventCard from '../components/EventCard';

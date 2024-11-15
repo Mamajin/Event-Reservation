@@ -26,11 +26,10 @@ import Design from './pages/footerpage/Design';
 import Marketing from './pages/footerpage/Marketing';
 import MyEvents from './pages/MyEvents';
 import OrganizerInfo from './pages/OrganizerInfo';
+import Bookmark from './pages/BookMark';
+import Logout from './pages/Logout';
 
 function App() {
-  const handleLogout = () => {
-    localStorage.clear();
-  };
 
   return (
     <GoogleOAuthProvider clientId="987028649849-8uhmhr5qrkg494ren8um9prtdsavd6uv.apps.googleusercontent.com">
@@ -45,7 +44,7 @@ function App() {
           <Route path="/register" element={<Register />} />
           <Route path="/become-organizer" element={<ApplyOrganizer />} />
           <Route path="/events/:eventId" element={<EventDetailPage />} />
-          <Route path="/logout" element={<Navigate to="/" onEnter={handleLogout} />} />
+          <Route path="/logout" element={<Logout />} />
 
           {/* Footer Page */}
           <Route path="/legal/terms-of-use" element={<TermsOfUse />} />
@@ -68,6 +67,7 @@ function App() {
           <Route path="/applied-events" element={<ProtectedRoute><AppliedEvents /></ProtectedRoute>} />
           <Route path="/create-event" element={<ProtectedRoute><CreateEvent /></ProtectedRoute>} />
           <Route path="/my-events" element={<ProtectedRoute><MyEvents /></ProtectedRoute>} />
+          <Route path="/bookmarks" element={<ProtectedRoute><Bookmark /></ProtectedRoute>} />
 
           {/* Fallback Route */}
           <Route path="*" element={<NotFound />} />

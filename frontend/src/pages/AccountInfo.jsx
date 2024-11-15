@@ -5,11 +5,12 @@ import DateInput from '../components/DateInput'; // Import DateTimeInput compone
 import Map from '../components/Map';
 import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
-import { ACCESS_TOKEN } from "../constants";
+import { ACCESS_TOKEN, USER_STATUS, PROFILE_PICTURE } from "../constants";
 
 function AccountInfo() {
   const { register, setValue, handleSubmit, watch } = useForm();
   const [userData, setUserData] = useState(null);
+  const [isOrganizer, setIsOrganizer] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
@@ -35,7 +36,7 @@ function AccountInfo() {
         }
 
         setUserData(response.data);
-
+        setIsOrganizer(response.data[USER_STATUS] === 'Organizer');
 
         setValue('address', response.data.address);
         setValue('latitude', response.data.latitude);
@@ -119,6 +120,7 @@ function AccountInfo() {
         },
       });
       setPreviewImage(`http://127.0.0.1:8000${response.data.file_url}`);
+      localStorage.setItem(PROFILE_PICTURE, response.data.file_url)
     } catch (err) {
       console.error("Error uploading profile picture:", err.message);
       alert("Failed to upload profile picture. Please try again.");
@@ -164,15 +166,17 @@ function AccountInfo() {
         <div className="max-w-3xl mx-auto">
           <h1 className="text-2xl font-bold mb-6 text-dark-purple">Account Details</h1>
 
-          {/* Navigate to Organizer Info Button */}
-          <div className="mt-6">
-            <button
-              onClick={goToOrganizerInfo}
-              className="px-4 py-2 bg-amber-300 text-dark-purple rounded hover:bg-yellow-600 transition duration-200"
-            >
-              Go to Organizer Profile
-            </button>
-          </div>
+          {/* Show Organizer Info Button only if user is an organizer */}
+          {isOrganizer && (
+            <div className="mt-6">
+              <button
+                onClick={goToOrganizerInfo}
+                className="px-4 py-2 bg-amber-300 text-dark-purple rounded hover:bg-yellow-600 transition duration-200"
+              >
+                Go to Organizer Profile
+              </button>
+            </div>
+          )}
 
           <p className="mt-6 text-gray-600 mb-6">View or edit your user login details.</p>
 

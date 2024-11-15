@@ -41,7 +41,7 @@ class BookmarkModelsTest(TestCase):
             max_attendee=fake.random_int(min=10, max=500),
             description=fake.text(max_nb_chars=200)
         )
-        self.bookmark = Bookmarks.objects.create(event = self.event_test, attendee = self.test_user)
+
         
     def get_token_for_user(self, user):
         """Helper method to generate a JWT token for the test user"""

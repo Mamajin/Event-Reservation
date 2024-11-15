@@ -8,6 +8,15 @@ class BookmarkAPI:
     
     @router.get('/my-favorite/', response=List[EventResponseSchema], auth=JWTAuth())
     def show_bookmark(request: HttpRequest):
+        """
+        Retrieves a list of events that are bookmarked by the authenticated user.
+
+        Args:
+            request (HttpRequest): The HTTP request object.
+
+        Returns:
+            List[EventResponseSchema]: A list of event data in the form of EventResponseSchema.
+        """
         user = request.user
         bookmarks = Bookmarks.objects.filter(attendee=user)
         
@@ -19,31 +28,20 @@ class BookmarkAPI:
         return event_data
     
     
-    @router.post('/{event_id}/', auth= JWTAuth())
-    def create_bookmark(request : HttpRequest, event_id : int):
-        event = Event.objects.get(id = event_id)
-
-        if Bookmarks.objects.filter(attendee = request.user, event = event).exists():
-            return Response({'error': 'This event is already in your favorites'}, status = 400)
-        
+    @router.put('/{event_id}/toggle-bookmark', auth=JWTAuth())
+    def toggle_bookmark(request, event_id: int):
+        """
+        Toggle bookmark on an event. If the user has not bookmarked the event before, this will create a new bookmark.
+        If the user has already bookmarked the event, this will toggle the bookmark status.
+        """
         user = request.user
+        event = get_object_or_404(Event, id=event_id)
 
-        Bookmarks.objects.create(event = event, attendee = user)
-
-        return Response({'success': 'This event has been added to your favorites.'}, status = 200)
-    
-    
-    @router.delete('/{event_id}/remove', auth = JWTAuth())
-    def delete_bookmark(request : HttpRequest, event_id : int):
-        event = Event.objects.get(id = event_id)
-        if Bookmarks.objects.filter(attendee = request.user , event = event_id).exists():
-            bookmark = Bookmarks.objects.get(attendee = request.user , event = event)
+        try:
+            bookmark = Bookmarks.objects.get(event=event, attendee=user)
             bookmark.delete()
-            return Response({'success': 'This event has been removed from your favorites'}, status = 200)
-        
-        return Response({'error': 'You are not have permission to delete this'}, status = 404)
+            return Response({"message": "Bookmark removed successfully."}, status=200)
+        except Bookmarks.DoesNotExist:
+            Bookmarks.objects.create(event=event, attendee=user)
+            return Response({"message": "Bookmark added successfully."}, status=200)
     
-    
-
-
-

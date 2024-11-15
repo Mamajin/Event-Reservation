@@ -129,15 +129,17 @@ export function CommentSection({ event }) {
 
   // JSX rendering the component
   return (
-    <div className="bg-white rounded-xl p-6 shadow-sm">
-      <div className="flex items-center gap-2 mb-6">
+    <div className="bg-white rounded-xl shadow-sm flex flex-col h-[600px]">
+      <div className="p-6 border-b">
+        <div className="flex items-center gap-2">
         <FiMessageSquare className="w-5 h-5 text-dark-purple" />
         <h2 className="text-2xl font-semibold text-dark-purple">Comments</h2>
+        </div>
       </div>
-
       {error && <div className="text-red-500 mb-4">{error}</div>}
 
-      <div className="space-y-6 mb-6">
+      <div className="flex-1 overflow-y-auto p-6">
+      <div className="space-y-6">
       {comments.map((comment) => (
   <div key={comment.id} className="border-b pb-4 last:border-0 flex items-start space-x-4">
     <div className="avatar h-10 w-10">
@@ -214,9 +216,10 @@ export function CommentSection({ event }) {
     </div>
   </div>
 ))}
+ </div>
 
-    </div>
-
+ </div>
+    <div className="p-6 border-t">  
       <form onSubmit={handleSubmit(onSubmit)} className="flex gap-2">
         <input
           type="text"
@@ -232,7 +235,8 @@ export function CommentSection({ event }) {
           <LuSend className="w-4 h-4" />
           Send
         </button>
-      </form>
+        </form>
+      </div>
     </div>
   );
 }
