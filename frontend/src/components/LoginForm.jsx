@@ -56,9 +56,9 @@ function LoginForm() {
                 headers: {
                     'Content-Type': 'application/json',
                 }});
-
-            localStorage.setItem(ACCESS_TOKEN, token.data.access);
-            localStorage.setItem(REFRESH_TOKEN, token.data.refresh);
+            localStorage.setItem(PROFILE_PICTURE, res.data.image_url);
+            localStorage.setItem(ACCESS_TOKEN, res.data.access_token);
+            localStorage.setItem(REFRESH_TOKEN, res.data.refresh_token);
             localStorage.setItem(USER_NAME, res.data.username);
             localStorage.setItem(USER_STATUS, res.data.status);
             localStorage.setItem(USER_ID, res.data.id);

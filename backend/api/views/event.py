@@ -1,4 +1,4 @@
-from .schemas import EventInputSchema, ErrorResponseSchema, EventResponseSchema, FileUploadResponseSchema, EventEngagementSchema, CommentResponseSchema, EventUpdateSchema
+from .schemas import EventInputSchema, ErrorResponseSchema, EventResponseSchema, FileUploadResponseSchema, CommentResponseSchema, EventUpdateSchema, UserResponseSchema
 from .modules import *
 from django.contrib.auth.models import AnonymousUser
 from typing import Union
@@ -327,4 +327,30 @@ class EventAPI:
         response_data = [CommentResponseSchema.from_orm(comment) for comment in comments]
         logger.info(f"Retrieved {len(comments)} comments for event {event_id}.")
         return Response(response_data, status=200)
+    
+    @router.get('/{event_id}/attendee-list', response=List[UserResponseSchema], auth=JWTAuth())
+    def get_attendee_list(request: HttpRequest, event_id: int):
+        """
+        Retrieve the list of attendees for a specific event.
+
+        Args:
+            request (HttpRequest): The HTTP request object, containing user and request metadata.
+            event_id (int): The ID of the event for which attendee list is requested.
+
+        Returns:
+            List[UserResponseSchema]: A list of attendee users for the event.
+        """
+        try:
+            organizer = Organizer.objects.get(user=request.user)
+            event = get_object_or_404(Event, id=event_id)
+            if event.organizer != organizer:
+                logger.warning(f"User {request.user.username} tried to access attendee list but is not an organizer.")
+                return Response({'error': 'You are not allowed to access this event.'}, status=403)
+            tickets = Ticket.objects.filter(event=event).order_by('attendee__username')
+            response_data = [UserResponseSchema.from_orm(ticket.attendee) for ticket in tickets]
+            logger.info(f"Retrieved attendee list for event {event_id}.")
+            return Response(response_data, status=200)
+        except Organizer.DoesNotExist:
+            logger.error(f"User {request.user.username} tried to access attendee list but is not an organizer.")
+            return Response({'error': 'User is not an organizer'}, status=403)
                 

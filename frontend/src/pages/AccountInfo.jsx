@@ -5,7 +5,7 @@ import DateInput from '../components/DateInput'; // Import DateTimeInput compone
 import Map from '../components/Map';
 import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
-import { ACCESS_TOKEN, USER_STATUS  } from "../constants";
+import { ACCESS_TOKEN, USER_STATUS, PROFILE_PICTURE } from "../constants";
 
 function AccountInfo() {
   const { register, setValue, handleSubmit, watch } = useForm();
@@ -120,6 +120,7 @@ function AccountInfo() {
         },
       });
       setPreviewImage(`http://127.0.0.1:8000${response.data.file_url}`);
+      localStorage.setItem(PROFILE_PICTURE, response.data.file_url)
     } catch (err) {
       console.error("Error uploading profile picture:", err.message);
       alert("Failed to upload profile picture. Please try again.");

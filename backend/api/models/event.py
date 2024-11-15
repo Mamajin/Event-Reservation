@@ -166,7 +166,7 @@ class Event(models.Model):
         """
         Get the total Event's likes.
         """
-        return self.likes.count()
+        return self.likes.filter(status='like').count()
     
     @property
     def bookmark_count(self):

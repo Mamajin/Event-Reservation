@@ -5,7 +5,7 @@ from api.models.user import AttendeeUser
 
 
 class LikeManager(models.Manager):
-    def has_user_liked(self):
+    def has_user_liked(self, user, event):
         """
         Check if the user has liked the specified event.
         
@@ -16,7 +16,7 @@ class LikeManager(models.Manager):
         Returns:
             bool: True if the user has liked the event, False otherwise.
         """
-        return self.filter(status='like').exists()
+        return self.filter(status='like', user=user, event=event).exists()
 
 
 class Like(models.Model):
