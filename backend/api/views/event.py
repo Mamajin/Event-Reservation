@@ -1,5 +1,9 @@
 from .schemas import EventInputSchema, ErrorResponseSchema, EventResponseSchema, FileUploadResponseSchema, EventEngagementSchema, CommentResponseSchema, EventUpdateSchema
 from .modules import *
+from django.contrib.auth.models import AnonymousUser
+from typing import Union
+
+
 
 router = Router()
 
@@ -106,19 +110,30 @@ class EventAPI:
         Returns:
             List[EventResponseSchema]: List of all events.
         """
+        
         events = Event.objects.filter(event_create_date__lte=timezone.now()).order_by("-event_create_date")
         event_list = []
+        user = request.user
+        if request.headers.get("Authorization"):
+            token = request.headers.get('Authorization')
+            if token != None and token.startswith('Bearer '):
+                token = token[7:]
+                if JWTAuth().authenticate(request,token):
+                    user = JWTAuth().authenticate(request, token)
+
         for event in events:
             engagement = EventResponseSchema.resolve_engagement(event)
-            user_engaged = EventResponseSchema.resolve_user_engagement(event, request.user)
+            user_engaged = EventResponseSchema.resolve_user_engagement(event, user)
             EventResponseSchema.set_status_event(event)
             event_data = EventResponseSchema.from_orm(event)
             event_data.engagement = engagement
-            event_data.user_engaged = user_engaged
+            event_data.user_engaged = user_engaged  
             event_list.append(event_data)
-        logger.info(f"Retrieved all public events for the homepage.")
-        return Response(event_list, status=200)
 
+        # Conditionally add user-specific engagement data
+
+        logger.info("Retrieved all public events for the homepage.")
+        return Response(event_list, status=200)
     @router.patch('/{event_id}/edit', response={200: EventUpdateSchema, 401: ErrorResponseSchema, 404: ErrorResponseSchema}, auth=JWTAuth())
     def edit_event(request: HttpRequest, event_id: int, data: EventUpdateSchema):
         """

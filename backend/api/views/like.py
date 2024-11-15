@@ -21,8 +21,10 @@ class LikeAPI:
             like = Like.objects.get(event=event, user=user)
             like.status = 'unlike' if like.status == 'like' else 'like'
             like.save()
+            like.refresh_from_db()
         except Like.DoesNotExist:
             like = Like.objects.create(event=event, user=user, status='like')
+            like.refresh_from_db()
 
         return Response({"message": "Like toggled successfully."}, status=200)
             
