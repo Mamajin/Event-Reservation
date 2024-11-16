@@ -8,7 +8,6 @@ const LikeButton = ({ eventId }) => {
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState(null);
 
-  // Fetch the initial like state from the server on mount
   useEffect(() => {
     const fetchInitialLikeState = async () => {
       try {
@@ -18,9 +17,6 @@ const LikeButton = ({ eventId }) => {
 
         const isLiked = response.data?.is_liked ?? false;
         setLiked(isLiked);
-
-        // Persist the initial like state to localStorage
-        localStorage.setItem(`liked-${eventId}`, JSON.stringify(isLiked));
       } catch (error) {
         console.error("Failed to fetch like state:", error);
       }
@@ -34,19 +30,13 @@ const LikeButton = ({ eventId }) => {
     setErrorMessage(null);
 
     try {
-      // Update UI
       const newLikedState = !liked;
       setLiked(newLikedState);
 
-      // Persist the new state locally
-      localStorage.setItem(`liked-${eventId}`, JSON.stringify(newLikedState));
-
-      // Send toggle request to the server
       await api.put(`/likes/${eventId}/toggle-like`, {}, {
         headers: { Authorization: `Bearer ${localStorage.getItem(ACCESS_TOKEN)}` },
       });
     } catch (error) {
-      // Revert UI state on error
       setLiked(!liked);
 
       setErrorMessage(

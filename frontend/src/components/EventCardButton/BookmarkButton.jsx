@@ -8,7 +8,6 @@ const BookmarkButton = ({ eventId }) => {
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState(null);
 
-  // Fetch the initial bookmark state from the server on mount
   useEffect(() => {
     const fetchInitialBookmarkState = async () => {
       try {
@@ -18,9 +17,6 @@ const BookmarkButton = ({ eventId }) => {
 
         const isBookmarked = response.data?.is_bookmarked ?? false;
         setBookmarked(isBookmarked);
-
-        // Persist the initial bookmark state to localStorage
-        localStorage.setItem(`bookmarked-${eventId}`, JSON.stringify(isBookmarked));
       } catch (error) {
         console.error("Failed to fetch bookmark state:", error);
       }
@@ -34,19 +30,13 @@ const BookmarkButton = ({ eventId }) => {
     setErrorMessage(null);
 
     try {
-      // Optimistically update UI
       const newBookmarkState = !bookmarked;
       setBookmarked(newBookmarkState);
 
-      // Persist the new state locally
-      localStorage.setItem(`bookmarked-${eventId}`, JSON.stringify(newBookmarkState));
-
-      // Send toggle request to the server
       await api.put(`/bookmarks/${eventId}/toggle-bookmark`, {}, {
         headers: { Authorization: `Bearer ${localStorage.getItem(ACCESS_TOKEN)}` },
       });
     } catch (error) {
-      // Revert UI state on error
       setBookmarked(!bookmarked);
 
       setErrorMessage(
