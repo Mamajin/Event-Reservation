@@ -183,10 +183,17 @@ class EventAPI:
         Returns:
             EventResponseSchema: Details of the specified event.
         """
+        user = request.user
+        if request.headers.get("Authorization"):
+            token = request.headers.get('Authorization')
+            if token != None and token.startswith('Bearer '):
+                token = token[7:]
+                if JWTAuth().authenticate(request,token):
+                    user = JWTAuth().authenticate(request, token)
         logger.info(f"Fetching details for event ID: {event_id} by user {request.user.username}.")
         event = get_object_or_404(Event, id=event_id)
         engagement_data = EventResponseSchema.resolve_engagement(event)
-        user_engaged = EventResponseSchema.resolve_user_engagement(event, request.user)
+        user_engaged = EventResponseSchema.resolve_user_engagement(event, user)
         EventResponseSchema.set_status_event(event)
         
         event_data = EventResponseSchema.from_orm(event)

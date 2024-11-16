@@ -101,7 +101,8 @@ class UserAPI:
         refresh_token = RefreshToken.for_user(user)
         login(request,user)
         return Response(
-            {'status': user.status,
+            {   'id': user.id,
+                'status': user.status,
                 'refresh_token': str(refresh_token),
                 'access_token': str(access_token),
                 'first_name': str(first_name),
