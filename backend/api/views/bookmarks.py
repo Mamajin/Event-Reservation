@@ -22,9 +22,17 @@ class BookmarkAPI:
         
         events = [bookmark.event for bookmark in bookmarks]
 
+        # Add engagement and user_engaged properties
+        event_data = []
+        for event in events:
+            engagement = EventResponseSchema.resolve_engagement(event)
+            user_engaged = EventResponseSchema.resolve_user_engagement(event, request.user)
+            EventResponseSchema.set_status_event(event)
+            event_schema = EventResponseSchema.from_orm(event)
+            event_schema.engagement = engagement
+            event_schema.user_engaged = user_engaged
+            event_data.append(event_schema.dict())
 
-        event_data = [EventResponseSchema.from_orm(event).dict() for event in events]
-        
         return event_data
     
     
