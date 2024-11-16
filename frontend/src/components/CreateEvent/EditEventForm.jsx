@@ -74,8 +74,8 @@ export function EditEventForm() {
       Object.entries(data).forEach(([key, value]) => {
         formData.append(key, value);
       });
-
-      if (formValues.event_image) {
+      console.log(formValues.event_image);
+      if (formValues.event_image !== undefined && formValues.event_image !== null && formValues.event_image instanceof File) {
         const imageFormData = new FormData();
         imageFormData.append('file', formValues.event_image);
   
