@@ -11,6 +11,14 @@ function EventCard({ event, onEdit, isEditable }) {
     navigate(`/events/${event.id}`);
   };
 
+  const handleDelete = async (eventId) => {
+    try {
+      await api.delete(`/organizers/delete-event/${eventId}`);
+      window.location.reload();
+    } catch (error) {
+      console.error('Error deleting event:', error);
+    }
+  };
   return (
     <div className="flex bg-white shadow-lg p-4 mb-4 rounded-lg">
       <img
@@ -54,6 +62,12 @@ function EventCard({ event, onEdit, isEditable }) {
           >
             Edit Event
           </button>
+              <button
+              onClick={() => handleDelete(event.id)}
+              className="btn bg-red-500 text-white mt-4 ml-2"
+            >
+              Delete Event
+            </button>
             </div>
         )}
       </div>
