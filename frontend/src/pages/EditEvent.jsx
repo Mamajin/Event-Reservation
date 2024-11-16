@@ -1,12 +1,11 @@
 import React from 'react';
 import { EditEventForm } from '../components/CreateEvent/EditEventForm';
-
+import PageLayout from '../components/PageLayout';
 function EditEventPage() {
   return (
-    <div className="container mx-auto py-10">
-      <h1 className="text-4xl font-bold mb-6">Edit Event</h1>
+    <PageLayout>
       <EditEventForm />
-    </div>
+    </PageLayout>
   );
 }
 

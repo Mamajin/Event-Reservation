@@ -14,7 +14,7 @@ import api from '../../api';
 import { useNavigate, useParams } from 'react-router-dom';
 
 export function EditEventForm() {
-  const { eventId } = useParams(); // Get eventId from URL
+  const { eventId } = useParams();
   const [activeTab, setActiveTab] = useState('basic');
   const [loading, setLoading] = useState(false);
   const [isFetching, setIsFetching] = useState(true);
@@ -30,7 +30,6 @@ export function EditEventForm() {
     },
   });
 
-  // Load event data and set default form values
   useEffect(() => {
     const fetchEventData = async () => {
       try {
@@ -63,8 +62,6 @@ export function EditEventForm() {
     setLoading(true);
     try {
       const formData = new FormData();
-
-      // Include fields to update based on form input
       const data = {
         ...formValues,
         start_date_register: formatDateTime(formValues.start_date_register),
@@ -84,15 +81,14 @@ export function EditEventForm() {
 
       const token = localStorage.getItem(ACCESS_TOKEN);
       const headers = {
-        'Content-Type': 'multipart/form-data',
+        'Content-Type': "application/json",
         'Authorization': `Bearer ${token}`,
       };
 
-      // Use PATCH method to update the event
       const response = await api.patch(`/events/${eventId}/edit`, formData, { headers });
       console.log(response);
       alert("Event updated successfully!");
-      navigate(`/events/${eventId}`); // Redirect to event detail page
+      navigate(`/events/${eventId}`);
     } catch (error) {
       console.error("Error updating event:", error);
       let errorMessage = "Failed to update event. Please try again.";
