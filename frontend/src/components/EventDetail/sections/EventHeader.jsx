@@ -1,11 +1,50 @@
 import { FaCalendarAlt, FaClock, FaMapMarkerAlt, FaUsers, FaTicketAlt, FaArrowLeft } from 'react-icons/fa';
-import { format } from 'date-fns';
+import { LuBookmark, LuShare2, LuHeart } from "react-icons/lu";
+import { ACCESS_TOKEN } from '../../../constants';
+import api from '../../../api';
+import { useState, useEffect } from 'react';
+import { format, set } from 'date-fns';
 
 
 export function EventHeader({ event }) {
   const isRegistrationOpen = new Date(event.end_date_register) > new Date();
   const isFreeEvent = event.is_free || event.ticket_price === 0;
+  const [isBookmarked, setIsBookmarked] = useState(false);
+  const [isLiked, setIsLiked] = useState(false);
+  useEffect(() => {
+    if (event?.user_engaged) {
+      setIsLiked(event.user_engaged.is_liked);
+      setIsBookmarked(event.user_engaged.is_bookmarked);
+    }
+  }, [event]);
 
+  const handleLike = async (eventId) => {
+    try {
+      const token = localStorage.getItem(ACCESS_TOKEN);
+      const headers = {
+        Authorization: `Bearer ${token}`,
+      };
+      await api.put(`/likes/${eventId}/toggle-like`, {}, { headers });
+      setIsLiked(!isLiked);
+    } catch (error) {
+      console.error('Error liking event:', error);
+      alert('Failed to like the event. Please try again.');
+    }
+  };
+  
+  const handleBookmark = async (eventId) => {
+    try {
+      const token = localStorage.getItem(ACCESS_TOKEN);
+      const headers = {
+        Authorization: `Bearer ${token}`,
+      };
+      const response = await api.put(`/bookmarks/${eventId}/toggle-bookmark`, {}, { headers });
+      setIsBookmarked(!isBookmarked); 
+      console.log('Bookmarked:', response.data.message);
+    } catch (error) {
+      console.error('Error bookmarking event:', error);
+    }
+  };  
 
   const handleBackClick = () => {
     navigate(-1);
@@ -36,6 +75,38 @@ export function EventHeader({ event }) {
         }}
       >
         <div className="absolute inset-0 bg-black/50" />
+        <div className="absolute top-4 right-4 flex items-center gap-2 z-10">
+        <button
+          onClick={() => handleLike(event.id)}
+          className="button p-2 bg-white/10 backdrop-blur-md rounded-full hover:bg-white/20 transition-colors"
+          title={isLiked ? 'Remove like' : 'Like event'}
+        >
+          <LuHeart
+            className={`w-5 h-5 ${isLiked ? 'fill-white text-white' : 'text-white'}`}
+          />
+        </button>
+
+        <button
+          onClick={() => handleBookmark(event.id)}
+          className="button p-2 bg-white/10 backdrop-blur-md rounded-full hover:bg-white/20 transition-colors"
+          title={isBookmarked ? 'Remove bookmark' : 'Bookmark event'}
+        >
+          <LuBookmark
+            className={`w-5 h-5 ${isBookmarked ? 'fill-white text-white' : 'text-white'}`}
+          />
+        </button>
+
+        
+        <div className="relative">
+          <button
+            onClick={() => setShowShareMenu(!showShareMenu)}
+            className="p-2 bg-white/10 backdrop-blur-md rounded-full hover:bg-white/20 transition-colors"
+            title="Share event"
+          >
+            <LuShare2 share2 className="w-5 h-5 text-white" />
+          </button>
+        </div>
+      </div>
       </div>
       <div className="absolute inset-0 flex items-end">
         <div className="container pb-8">
