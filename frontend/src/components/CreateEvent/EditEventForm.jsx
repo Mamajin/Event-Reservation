@@ -70,14 +70,22 @@ export function EditEventForm() {
         end_date_event: formatDateTime(formValues.end_date_event),
         updated_at: formatDateTime(new Date())
       };
-
+      delete data.event_image;
       Object.entries(data).forEach(([key, value]) => {
         formData.append(key, value);
       });
 
       if (formValues.event_image) {
-        const imageResponse = await api.post(`/events/${eventId}/upload/event-image/`, formValues.event_image);
-        console.log('Image uploaded:', imageResponse);
+        const imageFormData = new FormData();
+        imageFormData.append('file', formValues.event_image);
+  
+        const imageResponse = await api.post(
+          `/events/${eventId}/upload/event-image/`,
+          imageFormData,
+          { headers: { 'Content-Type': 'multipart/form-data' } }
+        );
+  
+        console.log('Image uploaded:', imageResponse.data);
       }
 
       const token = localStorage.getItem(ACCESS_TOKEN);
