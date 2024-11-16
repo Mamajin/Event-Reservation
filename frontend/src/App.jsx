@@ -28,6 +28,7 @@ import MyEvents from './pages/MyEvents';
 import OrganizerInfo from './pages/OrganizerInfo';
 import Bookmark from './pages/BookMark';
 import Logout from './pages/Logout';
+import EditEventPage from './pages/EditEvent';
 
 function App() {
 
@@ -68,6 +69,7 @@ function App() {
           <Route path="/create-event" element={<ProtectedRoute><CreateEvent /></ProtectedRoute>} />
           <Route path="/my-events" element={<ProtectedRoute><MyEvents /></ProtectedRoute>} />
           <Route path="/bookmarks" element={<ProtectedRoute><Bookmark /></ProtectedRoute>} />
+          <Route path="/events/:eventId/edit" element={<ProtectedRoute><EditEventPage /></ProtectedRoute>} />
 
           {/* Fallback Route */}
           <Route path="*" element={<NotFound />} />

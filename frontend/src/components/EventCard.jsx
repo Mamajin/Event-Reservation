@@ -3,8 +3,9 @@ import { useNavigate } from 'react-router-dom';
 import { FaShareAlt } from 'react-icons/fa';
 import LikeButton from './EventCardButton/LikeButton';
 import BookmarkButton from './EventCardButton/BookMarkButton';
+import api from '../api';
 
-function EventCard({ event }) {
+function EventCard({ event, onEdit, isEditable }) {
   const navigate = useNavigate();
   const maxDescriptionLength = 110;
 
@@ -16,6 +17,14 @@ function EventCard({ event }) {
   const { engagement = {} } = event;
   const hasUserLiked = engagement.has_user_liked ?? false;
 
+  const handleDelete = async (eventId) => {
+    try {
+      await api.delete(`/organizers/delete-event/${eventId}`);
+      window.location.reload();
+    } catch (error) {
+      console.error('Error deleting event:', error);
+    }
+  };
   return (
     <div className="flex bg-white shadow-lg p-4 mb-4 rounded-lg">
       <img
@@ -53,6 +62,23 @@ function EventCard({ event }) {
 
           <FaShareAlt className="text-gray-500 cursor-pointer hover:text-green-500 active:text-green-600" />
         </div>
+
+        {isEditable && (
+          <div>
+          <button
+            onClick={() => onEdit(event.id)}
+            className="btn bg-amber-300 text-dark-purple mt-4"
+          >
+            Edit Event
+          </button>
+              <button
+              onClick={() => handleDelete(event.id)}
+              className="btn bg-red-500 text-white mt-4 ml-2"
+            >
+              Delete Event
+            </button>
+            </div>
+        )}
       </div>
     </div>
   );
