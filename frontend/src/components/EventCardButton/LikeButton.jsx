@@ -3,71 +3,63 @@ import { FaHeart, FaRegHeart } from 'react-icons/fa';
 import api from '../../api';
 import { ACCESS_TOKEN } from '../../constants';
 
-const LikeButton = ({ eventId, isInitiallyLiked }) => {
-  const [liked, setLiked] = useState(null);
+const LikeButton = ({ eventId }) => {
+  const [liked, setLiked] = useState(false);
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState(null);
 
-  // Sync the like state when the component mounts or when the 'isInitiallyLiked' prop changes
+  // Fetch the initial like state from the server on mount
   useEffect(() => {
-    // Check localStorage to see if this event has been liked
-    const storedLiked = localStorage.getItem(`liked-${eventId}`);
-    
-    // If we have a stored value, use it, otherwise use the initial prop
-    if (storedLiked !== null) {
-      setLiked(JSON.parse(storedLiked)); // Use stored value from localStorage
-    } else {
-      setLiked(isInitiallyLiked); // Use prop if no stored value
-    }
-  }, [eventId, isInitiallyLiked]);
+    const fetchInitialLikeState = async () => {
+      try {
+        const response = await api.get(`/events/${eventId}/user-engagement`, {
+          headers: { Authorization: `Bearer ${localStorage.getItem(ACCESS_TOKEN)}` },
+        });
 
-  const handleLike = async () => {
-    if (loading) return; // Prevent clicking while loading
+        const isLiked = response.data?.is_liked ?? false;
+        setLiked(isLiked);
 
+        // Persist the initial like state to localStorage
+        localStorage.setItem(`liked-${eventId}`, JSON.stringify(isLiked));
+      } catch (error) {
+        console.error("Failed to fetch like state:", error);
+      }
+    };
+
+    fetchInitialLikeState();
+  }, [eventId]);
+
+  const handleToggleLike = async () => {
     setLoading(true);
-    setErrorMessage(null); // Clear any previous error messages
-    const token = localStorage.getItem(ACCESS_TOKEN); // Get token for authentication
+    setErrorMessage(null);
 
     try {
-      let response;
-      if (liked) {
-        // Send the unlike request if currently liked
-        response = await api.delete(`/likes/unlike/${eventId}`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-      } else {
-        // Send the like request if currently unliked
-        response = await api.post(`/likes/like/${eventId}`, {}, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-      }
+      // Update UI
+      const newLikedState = !liked;
+      setLiked(newLikedState);
 
-      if (response.status === 200) {
-        const newLikedState = !liked;
-        setLiked(newLikedState); // Toggle the liked state after a successful request
+      // Persist the new state locally
+      localStorage.setItem(`liked-${eventId}`, JSON.stringify(newLikedState));
 
-        // Store the new state in localStorage to persist it after page refresh
-        localStorage.setItem(`liked-${eventId}`, JSON.stringify(newLikedState));
-      }
+      // Send toggle request to the server
+      await api.put(`/likes/${eventId}/toggle-like`, {}, {
+        headers: { Authorization: `Bearer ${localStorage.getItem(ACCESS_TOKEN)}` },
+      });
     } catch (error) {
-      // Handle errors, show error message if any
-      if (error.response && error.response.data && error.response.data.error) {
-        setErrorMessage(error.response.data.error);
-      } else {
-        console.error("Error toggling like:", error);
-      }
+      // Revert UI state on error
+      setLiked(!liked);
+
+      setErrorMessage(
+        error.response?.data?.message || "An error occurred. Please try again."
+      );
+      console.error("Error toggling like:", error);
     } finally {
-      setLoading(false); // Reset loading state
+      setLoading(false);
     }
   };
 
-  if (liked === null) {
-    // If we haven't received the state yet, return a loading state or a placeholder
-    return <div className="animate-pulse">...</div>;
-  }
-
   return (
-    <div onClick={handleLike} className="cursor-pointer">
+    <div onClick={handleToggleLike} className="cursor-pointer">
       {liked ? (
         <FaHeart
           className={`text-red-500 ${loading ? 'opacity-50 pointer-events-none' : ''}`}
@@ -78,7 +70,7 @@ const LikeButton = ({ eventId, isInitiallyLiked }) => {
         />
       )}
       {errorMessage && (
-        <p className="text-red-500 text-xs mt-1">{errorMessage}</p> // Display error message if any
+        <p className="text-red-500 text-xs mt-1">{errorMessage}</p>
       )}
     </div>
   );
