@@ -2,7 +2,25 @@ from django.db import models
 from django.utils import timezone
 from django.core.files.storage import default_storage
 from django.core.validators import MinValueValidator, MaxValueValidator, FileExtensionValidator
+from django.core.exceptions import ValidationError
 from api.models.organizer import Organizer
+import re
+
+
+# class EventManager(models.Manager):
+#     def public(self):
+#         return self.filter(visibility='PUBLIC')
+
+#     def private(self):
+#         return self.filter(visibility='PRIVATE')
+    
+#     def filter_by_category(self, category):
+#         return self.filter(category=category)
+    
+#     def within_date_range(self, start_date, end_date):
+#         return self.filter(start_date_event__gte=start_date, end_date_event__lte=end_date)
+
+
 class Event(models.Model):
     """
     Represents an event with enhanced fields for better event management.
@@ -34,14 +52,20 @@ class Event(models.Model):
         ('WHITE_TIE', 'White Tie'),
         ('THEMED', 'Themed Dress Code'),
         ('OUTDOOR_BEACH_CASUAL', 'Outdoor/Beach Casual'),
-        ]
+    ]
     STATUS_OF_REGISTRATION = [
         ('OPEN', 'Open'),
         ('CLOSED', 'Closed'),
         ('FULL', 'Full'),
+    ]
+    EVENT_VISIBILITY = [
+        ('PUBLIC', 'Public'),
+        ('PRIVATE', 'Private')
+    ]
+    VERIFICATION_STATUS_CHOICES = [
         ('PENDING', 'Pending'),
-        ('CANCELLED', 'Cancelled'),
-        ('WAITLIST', 'Waitlist'),
+        ('VERIFIED', 'Verified'),
+        ('REJECTED', 'Rejected'),
     ]
     # Existing fields
     event_name = models.CharField(max_length=100)
@@ -73,17 +97,30 @@ class Event(models.Model):
     
     # Online events
     is_online = models.BooleanField(default=False)
+    meeting_link = models.TextField(max_length=500, null=True, blank=True)
 
     # Categorization
     category = models.CharField(max_length=50, choices=EVENT_CATEGORIES, default='OTHER')
     tags = models.CharField(max_length=200, blank=True, help_text="Comma-separated tags")
+    
+    # Privacy settings
+    visibility = models.CharField(
+        max_length=20,
+        choices=EVENT_VISIBILITY,
+        default='PUBLIC',
+        help_text='Choose whether the event is public or private'
+    )
+    allowed_email_domains = models.TextField(
+        null=True,
+        blank=True,
+        help_text="Comma-separated list of allowed email domains (e.g., 'ku.th, example.com')"
+    )
 
     # Additional details
     detailed_description = models.TextField(blank=True, help_text="Full event details including schedule")
     status = models.CharField(max_length=20, default='')
     dress_code = models.CharField(max_length=20, choices = DRESS_CODES, null = False, blank = False, default= "CASUAL")
-    status_registeration = models.CharField(max_length=20, choices= STATUS_OF_REGISTRATION, null = False, blank= False)
-
+    status_registeration = models.CharField(max_length=20, choices= STATUS_OF_REGISTRATION, null = False, blank= False, default= "OPEN")
     # Contact information
     contact_email = models.EmailField(blank=True)
     contact_phone = models.CharField(max_length=20, blank=True)
@@ -102,27 +139,42 @@ class Event(models.Model):
     # Timestamps
     updated_at = models.DateTimeField(auto_now=True)
     
+    is_verified = models.BooleanField(default=False)
+    verification_status = models.CharField(
+        max_length=20,
+        choices=VERIFICATION_STATUS_CHOICES,
+        default='PENDING'
+    )
+    
     terms_and_conditions = models.TextField(null=True, blank=True)
+    
+    # objects = EventManager()
 
     # Existing methods remain the same
+    
+
+        
     @property
     def current_number_attendee(self):
+        """
+        Get the total Event's ticket number.
+        """
         return self.ticket_set.count()
     
-    def get_event_status(self) -> str:
+    @property
+    def like_count(self):
         """
-        Get current event Status
-
-        Returns:
-            str: String of the current status of the event
+        Get the total Event's likes.
         """
-        now = timezone.now()
-        if now < self.start_date_event:
-            return "Upcoming"
-        elif self.start_date_event <= now <= self.end_date_event:
-            return "Ongoing"
-        else:
-            return "Finished"
+        return self.likes.filter(status='like').count()
+    
+    @property
+    def bookmark_count(self):
+        """
+        Get the total Event's bookmarks.
+        """
+        return self.bookmarks_set.count() 
+    
 
     def available_spot(self) -> int:
         """
@@ -132,6 +184,7 @@ class Event(models.Model):
             int: Number of slots available for the event
         """
         return self.max_attendee - self.current_number_attendee
+    
     
     
     def is_max_attendee(self) -> bool:
@@ -145,15 +198,6 @@ class Event(models.Model):
             return True
         return False
     
-    def is_event_published(self) -> bool:
-        """
-        Check if event is published
-
-        Return:
-            bool: True if event is published  if not return False
-        """
-        now = timezone.now()
-        return self.event_create_date <= now
     
     def is_valid_date(self) -> bool:
         return self.start_date_register <= self.end_date_register <= self.start_date_event <= self.end_date_event
@@ -167,7 +211,73 @@ class Event(models.Model):
         """
         now = timezone.now()
         return self.start_date_register <= now < self.end_date_register
+    
+    def is_registration_status_allowed(self) -> bool:
+        """Check if the registration status is allowed to register."""
+        return self.status_registeration not in ('CLOSED', 'FULL')
+    
+    def set_status_event(self):
+        """
+        Set the status of the event based on the current date and time.
+
+        The status can be 'UPCOMING', 'ONGOING', or 'ENDED' depending on
+        whether the current time is before the event start, during the event,
+        or after the event has ended.
+        """
+        now = timezone.now()  
+        
+        if now < self.start_date_event:
+            self.status = 'UPCOMING'  
+        elif now < self.end_date_event:
+            self.status = 'ONGOING'  
+        else:
+            self.status = 'ENDED'
+            
+    def set_registeration_status(self):
+        now = timezone.now()
+        if now > self.end_date_register:
+            self.status_registeration = "CLOSED"
+        elif self.current_number_attendee >= self.max_attendee:
+            self.status_registeration = "FULL"
+        self.save()
+            
+ 
+    def is_email_allowed(self, email: str) -> bool:
+        """
+        Check if an email address is allowed to register for this event
+        based on the domain restrictions.
+
+        Args:
+            email (str): Email address to check
+
+        Returns:
+            bool: True if email is allowed, False otherwise
+        """
+        if self.visibility == 'PUBLIC' or not self.allowed_email_domains:
+            return True
+        try:
+            domain = email.split('@')[1].lower()
+        except IndexError:
+            return False
+        allowed_domains = [
+            d.strip().lower()
+            for d in self.allowed_email_domains.split(',')
+            if d.strip()
+        ]
+
+        return domain in allowed_domains
+
+    def clean(self):
+        super().clean()
+        if self.visibility == 'PRIVATE' and self.allowed_email_domains:
+            domains = [d.strip() for d in self.allowed_email_domains.split(',')]
+            invalid_domains = [d for d in domains if not re.match(r'^[a-zA-Z0-9-]+(\.[a-zA-Z0-9-]+)*$', d)]
+            if invalid_domains:
+                raise ValidationError({
+                    'allowed_email_domains': f"Invalid domain(s): {', '.join(invalid_domains)}"
+                })
+        if self.start_date_event >= self.end_date_event:
+            raise ValidationError("End date must be after start date.")
 
     def __str__(self) -> str:
         return f"Event: {self.event_name}"
-

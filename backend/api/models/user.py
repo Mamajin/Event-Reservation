@@ -4,6 +4,7 @@ from django.utils import timezone
 from django.core.validators import FileExtensionValidator
 from django.utils.translation import gettext_lazy as _
 from django.core.files.storage import default_storage
+from api.utils import EmailVerification
 
 
 class AttendeeUser(AbstractUser):
@@ -16,7 +17,7 @@ class AttendeeUser(AbstractUser):
     username = models.CharField(max_length=150, unique=True, null=True, blank=True)  # Optional field
     first_name = models.CharField(max_length=100, null=False, blank=False)
     last_name = models.CharField(max_length=100, null=False, blank=False)
-    birth_date = models.DateField('Birth Date', null=True, blank=False)
+    birth_date = models.DateField('Birth Date', null=True, blank=True)
     phone_number = models.CharField(max_length=50, null=True, blank=False, ) # Max number
     status = models.CharField(max_length=50, null=True, blank=True, default='Attendee')
     email = models.EmailField(unique=True, null=False, blank=False) 
@@ -47,6 +48,9 @@ class AttendeeUser(AbstractUser):
         default='',
     )
     
+    is_email_verified = models.BooleanField(default=False)
+    email_verification_token_sent_at = models.DateTimeField(null=True, blank=True)
+    
     attended_events_count = models.PositiveIntegerField(default=0)
     cancelled_events_count = models.PositiveIntegerField(default=0)
 
@@ -70,11 +74,13 @@ class AttendeeUser(AbstractUser):
 
     @property
     def age(self):
-        today = timezone.now().date()
-        age = today.year - self.birth_date.year
-        if (today.month, today.day) < (self.birth_date.month, self.birth_date.day):
-            age -= 1
-        return age
+        if self.birth_date:
+            today = timezone.now().date()
+            age = today.year - self.birth_date.year
+            if (today.month, today.day) < (self.birth_date.month, self.birth_date.day):
+                age -= 1
+            return age
+        return None
 
     @property
     def full_name(self):
@@ -111,6 +117,15 @@ class AttendeeUser(AbstractUser):
             event__end_date_event__lt=timezone.now()
         ).count()
         self.save()
+        
+    def send_verification_email(self):
+        """Generate and send verification email with a secure token."""
+        token = EmailVerification.generate_verification_token(self)
+
+        self.email_verification_token_sent_at = timezone.now()
+        self.save()
+        
+        EmailVerification.send_verification_email(self, token)
 
     def __str__(self):
         return f"{self.full_name} ({self.email})"

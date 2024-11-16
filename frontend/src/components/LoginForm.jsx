@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import api from "../api";
 import { GoogleLogin } from '@react-oauth/google';
-import { ACCESS_TOKEN, REFRESH_TOKEN,USER_NAME,USER_STATUS, PROFILE_PICTURE } from "../constants";
+import { ACCESS_TOKEN, REFRESH_TOKEN,USER_NAME,USER_STATUS, PROFILE_PICTURE, USER_ID} from "../constants";
 import "../style/index.css";
 import qs from "qs";
 
@@ -24,6 +24,9 @@ function LoginForm() {
             localStorage.setItem(PROFILE_PICTURE, authResponse.data.picture);
             localStorage.setItem(ACCESS_TOKEN, authResponse.data.access_token);
             localStorage.setItem(REFRESH_TOKEN, authResponse.data.refresh_token);
+            localStorage.setItem(USER_STATUS, authResponse.data.status);
+            localStorage.setItem(USER_NAME, authResponse.data.username);
+            localStorage.setItem(USER_ID, authResponse.data.id);
             console.log(authResponse.data.picture)
             // Navigate to the dashboard or home after successful login
             navigate("/");
@@ -53,11 +56,12 @@ function LoginForm() {
                 headers: {
                     'Content-Type': 'application/json',
                 }});
-
-            localStorage.setItem(ACCESS_TOKEN, token.data.access);
-            localStorage.setItem(REFRESH_TOKEN, token.data.refresh);
+            localStorage.setItem(PROFILE_PICTURE, res.data.image_url);
+            localStorage.setItem(ACCESS_TOKEN, res.data.access_token);
+            localStorage.setItem(REFRESH_TOKEN, res.data.refresh_token);
             localStorage.setItem(USER_NAME, res.data.username);
             localStorage.setItem(USER_STATUS, res.data.status);
+            localStorage.setItem(USER_ID, res.data.id);
             console.log("Ninja access token",token.data.access)
             console.log("Our api access token",res.data.access_token)
             console.log("Ninja refresh token",token.data.refresh)

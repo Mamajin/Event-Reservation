@@ -1,4 +1,4 @@
-from .schemas import OrganizerResponseSchema, ErrorResponseSchema, OrganizerSchema, FileUploadResponseSchema
+from .schemas import OrganizerResponseSchema, ErrorResponseSchema, OrganizerSchema, FileUploadResponseSchema, OrganizerUpdateSchema
 from .modules import *
 
 router = Router()
@@ -65,17 +65,25 @@ class OrganizerAPI:
             logger.error(f"Organizer {organizer.organizer_name} attempted to delete non-existing event {event_id}.")
             return Response({'error': 'Event does not exist or you do not have permission to delete it'}, status=404)
 
-    @router.put('/update-organizer', response={200: OrganizerResponseSchema, 401: ErrorResponseSchema, 404: ErrorResponseSchema}, auth=JWTAuth())
-    def update_organizer(request: HttpRequest, data: OrganizerSchema):
+    @router.patch('/update-organizer', response={200: OrganizerUpdateSchema, 401: ErrorResponseSchema, 404: ErrorResponseSchema}, auth=JWTAuth())
+    def update_organizer(request: HttpRequest, data: OrganizerUpdateSchema):
         """Update the profile information of the authenticated organizer."""
 
-        Organizer.objects.filter(user=request.user).update(**data.dict())
         organizer = Organizer.objects.get(user=request.user)
-        organize_data = OrganizerResponseSchema.from_orm(organizer).dict()
-        
-        if organizer.organizer_name_is_taken(data.organizer_name):
+
+        # Check if organizer_name is being updated and if the new name is already taken
+        if data.organizer_name != organizer.organizer_name and organizer.organizer_name_is_taken(data.organizer_name):
             logger.info(f"Organizer name '{data.organizer_name}' is already taken.")
             return Response({'error': 'Organizer name is already taken'}, status=400)
+        
+        
+        update_fields = data.dict(exclude_unset = True)
+        for field, value in update_fields.items():
+            setattr(organizer, field, value)
+            
+        organizer.save()
+    
+        organize_data = OrganizerUpdateSchema.from_orm(organizer).dict()
 
         logger.info(f"User {request.user.id} updated their organizer profile.")
         
@@ -102,12 +110,12 @@ class OrganizerAPI:
         return Response(OrganizerResponseSchema(**organizer_dict), status=200)
         
     @router.post('/{organizer_id}/upload/logo/', response={200: FileUploadResponseSchema, 400: ErrorResponseSchema}, auth=JWTAuth())
-    def upload_profile_picture(request: HttpRequest, organzier_id: int, logo: UploadedFile = File(...)):
+    def upload_profile_picture(request: HttpRequest, organizer_id: int, logo: UploadedFile = File(...)):
         """
         Upload a logo for a organzier's profile.
         """
         try:
-            organizer = get_object_or_404(Organizer, id=organzier_id)
+            organizer = get_object_or_404(Organizer, id=organizer_id)
             
             if logo.content_type not in ALLOWED_IMAGE_TYPES:
                 return Response({'error': 'Invalid file type. Only JPEG and PNG are allowed.'}, status=400)

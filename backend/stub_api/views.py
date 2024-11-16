@@ -2,7 +2,7 @@ from ninja import Router, NinjaAPI, ModelSchema
 from faker import Faker
 import datetime
 from typing import List
-from api.models import *
+from api.models import Organizer, Event
 from django.utils import timezone
 from django.contrib.auth.models import User
 import datetime

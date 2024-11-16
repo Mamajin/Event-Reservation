@@ -7,16 +7,13 @@ function Navbar() {
   const navigate = useNavigate();
 
   const handleLogout = () => {
-    localStorage.clear();
-    navigate('/login');
+    navigate('/logout');
   };
 
   const isLoggedIn = localStorage.getItem(ACCESS_TOKEN) !== null;
   const isOrganizer = localStorage.getItem(USER_STATUS) === "Organizer";
   const username = localStorage.getItem(USER_NAME);
   const profilePicture = localStorage.getItem(PROFILE_PICTURE);
-
-  console.log("Profile Picture URL:", profilePicture); // Debugging line
 
   return (
     <nav className="navbar bg-dark-purple fixed top-0 left-0 right-0 z-50">

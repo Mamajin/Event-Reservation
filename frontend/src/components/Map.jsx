@@ -1,10 +1,10 @@
 import React, { useEffect } from 'react';
 import { Loader } from '@googlemaps/js-api-loader';
-import { FiMapPin } from "react-icons/fi";
+
 
 const GOOGLE_MAPS_API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
 
-function Map({ formData, setFormData, setError }) {
+function Map({ form, setError }) {
   useEffect(() => {
     const loader = new Loader({
       apiKey: GOOGLE_MAPS_API_KEY,
@@ -30,14 +30,12 @@ function Map({ formData, setFormData, setError }) {
           }
         ]
       });
-
+      mapInstance.setZoom(15);
       const input = document.getElementById('address-input');
       const autocompleteInstance = new google.maps.places.Autocomplete(input);
-
       const markerInstance = new google.maps.Marker({
         map: mapInstance,
         position: mapInstance.getCenter(),
-        title: "Event Location",
         draggable: true,
         icon: {
           path: google.maps.SymbolPath.CIRCLE,
@@ -54,32 +52,24 @@ function Map({ formData, setFormData, setError }) {
         if (place.geometry && place.geometry.location) {
           mapInstance.setCenter(place.geometry.location);
           mapInstance.setZoom(15);
-          markerInstance.position = place.geometry.location;
-          setFormData(prev => ({
-            ...prev,
-            address: place.formatted_address || '',
-            latitude: place.geometry.location.lat(),
-            longitude: place.geometry.location.lng(),
-          }));
+          markerInstance.setPosition(place.geometry.location);
+
+          form.setValue('address', place.formatted_address || '');
+          form.setValue('latitude', place.geometry.location.lat());
+          form.setValue('longitude', place.geometry.location.lng());
         }
       });
 
       markerInstance.addListener('dragend', () => {
         const position = markerInstance.getPosition();
         if (position) {
-          setFormData(prev => ({
-            ...prev,
-            latitude: position.lat(),
-            longitude: position.lng(),
-          }));
+          form.setValue('latitude', position.lat());
+          form.setValue('longitude', position.lng());
 
           const geocoder = new google.maps.Geocoder();
           geocoder.geocode({ location: position }, (results, status) => {
             if (status === 'OK' && results?.[0]) {
-              setFormData(prev => ({
-                ...prev,
-                address: results[0].formatted_address,
-              }));
+              form.setValue('address', results[0].formatted_address);
               input.value = results[0].formatted_address;
             }
           });
@@ -89,31 +79,13 @@ function Map({ formData, setFormData, setError }) {
       setError('Failed to load Google Maps. Please try again later.');
       console.error('Google Maps loading error:', err);
     });
-  }, [setFormData, setError]);
+  }, [form, setError]);
 
   return (
-    <div className="space-y-4">
-      <div className="relative">
-        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-          <FiMapPin className="h-5 w-5 text-gray-400" />
-        </div>
-        <input
-          id="address-input"
-          type="text"
-          name="address"
-          value={formData.address}
-          onChange={(e) => setFormData(prev => ({ ...prev, address: e.target.value }))}
-          className="pl-10 input bg-gray-100 input-bordered w-full"
-          placeholder="Enter event location"
-          required
-        />
-      </div>
-      <div className="h-64 rounded-lg overflow-hidden border border-gray-300">
-        <div id="map" className="w-full h-full"></div>
-      </div>
+    <div className="h-64 rounded-lg overflow-hidden border border-gray-300">
+      <div id="map" className="w-full h-full"></div>
     </div>
   );
 }
 
 export default Map;
-  

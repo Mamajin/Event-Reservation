@@ -7,6 +7,7 @@ from django.core.exceptions import ValidationError
 from api.models.organizer import Organizer
 from api.models.event import Event
 from api.models.user import AttendeeUser
+from api.utils import TicketNotificationManager
 
 
 class Ticket(models.Model):
@@ -36,6 +37,10 @@ class Ticket(models.Model):
     # Cancellation/Refund
     cancellation_date = models.DateTimeField(null=True, blank=True)
 
+    # Email Notification
+    email_sent = models.BooleanField(default=False)
+    user_email = models.EmailField(max_length=255, null=True, blank=True)
+    
     # System Fields
     created_at = models.DateTimeField('Created At', default=timezone.now)
     updated_at = models.DateTimeField('Updated At', auto_now=True)
@@ -43,11 +48,6 @@ class Ticket(models.Model):
 
     class Meta:
         ordering = ['-created_at']
-        indexes = [
-            models.Index(fields=['ticket_number']),
-            models.Index(fields=['status']),
-            models.Index(fields=['register_date']),
-        ]
         constraints = [
             models.UniqueConstraint(
                 fields=['event', 'attendee'],
@@ -57,13 +57,14 @@ class Ticket(models.Model):
 
     def save(self, *args, **kwargs):
         """Override save method to handle ticket number generation and validation."""
-        if not self.ticket_number:
-            self.ticket_number = self.generate_ticket_number()
+        self.ticket_number = self.generate_ticket_number()
         
-        if self.status == 'CANCELLED' and not self.cancellation_date:
-            self.cancellation_date = timezone.now()
-            
         super().save(*args, **kwargs)
+            
+    def send_event_reminder(self) -> bool:
+        """Send event reminder email to ticket holder"""
+        notification = TicketNotificationManager(self)
+        return notification.send_reminder_notification()
 
     def clean(self):
         """Validate the ticket before saving."""
@@ -124,20 +125,8 @@ class Ticket(models.Model):
             ticket_number = f"{prefix}-{random_string}"
             
             # Check if ticket number already exists
-            if not Ticket.objects.filter(ticket_number=ticket_number).exists():
-                return ticket_number
+            return ticket_number
         
-    def is_user_registered(self, user) -> bool:
-        """
-        Check if a user is registered for any event.
-
-        Args:
-            user (AttendeeUser): User to check
-
-        Returns:
-            bool: True if user is registered, False otherwise
-        """
-        return Ticket.objects.filter(attendee=user).exists()
         
     def is_organizer_join_own_event(self, user) -> bool:
         """
@@ -168,19 +157,6 @@ class Ticket(models.Model):
             status='ACTIVE'
         ).exists()
     
-    def get_ticket_status(self) -> str:
-        """
-        Get the current status of the ticket.
-
-        Returns:
-            str: Current ticket status
-        """
-        if self.status == 'ACTIVE':
-            # Check if event has passed
-            if self.event.event_date < timezone.now():
-                self.status = 'EXPIRED'
-                self.save()
-        return self.status
 
     def __str__(self) -> str:
         """String representation of the ticket."""
