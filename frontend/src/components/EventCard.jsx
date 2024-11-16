@@ -1,7 +1,8 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FaRegBookmark, FaShareAlt } from 'react-icons/fa';
+import { FaShareAlt } from 'react-icons/fa';
 import LikeButton from './EventCardButton/LikeButton';
+import BookmarkButton from './EventCardButton/BookMarkButton';
 
 function EventCard({ event }) {
   const navigate = useNavigate();
@@ -10,6 +11,10 @@ function EventCard({ event }) {
   const handleMoreDetailClick = () => {
     navigate(`/events/${event.id}`);
   };
+
+  // Destructure engagement and provide default values in case it's null or undefined
+  const { engagement = {} } = event;
+  const hasUserLiked = engagement.has_user_liked ?? false;
 
   return (
     <div className="flex bg-white shadow-lg p-4 mb-4 rounded-lg">
@@ -40,9 +45,12 @@ function EventCard({ event }) {
         </p>
 
         <div className="flex items-center mt-4 space-x-4">
-          {/* Ensure 'event.engagement.has_user_liked' is correctly passed to LikeButton */}
-          <LikeButton eventId={event.id} isInitiallyLiked={event.engagement.has_user_liked} />
-          <FaRegBookmark className="text-gray-500 cursor-pointer hover:text-blue-500 active:text-blue-600" />
+          {/* Like button */}
+          <LikeButton eventId={event.id} isInitiallyLiked={hasUserLiked} />
+          
+          {/* Bookmark button */}
+          <BookmarkButton eventId={event.id} />
+
           <FaShareAlt className="text-gray-500 cursor-pointer hover:text-green-500 active:text-green-600" />
         </div>
       </div>
