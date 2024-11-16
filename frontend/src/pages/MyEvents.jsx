@@ -12,6 +12,10 @@ function MyEvents() {
     const [error, setError] = useState(null);
     const navigate = useNavigate();
     const { userId, loading: userLoading, error: userError } = useUserProfile(navigate);
+    
+    const handleEdit = (eventId) => {
+        navigate(`/events/${eventId}/edit`);
+    };
 
     useEffect(() => {
         const fetchOrganizerEvents = async () => {
@@ -99,7 +103,7 @@ function MyEvents() {
                     <h1 className="text-2xl font-bold mb-6 text-center text-dark-purple">My Events</h1>
                     <div className="grid grid-cols-1 gap-4">
                         {events.map((event) => (
-                            <EventCard key={event.id} event={event} />
+                            <EventCard key={event.id} event={event} onEdit={handleEdit} isEditable={true} />
                         ))}
                     </div>
                 </div>
