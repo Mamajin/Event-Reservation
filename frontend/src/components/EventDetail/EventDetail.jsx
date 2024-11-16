@@ -1,7 +1,7 @@
 import { EventHeader } from './sections/EventHeader';
 import { EventInfo } from './sections/EventInfo';
 import { OrganizerInfo } from './sections/OrganizerInfo';
-import { CommentSection } from './sections/Comment';
+import { ACCESS_TOKEN } from '../../constants';
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import api from '../../api';
@@ -15,7 +15,9 @@ function EventDetail() {
   useEffect(() => {
     const fetchEvent = async () => {
       try {
-        const response = await api.get(`/events/${eventId}`);
+        const token = localStorage.getItem(ACCESS_TOKEN);
+        const headers = token ? { Authorization: `Bearer ${token}` } : {};
+        const response = await api.get(`/events/${eventId}`, { headers });
         console.log(response.data);
         setEvent(response.data);
       } catch (err) {

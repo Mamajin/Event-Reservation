@@ -12,6 +12,10 @@ function MyEvents() {
     const [error, setError] = useState(null);
     const navigate = useNavigate();
     const { userId, loading: userLoading, error: userError } = useUserProfile(navigate);
+    
+    const handleEdit = (eventId) => {
+        navigate(`/events/${eventId}/edit`);
+    };
 
     useEffect(() => {
         const fetchOrganizerEvents = async () => {
@@ -51,7 +55,7 @@ function MyEvents() {
         return (
             <PageLayout>
                 <div className="flex justify-center items-start min-h-screen p-4">
-                    <div className="w-full max-w-lg bg-white rounded-lg shadow-lg p-6 space-y-4">
+                    <div className="w-full max-w-[1400px] max-w-lg bg-white rounded-lg shadow-lg p-6 space-y-4">
                         <h2 className="text-2xl font-bold mb-4 text-center text-dark-purple">My Events</h2>
                         <div className="grid grid-cols-1 gap-4">
                             <div className="text-center">Loading...</div>
@@ -66,7 +70,7 @@ function MyEvents() {
         return (
             <PageLayout>
                 <div className="flex justify-center items-start min-h-screen p-4">
-                    <div className="w-full max-w-lg bg-white rounded-lg shadow-lg p-6 space-y-4">
+                    <div className="w-full max-w-[1400px] max-w-lg bg-white rounded-lg shadow-lg p-6 space-y-4">
                         <h2 className="text-2xl font-bold mb-4 text-center text-dark-purple">Error</h2>
                         <div className="text-center">
                             <div>Error fetching organizer events: {error?.message || userError?.message}</div>
@@ -81,7 +85,7 @@ function MyEvents() {
         return (
             <PageLayout>
                 <div className="flex justify-center items-start min-h-screen p-4">
-                    <div className="w-full max-w-lg bg-white rounded-lg shadow-lg p-6 space-y-4">
+                    <div className="w-full max-w-[1400px] max-w-lg bg-white rounded-lg shadow-lg p-6 space-y-4">
                         <h2 className="text-2xl font-bold mb-4 text-center text-dark-purple">My Events</h2>
                         <div className="grid grid-cols-1 gap-4">
                             <div>No events available</div>
@@ -95,11 +99,11 @@ function MyEvents() {
     return (
         <PageLayout>
             <div className="flex justify-center items-start min-h-screen p-4">
-                <div className="w-full max-w-[900px] bg-white rounded-lg shadow-lg p-6 space-y-4">
+                <div className="w-full max-w-[1400px] bg-white rounded-lg shadow-lg p-6 space-y-4">
                     <h1 className="text-2xl font-bold mb-6 text-center text-dark-purple">My Events</h1>
                     <div className="grid grid-cols-1 gap-4">
                         {events.map((event) => (
-                            <EventCard key={event.id} event={event} />
+                            <EventCard key={event.id} event={event} onEdit={handleEdit} isEditable={true} />
                         ))}
                     </div>
                 </div>

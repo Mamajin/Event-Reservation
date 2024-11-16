@@ -7,14 +7,14 @@ import useUserProfile from '../hooks/useUserProfile';
 import api from '../api';
 
 function Bookmark() {
-    const [bookmarks, setBookmarks] = useState([]);
+    const [events, setEvents] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const navigate = useNavigate();
     const { userId, loading: userLoading, error: userError } = useUserProfile(navigate);
 
     useEffect(() => {
-        const fetchBookmarks = async () => {
+        const fetchBookmarkedEvents = async () => {
             try {
                 console.log('Fetching bookmarked events...');
                 const token = localStorage.getItem(ACCESS_TOKEN);
@@ -22,7 +22,6 @@ function Bookmark() {
                     throw new Error('No access token or user ID found');
                 }
 
-                // Fetch bookmarked events from the API
                 const response = await api.get(`/bookmarks/my-favorite/`, {
                     headers: {
                         Authorization: `Bearer ${token}`,
@@ -30,7 +29,7 @@ function Bookmark() {
                     },
                 });
 
-                setBookmarks(response.data);
+                setEvents(response.data);
                 console.log('Fetched bookmarked events:', response.data);
             } catch (err) {
                 console.error('Error fetching bookmarked events:', err);
@@ -41,7 +40,7 @@ function Bookmark() {
         };
 
         if (!userLoading && userId) {
-            fetchBookmarks();
+            fetchBookmarkedEvents();
         } else if (userLoading) {
             console.log('Waiting for user profile to load...');
         }
@@ -52,7 +51,7 @@ function Bookmark() {
             <PageLayout>
                 <div className="flex justify-center items-start min-h-screen p-4">
                     <div className="w-full max-w-[1400px] max-w-lg bg-white rounded-lg shadow-lg p-6 space-y-4">
-                        <h2 className="text-2xl font-bold mb-4 text-center text-dark-purple">My Bookmarked Events</h2>
+                        <h2 className="text-2xl font-bold mb-4 text-center text-dark-purple">Bookmarked Events</h2>
                         <div className="grid grid-cols-1 gap-4">
                             <div className="text-center">Loading...</div>
                         </div>
@@ -77,12 +76,12 @@ function Bookmark() {
         );
     }
 
-    if (bookmarks.length === 0) {
+    if (events.length === 0) {
         return (
             <PageLayout>
                 <div className="flex justify-center items-start min-h-screen p-4">
                     <div className="w-full max-w-[1400px] max-w-lg bg-white rounded-lg shadow-lg p-6 space-y-4">
-                        <h2 className="text-2xl font-bold mb-4 text-center text-dark-purple">My Bookmarked Events</h2>
+                        <h2 className="text-2xl font-bold mb-4 text-center text-dark-purple">Bookmarked Events</h2>
                         <div className="grid grid-cols-1 gap-4">
                             <div>No bookmarked events available</div>
                         </div>
@@ -96,9 +95,9 @@ function Bookmark() {
         <PageLayout>
             <div className="flex justify-center items-start min-h-screen p-4">
                 <div className="w-full max-w-[1400px] bg-white rounded-lg shadow-lg p-6 space-y-4">
-                    <h1 className="text-2xl font-bold mb-6 text-center text-dark-purple">My Bookmarked Events</h1>
+                    <h1 className="text-2xl font-bold mb-6 text-center text-dark-purple">Bookmarked Events</h1>
                     <div className="grid grid-cols-1 gap-4">
-                        {bookmarks.map((event) => (
+                        {events.map((event) => (
                             <EventCard key={event.id} event={event} />
                         ))}
                     </div>

@@ -194,7 +194,10 @@ export function CommentSection({ event }) {
           />
           <button
             onClick={() => saveEdit(comment.id)}
-            className="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors"
+            disabled={!editContent.trim()}
+            className={`p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors ${
+              !editContent.trim() ? 'opacity-50 cursor-not-allowed' : ''
+            }`}
             title="Save"
           >
             <LuCheck className="w-4 h-4" />
