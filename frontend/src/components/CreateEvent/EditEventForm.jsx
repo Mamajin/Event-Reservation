@@ -76,7 +76,8 @@ export function EditEventForm() {
       });
 
       if (formValues.event_image) {
-        formData.append('image', formValues.event_image);
+        const imageResponse = await api.post(`/api/events/${eventId}/upload/event-image/`, formValues.event_image);
+        console.log('Image uploaded:', imageResponse);
       }
 
       const token = localStorage.getItem(ACCESS_TOKEN);
