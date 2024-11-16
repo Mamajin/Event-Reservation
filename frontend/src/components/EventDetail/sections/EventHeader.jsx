@@ -9,6 +9,7 @@ import { format, set } from 'date-fns';
 export function EventHeader({ event }) {
   const isRegistrationOpen = new Date(event.end_date_register) > new Date();
   const isFreeEvent = event.is_free || event.ticket_price === 0;
+  const [showShareMenu, setShowShareMenu] = useState(false);
   const [isBookmarked, setIsBookmarked] = useState(false);
   const [isLiked, setIsLiked] = useState(false);
   useEffect(() => {
@@ -17,6 +18,28 @@ export function EventHeader({ event }) {
       setIsBookmarked(event.user_engaged.is_bookmarked);
     }
   }, [event]);
+  const handleShare = async (platform) => {
+    const shareUrl = window.location.href;
+    const shareText = `Check out this event: ${event.title}`;
+  
+    switch (platform) {
+      case 'twitter':
+        window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(shareUrl)}`);
+        break;
+      case 'facebook':
+        window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`);
+        break;
+      case 'copy':
+        try {
+          await navigator.clipboard.writeText(shareUrl);
+          alert('Link copied to clipboard!');
+        } catch (err) {
+          console.error('Failed to copy:', err);
+        }
+        break;
+    }
+    setShowShareMenu(false);
+  };
 
   const handleLike = async (eventId) => {
     try {
@@ -105,6 +128,29 @@ export function EventHeader({ event }) {
           >
             <LuShare2 share2 className="w-5 h-5 text-white" />
           </button>
+          {showShareMenu && (
+            <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-2 z-50">
+              <button
+                onClick={() => handleShare('twitter')}
+                className="w-full px-4 py-2 text-left text-gray-700 hover:bg-gray-100 transition-colors"
+              >
+                Share on Twitter
+              </button>
+              <button
+                onClick={() => handleShare('facebook')}
+                className="w-full px-4 py-2 text-left text-gray-700 hover:bg-gray-100 transition-colors"
+              >
+                Share on Facebook
+              </button>
+              <hr className="my-2" />
+              <button
+                onClick={() => handleShare('copy')}
+                className="w-full px-4 py-2 text-left text-gray-700 hover:bg-gray-100 transition-colors"
+              >
+                Copy Link
+              </button>
+            </div>
+          )}
         </div>
       </div>
       </div>
