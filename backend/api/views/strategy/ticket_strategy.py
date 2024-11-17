@@ -3,10 +3,6 @@ from api.views.modules import *
 from api.views.schemas import *
 
 class TicketStrategy(ABC):
-    TICKET_USER = "list_user_ticket"
-    TICKET_DETAIL = "ticket_detail"
-    TICKET_REGISTER = "ticket_register"
-    TICKET_DELETE = "ticket_delete"
     
     @staticmethod
     def get_strategy(strategy_name):
