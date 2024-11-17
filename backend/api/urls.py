@@ -2,7 +2,6 @@ from django.urls import path
 from ninja_extra import NinjaExtraAPI
 from ninja_jwt.controller import NinjaJWTDefaultController
 from api.views.user import router as user_router
-from api.views.organizer import router as organizer_router
 from api.views.event import router as event_router
 from api.views.ticket import TicketAPI
 from api.views.bookmarks import router as bookmark_router
@@ -19,7 +18,6 @@ api.register_controllers(TicketAPI)
 
 # Register routers for different models/views
 api.add_router("/users/", user_router)
-api.add_router("/organizers/", organizer_router)
 api.add_router("/events/", event_router)
 api.add_router('/bookmarks/', bookmark_router)
 api.add_router('/likes/', like_router)
