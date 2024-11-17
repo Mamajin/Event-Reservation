@@ -36,6 +36,13 @@ class EventVisibility(str, Enum):
     PUBLIC = 'PUBLIC'
     PRIVATE = 'PRIVATE'
     
+    
+class CommentType(str, Enum):
+    LIKE = 'LIKE'
+    LOVE = 'LOVE'
+    LAUGH = 'LAUGH'
+    
+    
 # Schema for Organizer
 class OrganizerSchema(Schema):
     organizer_name: Optional[str]
@@ -222,10 +229,6 @@ class EventUpdateSchema(Schema):
     instagram_url: Optional[str] = None
     min_age_requirement: Optional[int] = 0
     terms_and_conditions: Optional[str] = None
-    
-    
-    
-
 
     
 class LoginSchema(Schema):
@@ -337,3 +340,16 @@ class CommentResponseSchema(Schema):
     status: str
     reactions: List[Dict] = []
     replies: List['CommentResponseSchema'] = []
+    
+
+class CommentReaction(Schema):
+    comment_id: int
+    reaction_type: str
+    
+    
+class CommentReactionResponseSchema(Schema):
+    id: int
+    comment: CommentResponseSchema
+    user: UserProfileSchema
+    reaction_type: str
+    created_at: datetime

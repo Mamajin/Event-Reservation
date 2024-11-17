@@ -90,7 +90,8 @@ class TicketAPI:
                 logger.error(f"Failed to send cancellation email: {str(email_error)}")
                 return Response({'error': 'Failed to send cancellation email'}, status=500)
             
-            ticket.delete()
+            ticket.status = 'CANCELLED'
+            ticket.save()
             return Response({
                 "success": f"Ticket with ID {ticket_id} has been canceled."
             }, status=200)
@@ -126,5 +127,6 @@ class TicketAPI:
         """Send an event remider after registration."""
         ticket = get_object_or_404(Ticket, id=ticket_id)
         ticket.email_sent = True
+        ticket.save()
         ticket.send_event_reminder()
         

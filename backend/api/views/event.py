@@ -1,4 +1,4 @@
-from .schemas import EventInputSchema, ErrorResponseSchema, EventResponseSchema, FileUploadResponseSchema, CommentResponseSchema, EventUpdateSchema, UserResponseSchema
+from .schemas import EventInputSchema, ErrorResponseSchema, EventResponseSchema, FileUploadResponseSchema, CommentResponseSchema, EventUpdateSchema, UserResponseSchema, TicketResponseSchema
 from .modules import *
 from django.contrib.auth.models import AnonymousUser
 from typing import Union
@@ -360,4 +360,25 @@ class EventAPI:
         except Organizer.DoesNotExist:
             logger.error(f"User {request.user.username} tried to access attendee list but is not an organizer.")
             return Response({'error': 'User is not an organizer'}, status=403)
+        
+    @router.get('/{event_id}/ticket-list', response=List[TicketResponseSchema], auth=JWTAuth())
+    def get_ticket_list(request: HttpRequest, event_id: int):
+        """
+        Retrieve the list of tickets for a specific event.
+
+        Args:
+            request (HttpRequest): The HTTP request object, containing user and request metadata.
+            event_id (int): The ID of the event for which ticket list is requested.
+
+        Returns:
+            List[TicketResponseSchema]: A list of tickets for the event.
+        """
+        event = get_object_or_404(Event, id=event_id)
+        tickets = Ticket.objects.filter(event=event).order_by('id')
+        response_data = [TicketResponseSchema(
+                            **ticket.get_ticket_details()
+                        )
+                        for ticket in tickets]
+        logger.info(f"Retrieved ticket list for event {event_id}.")
+        return Response(response_data, status=200)
                 
