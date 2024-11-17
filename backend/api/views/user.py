@@ -1,12 +1,26 @@
 from .schemas import UserSchema, LoginResponseSchema, UserResponseSchema, LoginSchema, ErrorResponseSchema, FileUploadResponseSchema, AuthResponseSchema, GoogleAuthSchema, EmailVerification, EmailVerificationResponseSchema, UserupdateSchema
 from .modules import *
 
-router = Router()
 
+
+@api_controller("/users/")
 class UserAPI:
     
-    @router.post('/register', response={201: UserSchema, 400: ErrorResponseSchema})
-    def create_user(request, form: UserSchema = Form(...)):
+    def validate_user(self,form):
+        if form.password != form.password2:
+            return Response({"error": "Passwords do not match"}, status=400)
+        if AttendeeUser.objects.filter(username=form.username).exists():
+            return Response({"error": "Username already taken"}, status=400)
+        if AttendeeUser.objects.filter(email = form.email).exists():
+            return Response({"error": "This email already taken"}, status=400)
+        if len(form.phone_number) != 10:
+            return Response({'error' : 'Phone number must be 10 digits long'}, status = 400)
+        if not form.phone_number.isdigit():
+            return Response({'error' : 'Phone number must be digit'}, status = 400)
+        
+    
+    @route.post('/register', response={201: UserSchema, 400: ErrorResponseSchema})
+    def create_user(self,request, form: UserSchema = Form(...)):
         """
         Register a new user with the provided details.
 
@@ -18,16 +32,7 @@ class UserAPI:
             Response: Success response with user data on successful registration, or
                       an error message if registration fails.
         """
-        if form.password != form.password2:
-            return Response({"error": "Passwords do not match"}, status=400)
-        if AttendeeUser.objects.filter(username=form.username).exists():
-            return Response({"error": "Username already taken"}, status=400)
-        if AttendeeUser.objects.filter(email = form.email).exists():
-            return Response({"error": "This email already taken"}, status=400)
-        if len(form.phone_number) != 10:
-            return Response({'error' : 'Phone number must be 10 digits long'}, status = 400)
-        if not form.phone_number.isdigit():
-            return Response({'error' : 'Phone number must be digit'}, status = 400)
+        self.validate_user(form)
         
         user = AttendeeUser(
             username=form.username,
@@ -42,8 +47,8 @@ class UserAPI:
         user.send_verification_email()
         return Response(UserSchema.from_orm(user), status=201)
     
-    @router.post('/logout', response={200: dict})
-    def logout(request):
+    @route.post('/logout', response={200: dict})
+    def logout(self,request):
         """
         Logs out the current user.
 
@@ -56,8 +61,8 @@ class UserAPI:
         logout(request)
         return Response({"message": "Logged out successfully"}, status=200)
 
-    @router.post('/auth/google', response=AuthResponseSchema)
-    def google_auth(request, data: GoogleAuthSchema):
+    @route.post('/auth/google', response=AuthResponseSchema)
+    def google_auth(self,request, data: GoogleAuthSchema):
         """
         Authenticate a user via Google OAuth2 and retrieve access and refresh tokens.
 
@@ -113,8 +118,8 @@ class UserAPI:
         )
                     
     
-    @router.post('/login', response = LoginResponseSchema)
-    def login(request, form: LoginSchema = Form(...)):
+    @route.post('/login', response = LoginResponseSchema)
+    def login(self,request, form: LoginSchema = Form(...)):
         """
         Log in a user with username and password, returning access and refresh tokens.
 
@@ -156,8 +161,8 @@ class UserAPI:
                 status=400
             )
 
-    @router.get('/profile', response=UserResponseSchema, auth=JWTAuth())
-    def view_profile(request):
+    @route.get('/profile', response=UserResponseSchema, auth=JWTAuth())
+    def view_profile(self,request):
         """
         Retrieve the profile of the currently logged-in user.
 
@@ -170,8 +175,8 @@ class UserAPI:
         profile_data = UserResponseSchema(**profile_dict)
         return profile_data
 
-    @router.patch('/edit-profile/{user_id}/', response=UserupdateSchema, auth=JWTAuth())
-    def edit_profile(request, user_id: int, new_data: UserupdateSchema):
+    @route.patch('/edit-profile/{user_id}/', response=UserupdateSchema, auth=JWTAuth())
+    def edit_profile(self,request, user_id: int, new_data: UserupdateSchema):
         """
         Update the profile information of a user by user ID.
 
@@ -191,8 +196,8 @@ class UserAPI:
         user.refresh_from_db()
         return UserupdateSchema.from_orm(user)
 
-    @router.delete('delete/', auth=JWTAuth())
-    def delete_profile(request):
+    @route.delete('delete/', auth=JWTAuth())
+    def delete_profile(self,request):
         """
         Delete a user profile by user ID.
 
@@ -210,8 +215,8 @@ class UserAPI:
             
         return Response({'success': 'Your account has been deleted'})
 
-    @router.post('/{user_id}/upload/profile-picture/', response={200: FileUploadResponseSchema, 400: ErrorResponseSchema}, auth=JWTAuth())
-    def upload_profile_picture(request: HttpRequest, user_id: int, profile_picture: UploadedFile = File(...)):
+    @route.post('/{user_id}/upload/profile-picture/', response={200: FileUploadResponseSchema, 400: ErrorResponseSchema}, auth=JWTAuth())
+    def upload_profile_picture(self,request: HttpRequest, user_id: int, profile_picture: UploadedFile = File(...)):
         """
         Upload a profile picture for the specified user.
 
@@ -273,8 +278,8 @@ class UserAPI:
         except Exception as e:
             return Response({'error': f"Upload failed: {str(e)}"}, status=400)
         
-    @router.get('/verify-email/{user_id}/{token}', response={200: EmailVerificationResponseSchema, 400: ErrorResponseSchema})
-    def verify_email(request, user_id: str, token: str):
+    @route.get('/verify-email/{user_id}/{token}', response={200: EmailVerificationResponseSchema, 400: ErrorResponseSchema})
+    def verify_email(self,request, user_id: str, token: str):
         """Verify user's email address with the secure token."""
         try:
             uid = force_str(urlsafe_base64_decode(user_id))
@@ -299,8 +304,8 @@ class UserAPI:
                 "error": "Invalid verification token"
             }, status=400)
 
-    @router.post('/resend-verification', response={200: EmailVerificationResponseSchema, 400: ErrorResponseSchema})
-    def resend_verification(request, email: str):
+    @route.post('/resend-verification', response={200: EmailVerificationResponseSchema, 400: ErrorResponseSchema})
+    def resend_verification(self,request, email: str):
         """Resend verification email if user is not verified."""
         try:
             user = AttendeeUser.objects.get(email=email, is_email_verified=False)
