@@ -13,7 +13,8 @@ from django.conf.urls.static import static
 
 api = NinjaExtraAPI(version ="2.0.0", urls_namespace= "api")
 api.register_controllers(NinjaJWTDefaultController)
-api.register_controllers(TicketAPI,UserAPI)
+api.register_controllers(TicketAPI)
+api.register_controllers(UserAPI)
 
 
 # Register routers for different models/views

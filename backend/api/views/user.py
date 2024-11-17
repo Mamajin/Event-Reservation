@@ -3,20 +3,10 @@ from .modules import *
 
 
 
-@api_controller("/users/")
+@api_controller("/users/", tags = ["Users"])
 class UserAPI:
     
-    def validate_user(self,form):
-        if form.password != form.password2:
-            return Response({"error": "Passwords do not match"}, status=400)
-        if AttendeeUser.objects.filter(username=form.username).exists():
-            return Response({"error": "Username already taken"}, status=400)
-        if AttendeeUser.objects.filter(email = form.email).exists():
-            return Response({"error": "This email already taken"}, status=400)
-        if len(form.phone_number) != 10:
-            return Response({'error' : 'Phone number must be 10 digits long'}, status = 400)
-        if not form.phone_number.isdigit():
-            return Response({'error' : 'Phone number must be digit'}, status = 400)
+
         
     
     @route.post('/register', response={201: UserSchema, 400: ErrorResponseSchema})
@@ -32,7 +22,16 @@ class UserAPI:
             Response: Success response with user data on successful registration, or
                       an error message if registration fails.
         """
-        self.validate_user(form)
+        if form.password != form.password2:
+            return Response({"error": "Passwords do not match"}, status=400)
+        if AttendeeUser.objects.filter(username=form.username).exists():
+            return Response({"error": "Username already taken"}, status=400)
+        if AttendeeUser.objects.filter(email = form.email).exists():
+            return Response({"error": "This email already taken"}, status=400)
+        if len(form.phone_number) != 10:
+            return Response({'error' : 'Phone number must be 10 digits long'}, status = 400)
+        if not form.phone_number.isdigit():
+            return Response({'error' : 'Phone number must be digit'}, status = 400)
         
         user = AttendeeUser(
             username=form.username,
