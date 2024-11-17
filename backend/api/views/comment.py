@@ -1,4 +1,4 @@
-from  .schemas import CommentSchema, CommentResponseSchema, CommentReaction, ErrorResponseSchema
+from  .schemas import CommentSchema, CommentResponseSchema, CommentReaction, ErrorResponseSchema, CommentReactionResponseSchema, CommentType
 from .modules import *
 
 
@@ -95,4 +95,49 @@ class CommentAPI:
             logger.error(f"Comment {comment_id} not found for edit.")
             return Response({'error': 'Comment not found'}, status=404)
 
+        except Exception as e:
+            logger.error(f"Error editing comment {comment_id}: {str(e)}")
+            return Response({'error': str(e)}, status=500)
+        
+    @router.put('/{comment_id}/react/', response={200: dict, 404: ErrorResponseSchema}, auth=JWTAuth())
+    def react_to_comment(request: HttpRequest,  comment_id: int, reaction: CommentType):
+        """
+        React to a comment with a specific reaction if user is authorized.
+
+        Args:
+            request (HttpRequest): HTTP request with authenticated user.
+            comment_id (int): ID of the comment to react to.
+            reaction (str): Reaction to apply.
+
+        Returns:
+            Response: Updated comment details or error if unauthorized/not found.
+        """
+        try:
+            comment = get_object_or_404(Comment, id=comment_id)
+
+            if reaction not in dict(CommentReaction.REACTION_CHOICES):
+                logger.error(f"Invalid reaction type '{reaction}' by user {request.user.username}.")
+                return Response({'error': 'Invalid reaction type.'}, status=400)
+
+            existing_reaction = CommentReaction.objects.filter(
+                comment=comment, user=request.user, reaction_type=reaction
+            ).first()
+
+            if not existing_reaction:
+                CommentReaction.objects.create(
+                    comment=comment, user=request.user, reaction_type=reaction
+                )
+                logger.info(f"User {request.user.username} added reaction '{reaction}' to comment {comment_id}.")
+                return Response({'message': 'Reaction added successfully.'}, status=200)
+            else:
+                existing_reaction.delete()
+                logger.info(f"User {request.user.username} removed reaction '{reaction}' from comment {comment_id}.")
+                return Response({'message': 'Reaction removed successfully.'}, status=200)
+
+        except Comment.DoesNotExist:
+            logger.error(f"Comment {comment_id} not found for reaction.")
+            return Response({'error': 'Comment not found.'}, status=404)
+        except Exception as e:
+            logger.error(f"Error reacting to comment {comment_id}: {str(e)}")
+            return Response({'error': 'Internal server error.'}, status=500)
             
