@@ -4,7 +4,7 @@ from api.models import AttendeeUser, Organizer, Event, Ticket
 from unittest.mock import patch
 from datetime import datetime
 from ninja.testing import TestClient
-from api.urls import ticket_router
+from api.urls import api
 from ninja_jwt.tokens import RefreshToken
 from django.core.exceptions import ValidationError
 from faker import Faker
@@ -14,15 +14,15 @@ import datetime
 fake = Faker()
 
 class TicketModelsTest(TestCase):
+    client = TestClient(api)
 
     def setUp(self):
         """
         Set up initial test data for models.
         """
-        self.client = TestClient(ticket_router)
-        self.user_list_event_url = '/user/'
-        self.user_reserve_event_url = '/event/'
-        self.user_cancel_event_url = '/cancel'
+        self.user_list_event_url = "/api/tickets/user/"
+        self.user_reserve_event_url = '/api/tickets/event/'
+        self.user_cancel_event_url = '/api/tickets/'
         self.test_user = AttendeeUser.objects.create_user(
             username='attendeeuser3',
             password='password123',

@@ -11,7 +11,9 @@ from django.db import IntegrityError
 from django.shortcuts import get_object_or_404
 from django.http import HttpRequest
 from ninja import Schema, ModelSchema, Form, Router, File
+from requests import Request
 from ninja.responses import Response
+from ninja_extra import api_controller, http_get,http_post,http_put,http_patch,http_delete, route, ControllerBase
 from ninja.errors import HttpError
 from ninja.files import UploadedFile
 from ninja_jwt.authentication import JWTAuth

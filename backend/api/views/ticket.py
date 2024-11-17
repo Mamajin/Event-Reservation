@@ -1,12 +1,14 @@
 from .modules import *
 from .schemas import TicketSchema, TicketResponseSchema, SessionSchema, SessionResponseSchema, ErrorResponseSchema
+from abc import ABC, abstractmethod
 
-router = Router()
-
+    
+@api_controller("/tickets/", tags=["Tickets"])
 class TicketAPI:
     
-    @router.get('/user/{user_id}', response=List[TicketResponseSchema], auth=JWTAuth())
-    def list_user_tickets(request: HttpRequest, user_id: int):
+    
+    @route.get('/user/{user_id}', response=List[TicketResponseSchema], auth=JWTAuth())
+    def list_user_tickets(self, request: HttpRequest, user_id: int):
         try:
             user = AttendeeUser.objects.get(id=user_id)
             tickets = Ticket.objects.filter(attendee=user, register_date__lte=timezone.now()).order_by("-register_date")
@@ -19,8 +21,8 @@ class TicketAPI:
             logger.error(f"User with ID {user_id} does not exist.")
             return Response({'error': 'User not found'}, status=404)
 
-    @router.post('/event/{event_id}/register', response={201: TicketResponseSchema, 400: ErrorResponseSchema}, auth=JWTAuth())
-    def register_for_event(request: HttpRequest, event_id: int):
+    @route.post('/event/{event_id}/register', response={201: TicketResponseSchema, 400: ErrorResponseSchema}, auth=JWTAuth())
+    def register_for_event(self,request: HttpRequest, event_id: int):
         """Register a user for an event and create a ticket."""
         user = request.user
         event = get_object_or_404(Event, id=event_id)
@@ -77,8 +79,8 @@ class TicketAPI:
             logger.error(f"Error during ticket registration: {str(e)}")
             return Response({'error': 'Internal server error'}, status=500)
 
-    @router.delete('/{ticket_id}/cancel', auth=JWTAuth())
-    def cancel_ticket(request: HttpRequest, ticket_id: int):
+    @route.delete('/{ticket_id}/cancel', auth=JWTAuth())
+    def cancel_ticket(self,request: HttpRequest, ticket_id: int):
         this_user = request.user
         try:
             ticket = Ticket.objects.get(id=ticket_id, attendee=this_user)
@@ -104,8 +106,8 @@ class TicketAPI:
             logger.error(f"Error during ticket cancellation: {str(e)}")
             return Response({'error': 'Internal server error'}, status=500)
         
-    @router.get('/{ticket_id}', response=TicketResponseSchema, auth=JWTAuth())
-    def ticket_detail(request: HttpRequest, ticket_id: int):
+    @route.get('/{ticket_id}', response=TicketResponseSchema, auth=JWTAuth())
+    def ticket_detail(self,request: HttpRequest, ticket_id: int):
         """
         Get detailed information about a specific ticket.
         """
@@ -121,8 +123,8 @@ class TicketAPI:
             logger.error(f"Error fetching ticket details: {str(e)}")
             return Response({'error': 'Internal server error'}, status=500)
 
-    @router.post('/{ticket_id}/send-reminder', auth=JWTAuth())
-    def send_remider(request: HttpRequest, ticket_id: int):
+    @route.post('/{ticket_id}/send-reminder', auth=JWTAuth())
+    def send_remider(self,request: HttpRequest, ticket_id: int):
         """Send an event remider after registration."""
         ticket = get_object_or_404(Ticket, id=ticket_id)
         ticket.email_sent = True
