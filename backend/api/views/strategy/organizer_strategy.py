@@ -62,6 +62,7 @@ class ApplyOrganizerStrategy(OrganizerStrategy):
         except Exception as e:
             logger.error(f"Unexpected error while creating organizer for user {request.user.id}: {str(e)}")
             return Response({"error": "An unexpected error occurred"}, status=400)
+        
 
 class DeleteEventStrategy(OrganizerStrategy):
     """Delete an event"""
@@ -77,7 +78,7 @@ class DeleteEventStrategy(OrganizerStrategy):
         """Delete an event"""
         logger.info(f"User {request.user.id} is attempting to delete an event.")
         try:
-            organizer = get_object_or_404(Organizer, user=request.user)
+            organizer = Organizer.objects.get(user=request.user)
             event = get_object_or_404(Event, id=event_id, organizer=organizer)
             event.delete()
             logger.info(f"Organizer {organizer.organizer_name} deleted event {event_id}.")
@@ -88,6 +89,7 @@ class DeleteEventStrategy(OrganizerStrategy):
         except Event.DoesNotExist:
             logger.error(f"Organizer {organizer.organizer_name} attempted to delete non-existing event {event_id}.")
             return Response({'error': 'Event does not exist or you do not have permission to delete it'}, status=404)
+        
 
 class UpdateOrganizerStrategy(OrganizerStrategy):
     """Update an organizer profile"""
@@ -105,7 +107,7 @@ class UpdateOrganizerStrategy(OrganizerStrategy):
         try:
             organizer = get_object_or_404(Organizer, user=request.user)
 
-            if data.organizer_name == organizer.organizer_name and Organizer.objects.filter(organizer_name=data.organizer_name).exists():
+            if data.organizer_name and organizer.organizer_name == data.organizer_name:
                 logger.info(f"Organizer name '{data.organizer_name}' is already taken.")
                 return Response({'error': 'Organizer name is already taken'}, status=400)
             
@@ -113,6 +115,7 @@ class UpdateOrganizerStrategy(OrganizerStrategy):
             for field, value in update_fields.items():
                 setattr(organizer, field, value)
             
+            organizer.full_clean()
             organizer.save()
             
             logger.info(f"User {request.user.id} updated their organizer profile.")
@@ -124,6 +127,7 @@ class UpdateOrganizerStrategy(OrganizerStrategy):
         except Exception as e:
             logger.error(f"Error updating organizer profile: {str(e)}")
             return Response({'error': str(e)}, status=400)
+
 
 class RevokeOrganizerStrategy(OrganizerStrategy):
     """Revoke an organizer role"""
@@ -137,14 +141,17 @@ class RevokeOrganizerStrategy(OrganizerStrategy):
     def execute(self, request: HttpRequest, **kwargs):
         """Revoke the organizer role of the authenticated user."""
         logger.info(f"User {request.user.id} is attempting to revoke their organizer role.")
+        
         try:
             organizer = get_object_or_404(Organizer, user=request.user)
             organizer.delete()
             logger.info(f"Organizer role revoked for user {request.user.id}.")
             return Response({'success': f'Organizer role revoked for user {request.user.id}.'}, status=204)
+        
         except Organizer.DoesNotExist:
             logger.error(f"User {request.user.username} tried to revoke a non-existing organizer profile.")
             return Response({'error': 'User is not an organizer'}, status=404)
+
 
 class ViewOrganizerStrategy(OrganizerStrategy):
     """View an organizer profile"""
@@ -170,10 +177,11 @@ class ViewOrganizerStrategy(OrganizerStrategy):
             logger.error(f"Error viewing organizer profile: {str(e)}")
             return Response({'error': str(e)}, status=400)
 
+
 class UploadLogoStrategy(OrganizerStrategy):
     """Upload a logo for an organizer"""
     ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png']
-    MAX_FILE_SIZE = 5 * 1024 * 1024  # 5MB
+    MAX_FILE_SIZE = 10 * 1024 * 1024  # 5MB
 
     @staticmethod
     def get_strategy(name):
