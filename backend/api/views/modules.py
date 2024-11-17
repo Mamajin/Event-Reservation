@@ -12,7 +12,9 @@ from django.shortcuts import get_object_or_404
 from django.http import HttpRequest
 from django.views import View
 from ninja import Schema, ModelSchema, Form, Router, File
+from requests import Request
 from ninja.responses import Response
+from ninja_extra import api_controller, http_get,http_post,http_put,http_patch,http_delete, route, ControllerBase
 from ninja.errors import HttpError
 from ninja.files import UploadedFile
 from ninja_jwt.authentication import JWTAuth
@@ -27,6 +29,7 @@ from api.models.like import *
 from api.models.organizer import *
 from api.models.ticket import *
 from api.models.comment import *
+from django.core.exceptions import PermissionDenied, ValidationError
 from botocore.exceptions import ClientError
 from pydantic import EmailStr, HttpUrl, constr, conint, Field
 from django.conf import settings

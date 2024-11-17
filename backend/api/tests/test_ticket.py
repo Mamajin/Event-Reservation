@@ -89,7 +89,7 @@ class TicketTestAPI(TicketModelsTest):
         )
         response = self.client.post(self.user_reserve_event_url + str(event_test.id) + '/register',  headers={'Authorization': f'Bearer {token}'})
         self.assertEqual(response.status_code, 400)
-        self.assertEqual(response.json()['error'], 'Registration for this event is not allowed')
+        self.assertEqual(response.json()['error'], 'Registration for this event is not allowed.')
         
         
     def test_user_invalid_age_to_register(self):
@@ -142,7 +142,7 @@ class TicketTestAPI(TicketModelsTest):
         token = self.get_token_for_user(test_user)
         response = self.client.post(self.user_reserve_event_url + str(event_test.id) + '/register',  headers={'Authorization': f'Bearer {token}'})
         self.assertEqual(response.status_code, 400)
-        self.assertEqual(response.json()['error'], "Please set your birth date in accountinfo")
+        self.assertEqual(response.json()['error'], "Please set your birth date in account information.")
         
     def test_invalid_registeration_status(self):
         event_test = Event.objects.create(
@@ -159,7 +159,7 @@ class TicketTestAPI(TicketModelsTest):
         token = self.get_token_for_user(self.test_user)
         response = self.client.post(self.user_reserve_event_url + str(event_test.id) + '/register',  headers={'Authorization': f'Bearer {token}'})
         self.assertEqual(response.status_code, 400)
-        self.assertEqual(response.json()['error'], f'Registeration of this event is {event_test.status_registeration.lower()} now')
+        self.assertEqual(response.json()['error'], f'Registration for this event is {event_test.status_registeration.lower()} now.')
         
 
     def test_invalid_register_private_event(self):
@@ -180,7 +180,7 @@ class TicketTestAPI(TicketModelsTest):
         token = self.get_token_for_user(user)
         response = self.client.post(self.user_reserve_event_url + str(event_test.id) + '/register',  headers={'Authorization': f'Bearer {token}'})
         self.assertEqual(response.status_code , 403)
-        self.assertEqual(response.json()['error'], 'Your email domain is not authorized to register for this event' )
+        self.assertEqual(response.json()['error'], 'Your email domain is not authorized to register for this event.' )
         
         
         
@@ -198,7 +198,7 @@ class TicketTestAPI(TicketModelsTest):
             description=fake.text(max_nb_chars=200),
         )
         ticket = Ticket.objects.create(event = event_test, attendee = user)
-        response = self.client.delete(f"/{ticket.id}" + self.user_cancel_event_url,  headers={'Authorization': f'Bearer {token}'})
+        response = self.client.delete(f"/api/tickets/{ticket.id}/cancel" , headers={'Authorization': f'Bearer {token}'})
         self.assertEqual(response.status_code , 200)
         self.assertEqual(response.json()['success'], f"Ticket with ID {ticket.id} has been canceled.")
         self.assertFalse(Ticket.objects.filter(event = event_test, attendee = user).exists())
@@ -219,7 +219,7 @@ class TicketTestAPI(TicketModelsTest):
             min_age_requirement = 20
         )
         ticket = Ticket.objects.create(event = event_test, attendee = user)
-        response = self.client.delete(f"/{100}" + self.user_cancel_event_url,  headers={'Authorization': f'Bearer {token}'})
+        response = self.client.delete(f'/api/tickets/{100}/cancel',  headers={'Authorization': f'Bearer {token}'})
         self.assertEqual(response.status_code, 404)
         self.assertEqual(response.json()['error'],  'Ticket with ID 100 does not exist or you do not have permission to cancel it.')
         
@@ -239,20 +239,20 @@ class TicketTestAPI(TicketModelsTest):
             min_age_requirement = 20
         )
         ticket = Ticket.objects.create(event = event_test, attendee = user)
-        response = self.client.get(f"/{ticket.id}",  headers={'Authorization': f'Bearer {token}'})
+        response = self.client.get(f"/api/tickets/{ticket.id}",  headers={'Authorization': f'Bearer {token}'})
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json()['id'], ticket.id)
         
     
-    def test_invalid_get__ticket_detail(self):
+    def test_invalid_get_ticket_detail(self):
         user = self.create_user("test","test")
         token = self.get_token_for_user(user)
-        response = self.client.get(f"/{100}",  headers={'Authorization': f'Bearer {token}'})
+        response = self.client.get(f"/api/tickets/{100}",  headers={'Authorization': f'Bearer {token}'})
         self.assertEqual(response.status_code, 404)
         self.assertEqual(response.json()['error'], "Ticket not found")
         
         
-    @patch("api.views.ticket.get_object_or_404")
+    @patch("api.views.strategy.ticket_strategy.get_object_or_404")
     def test_internal_server_error(self, mock_get_object_or_404):
         
         mock_get_object_or_404.side_effect = Exception("Simulated server error")
@@ -270,7 +270,10 @@ class TicketTestAPI(TicketModelsTest):
             min_age_requirement = 20
         )
         ticket = Ticket.objects.create(event = event_test, attendee = user)
-        response = self.client.get(f"/{ticket.id}",  headers={'Authorization': f'Bearer {token}'})
+        try:
+            response = self.client.get(f"/api/tickets/{ticket.id}",  headers={'Authorization': f'Bearer {token}'})
+        except Exception as e:
+            self.fail(f"Unexpected exception occurred: {str(e)}")
         self.assertEqual(response.status_code, 500)
         self.assertEqual(response.json()['error'], 'Internal server error')
         
@@ -295,7 +298,7 @@ class TicketTestAPI(TicketModelsTest):
         token = self.get_token_for_user(self.test_user)
 
         # Call the delete endpoint for canceling the ticket
-        response = self.client.delete(f"/{ticket.id}" + self.user_cancel_event_url,  headers={'Authorization': f'Bearer {token}'})
+        response = self.client.delete(f'/api/tickets/{ticket.id}/cancel',  headers={'Authorization': f'Bearer {token}'})
         # Assert the response status code is 500 as per the updated logic
         self.assertEqual(response.status_code, 500)
         self.assertEqual(response.json()['error'], 'Failed to send cancellation email')
@@ -322,7 +325,7 @@ class TicketTestAPI(TicketModelsTest):
         
     def test_sent_reminder(self):
         ticket = Ticket.objects.create(event = self.event_test, attendee =self.test_user)
-        response = self.client.post(f'/{ticket.id}/send-reminder',  headers={'Authorization': f'Bearer {self.get_token_for_user(self.test_user)}'})
+        response = self.client.post(f'/api/tickets/{ticket.id}/send-reminder',  headers={'Authorization': f'Bearer {self.get_token_for_user(self.test_user)}'})
         self.assertEqual(response.status_code, 200)
         
     @patch("api.models.Ticket.objects.get")
@@ -332,7 +335,7 @@ class TicketTestAPI(TicketModelsTest):
         ticket = Ticket.objects.create(event = self.event_test, attendee =self.test_user)
         token = self.get_token_for_user(self.test_user)
 
-        response = self.client.delete(f"/{ticket.id}" + self.user_cancel_event_url,  headers={'Authorization': f'Bearer {token}'})
+        response = self.client.delete(f"/api/tickets/{ticket.id}/cancel",  headers={'Authorization': f'Bearer {token}'})
 
         self.assertEqual(response.status_code, 500)
         self.assertEqual(response.json()['error'], 'Internal server error')
