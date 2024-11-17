@@ -90,8 +90,7 @@ class TicketAPI:
                 logger.error(f"Failed to send cancellation email: {str(email_error)}")
                 return Response({'error': 'Failed to send cancellation email'}, status=500)
             
-            ticket.status = 'CANCELLED'
-            ticket.save()
+            ticket.delete()
             return Response({
                 "success": f"Ticket with ID {ticket_id} has been canceled."
             }, status=200)
