@@ -54,7 +54,7 @@ class UserAPI:
         Returns:
             Response: A response containing tokens and user details upon successful login.
         """
-        strategy : UserStrategy = UserStrategy.get_strategy('user_login_regular')
+        strategy : UserStrategy = UserStrategy.get_strategy('user_login')
         return strategy.execute(request, form)
 
     @route.get('/profile', response=UserResponseSchema, auth=JWTAuth())
