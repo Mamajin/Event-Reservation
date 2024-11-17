@@ -1,49 +1,19 @@
 from .schemas import UserSchema, LoginResponseSchema, UserResponseSchema, LoginSchema, ErrorResponseSchema, FileUploadResponseSchema, AuthResponseSchema, GoogleAuthSchema, EmailVerification, EmailVerificationResponseSchema, UserupdateSchema
 from .modules import *
+from .strategy.user_strategy import UserStrategy
 
-router = Router()
 
+
+@api_controller("/users/", tags = ["Users"])
 class UserAPI:
+ 
+    @route.post('/register', response={201: UserSchema, 400: ErrorResponseSchema})
+    def create_user(self,request, form: UserSchema = Form(...)):
+        strategy : UserStrategy = UserStrategy.get_strategy('user_register')
+        return strategy.execute(form)
     
-    @router.post('/register', response={201: UserSchema, 400: ErrorResponseSchema})
-    def create_user(request, form: UserSchema = Form(...)):
-        """
-        Register a new user with the provided details.
-
-        Args:
-            request: The request object.
-            form (UserSchema): The schema containing user registration details.
-
-        Returns:
-            Response: Success response with user data on successful registration, or
-                      an error message if registration fails.
-        """
-        if form.password != form.password2:
-            return Response({"error": "Passwords do not match"}, status=400)
-        if AttendeeUser.objects.filter(username=form.username).exists():
-            return Response({"error": "Username already taken"}, status=400)
-        if AttendeeUser.objects.filter(email = form.email).exists():
-            return Response({"error": "This email already taken"}, status=400)
-        if len(form.phone_number) != 10:
-            return Response({'error' : 'Phone number must be 10 digits long'}, status = 400)
-        if not form.phone_number.isdigit():
-            return Response({'error' : 'Phone number must be digit'}, status = 400)
-        
-        user = AttendeeUser(
-            username=form.username,
-            password=make_password(form.password),
-            birth_date=form.birth_date,
-            phone_number=form.phone_number,
-            email=form.email,
-            first_name=form.first_name,
-            last_name=form.last_name
-        )
-        user.save()
-        user.send_verification_email()
-        return Response(UserSchema.from_orm(user), status=201)
-    
-    @router.post('/logout', response={200: dict})
-    def logout(request):
+    @route.post('/logout', response={200: dict})
+    def logout(self,request):
         """
         Logs out the current user.
 
@@ -53,11 +23,11 @@ class UserAPI:
         Returns:
             Response: A success message with a 200 status code.
         """
-        logout(request)
-        return Response({"message": "Logged out successfully"}, status=200)
+        strategy : UserStrategy = UserStrategy.get_strategy('user_logout')
+        return strategy.execute(request)
 
-    @router.post('/auth/google', response=AuthResponseSchema)
-    def google_auth(request, data: GoogleAuthSchema):
+    @route.post('/auth/google', response=AuthResponseSchema)
+    def google_auth(self,request, data: GoogleAuthSchema):
         """
         Authenticate a user via Google OAuth2 and retrieve access and refresh tokens.
 
@@ -68,53 +38,12 @@ class UserAPI:
         Returns:
             Response: A response containing user details and tokens on successful authentication.
         """
-        idinfo = id_token.verify_oauth2_token(
-            data.token, 
-            requests.Request(),
-            settings.SOCIAL_AUTH_GOOGLE_OAUTH2_KEY,
-            clock_skew_in_seconds=10
-            )
-            
-        email = idinfo.get('email')
-        first_name  = idinfo.get('given_name')
-        last_name = idinfo.get('family_name')
-        picture = idinfo.get('picture')
-
-        
-        if AttendeeUser.objects.filter(email = email).exists():
-            # User exists; optionally update user details from Google info
-            user=  AttendeeUser.objects.get(email = email)
-            first_name = user.first_name
-            last_name = user.last_name
-            email = user.email
-        else:
-            # Create a new user if one does not exist
-            user = AttendeeUser.objects.create(
-                email=email,
-                first_name=first_name,
-                last_name=last_name,
-                username=email.split('@')[0],  # Optionally use email prefix as username
-                password=make_password(get_random_string(8)),  # Generate a random password
-            )
-
-        access_token = AccessToken.for_user(user)
-        refresh_token = RefreshToken.for_user(user)
-        login(request,user)
-        return Response(
-            {   'id': user.id,
-                'status': user.status,
-                'refresh_token': str(refresh_token),
-                'access_token': str(access_token),
-                'first_name': str(first_name),
-                'last_name': str(last_name),
-                'picture': str(picture),
-                'email' : str(email)
-                }
-        )
+        strategy : UserStrategy = UserStrategy.get_strategy('user_google_login')
+        return strategy.execute(request, data)
                     
     
-    @router.post('/login', response = LoginResponseSchema)
-    def login(request, form: LoginSchema = Form(...)):
+    @route.post('/login', response = LoginResponseSchema)
+    def login(self,request, form: LoginSchema = Form(...)):
         """
         Log in a user with username and password, returning access and refresh tokens.
 
@@ -125,53 +54,22 @@ class UserAPI:
         Returns:
             Response: A response containing tokens and user details upon successful login.
         """
-        user = authenticate(request, username=form.username, password=form.password)
-        if user is not None:
-            login(request, user)
-            access_token = AccessToken.for_user(user)
-            refresh_token = RefreshToken.for_user(user)
-            response_data = {
-                "success": True,
-                "message": "Login successful",
-                "access_token": str(access_token),
-                "refresh_token": str(refresh_token),
-                "username": user.username,
-                "id": user.id,
-                "status": user.status,
-            }
+        strategy : UserStrategy = UserStrategy.get_strategy('user_login')
+        return strategy.execute(request, form)
 
-            if user.status == 'Organizer':
-                try:
-                    organizer = Organizer.objects.get(user=user)
-                    response_data["image_url"] = organizer.logo.url if organizer.logo else None
-                except Organizer.DoesNotExist:
-                    response_data["image_url"] = None
-            else:
-                response_data["image_url"] = user.profile_picture.url if user.profile_picture else None
-
-            return Response(response_data, status=200)
-        else:
-            return Response(
-                {"error": "Invalid username or password"},
-                status=400
-            )
-
-    @router.get('/profile', response=UserResponseSchema, auth=JWTAuth())
-    def view_profile(request):
+    @route.get('/profile', response=UserResponseSchema, auth=JWTAuth())
+    def view_profile(self,request):
         """
         Retrieve the profile of the currently logged-in user.
 
         Returns:
             UserResponseSchema: The profile details of the user.
         """
-        user = request.user
-        profile_user = get_object_or_404(AttendeeUser, username=user.username)
-        profile_dict = UserResponseSchema.from_orm(profile_user).dict()
-        profile_data = UserResponseSchema(**profile_dict)
-        return profile_data
+        strategy : UserStrategy = UserStrategy.get_strategy('user_view_profile')
+        return strategy.execute(request)
 
-    @router.patch('/edit-profile/{user_id}/', response=UserupdateSchema, auth=JWTAuth())
-    def edit_profile(request, user_id: int, new_data: UserupdateSchema):
+    @route.patch('/edit-profile/{user_id}/', response=UserupdateSchema, auth=JWTAuth())
+    def edit_profile(self,request, user_id: int, new_data: UserupdateSchema):
         """
         Update the profile information of a user by user ID.
 
@@ -183,16 +81,11 @@ class UserAPI:
         Returns:
             UserResponseSchema: Updated user profile details.
         """
-        user = get_object_or_404(AttendeeUser, id=user_id)
-        update_fields = new_data.dict(exclude={'profile_picture'}, exclude_unset = True)
-        for field, value in update_fields.items():
-            setattr(user, field, value)
-        user.save()
-        user.refresh_from_db()
-        return UserupdateSchema.from_orm(user)
+        strategy : UserStrategy = UserStrategy.get_strategy('user_edit_profile')
+        return strategy.execute(user_id, new_data)
 
-    @router.delete('delete/', auth=JWTAuth())
-    def delete_profile(request):
+    @route.delete('delete/', auth=JWTAuth())
+    def delete_profile(self,request):
         """
         Delete a user profile by user ID.
 
@@ -203,15 +96,10 @@ class UserAPI:
         Returns:
             Response: Success message upon successful deletion.
         """
-        user = request.user
-        get_user = AttendeeUser.objects.get(id = user.id)
-
-        get_user.delete()
-            
-        return Response({'success': 'Your account has been deleted'})
-
-    @router.post('/{user_id}/upload/profile-picture/', response={200: FileUploadResponseSchema, 400: ErrorResponseSchema}, auth=JWTAuth())
-    def upload_profile_picture(request: HttpRequest, user_id: int, profile_picture: UploadedFile = File(...)):
+        strategy : UserStrategy = UserStrategy.get_strategy('user_delete_account')
+        return strategy.execute(request)
+    @route.post('/{user_id}/upload/profile-picture/', response={200: FileUploadResponseSchema, 400: ErrorResponseSchema}, auth=JWTAuth())
+    def upload_profile_picture(self,request: HttpRequest, user_id: int, profile_picture: UploadedFile = File(...)):
         """
         Upload a profile picture for the specified user.
 
@@ -223,94 +111,17 @@ class UserAPI:
         Returns:
             Response: URL and details of the uploaded profile picture.
         """
-        try:
-            user = request.user
-            
-            if profile_picture.content_type not in ALLOWED_IMAGE_TYPES:
-                return Response({'error': 'Invalid file type. Only JPEG and PNG are allowed.'}, status=400)
-            
-            if profile_picture.size > MAX_FILE_SIZE:
-                return Response({'error': f'File size exceeds the limit of {MAX_FILE_SIZE / (1024 * 1024)} MB.'}, status=400)
-
-            filename = f'picture_profiles/{uuid.uuid4()}{os.path.splitext(profile_picture.name)[1]}'
-            logger.info(f"Starting upload for file: {filename}")
-            try:
-                # Direct S3 upload using boto3
-                s3_client = boto3.client(
-                    's3',
-                    aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
-                    aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY,
-                    region_name=settings.AWS_S3_REGION_NAME
-                )
-
-                # Upload file to S3
-                s3_client.upload_fileobj(
-                    profile_picture.file,
-                    settings.AWS_STORAGE_BUCKET_NAME,
-                    filename,
-                    ExtraArgs={
-                        'ContentType': profile_picture.content_type,
-                    }
-                )
-
-                file_url = f"https://{settings.AWS_S3_CUSTOM_DOMAIN}/{filename}"
-                logger.info(f"Successfully uploaded file to S3: {file_url}")
-                
-                user.profile_picture = filename
-                user.save()
-            
-                return Response(FileUploadResponseSchema(
-                    file_url=file_url,
-                    message="Upload successful",
-                    file_name=os.path.basename(filename),
-                    uploaded_at=timezone.now()
-                ), status=200)
-            
-            except ClientError as e:
-                logger.error(f"S3 upload error: {str(e)}")
-                return Response({'error': f"S3 upload failed: {str(e)}"}, status=400)
-            
-        except Exception as e:
-            return Response({'error': f"Upload failed: {str(e)}"}, status=400)
+        strategy: UserStrategy = UserStrategy.get_strategy('user_upload_picture')
+        return strategy.execute(request, profile_picture)
         
-    @router.get('/verify-email/{user_id}/{token}', response={200: EmailVerificationResponseSchema, 400: ErrorResponseSchema})
-    def verify_email(request, user_id: str, token: str):
+    @route.get('/verify-email/{user_id}/{token}', response={200: EmailVerificationResponseSchema, 400: ErrorResponseSchema})
+    def verify_email(self,request, user_id: str, token: str):
         """Verify user's email address with the secure token."""
-        try:
-            uid = force_str(urlsafe_base64_decode(user_id))
-            user = AttendeeUser.objects.get(pk=uid)
-            
-            # Check if token is valid and user is not yet verified
-            if default_token_generator.check_token(user, token) and not user.is_email_verified:
-                user.is_email_verified = True
-                user.is_active = True
-                user.save()
-                
-                return Response({
-                    "message": "Email verified successfully",
-                    "verified": True
-                }, status=200)
-            else:
-                return Response({
-                    "error": "Invalid or expired token"
-                }, status=400)
-        except (TypeError, ValueError, OverflowError, AttendeeUser.DoesNotExist):
-            return Response({
-                "error": "Invalid verification token"
-            }, status=400)
+        strategy: UserStrategy = UserStrategy.get_strategy('user_verify_email')
+        return strategy.execute(user_id, token)
 
-    @router.post('/resend-verification', response={200: EmailVerificationResponseSchema, 400: ErrorResponseSchema})
-    def resend_verification(request, email: str):
+    @route.post('/resend-verification', response={200: EmailVerificationResponseSchema, 400: ErrorResponseSchema})
+    def resend_verification(self,request, email: str):
         """Resend verification email if user is not verified."""
-        try:
-            user = AttendeeUser.objects.get(email=email, is_email_verified=False)
-            user.send_verification_email()
-            
-            return Response({
-                "message": "Verification email sent successfully",
-                "verified": user.is_email_verified
-            }, status=200)
-        except AttendeeUser.DoesNotExist:
-            return Response({
-                "error": "User not found or already verified"
-            }, status=400)
+        strategy : UserStrategy = UserStrategy.get_strategy('user_resend_verification')
+        return strategy.execute(email)

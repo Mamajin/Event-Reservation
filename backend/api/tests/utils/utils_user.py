@@ -3,10 +3,10 @@ from django.utils import timezone
 from api.models import AttendeeUser, Organizer, Event, Ticket
 from datetime import datetime
 from ninja.testing import TestClient
-from api.urls import user_router
 from ninja_jwt.tokens import RefreshToken
 from faker import Faker
 from django.conf import settings
+from api.urls import api
 from google.oauth2 import id_token
 from google.auth.transport import requests
 from django.core.files.uploadedfile import SimpleUploadedFile
@@ -18,12 +18,12 @@ import json
 faker = Faker()
 
 class UserModelsTest(TestCase):
+    client = TestClient(api)
 
     def setUp(self):
         """
         Set up initial test data for models.
         """
-        self.client = TestClient(user_router)
         self.user_create_url = '/register'
         self.user_login_url = '/login'
         self.user_profile_url = '/profile'
