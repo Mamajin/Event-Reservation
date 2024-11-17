@@ -8,11 +8,13 @@ from api.views.ticket import router as ticket_router
 from api.views.bookmarks import router as bookmark_router
 from api.views.like import router as like_router
 from api.views.comment import router as comment_router
+from api.views.organizer import OrganizerController
 from django.conf import settings
 from django.conf.urls.static import static
 
 api = NinjaExtraAPI(version ="2.0.0")
 api.register_controllers(NinjaJWTDefaultController)
+api.register_controllers(OrganizerController)
 
 # Register routers for different models/views
 api.add_router("/users/", user_router)

@@ -1,12 +1,12 @@
 from .schemas import OrganizerResponseSchema, ErrorResponseSchema, OrganizerSchema, FileUploadResponseSchema, OrganizerUpdateSchema
 from .modules import *
 
-router = Router()
+router = Router(tags=['Organizer'], auth=JWTAuth())
 
-
+@api_controller('organizers', tags=['Organizers'])    
 class OrganizerAPI:
-    @router.post('/apply-organizer',response={201: OrganizerResponseSchema, 400: ErrorResponseSchema}, auth=JWTAuth())    
-    def apply_organizer(request: HttpRequest, form: OrganizerSchema = Form(...)):
+    @http_post('/apply-organizer',response={201: OrganizerResponseSchema, 400: ErrorResponseSchema}, auth=JWTAuth())    
+    def apply_organizer(self, request: HttpRequest, form: OrganizerSchema = Form(...)):
         """Apply an authenticated user to be an organizer"""
         try:
             logger.info(f"User {request.user.id} is attempting to apply as an organizer.")
@@ -41,14 +41,14 @@ class OrganizerAPI:
             logger.info(f"User {request.user.id} successfully applied as an organizer with ID {organizer.id}.")
             
             # Return formatted response
-            return Response(OrganizerResponseSchema.from_orm(organizer), status=201)
+            return OrganizerResponseSchema.from_orm(organizer), 201
         
         except Exception as e:
             logger.error(f"Unexpected error while creating organizer for user {request.user.id}: {str(e)}")
             return 400, {"error": "An unexpected error occurred"}
 
-    @router.delete('/delete-event/{event_id}', response={204: None, 403: ErrorResponseSchema, 404: ErrorResponseSchema}, auth=JWTAuth())
-    def delete_event(request: HttpRequest, event_id: int):
+    @http_delete('/delete-event/{event_id}', response={204: None, 403: ErrorResponseSchema, 404: ErrorResponseSchema}, auth=JWTAuth())
+    def delete_event(self, request: HttpRequest, event_id: int):
         """Delete event by event id."""
         try:
             organizer = Organizer.objects.get(user=request.user)
@@ -60,13 +60,13 @@ class OrganizerAPI:
             event = Event.objects.get(id=event_id, organizer=organizer)
             event.delete()
             logger.info(f"Organizer {organizer.organizer_name} deleted event {event_id}.")
-            return Response({'success': f" Delete event ID {event_id} successfully"},status=204)
+            return {'success': f" Delete event ID {event_id} successfully"}, 204
         except Event.DoesNotExist:
             logger.error(f"Organizer {organizer.organizer_name} attempted to delete non-existing event {event_id}.")
-            return Response({'error': 'Event does not exist or you do not have permission to delete it'}, status=404)
+            return {'error': 'Event does not exist or you do not have permission to delete it'}, 404
 
-    @router.patch('/update-organizer', response={200: OrganizerUpdateSchema, 401: ErrorResponseSchema, 404: ErrorResponseSchema}, auth=JWTAuth())
-    def update_organizer(request: HttpRequest, data: OrganizerUpdateSchema):
+    @http_patch('/update-organizer', response={200: OrganizerUpdateSchema, 401: ErrorResponseSchema, 404: ErrorResponseSchema}, auth=JWTAuth())
+    def update_organizer(self, request: HttpRequest, data: OrganizerUpdateSchema):
         """Update the profile information of the authenticated organizer."""
 
         organizer = Organizer.objects.get(user=request.user)
@@ -87,30 +87,30 @@ class OrganizerAPI:
 
         logger.info(f"User {request.user.id} updated their organizer profile.")
         
-        return Response(organize_data, status=200)
+        return organize_data
             
-    @router.delete('/revoke-organizer', response={204: None, 403: ErrorResponseSchema, 404: ErrorResponseSchema}, auth=JWTAuth())
-    def revoke_organizer(request: HttpRequest):
+    @http_delete('/revoke-organizer', response={204: None, 403: ErrorResponseSchema, 404: ErrorResponseSchema}, auth=JWTAuth())
+    def revoke_organizer(self, request: HttpRequest):
         """Revoke the organizer role of the authenticated user."""
         try:
             organizer = Organizer.objects.get(user=request.user)
             organizer.delete()
             logger.info(f"Organizer role revoked for user {request.user.id}.")
-            return Response({'success':f'Organizer role revoked for user {request.user.id}.'},status=204)
+            return {'success':f'Organizer role revoked for user {request.user.id}.'}, 204
         except Organizer.DoesNotExist:
             logger.error(f"User {request.user.username} tried to revoke a non-existing organizer profile.")
             return Response({'error': 'User is not an organizer'}, status=404)
         
-    @router.get('/view-organizer', response={200: OrganizerResponseSchema, 401: ErrorResponseSchema, 404: ErrorResponseSchema}, auth=JWTAuth())
-    def view_organizer(request: HttpRequest):
+    @http_get('/view-organizer', response={200: OrganizerResponseSchema, 401: ErrorResponseSchema, 404: ErrorResponseSchema}, auth=JWTAuth())
+    def view_organizer(self, request: HttpRequest):
         """View the organizer profile."""
         organizer = get_object_or_404(Organizer, user=request.user)
         logger.info(f"User {request.user.id} viewed their organizer profile.")
         organizer_dict = OrganizerResponseSchema.from_orm(organizer).dict()
-        return Response(OrganizerResponseSchema(**organizer_dict), status=200)
+        return OrganizerResponseSchema(**organizer_dict), 200
         
-    @router.post('/{organizer_id}/upload/logo/', response={200: FileUploadResponseSchema, 400: ErrorResponseSchema}, auth=JWTAuth())
-    def upload_profile_picture(request: HttpRequest, organizer_id: int, logo: UploadedFile = File(...)):
+    @http_post('/{organizer_id}/upload/logo/', response={200: FileUploadResponseSchema, 400: ErrorResponseSchema}, auth=JWTAuth())
+    def upload_profile_picture(self, request: HttpRequest, organizer_id: int, logo: UploadedFile = File(...)):
         """
         Upload a logo for a organzier's profile.
         """
@@ -118,10 +118,10 @@ class OrganizerAPI:
             organizer = get_object_or_404(Organizer, id=organizer_id)
             
             if logo.content_type not in ALLOWED_IMAGE_TYPES:
-                return Response({'error': 'Invalid file type. Only JPEG and PNG are allowed.'}, status=400)
+                return {'error': 'Invalid file type. Only JPEG and PNG are allowed.'}, 400
             
             if logo.size > MAX_FILE_SIZE:
-                return Response({'error': f'File size exceeds the limit of {MAX_FILE_SIZE / (1024 * 1024)} MB.'}, status=400)
+                return {'error': f'File size exceeds the limit of {MAX_FILE_SIZE / (1024 * 1024)} MB.'}, 400
             
             # Check if there's an existing image
             if organizer.logo:
@@ -165,17 +165,16 @@ class OrganizerAPI:
                 organizer.logo = filename
                 organizer.save()
             
-                return Response(FileUploadResponseSchema(
+                return FileUploadResponseSchema(
                     file_url=file_url,
                     message="Upload successful",
                     file_name=os.path.basename(filename),
                     uploaded_at=timezone.now()
-                ), status=200)
+                ), 200
             
             except ClientError as e:
                 logger.error(f"S3 upload error: {str(e)}")
-                return Response({'error': f"S3 upload failed: {str(e)}"}, status=400)
+                return {'error': f"S3 upload failed: {str(e)}"}, 400
             
         except Exception as e:
-            return Response({'error': f"Upload failed: {str(e)}"}, status=400)
-                    
+            return {'error': f"Upload failed: {str(e)}"}, 400                  
