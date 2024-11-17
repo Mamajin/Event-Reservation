@@ -73,10 +73,9 @@ class DeleteEventStrategy(OrganizerStrategy):
             return
         return DeleteEventStrategy()
     
-    def execute(self, request: HttpRequest, **kwargs):
+    def execute(self, request: HttpRequest, event_id: int, **kwargs):
         """Delete an event"""
         logger.info(f"User {request.user.id} is attempting to delete an event.")
-        event_id = kwargs.get('event_id')
         try:
             organizer = get_object_or_404(Organizer, user=request.user)
             event = get_object_or_404(Event, id=event_id, organizer=organizer)
@@ -106,7 +105,7 @@ class UpdateOrganizerStrategy(OrganizerStrategy):
         try:
             organizer = get_object_or_404(Organizer, user=request.user)
 
-            if data.organizer_name != organizer.organizer_name and Organizer.objects.filter(organizer_name=data.organizer_name).exists():
+            if data.organizer_name == organizer.organizer_name and Organizer.objects.filter(organizer_name=data.organizer_name).exists():
                 logger.info(f"Organizer name '{data.organizer_name}' is already taken.")
                 return Response({'error': 'Organizer name is already taken'}, status=400)
             
