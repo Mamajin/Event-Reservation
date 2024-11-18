@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { FaShareAlt } from 'react-icons/fa';
 import LikeButton from './EventCardButton/LikeButton';
 import BookmarkButton from './EventCardButton/BookMarkButton';
+import ShareButton from './EventCardButton/ShareButton';
 import api from '../api';
 
 function EventCard({ event, onEdit, isEditable }) {
@@ -53,14 +54,11 @@ function EventCard({ event, onEdit, isEditable }) {
           {event.description.length > maxDescriptionLength ? `${event.description.substring(0, maxDescriptionLength)}...` : event.description}
         </p>
 
+        {/* Engangement Buttons */}
         <div className="flex items-center mt-4 space-x-4">
-          {/* Like button */}
-          <LikeButton eventId={event.id} isInitiallyLiked={hasUserLiked} />
-          
-          {/* Bookmark button */}
+          <LikeButton eventId={event.id} isInitiallyLiked={hasUserLiked} />          
           <BookmarkButton eventId={event.id} />
-
-          <FaShareAlt className="text-gray-500 cursor-pointer hover:text-green-500 active:text-green-600" />
+          <ShareButton eventId={event.id}/>
         </div>
 
         {isEditable && (
