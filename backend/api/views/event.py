@@ -3,12 +3,19 @@ from .modules import *
 from django.contrib.auth.models import AnonymousUser
 from typing import Union
 from .strategy.event_strategy import EventStrategy
+from injector import Binder, inject
+
+import injector
+
+
+
 
 
 
 @api_controller('/events/', tags = ["Events"])
-class EventAPI:
-
+class EventAPI(ControllerBase):
+    
+        
     @route.post('/create-event', response =EventResponseSchema, auth=JWTAuth())
     def create_event(self,request, data: EventInputSchema = Form(...), image: UploadedFile = File(None)):
         """
@@ -22,9 +29,8 @@ class EventAPI:
         Returns:
             EventResponseSchema: The created event details or error response.
         """
-        
-        strategy = EventStrategy.get_strategy('create_event')
-        return strategy.execute(request, data, image)
+        strategy = EventStrategy.get_strategy('create_event', request)
+        return strategy.execute(data, image)
 
     @route.get('/my-events', response=List[EventResponseSchema], auth=JWTAuth())
     def get_my_events(self,request: HttpRequest):
@@ -37,26 +43,8 @@ class EventAPI:
         Returns:
             List[EventResponseSchema]: List of events created by the organizer.
         """
-        try:
-            organizer = Organizer.objects.get(user=request.user)
-            events = Event.objects.filter(organizer=organizer, event_create_date__lte=timezone.now()).order_by("-event_create_date")
-            event_list = []
-            for event in events:
-                engagement = EventResponseSchema.resolve_engagement(event)
-                user_engaged = EventResponseSchema.resolve_user_engagement(event, request.user)
-                EventResponseSchema.set_status_event(event)
-                event_data = EventResponseSchema.from_orm(event)
-                event_data.engagement = engagement
-                event_data.user_engaged = user_engaged
-                event_list.append(event_data)
-            logger.info(f"Organizer {organizer.organizer_name} retrieved their events.")
-            return Response(event_list, status=200)
-        except Organizer.DoesNotExist:
-            logger.error(f"User {request.user.username} tried to access events but is not an organizer.")
-            return Response({'error': 'User is not an organizer'}, status=404)
-        except Exception as e:
-            logger.error(f"Error while retrieving events for organizer {request.user.id}: {str(e)}")
-            return Response({'error': str(e)}, status=400)
+        strategy : EventStrategy = EventStrategy.get_strategy('get_my_events', request)
+        return strategy.execute()
 
     @route.get('/events', response=List[EventResponseSchema])
     def list_all_events(self,request: HttpRequest):
@@ -340,4 +328,16 @@ class EventAPI:
                         for ticket in tickets]
         logger.info(f"Retrieved ticket list for event {event_id}.")
         return Response(response_data, status=200)
+    
+    
+
+
+def configure(binder: Binder) -> Binder:
+    binder.bind(RequestProvider, to=EventAPI, scope=injector.singleton)
+
+def get_request_provider(request: HttpRequest):
+    return RequestProvider(request)
+
+
+
                 
