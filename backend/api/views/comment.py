@@ -6,7 +6,7 @@ from api.views.strategy.comment_strategy import CommentStrategy
 @api_controller('/comments/', tags=['Comments'])
 class CommentAPI:
     
-    @route.post('/write-comment/{event_id}', response={201: CommentResponseSchema, 400: ErrorResponseSchema, 404: ErrorResponseSchema}, auth=JWTAuth())
+    @http_post('/write-comment/{event_id}', response={201: dict}, auth=JWTAuth())
     def create_comment(self, request: HttpRequest, event_id: int, comment: CommentSchema):
         """Create a new comment for a specific event.
 
@@ -19,9 +19,9 @@ class CommentAPI:
             Response: Created comment details or error message.
         """
         strategy : CommentStrategy = CommentStrategy.get_strategy('create_comment')
-        return strategy.execute(request, event_id, comment)
+        return strategy.execute(request, event_id, Comment)
         
-    @http_delete('/{comment_id}/delete/', response={204: None, 404: ErrorResponseSchema}, auth=JWTAuth())
+    @http_delete('/{comment_id}/delete/', response={200: dict, 404: ErrorResponseSchema}, auth=JWTAuth())
     def delete_comment(self, request: HttpRequest, comment_id: int):
         """Delete a comment by ID if user is authorized.
 
@@ -35,7 +35,7 @@ class CommentAPI:
         strategy : CommentStrategy = CommentStrategy.get_strategy('delete_comment')
         return strategy.execute(request, comment_id)
             
-    @http_put('/{comment_id}/edit/', response={200: CommentResponseSchema, 404: ErrorResponseSchema}, auth=JWTAuth())
+    @http_put('/{comment_id}/edit/', response={200: dict, 404: ErrorResponseSchema}, auth=JWTAuth())
     def edit_comment(self, request: HttpRequest, comment_id: int, data: CommentSchema):
         """Edit a comment's content if user is authorized.
 

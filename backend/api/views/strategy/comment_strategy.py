@@ -50,9 +50,12 @@ class CommentCreateStrategy(CommentStrategy):
             logger.info(f"Comment created for event {event_id} by {user.username}.")
             return Response(CommentResponseSchema.from_orm(comment), status=200)
         
-        except Event.DoesNotExist:
+        except Http404:
             logger.error(f"Event {event_id} doesn't exist.")
             return Response({'error': f"Event {event_id} doesn't exist."}, status=404)
+        except Exception as e:
+            logger.error(f"Error creating comment for event {event_id}: {str(e)}")
+            return Response({'error': str(e)}, status=500)
         
 class CommentGetStrategy(CommentStrategy):
     """Get a comment by ID."""
@@ -77,7 +80,7 @@ class CommentGetStrategy(CommentStrategy):
 
 class CommentUpdateStrategy(CommentStrategy):
     """Update a comment by ID."""
-    def execute(self, request: HttpRequest, comment_id: int, comment: CommentSchema):
+    def execute(self, request: HttpRequest, comment_id: int, data: CommentSchema):
         """Update a comment by ID.
 
         Args:
@@ -89,17 +92,17 @@ class CommentUpdateStrategy(CommentStrategy):
             Response: Updated comment details or error message.
         """
         try:
-            lastest_comment = get_object_or_404(Comment, id=comment_id)
+            comment = get_object_or_404(Comment, id=comment_id)
 
-            if lastest_comment.user != request.user:
+            if comment.user != request.user:
                 logger.warning(f"Unauthorized edit attempt by '{request.user.username}' on comment {comment_id}.")
                 return Response({'error': 'Unauthorized to edit this comment'}, status=403)
 
-            lastest_comment.content = comment.content
-            lastest_comment.save(update_fields=['content'])
+            comment.content = data.content
+            comment.save(update_fields=['content'])
 
             logger.info(f"Comment {comment_id} edited by user {request.user.username}")
-            return Response(CommentResponseSchema.from_orm(lastest_comment), status=200)
+            return Response(CommentResponseSchema.from_orm(comment), status=200)
 
         except Http404:
             logger.error(f"Comment {comment_id} not found for edit.")
@@ -131,7 +134,7 @@ class CommentListStrategy(CommentStrategy):
     
 class CommentReplyStrategy(CommentStrategy):
     """Reply to a comment."""
-    def execute(self, request: HttpRequest, comment_id: int, comment: CommentSchema):
+    def execute(self, request: HttpRequest, comment_id: int, data: CommentSchema):
         """Reply to a comment.
 
         Args:
@@ -142,12 +145,12 @@ class CommentReplyStrategy(CommentStrategy):
         Returns:    
             Response: Created reply details or error message.
         """
-        try:
+        try: 
             parent_comment = get_object_or_404(Comment, id=comment_id)
             user = request.user
             comment = Comment.objects.create(
                 event=parent_comment.event, user=user, parent=parent_comment,
-                content=comment.content, status=Comment.Status.APPROVED
+                content=data.content, status=Comment.Status.APPROVED
             )
             logger.info(f"Reply created for comment {comment_id} by {user.username}.")
             return Response(CommentResponseSchema.from_orm(comment), status=200)
@@ -183,7 +186,7 @@ class CommentDeleteStrategy(CommentStrategy):
                 
             comment.delete()
             logger.info(f"Comment {comment_id} deleted by user {request.user.username}")
-            return Response({'message': 'Delete comment successfully'}, status=204)
+            return Response({'message': 'Delete comment successfully.'}, status=200)
         
         except Http404:
             logger.error(f"Comment {comment_id} not found for delete.")
