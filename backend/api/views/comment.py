@@ -1,5 +1,6 @@
-from  .schemas import CommentSchema, CommentResponseSchema, CommentReaction, ErrorResponseSchema, CommentReactionResponseSchema, CommentType
 from .modules import *
+from api.views.schemas.comment_schema import *
+from api.views.schemas.other_schema import ErrorResponseSchema
 
 
 router = Router()
