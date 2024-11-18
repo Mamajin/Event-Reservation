@@ -265,7 +265,7 @@ class EventAPI:
 
                 file_url = f"https://{settings.AWS_S3_CUSTOM_DOMAIN}/{filename}"
                 logger.info(f"Successfully uploaded file to S3: {file_url}")
-                
+
                 event.event_image = filename
                 event.save()
             
