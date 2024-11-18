@@ -40,17 +40,17 @@ class EventTest(EventModelsTest):
             "detailed_description": "Join us for an exciting event!",
             "contact_email": "info@techconference.com",
             "contact_phone": "+1234567890",
-            "updated_at": timezone.now().isoformat()
+            "updated_at": timezone.now().isoformat(),
+            'image' : image_file
         }
 
         # Make the request
         response = self.client.post(
-            self.event_create_url,
-            data= data,
-            FILES = {'image': image_file},# Combine data and file
-            content_type='multipart/form-data',
-            headers={'Authorization': f'Bearer {token}'}  # Use HTTP_AUTHORIZATION instead of headers
+            path = '/api/events/create-event',
+            data = data,
+            headers={'Authorization': f'Bearer {token}'}  
         )
+
 
         
         # Check the response content
@@ -66,6 +66,7 @@ class EventTest(EventModelsTest):
         user = self.create_user("become_organizer", "become_organizer")
         token = self.get_token_for_user(user)
         organizer = self.become_organizer(user, "become_organizer")
+        
 
         # Create an image file for testing
         image = SimpleUploadedFile(
@@ -98,15 +99,16 @@ class EventTest(EventModelsTest):
             "contact_email": "info@techconference.com",
             "contact_phone": "+1234567890",
             "updated_at": timezone.now().isoformat(),
+            'image': image
         }
             
         response = self.client.post(
-            self.event_create_url,
+            path = '/api/events/create-event',
             data= data,
-            FILES = {'image': image },
-            content_type='multipart/form-data',
             headers={'Authorization': f'Bearer {token}'}
         )
+    
+        
         
         # Make the request with multipart/form-data for the image upload
         self.assertEqual(response.status_code, 400)
@@ -143,11 +145,12 @@ class EventTest(EventModelsTest):
         
         self.assertFalse(Organizer.objects.filter(user = just_user).exists())
         response = self.client.post(
-            self.event_create_url,
-            data= data,  
-            content_type='multipart/form-data',  # Ensure the correct content type
+            path = '/api/events/create-event',
+            data= data,
             headers={'Authorization': f'Bearer {token}'}
         )
+
+
 
         self.assertEqual(response.status_code, 403)
         self.assertEqual(response.json()['detail'], "You are not an organizer.")
@@ -181,9 +184,8 @@ class EventTest(EventModelsTest):
         organizer = self.become_organizer(normal_user, "test")
         token  = self.get_token_for_user(normal_user)
         response = self.client.post(
-            self.event_create_url,
+            path = '/api/events/create-event',
             data= data,  # Wrap the data in a 'data' key
-            content_type='multipart/form-data',  # Ensure the correct content type
             headers={'Authorization': f'Bearer {token}'}
         )
         self.assertEqual(response.status_code, 400)
@@ -209,12 +211,12 @@ class EventTest(EventModelsTest):
         # Prepare request data
         event_data = self.get_valid_data()
         image_file = self.create_test_image()
+        event_data['image'] = image_file
 
         # Make request
         response = self.client.post(
-            self.event_create_url,
+            path = '/api/events/create-event',
             data=event_data,
-            FILES={'image': image_file},
             headers={'Authorization': f'Bearer {token}'}
         )
 

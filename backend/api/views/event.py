@@ -2,14 +2,14 @@ from .schemas import EventInputSchema, ErrorResponseSchema, EventResponseSchema,
 from .modules import *
 from django.contrib.auth.models import AnonymousUser
 from typing import Union
+from .strategy.event_strategy import EventStrategy
 
 
 
-router = Router()
-@api_controller('/events/', tag = ["Events"])
+@api_controller('/events/', tags = ["Events"])
 class EventAPI:
 
-    @router.post('/create-event', response=EventResponseSchema, auth=JWTAuth())
+    @route.post('/create-event', response =EventResponseSchema, auth=JWTAuth())
     def create_event(self,request, data: EventInputSchema = Form(...), image: UploadedFile = File(None)):
         """
         Create a new event with optional image upload.
@@ -22,51 +22,11 @@ class EventAPI:
         Returns:
             EventResponseSchema: The created event details or error response.
         """
-        this_user = request.user
-        try:
-            organizer = Organizer.objects.get(user=this_user)
-        except Organizer.DoesNotExist:
-            raise HttpError(status_code=403, message="You are not an organizer.")
         
-        # Create event
-        event = Event(**data.dict(), organizer=organizer)
-        if not event.is_valid_date():
-            return Response({'error': 'Please enter valid date'}, status=400)
-        
-        
+        strategy = EventStrategy.get_strategy('create_event')
+        return strategy.execute(request, data, image)
 
-        # If an image is provided, upload it
-        if image:
-            if image.content_type not in ALLOWED_IMAGE_TYPES:
-                return Response({'error': 'Invalid file type. Only JPEG and PNG are allowed.'}, status=400)
-            
-            # (Image upload process, similar to your upload_event_image logic)
-            filename = f'event_images/{uuid.uuid4()}{os.path.splitext(image.name)[1]}'
-            try:
-                s3_client = boto3.client(
-                    's3',
-                    aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
-                    aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY,
-                    region_name=settings.AWS_S3_REGION_NAME
-                )
-                s3_client.upload_fileobj(
-                    image.file,
-                    settings.AWS_STORAGE_BUCKET_NAME,
-                    filename,
-                    ExtraArgs={'ContentType': image.content_type}
-                )
-                event.event_image = filename
-                event.save()
-                file_url = f"https://{settings.AWS_S3_CUSTOM_DOMAIN}/{filename}"
-                logger.info(f"Uploaded event image for event ID {event.id}: {file_url}")
-            except ClientError as e:
-                return Response({'error': f"S3 upload failed"}, status=400)
-            
-        # Save event and return response
-        event.save()
-        return EventResponseSchema.from_orm(event)
-
-    @router.get('/my-events', response=List[EventResponseSchema], auth=JWTAuth())
+    @route.get('/my-events', response=List[EventResponseSchema], auth=JWTAuth())
     def get_my_events(self,request: HttpRequest):
         """
         Retrieve events created by the logged-in organizer.
@@ -98,7 +58,7 @@ class EventAPI:
             logger.error(f"Error while retrieving events for organizer {request.user.id}: {str(e)}")
             return Response({'error': str(e)}, status=400)
 
-    @router.get('/events', response=List[EventResponseSchema])
+    @route.get('/events', response=List[EventResponseSchema])
     def list_all_events(self,request: HttpRequest):
         """
         Retrieve all public events for the homepage.
@@ -133,7 +93,7 @@ class EventAPI:
 
         logger.info("Retrieved all public events for the homepage.")
         return Response(event_list, status=200)
-    @router.patch('/{event_id}/edit', response={200: EventUpdateSchema, 401: ErrorResponseSchema, 404: ErrorResponseSchema}, auth=JWTAuth())
+    @route.patch('/{event_id}/edit', response={200: EventUpdateSchema, 401: ErrorResponseSchema, 404: ErrorResponseSchema}, auth=JWTAuth())
     def edit_event(self,request: HttpRequest, event_id: int, data: EventUpdateSchema):
         """
         Edit an existing event by ID if the user is the organizer.
@@ -170,7 +130,7 @@ class EventAPI:
             logger.error(f"Error while editing event {event_id}: {str(e)}")
             return Response({'error': str(e)}, status=400)
 
-    @router.get('/{event_id}', response=EventResponseSchema)
+    @route.get('/{event_id}', response=EventResponseSchema)
     def event_detail(self,request: HttpRequest, event_id: int):
         """
         Retrieve detailed information for a specific event.
@@ -200,7 +160,7 @@ class EventAPI:
         event_data.user_engaged = user_engaged
         return event_data
     
-    @router.post('/{event_id}/upload/event-image/', response={200: FileUploadResponseSchema, 400: ErrorResponseSchema}, auth=JWTAuth())
+    @route.post('/{event_id}/upload/event-image/', response={200: FileUploadResponseSchema, 400: ErrorResponseSchema}, auth=JWTAuth())
     def upload_event_image(self,request: HttpRequest, event_id: int, file: UploadedFile = File(...)):
         """
         Upload an image for a specific event.
@@ -284,7 +244,7 @@ class EventAPI:
         except Exception as e:
             return Response({'error': f"Upload failed: {str(e)}"}, status=400)
         
-    @router.get('/{event_id}/engagement', response={200: dict})
+    @route.get('/{event_id}/engagement', response={200: dict})
     def get_event_engagements(self,request: HttpRequest, event_id: int):
         """
         Retrieve engagement metrics for a specific event.
@@ -300,7 +260,7 @@ class EventAPI:
         engagement_data = EventResponseSchema.resolve_engagement(event)
         return engagement_data  
     
-    @router.get('/{event_id}/user-engagement', response={200: dict}, auth=JWTAuth())
+    @route.get('/{event_id}/user-engagement', response={200: dict}, auth=JWTAuth())
     def get_event_user_engagement(self,request: HttpRequest, event_id: int):
         """
         Retrieve user engagement metrics for a specific event.
@@ -316,7 +276,7 @@ class EventAPI:
         user_engaged = EventResponseSchema.resolve_user_engagement(event, request.user)
         return user_engaged              
     
-    @router.get('/{event_id}/comments', response=List[CommentResponseSchema])
+    @route.get('/{event_id}/comments', response=List[CommentResponseSchema])
     def get_events_comments(self,request: HttpRequest, event_id: int):
         """
         Retrieve all comments for a specific event, including nested replies.
@@ -334,7 +294,7 @@ class EventAPI:
         logger.info(f"Retrieved {len(comments)} comments for event {event_id}.")
         return Response(response_data, status=200)
     
-    @router.get('/{event_id}/attendee-list', response=List[UserResponseSchema], auth=JWTAuth())
+    @route.get('/{event_id}/attendee-list', response=List[UserResponseSchema], auth=JWTAuth())
     def get_attendee_list(self,request: HttpRequest, event_id: int):
         """
         Retrieve the list of attendees for a specific event.
@@ -360,7 +320,7 @@ class EventAPI:
             logger.error(f"User {request.user.username} tried to access attendee list but is not an organizer.")
             return Response({'error': 'User is not an organizer'}, status=403)
         
-    @router.get('/{event_id}/ticket-list', response=List[TicketResponseSchema], auth=JWTAuth())
+    @route.get('/{event_id}/ticket-list', response=List[TicketResponseSchema], auth=JWTAuth())
     def get_ticket_list(self,request: HttpRequest, event_id: int):
         """
         Retrieve the list of tickets for a specific event.
