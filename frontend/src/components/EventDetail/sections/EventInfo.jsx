@@ -196,6 +196,7 @@ export function EventInfo({ event }) {
             )}
           </div>
           {/* Contact Information */}
+          {(event.contact_email || event.contact_phone) &&(
           <div className="card bg-white">
             <div className="card-body">
               <h3 className="font-semibold text-dark-purple text-lg mb-4">Contact Information</h3>
@@ -218,7 +219,7 @@ export function EventInfo({ event }) {
                 )}
               </div>
             </div>
-          </div>
+          </div>)}
 
           {/* Social Links */}
           {socialLinks.length > 0 && (
