@@ -80,7 +80,7 @@ function LoginForm() {
         }
     };
     return (
-        <div className="min-h-screen bg-base-200 flex flex-col items-center justify-center p-4">
+        <div className="min-h-screen bg-white flex flex-col items-center justify-center p-4">
             <div className="card w-full max-w-md bg-base-100 shadow-xl relative">
                 {isLoading && (
                     <div className="absolute inset-0 bg-base-100/50 backdrop-blur-sm flex items-center justify-center z-50 rounded-2xl">
@@ -88,13 +88,13 @@ function LoginForm() {
                     </div>
                 )}
 
-                <div className="card-body">
+                <div className="card-body bg-white">
                     {/* Logo Section */}
                     <div className="flex flex-col items-center gap-2 mb-4">
                         <div className="avatar">
                         </div>
-                        <h2 className="card-title text-2xl font-bold">Welcome Back!</h2>
-                        <p className="text-base-content/60 text-center">
+                        <h2 className="card-title text-2xl text-dark-purple font-bold">Welcome Back!</h2>
+                        <p className="text-base-content/90 text-center">
                             Sign in to access your account
                         </p>
                     </div>
@@ -117,28 +117,12 @@ function LoginForm() {
 
                     {/* Sign In Options */}
                     <div className="space-y-4">
-                        <div className="relative">
-                            <GoogleLogin
-                                onSuccess={handleGoogleSuccess}
-                                onError={() => {
-                                    setError('Google Sign In was unsuccessful. Please try again.');
-                                }}
-                                useOneTap
-                                theme="filled_black"
-                                shape="circle"
-                                size="large"
-                            />
-                        </div>
-
-                        {/* Divider */}
-                        <div className="divider">OR</div>
-
                         {/* Email Input */}
                         <div className="form-control">
                             <input 
                                 type="email" 
                                 placeholder="Username" 
-                                className="input input-bordered" 
+                                className="input bg-white input-bordered" 
                                 onChange={(e) => setUsername(e.target.value)}
                                 
                             />
@@ -149,7 +133,7 @@ function LoginForm() {
                             <input 
                                 type="password" 
                                 placeholder="Password" 
-                                className="input input-bordered" 
+                                className="input bg-white input-bordered" 
                                 onChange={(e) => setPassword(e.target.value)}
                             />
                             <label className="label">
@@ -158,16 +142,36 @@ function LoginForm() {
                                 </a>
                             </label>
                         </div>
+                        {/* Divider */}
+                        <div className="divider">OR</div>
+
+                        {/* Google Sign In Button */}
+                        <div className="relative">
+                            <GoogleLogin
+                                onSuccess={handleGoogleSuccess}
+                                onError={() => {
+                                    setError('Google Sign In was unsuccessful. Please try again.');
+                                }}
+                                useOneTap
+                                theme="bg-white"
+                                shape="circle"
+                                size="large"
+                            />
+                        </div>
+
+
+
+
 
                         {/* Login Button */}
-                        <button className="btn btn-primary w-full" onClick={handleSubmit}>
-                            Login with Email
+                        <button className="btn btn-dark-purple w-full" onClick={handleSubmit}>
+                            Login
                         </button>
 
                         {/* Sign Up Link */}
                         <p className="text-center text-sm">
                             Don't have an account?{' '}
-                            <Link to="/register"  className="link link-primary">
+                            <Link to="/register"  className="link link-dark-purple">
                                 Sign up
                             </Link>
                         </p>
