@@ -6,12 +6,11 @@ from typing import Union
 
 
 router = Router()
-
-
+@api_controller('/events/', tag = ["Events"])
 class EventAPI:
 
     @router.post('/create-event', response=EventResponseSchema, auth=JWTAuth())
-    def create_event(request, data: EventInputSchema = Form(...), image: UploadedFile = File(None)):
+    def create_event(self,request, data: EventInputSchema = Form(...), image: UploadedFile = File(None)):
         """
         Create a new event with optional image upload.
 
@@ -68,7 +67,7 @@ class EventAPI:
         return EventResponseSchema.from_orm(event)
 
     @router.get('/my-events', response=List[EventResponseSchema], auth=JWTAuth())
-    def get_my_events(request: HttpRequest):
+    def get_my_events(self,request: HttpRequest):
         """
         Retrieve events created by the logged-in organizer.
 
@@ -100,7 +99,7 @@ class EventAPI:
             return Response({'error': str(e)}, status=400)
 
     @router.get('/events', response=List[EventResponseSchema])
-    def list_all_events(request: HttpRequest):
+    def list_all_events(self,request: HttpRequest):
         """
         Retrieve all public events for the homepage.
 
@@ -135,7 +134,7 @@ class EventAPI:
         logger.info("Retrieved all public events for the homepage.")
         return Response(event_list, status=200)
     @router.patch('/{event_id}/edit', response={200: EventUpdateSchema, 401: ErrorResponseSchema, 404: ErrorResponseSchema}, auth=JWTAuth())
-    def edit_event(request: HttpRequest, event_id: int, data: EventUpdateSchema):
+    def edit_event(self,request: HttpRequest, event_id: int, data: EventUpdateSchema):
         """
         Edit an existing event by ID if the user is the organizer.
 
@@ -172,7 +171,7 @@ class EventAPI:
             return Response({'error': str(e)}, status=400)
 
     @router.get('/{event_id}', response=EventResponseSchema)
-    def event_detail(request: HttpRequest, event_id: int):
+    def event_detail(self,request: HttpRequest, event_id: int):
         """
         Retrieve detailed information for a specific event.
 
@@ -202,7 +201,7 @@ class EventAPI:
         return event_data
     
     @router.post('/{event_id}/upload/event-image/', response={200: FileUploadResponseSchema, 400: ErrorResponseSchema}, auth=JWTAuth())
-    def upload_event_image(request: HttpRequest, event_id: int, file: UploadedFile = File(...)):
+    def upload_event_image(self,request: HttpRequest, event_id: int, file: UploadedFile = File(...)):
         """
         Upload an image for a specific event.
 
@@ -286,7 +285,7 @@ class EventAPI:
             return Response({'error': f"Upload failed: {str(e)}"}, status=400)
         
     @router.get('/{event_id}/engagement', response={200: dict})
-    def get_event_engagements(request: HttpRequest, event_id: int):
+    def get_event_engagements(self,request: HttpRequest, event_id: int):
         """
         Retrieve engagement metrics for a specific event.
 
@@ -302,7 +301,7 @@ class EventAPI:
         return engagement_data  
     
     @router.get('/{event_id}/user-engagement', response={200: dict}, auth=JWTAuth())
-    def get_event_user_engagement(request: HttpRequest, event_id: int):
+    def get_event_user_engagement(self,request: HttpRequest, event_id: int):
         """
         Retrieve user engagement metrics for a specific event.
 
@@ -318,7 +317,7 @@ class EventAPI:
         return user_engaged              
     
     @router.get('/{event_id}/comments', response=List[CommentResponseSchema])
-    def get_events_comments(request: HttpRequest, event_id: int):
+    def get_events_comments(self,request: HttpRequest, event_id: int):
         """
         Retrieve all comments for a specific event, including nested replies.
         
@@ -336,7 +335,7 @@ class EventAPI:
         return Response(response_data, status=200)
     
     @router.get('/{event_id}/attendee-list', response=List[UserResponseSchema], auth=JWTAuth())
-    def get_attendee_list(request: HttpRequest, event_id: int):
+    def get_attendee_list(self,request: HttpRequest, event_id: int):
         """
         Retrieve the list of attendees for a specific event.
 
@@ -362,7 +361,7 @@ class EventAPI:
             return Response({'error': 'User is not an organizer'}, status=403)
         
     @router.get('/{event_id}/ticket-list', response=List[TicketResponseSchema], auth=JWTAuth())
-    def get_ticket_list(request: HttpRequest, event_id: int):
+    def get_ticket_list(self,request: HttpRequest, event_id: int):
         """
         Retrieve the list of tickets for a specific event.
 
