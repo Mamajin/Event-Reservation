@@ -226,42 +226,42 @@ class EventTest(EventModelsTest):
         
 
     # ## Test get_my_events function
-    # def test_invalid_organizer_get_my_events(self):
-    #     normal_user  = self.create_user("test","test")
-    #     token = self.get_token_for_user(normal_user)
-    #     response = self.client.get(self.organizer_get_events, headers={'Authorization': f'Bearer {token}'})
-    #     self.assertEqual(response.status_code, 404)
-    #     response1 = self.client.get(self.organizer_get_events)
+    def test_invalid_organizer_get_my_events(self):
+        normal_user  = self.create_user("test","test")
+        token = self.get_token_for_user(normal_user)
+        response = self.client.get('/api/events/my-events', headers={'Authorization': f'Bearer {token}'})
+        self.assertEqual(response.status_code, 404)
+        response1 = self.client.get(self.organizer_get_events)
         
         
-    # def test_valid_organizer_get_my_events(self):
-    #     normal_user  = self.create_user("test","test")
-    #     organizer = self.become_organizer(normal_user,"test")
-    #     token = self.get_token_for_user(normal_user)
-    #     response = self.client.get(self.organizer_get_events, headers={'Authorization': f'Bearer {token}'})
-    #     self.assertEqual(response.status_code, 200)
+    def test_valid_organizer_get_my_events(self):
+        normal_user  = self.create_user("test","test")
+        organizer = self.become_organizer(normal_user,"test")
+        token = self.get_token_for_user(normal_user)
+        response = self.client.get('/api/events/my-events', headers={'Authorization': f'Bearer {token}'})
+        self.assertEqual(response.status_code, 200)
         
         
-    # def test_valid_get_my_events(self):
-    #     token = self.get_token_for_user(self.test_user)
-    #     response = self.client.get(self.organizer_get_events, headers={'Authorization': f'Bearer {token}'})
-    #     self.assertEqual(response.status_code, 200)
+    def test_valid_get_my_events(self):
+        token = self.get_token_for_user(self.test_user)
+        response = self.client.get('/api/events/my-events', headers={'Authorization': f'Bearer {token}'})
+        self.assertEqual(response.status_code, 200)
         
-    # @patch("api.models.Event.objects.filter")
-    # def test_exception_get_my_events(self, mock_filter):
-    #     mock_filter.side_effect = Exception("Unexpected error occurred")
-    #     user = self.create_user("test","test")
-    #     token = self.get_token_for_user(user)
-    #     organizer = self.become_organizer(user, "test")
+    @patch("api.models.Event.objects.filter")
+    def test_exception_get_my_events(self, mock_filter):
+        mock_filter.side_effect = Exception("Unexpected error occurred")
+        user = self.create_user("test","test")
+        token = self.get_token_for_user(user)
+        organizer = self.become_organizer(user, "test")
 
-    #     # Simulate a GET request to the /my-events endpoint
-    #     response = self.client.get(self.organizer_get_events, headers={'Authorization': f'Bearer {token}'})
+        # Simulate a GET request to the /my-events endpoint
+        response = self.client.get('/api/events/my-events', headers={'Authorization': f'Bearer {token}'})
 
-    #     # Check that the response status code is 400
-    #     self.assertEqual(response.status_code, 400)
+        # Check that the response status code is 400
+        self.assertEqual(response.status_code, 400)
 
-    #     # Check that the response contains the correct error message
-    #     self.assertEqual(response.json(), {'error': 'Unexpected error occurred'})
+        # Check that the response contains the correct error message
+        self.assertEqual(response.json(), {'error': 'Unexpected error occurred'})
 
     
     # ## Test list all event function

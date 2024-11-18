@@ -33,7 +33,7 @@ class EventAPI(ControllerBase):
         return strategy.execute(data, image)
 
     @route.get('/my-events', response=List[EventResponseSchema], auth=JWTAuth())
-    def get_my_events(self,request: HttpRequest):
+    def get_my_events(self,request):
         """
         Retrieve events created by the logged-in organizer.
 
@@ -43,7 +43,7 @@ class EventAPI(ControllerBase):
         Returns:
             List[EventResponseSchema]: List of events created by the organizer.
         """
-        strategy : EventStrategy = EventStrategy.get_strategy('get_my_events', request)
+        strategy : EventStrategy = EventStrategy.get_strategy('organizer_get_events', request)
         return strategy.execute()
 
     @route.get('/events', response=List[EventResponseSchema])

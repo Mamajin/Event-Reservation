@@ -77,10 +77,10 @@ class EventCreateStrategy(EventStrategy):
 class EventOrganizerStrategy(EventStrategy):
 
     
-    def add_event(self,request,event_list: list,events):
+    def add_event(self,event_list: list,events):
         for event in events:
                 engagement = EventResponseSchema.resolve_engagement(event)
-                user_engaged = EventResponseSchema.resolve_user_engagement(event, request.user)
+                user_engaged = EventResponseSchema.resolve_user_engagement(event, self.user)
                 EventResponseSchema.set_status_event(event)
                 event_data = EventResponseSchema.from_orm(event)
                 event_data.engagement = engagement
