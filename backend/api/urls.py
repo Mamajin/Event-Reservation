@@ -7,7 +7,7 @@ from api.views.event import router as event_router
 from api.views.ticket import TicketAPI
 from api.views.bookmarks import router as bookmark_router
 from api.views.like import LikeAPI
-from api.views.comment import router as comment_router
+from api.views.comment import CommentAPI
 from django.conf import settings
 from django.conf.urls.static import static
 
@@ -16,6 +16,7 @@ api.register_controllers(NinjaJWTDefaultController)
 api.register_controllers(TicketAPI)
 api.register_controllers(UserAPI)
 api.register_controllers(LikeAPI)
+api.register_controllers(CommentAPI)
 
 
 # Register routers for different models/views
@@ -23,7 +24,6 @@ api.register_controllers(LikeAPI)
 api.add_router("/organizers/", organizer_router)
 api.add_router("/events/", event_router)
 api.add_router('/bookmarks/', bookmark_router)
-api.add_router('/comments', comment_router)
 
 urlpatterns = [
     path("", api.urls),  # Prefix all API routes with /api/

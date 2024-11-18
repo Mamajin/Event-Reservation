@@ -148,6 +148,7 @@ class OrganizerTestAPI(OrganizerModelsTest):
             content_type='image/jpg'
         )
         response = self.client.post(f"/{organizer.id}" + self.upload_logo_organizer_url, headers={'Authorization': f'Bearer {token}'}, FILES = {'logo': image_file})
+        print(response.json())
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json()['message'], 'Upload successful')
         
