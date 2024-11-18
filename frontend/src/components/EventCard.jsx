@@ -54,7 +54,7 @@ function EventCard({ event, onEdit, isEditable }) {
           {event.description.length > maxDescriptionLength ? `${event.description.substring(0, maxDescriptionLength)}...` : event.description}
         </p>
 
-        {/* Engangement Buttons */}
+        {/* Engangement and Share Buttons */}
         <div className="flex items-center mt-4 space-x-4">
           <LikeButton eventId={event.id} isInitiallyLiked={hasUserLiked} />          
           <BookmarkButton eventId={event.id} />

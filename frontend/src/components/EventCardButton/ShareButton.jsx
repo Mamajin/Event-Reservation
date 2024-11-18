@@ -6,7 +6,6 @@ const ShareButton = ({ eventId }) => {
     const eventUrl = `${window.location.origin}/events/${eventId}`;
 
     if (navigator.share) {
-      // Use the Web Share API if supported
       try {
         await navigator.share({
           title: 'Check out this event!',
@@ -17,7 +16,6 @@ const ShareButton = ({ eventId }) => {
         console.error('Error sharing:', error);
       }
     } else {
-      // Fallback: Copy to clipboard
       try {
         await navigator.clipboard.writeText(eventUrl);
         alert('Event link copied to clipboard!');
