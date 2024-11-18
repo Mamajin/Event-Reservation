@@ -72,7 +72,7 @@ class EventInputSchema(ModelSchema):
     allowed_email_domains: Optional[str] = None
     class Meta:
         model = Event
-        exclude = ('organizer', 'id', 'status_registeration','tags','status', 'event_image','updated_at')
+        exclude = ('organizer', 'id', 'status_registeration','status', 'event_image','updated_at')
     
 class AuthResponseSchema(Schema):
     access_token: str

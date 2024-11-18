@@ -220,7 +220,7 @@ class Event(models.Model):
         """
         Set the status of the event based on the current date and time.
 
-        The status can be 'UPCOMING', 'ONGOING', or 'ENDED' depending on
+        The status can be 'UPCOMING', 'ONGOING', or 'COMPLETED' depending on
         whether the current time is before the event start, during the event,
         or after the event has ended.
         """
@@ -231,7 +231,7 @@ class Event(models.Model):
         elif now < self.end_date_event:
             self.status = 'ONGOING'  
         else:
-            self.status = 'ENDED'
+            self.status = 'COMPLETED'
             
     def set_registeration_status(self):
         now = timezone.now()
