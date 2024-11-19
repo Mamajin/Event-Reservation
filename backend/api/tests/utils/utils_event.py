@@ -3,7 +3,6 @@ from django.utils import timezone
 from api.models import AttendeeUser, Organizer, Event, Ticket
 from datetime import datetime
 from ninja.testing import TestClient
-from api.urls import event_router
 from api.views.schemas.event_schema import EventResponseSchema
 from ninja_jwt.tokens import RefreshToken
 from faker import Faker

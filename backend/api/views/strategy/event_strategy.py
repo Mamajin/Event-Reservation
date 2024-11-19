@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from api.views.modules import *
-from api.views.schemas import *
+from api.views.schemas.event_schema import *
 from injector import inject
 
 
