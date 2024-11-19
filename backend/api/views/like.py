@@ -1,29 +1,23 @@
-from .schemas import EventEngagementSchema, EventResponseSchema
 from .modules import *
+from api.views.strategy.like_strategy import *
+from api.views.schemas.event_schema import EventEngagementSchema, EventResponseSchema
 
 
-router = Router()
-
-
+@api_controller('/likes/', tags=['Likes'])
 class LikeAPI:
+    """Like an event."""
     
-    
-    @router.put('/{event_id}/toggle-like', response={200: dict}, auth=JWTAuth())
-    def toggle_like(request, event_id: int):
-        user = request.user
-        event = get_object_or_404(Event, id=event_id)
+    @http_put('/{event_id}/toggle-like', response={200: dict}, auth=JWTAuth())
+    def toggle_like(self, request: HttpRequest, event_id: int) -> dict:
+        """Toggle the like status for a given event and user.
 
-        try:
-            like = Like.objects.get(event=event, user=user)
-            like.status = 'unlike' if like.status == 'like' else 'like'
-            like.save()
-            like.refresh_from_db()
-        except Like.DoesNotExist:
-            like = Like.objects.create(event=event, user=user, status='like')
-            like.refresh_from_db()
-        
-        # Return the updated user engagement status
-        user_engaged = EventResponseSchema.resolve_user_engagement(event, user)
-        return Response({"message": "Like toggled successfully.", "user_engaged": user_engaged}, status=200)
+        Args:
+            request (HttpRequest): The HTTP request containing the user information.
+            event_id (int): The ID of the event to be liked or unliked.
 
+        Returns:
+            dict: A dictionary containing a success message and the user's engagement status.
+        """
+        strategy : LikeStrategy = LikeStrategy.get_strategy('like_event')
+        return strategy.execute(request, event_id)
             

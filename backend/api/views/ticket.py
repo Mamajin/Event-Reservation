@@ -1,11 +1,10 @@
+from api.views.schemas.ticket_schema import TicketResponseSchema
+from api.views.schemas.other_schema import ErrorResponseSchema
 from .modules import *
-from .schemas import TicketResponseSchema, ErrorResponseSchema
 from .strategy.ticket_strategy import *
 
 
-
-
-            
+     
 @api_controller("/tickets/", tags=["Tickets"])
 class TicketAPI:
     

@@ -1,4 +1,5 @@
-from .schemas import OrganizerResponseSchema, ErrorResponseSchema, OrganizerSchema, FileUploadResponseSchema, OrganizerUpdateSchema
+from api.views.schemas.organizer_schema import OrganizerSchema, OrganizerUpdateSchema, OrganizerResponseSchema
+from api.views.schemas.other_schema import ErrorResponseSchema, FileUploadResponseSchema
 from .modules import *
 from .strategy.organizer_strategy import *
 
