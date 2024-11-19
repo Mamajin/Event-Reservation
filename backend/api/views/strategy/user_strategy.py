@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 from api.views.modules import *
-from api.views.schemas import *
+from api.views.schemas.user_schema import *
+from api.views.schemas.other_schema import FileUploadResponseSchema
 
 
 class UserStrategy(ABC):

@@ -5,7 +5,7 @@ from api.models import AttendeeUser, Organizer, Event, Ticket, Bookmarks, Commen
 from unittest.mock import patch
 from datetime import datetime
 from ninja.testing import TestClient
-from api.urls import comment_router
+from api.urls import api
 from ninja_jwt.tokens import RefreshToken
 from faker import Faker
 from django.contrib.auth import get_user_model
@@ -14,13 +14,13 @@ import datetime
 fake = Faker()
 
 class CommentModelsTest(TestCase):
-
+    client = TestClient(api)
+    
     def setUp(self):
         """
         Set up initial test data for models.
         """
-        self.client = TestClient(comment_router)
-        self.write_comment_url = '/write-comment/'
+        self.write_comment_url = '/api/comments/write-comment/'
         self.test_user = AttendeeUser.objects.create_user(
             username='attendeeuser3',
             password='password123',

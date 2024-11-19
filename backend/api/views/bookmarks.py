@@ -1,6 +1,7 @@
 from .modules import *
-from .schemas import EventResponseSchema
+from api.views.schemas.event_schema import EventResponseSchema
 from .strategy.bookmark_strategy import BookmarkStrategy
+
 
 router = Router()
 

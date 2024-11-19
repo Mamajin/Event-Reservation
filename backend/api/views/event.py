@@ -1,13 +1,12 @@
-from .schemas import EventInputSchema, ErrorResponseSchema, EventResponseSchema, FileUploadResponseSchema, CommentResponseSchema, EventUpdateSchema, UserResponseSchema, TicketResponseSchema
 from .modules import *
 from django.contrib.auth.models import AnonymousUser
 from typing import Union
-from .strategy.event_strategy import EventStrategy, EventEngagement
-
-
-
-
-
+from api.views.schemas.comment_schema import CommentResponseSchema
+from api.views.schemas.event_schema import *
+from api.views.schemas.ticket_schema import TicketResponseSchema
+from api.views.schemas.user_schema import UserResponseSchema
+from api.views.schemas.other_schema import ErrorResponseSchema, FileUploadResponseSchema
+from .strategy.event_strategy import EventStrategy,EventEngagement
 
 
 
@@ -109,7 +108,7 @@ class EventAPI(ControllerBase):
         return strategy.execute(event_id,file)
         
     @route.get('/{event_id}/engagement', response={200: dict})
-    def get_event_engagements(self,request: HttpRequest, event_id: int):
+    def get_event_engagements(self, request: HttpRequest, event_id: int):
         """
         Retrieve engagement metrics for a specific event.
 
@@ -124,7 +123,7 @@ class EventAPI(ControllerBase):
         return strategy.execute()
     
     @route.get('/{event_id}/user-engagement', response={200: dict}, auth=JWTAuth())
-    def get_event_user_engagement(self,request: HttpRequest, event_id: int):
+    def get_event_user_engagement(self, request: HttpRequest, event_id: int):
         """
         Retrieve user engagement metrics for a specific event.
 
@@ -139,7 +138,7 @@ class EventAPI(ControllerBase):
         return strategy.execute()        
     
     @route.get('/{event_id}/comments', response=List[CommentResponseSchema])
-    def get_events_comments(self,request: HttpRequest, event_id: int):
+    def get_events_comments(self, request: HttpRequest, event_id: int):
         """
         Retrieve all comments for a specific event, including nested replies.
         
@@ -154,7 +153,7 @@ class EventAPI(ControllerBase):
         return strategy.execute()
     
     @route.get('/{event_id}/attendee-list', response=List[UserResponseSchema], auth=JWTAuth())
-    def get_attendee_list(self,request: HttpRequest, event_id: int):
+    def get_attendee_list(self, request: HttpRequest, event_id: int):
         """
         Retrieve the list of attendees for a specific event.
 
@@ -169,7 +168,7 @@ class EventAPI(ControllerBase):
         return strategy.execute()
         
     @route.get('/{event_id}/ticket-list', response=List[TicketResponseSchema], auth=JWTAuth())
-    def get_ticket_list(self,request: HttpRequest, event_id: int):
+    def get_ticket_list(self, request: HttpRequest, event_id: int):
         """
         Retrieve the list of tickets for a specific event.
 
