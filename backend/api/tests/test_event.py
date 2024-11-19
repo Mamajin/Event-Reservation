@@ -265,17 +265,17 @@ class EventTest(EventModelsTest):
 
     
     # ## Test list all event function
-    # def test_valid_list_all_event(self):
-    #     response  = self.client.get(self.list_event_url)
-    #     self.assertEqual(response.status_code, 200)
-    #     self.assertEqual(len(response.json()), 3)
+    def test_valid_list_all_event(self):
+        response  = self.client.get('/api/events/events')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.json()), 3)
 
         
         
-    # def test_get_detail(self):
-    #     response = self.client.get(self.get_event_detail_url + str(self.event_test.id))
-    #     self.assertEqual(response.status_code , 200)
-    #     self.assertTrue(len([response.json()]), 1)
+    def test_get_detail(self):
+        response = self.client.get(f'/api/events/{self.event_test.id}')
+        self.assertEqual(response.status_code , 200)
+        self.assertTrue(len([response.json()]), 1)
         
         
     # def test_upload_image_event(self):
@@ -439,94 +439,76 @@ class EventTest(EventModelsTest):
     #     self.assertEqual(response.json(),[])
         
         
-    # def test_edit_event(self):
-    #     token = self.get_token_for_user(self.test_user)
-    #     data = {
-    #         "category": "CONFERENCE",
-    #         "dress_code": "CASUAL",
-    #         "event_name": "Test edit",
-    #         "event_create_date": timezone.now().isoformat(),
-    #         "start_date_event": (timezone.now() + datetime.timedelta(days=2)).isoformat(),
-    #         "end_date_event": (timezone.now() + datetime.timedelta(days=3)).isoformat(),
-    #         "start_date_register": timezone.now().isoformat(),
-    #         "end_date_register": (timezone.now() + datetime.timedelta(days=1)).isoformat(),
-    #         "description": "A tech event for showcasing new innovations.",
-    #         "max_attendee": 100,
-    #         "address": "Tech Park, Downtown",
-    #         "latitude": 0.0,
-    #         "longitude": 0.0,
-    #         "is_free": True,
-    #         "ticket_price": 0.00,
-    #         "expected_price": 0.00,
-    #         "detailed_description": "Join us for an exciting event!",
-    #         "contact_email": "info@techconference.com",
-    #         "contact_phone": "+1234567890",
-    #         "updated_at": timezone.now().isoformat(),
-    #     }
-    #     response = self.client.patch(f"/{self.event_test.id}" + self.edit_event_url, headers={'Authorization': f'Bearer {token}'}, json  = data )
-    #     self.assertTrue(response.status_code, 200)
-    #     self.assertEqual(response.json()['event_name'], "Test edit")
+    def test_edit_event(self):
+        token = self.get_token_for_user(self.test_user)
+        data = { 
+            "event_name": "Test edit"
+        }
+        response = self.client.patch(f'/api/events/{self.event_test.id}/edit', data = json.dumps(data),headers={'Authorization': f'Bearer {token}'})
+    
+        self.assertTrue(response.status_code, 200)
+        self.assertEqual(response.json()['event_name'], "Test edit")
         
         
-    # def test_invalid_organizer_edit(self):
-    #     user = self.create_user("test","test")
-    #     token = self.get_token_for_user(user)
-    #     organizer = self.become_organizer(user, "test")
-    #     data = {
-    #         "category": "CONFERENCE",
-    #         "dress_code": "CASUAL",
-    #         "event_name": "Test edit",
-    #         "event_create_date": timezone.now().isoformat(),
-    #         "start_date_event": (timezone.now() + datetime.timedelta(days=2)).isoformat(),
-    #         "end_date_event": (timezone.now() + datetime.timedelta(days=3)).isoformat(),
-    #         "start_date_register": timezone.now().isoformat(),
-    #         "end_date_register": (timezone.now() + datetime.timedelta(days=1)).isoformat(),
-    #         "description": "A tech event for showcasing new innovations.",
-    #         "max_attendee": 100,
-    #         "address": "Tech Park, Downtown",
-    #         "latitude": 0.0,
-    #         "longitude": 0.0,
-    #         "is_free": True,
-    #         "ticket_price": 0.00,
-    #         "expected_price": 0.00,
-    #         "detailed_description": "Join us for an exciting event!",
-    #         "contact_email": "info@techconference.com",
-    #         "contact_phone": "+1234567890",
-    #         "updated_at": timezone.now().isoformat(),
-    #     }
-    #     response = self.client.patch(f"/{self.event_test.id}" + self.edit_event_url, headers={'Authorization': f'Bearer {token}'}, json  = data )
-    #     self.assertEqual(response.status_code, 403)
-    #     self.assertEqual(response.json()['error'],'You are not allowed to edit this event.')
+    def test_invalid_organizer_edit(self):
+        user = self.create_user("test","test")
+        token = self.get_token_for_user(user)
+        organizer = self.become_organizer(user, "test")
+        data = {
+            "category": "CONFERENCE",
+            "dress_code": "CASUAL",
+            "event_name": "Test edit",
+            "event_create_date": timezone.now().isoformat(),
+            "start_date_event": (timezone.now() + datetime.timedelta(days=2)).isoformat(),
+            "end_date_event": (timezone.now() + datetime.timedelta(days=3)).isoformat(),
+            "start_date_register": timezone.now().isoformat(),
+            "end_date_register": (timezone.now() + datetime.timedelta(days=1)).isoformat(),
+            "description": "A tech event for showcasing new innovations.",
+            "max_attendee": 100,
+            "address": "Tech Park, Downtown",
+            "latitude": 0.0,
+            "longitude": 0.0,
+            "is_free": True,
+            "ticket_price": 0.00,
+            "expected_price": 0.00,
+            "detailed_description": "Join us for an exciting event!",
+            "contact_email": "info@techconference.com",
+            "contact_phone": "+1234567890",
+            "updated_at": timezone.now().isoformat(),
+        }
+        response = self.client.patch(f"/api/events/{self.event_test.id}/edit", headers={'Authorization': f'Bearer {token}'}, data  = json.dumps(data) )
+        self.assertEqual(response.status_code, 403)
+        self.assertEqual(response.json()['error'],'You are not allowed to edit this event.')
         
         
-    # def test_edit_not_exist_event(self):
-    #     token = self.get_token_for_user(self.test_user)
-    #     data = {
-    #         "category": "CONFERENCE",
-    #         "dress_code": "CASUAL",
-    #         "event_name": "Test edit",
-    #         "event_create_date": timezone.now().isoformat(),
-    #         "start_date_event": (timezone.now() + datetime.timedelta(days=2)).isoformat(),
-    #         "end_date_event": (timezone.now() + datetime.timedelta(days=3)).isoformat(),
-    #         "start_date_register": timezone.now().isoformat(),
-    #         "end_date_register": (timezone.now() + datetime.timedelta(days=1)).isoformat(),
-    #         "description": "A tech event for showcasing new innovations.",
-    #         "max_attendee": 100,
-    #         "address": "Tech Park, Downtown",
-    #         "latitude": 0.0,
-    #         "longitude": 0.0,
-    #         "is_free": True,
-    #         "ticket_price": 0.00,
-    #         "expected_price": 0.00,
-    #         "detailed_description": "Join us for an exciting event!",
-    #         "contact_email": "info@techconference.com",
-    #         "contact_phone": "+1234567890",
-    #         "updated_at": timezone.now().isoformat(),
-    #     }
+    def test_edit_not_exist_event(self):
+        token = self.get_token_for_user(self.test_user)
+        data = {
+            "category": "CONFERENCE",
+            "dress_code": "CASUAL",
+            "event_name": "Test edit",
+            "event_create_date": timezone.now().isoformat(),
+            "start_date_event": (timezone.now() + datetime.timedelta(days=2)).isoformat(),
+            "end_date_event": (timezone.now() + datetime.timedelta(days=3)).isoformat(),
+            "start_date_register": timezone.now().isoformat(),
+            "end_date_register": (timezone.now() + datetime.timedelta(days=1)).isoformat(),
+            "description": "A tech event for showcasing new innovations.",
+            "max_attendee": 100,
+            "address": "Tech Park, Downtown",
+            "latitude": 0.0,
+            "longitude": 0.0,
+            "is_free": True,
+            "ticket_price": 0.00,
+            "expected_price": 0.00,
+            "detailed_description": "Join us for an exciting event!",
+            "contact_email": "info@techconference.com",
+            "contact_phone": "+1234567890",
+            "updated_at": timezone.now().isoformat(),
+        }
         
-    #     response = self.client.patch(f"/{100}" + self.edit_event_url, headers={'Authorization': f'Bearer {token}'}, json  = data )
-    #     self.assertEqual(response.status_code, 404)
-    #     self.assertEqual(response.json()['error'], 'Event not found')
+        response = self.client.patch(f"/api/events/{10000}/edit", headers={'Authorization': f'Bearer {token}'}, data = json.dumps(data))
+        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.json()['error'], 'Event not found')
         
     # def test_organizer_does_not_exist(self):
     #     user = self.create_user("test", "Test")

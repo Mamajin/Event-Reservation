@@ -29,7 +29,7 @@ class EventAPI(ControllerBase):
         Returns:
             EventResponseSchema: The created event details or error response.
         """
-        strategy = EventStrategy.get_strategy('create_event', request)
+        strategy : EventStrategy= EventStrategy.get_strategy('create_event', request)
         return strategy.execute(data, image)
 
     @route.get('/my-events', response=List[EventResponseSchema], auth=JWTAuth())
@@ -58,29 +58,9 @@ class EventAPI(ControllerBase):
             List[EventResponseSchema]: List of all events.
         """
         
-        events = Event.objects.filter(event_create_date__lte=timezone.now()).order_by("-event_create_date")
-        event_list = []
-        user = request.user
-        if request.headers.get("Authorization"):
-            token = request.headers.get('Authorization')
-            if token != None and token.startswith('Bearer '):
-                token = token[7:]
-                if JWTAuth().authenticate(request,token):
-                    user = JWTAuth().authenticate(request, token)
-
-        for event in events:
-            engagement = EventResponseSchema.resolve_engagement(event)
-            user_engaged = EventResponseSchema.resolve_user_engagement(event, user)
-            EventResponseSchema.set_status_event(event)
-            event_data = EventResponseSchema.from_orm(event)
-            event_data.engagement = engagement
-            event_data.user_engaged = user_engaged  
-            event_list.append(event_data)
-
-        # Conditionally add user-specific engagement data
-
-        logger.info("Retrieved all public events for the homepage.")
-        return Response(event_list, status=200)
+        strategy : EventStrategy = EventStrategy.get_strategy('list_event', request)
+        return strategy.execute()
+    
     @route.patch('/{event_id}/edit', response={200: EventUpdateSchema, 401: ErrorResponseSchema, 404: ErrorResponseSchema}, auth=JWTAuth())
     def edit_event(self,request: HttpRequest, event_id: int, data: EventUpdateSchema):
         """
@@ -130,23 +110,9 @@ class EventAPI(ControllerBase):
         Returns:
             EventResponseSchema: Details of the specified event.
         """
-        user = request.user
-        if request.headers.get("Authorization"):
-            token = request.headers.get('Authorization')
-            if token != None and token.startswith('Bearer '):
-                token = token[7:]
-                if JWTAuth().authenticate(request,token):
-                    user = JWTAuth().authenticate(request, token)
-        logger.info(f"Fetching details for event ID: {event_id} by user {request.user.username}.")
-        event = get_object_or_404(Event, id=event_id)
-        engagement_data = EventResponseSchema.resolve_engagement(event)
-        user_engaged = EventResponseSchema.resolve_user_engagement(event, user)
-        EventResponseSchema.set_status_event(event)
+        strategy : EventStrategy = EventStrategy.get_strategy('event_detail', request)
+        return strategy.execute(event_id)
         
-        event_data = EventResponseSchema.from_orm(event)
-        event_data.engagement = engagement_data
-        event_data.user_engaged = user_engaged
-        return event_data
     
     @route.post('/{event_id}/upload/event-image/', response={200: FileUploadResponseSchema, 400: ErrorResponseSchema}, auth=JWTAuth())
     def upload_event_image(self,request: HttpRequest, event_id: int, file: UploadedFile = File(...)):
@@ -331,13 +297,3 @@ class EventAPI(ControllerBase):
     
     
 
-
-def configure(binder: Binder) -> Binder:
-    binder.bind(RequestProvider, to=EventAPI, scope=injector.singleton)
-
-def get_request_provider(request: HttpRequest):
-    return RequestProvider(request)
-
-
-
-                
