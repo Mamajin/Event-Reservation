@@ -83,6 +83,43 @@ const Sidebar = ({ events = [], selectedDate, onSelectDate }) => {
       );
     })}
     </div>
+    <div className="space-y-3">
+          {(selectedDate
+            ? getEventsForDate(selectedDate)
+            : events.slice(0, 3)
+          ).map((event) => (
+            <div
+              key={event.id}
+              className="p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer duration-200"
+              onClick={() => navigate(`/events/${event.id}`)}
+            >
+              <div className="flex items-start space-x-3">
+                <img
+                   src={event?.event_image || "https://images.unsplash.com/photo-1513623935135-c896b59073c1?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTR8fGV2ZW50fGVufDB8fDB8fHww"}
+                   alt={event.event_name}
+                  className="w-12 h-12 rounded-lg object-cover"
+                />
+                <div className="flex-1 min-w-0">
+                  <p className="font-medium text-gray-900 truncate">
+                    {event.event_name}
+                  </p>
+                  <p className="text-sm text-gray-600">
+                    {new Date(event.start_date_event).toLocaleTimeString([], {
+                      hour: '2-digit',
+                      minute: '2-digit'
+                    })}
+                  </p>
+                  <div className="flex items-center mt-1 text-xs text-gray-500">
+                    <LuCalendarDays className="h-3 w-3 mr-1" />
+                    <span>
+                      {new Date(event.start_date_event).toLocaleDateString()}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
   </div>
   );
 };
