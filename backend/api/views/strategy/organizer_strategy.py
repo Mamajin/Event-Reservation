@@ -1,5 +1,6 @@
 from api.views.modules import *
-from api.views.schemas import *
+from api.views.schemas.organizer_schema import *
+from api.views.schemas.other_schema import FileUploadResponseSchema
 
 
 logger = logging.getLogger(__name__)
@@ -7,27 +8,28 @@ logger = logging.getLogger(__name__)
 class OrganizerStrategy(ABC):
     """Abstract base class for organizer operations"""
     
-    @abstractmethod
+    @staticmethod
     def get_strategy(name):
         """Get the strategy based on the name"""
-        pass
+        strategies = {
+            'apply_organizer': ApplyOrganizerStrategy(),
+            'delete_event': DeleteEventStrategy(),
+            'view_organizer': ViewOrganizerStrategy(),
+            'update_organizer': UpdateOrganizerStrategy(),
+            'revoke_organizer': RevokeOrganizerStrategy(),
+            'upload_logo': UploadLogoStrategy(),
+        }
+        return strategies.get(name)
     
     @abstractmethod
-    def execute(self, request: HttpRequest, **kwargs):
+    def execute(self, request: HttpRequest):
         """Execute the strategy"""
         pass
 
 class ApplyOrganizerStrategy(OrganizerStrategy):
     """Apply to be an organizer"""
     
-    @staticmethod
-    def get_strategy(name):
-        """Get the strategy based on the name"""
-        if name != 'apply_organizer':
-            return
-        return ApplyOrganizerStrategy()
-    
-    def execute(self, request: HttpRequest, form: OrganizerSchema = Form(...), **kwargs):
+    def execute(self, request: HttpRequest, form: OrganizerSchema = Form(...)):
         """Apply to be an organizer"""
         try:
             logger.info(f"User {request.user.id} is attempting to apply as an organizer.")
@@ -67,14 +69,7 @@ class ApplyOrganizerStrategy(OrganizerStrategy):
 class DeleteEventStrategy(OrganizerStrategy):
     """Delete an event"""
     
-    @staticmethod
-    def get_strategy(name):
-        """Get the strategy based on the name"""
-        if name != 'delete_event':
-            return
-        return DeleteEventStrategy()
-    
-    def execute(self, request: HttpRequest, event_id: int, **kwargs):
+    def execute(self, request: HttpRequest, event_id: int):
         """Delete an event"""
         logger.info(f"User {request.user.id} is attempting to delete an event.")
         try:
@@ -94,14 +89,7 @@ class DeleteEventStrategy(OrganizerStrategy):
 class UpdateOrganizerStrategy(OrganizerStrategy):
     """Update an organizer profile"""
     
-    @staticmethod
-    def get_strategy(name):
-        """Get the strategy based on the name"""
-        if name != 'update_organizer':
-            return
-        return UpdateOrganizerStrategy()
-    
-    def execute(self, request: HttpRequest, data: OrganizerUpdateSchema, **kwargs):
+    def execute(self, request: HttpRequest, data: OrganizerUpdateSchema):
         """Update the profile information of the authenticated organizer."""
         logger.info(f"User {request.user.id} is attempting to update their organizer profile.")
         try:
@@ -131,14 +119,8 @@ class UpdateOrganizerStrategy(OrganizerStrategy):
 
 class RevokeOrganizerStrategy(OrganizerStrategy):
     """Revoke an organizer role"""
-    @staticmethod
-    def get_strategy(name):
-        """Get the strategy based on the name"""
-        if name != 'revoke_organizer':
-            return
-        return RevokeOrganizerStrategy()
     
-    def execute(self, request: HttpRequest, **kwargs):
+    def execute(self, request: HttpRequest):
         """Revoke the organizer role of the authenticated user."""
         logger.info(f"User {request.user.id} is attempting to revoke their organizer role.")
         
@@ -146,7 +128,7 @@ class RevokeOrganizerStrategy(OrganizerStrategy):
             organizer = get_object_or_404(Organizer, user=request.user)
             organizer.delete()
             logger.info(f"Organizer role revoked for user {request.user.id}.")
-            return Response({'success': f'Organizer role revoked for user {request.user.id}.'}, status=204)
+            return Response({'success': f'Organizer role revoked for user {request.user.id}.'}, status=200)
         
         except Organizer.DoesNotExist:
             logger.error(f"User {request.user.username} tried to revoke a non-existing organizer profile.")
@@ -156,14 +138,7 @@ class RevokeOrganizerStrategy(OrganizerStrategy):
 class ViewOrganizerStrategy(OrganizerStrategy):
     """View an organizer profile"""
     
-    @staticmethod
-    def get_strategy(name):
-        """Get the strategy based on the name"""
-        if name != 'view_organizer':
-            return
-        return ViewOrganizerStrategy()
-    
-    def execute(self, request: HttpRequest, **kwargs):
+    def execute(self, request: HttpRequest):
         """View the organizer profile."""
         logger.info(f"User {request.user.id} is attempting to view their organizer profile.")
         try:
@@ -181,14 +156,7 @@ class ViewOrganizerStrategy(OrganizerStrategy):
 class UploadLogoStrategy(OrganizerStrategy):
     """Upload a logo for an organizer"""
     ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png']
-    MAX_FILE_SIZE = 10 * 1024 * 1024  # 5MB
-
-    @staticmethod
-    def get_strategy(name):
-        """Get the strategy based on the name"""
-        if name != 'upload_logo':
-            return
-        return UploadLogoStrategy()
+    MAX_FILE_SIZE = 10 * 1024 * 1024  # 10MB
     
     def _delete_existing_logo(self, old_filename):
         """Delete the old logo from S3"""
@@ -230,12 +198,10 @@ class UploadLogoStrategy(OrganizerStrategy):
             logger.error(f"S3 upload error: {str(e)}")
             raise
 
-    def execute(self, request: HttpRequest, **kwargs):
+    def execute(self, request: HttpRequest, organizer_id: int, logo: UploadedFile = File(...)):
         """Upload a logo for an organizer"""    
         try:
-            organizer_id = kwargs.get('organizer_id')
             organizer = get_object_or_404(Organizer, id=organizer_id)
-            logo = request.FILES.get('logo')
 
             if not logo:
                 return Response({'error': 'No file provided'}, status=400)
