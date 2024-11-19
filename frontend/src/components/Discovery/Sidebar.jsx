@@ -4,7 +4,6 @@ import { useNavigate } from 'react-router-dom';
 
 const Sidebar = ({ events = [], selectedDate, onSelectDate }) => {
   const [currentMonth, setCurrentMonth] = useState(new Date());
-  const navigate = useNavigate();
   const nextMonth = () => {
     setCurrentMonth(new Date(currentMonth.setMonth(currentMonth.getMonth() + 1)));
   };
@@ -67,10 +66,14 @@ const Sidebar = ({ events = [], selectedDate, onSelectDate }) => {
       const date = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), day);
       const dayEvents = getEventsForDate(date);
       const hasEvents = dayEvents.length > 0;
+      const isSelected = selectedDate?.toDateString() === date.toDateString();
       return (
         <button
           key={day}
-          className="relative text-center py-1 rounded-full hover:bg-gray-100"
+          onClick={() => onSelectDate(date)}
+          className={`relative text-center py-1 rounded-full hover:bg-gray-100 ${
+            isSelected ? 'bg-dark-purple text-white hover:bg-indigo-700' : ''
+          }`}
         >
           {day}
           {hasEvents && (
