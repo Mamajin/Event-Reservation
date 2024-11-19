@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import api from '../api';
 import EventCard from '../components/EventCard';
 import PageLayout from '../components/PageLayout';
+import Sidebar from '../components/Discovery/Sidebar';
 import { ACCESS_TOKEN } from '../constants';
 
 function Discover() {
@@ -9,6 +10,9 @@ function Discover() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
+  const [selectedDate, setSelectedDate] = useState(null);
+  const [selectedTags, setSelectedTags] = useState([]);
+  const [selectedStatus, setSelectedStatus] = useState('');
 
   useEffect(() => {
     const fetchEvents = async () => {
@@ -59,7 +63,16 @@ function Discover() {
           No events found
         </h2>
          )}
-      </div>
+
+            {/* Sidebar */}
+            <div className="w-1/4">
+              <Sidebar
+                events={events}
+                selectedDate={selectedDate}
+                onSelectDate={setSelectedDate}
+              />
+            </div>
+          </div>
     </PageLayout>
   );
 }

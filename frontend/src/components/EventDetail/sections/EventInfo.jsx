@@ -17,8 +17,6 @@ export function EventInfo({ event }) {
   const [ticketId, setTicketId] = useState(null);
   const userId = localStorage.getItem(USER_ID);
 
-  const navigate = useNavigate();
-
   useEffect(() => {
     console.log("Event user_engaged data:", event?.user_engaged);
     
