@@ -1,5 +1,5 @@
 from .modules import *
-from .schemas import EventResponseSchema
+from api.views.schemas.event_schema import EventResponseSchema
 
 router = Router()
 

@@ -1,4 +1,5 @@
-from .schemas import UserSchema, LoginResponseSchema, UserResponseSchema, LoginSchema, ErrorResponseSchema, FileUploadResponseSchema, AuthResponseSchema, GoogleAuthSchema, EmailVerification, EmailVerificationResponseSchema, UserupdateSchema
+from api.views.schemas.user_schema import *
+from api.views.schemas.other_schema import *
 from .modules import *
 from .strategy.user_strategy import UserStrategy
 
