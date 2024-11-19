@@ -202,19 +202,9 @@ class UserDeleteAccount(UserStrategy):
     
 class UserUploadProfilePicture(UserStrategy):
     
-    def execute(self, request,profile_picture):
+    @staticmethod
+    def upload_file_to_s3(user,filename, profile_picture):
         try:
-            user = request.user
-            
-            if profile_picture.content_type not in ALLOWED_IMAGE_TYPES:
-                return Response({'error': 'Invalid file type. Only JPEG and PNG are allowed.'}, status=400)
-            
-            if profile_picture.size > MAX_FILE_SIZE:
-                return Response({'error': f'File size exceeds the limit of {MAX_FILE_SIZE / (1024 * 1024)} MB.'}, status=400)
-
-            filename = f'picture_profiles/{uuid.uuid4()}{os.path.splitext(profile_picture.name)[1]}'
-            logger.info(f"Starting upload for file: {filename}")
-            try:
                 # Direct S3 upload using boto3
                 s3_client = boto3.client(
                     's3',
@@ -246,10 +236,26 @@ class UserUploadProfilePicture(UserStrategy):
                     uploaded_at=timezone.now()
                 ), status=200)
             
-            except ClientError as e:
-                logger.error(f"S3 upload error: {str(e)}")
-                return Response({'error': f"S3 upload failed: {str(e)}"}, status=400)
+        except ClientError as e:
+            logger.error(f"S3 upload error: {str(e)}")
+            return Response({'error': f"S3 upload failed: {str(e)}"}, status=400)
             
+    
+    def execute(self, request,profile_picture):
+        try:
+            user = request.user
+            
+            if profile_picture.content_type not in ALLOWED_IMAGE_TYPES:
+                return Response({'error': 'Invalid file type. Only JPEG and PNG are allowed.'}, status=400)
+            
+            if profile_picture.size > MAX_FILE_SIZE:
+                return Response({'error': f'File size exceeds the limit of {MAX_FILE_SIZE / (1024 * 1024)} MB.'}, status=400)
+
+            filename = f'picture_profiles/{uuid.uuid4()}{os.path.splitext(profile_picture.name)[1]}'
+            logger.info(f"Starting upload for file: {filename}")
+            upload_file = self.upload_file_to_s3(user, filename, profile_picture)
+            return upload_file
+
         except Exception as e:
             return Response({'error': f"Upload failed: {str(e)}"}, status=400)
         

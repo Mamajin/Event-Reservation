@@ -13,17 +13,18 @@ from unittest.mock import patch, MagicMock
 from botocore.exceptions import ClientError
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.core.exceptions import ValidationError
+from api.urls import api
 ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/jpg']
 
 fake = Faker()
 
 class EventModelsTest(TestCase):
+    client = TestClient(api)
 
     def setUp(self):
         """
         Set up initial test data for models.
         """ 
-        self.client = TestClient(event_router)
         self.event_create_url = '/create-event'
         self.organizer_get_events = '/my-events'
         self.list_event_url = '/events'
