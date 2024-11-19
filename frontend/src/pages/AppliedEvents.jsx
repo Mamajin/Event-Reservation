@@ -113,7 +113,9 @@ function AppliedEvents() {
                         {events.map((event) => (
                             <EventCard 
                             key={event.id}
-                            event={event}/>
+                            event={event}
+                            showViewTicket={true}
+                            onViewTicket={() => navigate('/virtual-ticket/${event.id}')} />
                         ))}
                     </div>
                 </div>
