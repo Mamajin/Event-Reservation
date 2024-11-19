@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from api.views.modules import *
-from api.views.schemas import *
+from api.views.schemas.comment_schema import CommentResponseSchema, CommentSchema
 
 
 class CommentStrategy(ABC):

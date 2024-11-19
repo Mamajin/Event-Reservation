@@ -1,4 +1,5 @@
 from .utils.utils_comment import CommentModelsTest, Event, Http404, Comment
+import json
 
 class CommentTest(CommentModelsTest):
     
@@ -20,6 +21,7 @@ class CommentTest(CommentModelsTest):
         non_exist_event = 0
         data = {'content' : "test description"}
         response = self.client.post(self.write_comment_url + str(non_exist_event), json = data, headers={"Authorization": f"Bearer {token}"})
+        print(response.json())
         self.assertEqual(response.status_code, 404)
         self.assertEqual(response.json()['error'], f"Event {non_exist_event} doesn't exist." )
         
@@ -30,8 +32,7 @@ class CommentTest(CommentModelsTest):
         data =  "test test"
         comment = self.create_comment(user , data)
         response = self.client.delete(f'/api/comments/{comment.id}/delete/',headers={"Authorization": f"Bearer {token}"})
-        print(response.json())
-        self.assertEqual(response.status_code, 204)
+        self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json()['message'], 'Delete comment successfully.')
         
     def test_invalid_delete_comment(self):
@@ -62,7 +63,7 @@ class CommentTest(CommentModelsTest):
         data = {'content': "Updated content"}
         
         # Perform the PUT request to edit the comment
-        response = self.client.put(f'/api/comments/{comment.id}/edit/', json=data, headers={"Authorization": f"Bearer {token}"})
+        response = self.client.put(f'/api/comments/{comment.id}/edit/', data=json.dumps(data), headers={"Authorization": f"Bearer {token}"})
         print(response.json())
         
         # Assert the status code is 200 (successful update)
@@ -85,7 +86,7 @@ class CommentTest(CommentModelsTest):
         data = {'content': "Updated content"}
         
         # Perform the PUT request with a non-existing comment ID
-        response = self.client.put(f'/api/comments/999999/edit/', json=data, headers={"Authorization": f"Bearer {token}"})
+        response = self.client.put(f'/api/comments/999999/edit/', data=json.dumps(data), headers={"Authorization": f"Bearer {token}"})
         
         # Assert the status code is 404 (not found)
         
@@ -109,7 +110,7 @@ class CommentTest(CommentModelsTest):
         data = {'content': "Updated content"}
         
         # Perform the PUT request to edit the comment by user2 (unauthorized)
-        response = self.client.put(f'/api/comments/{comment.id}/edit/', json=data, headers={"Authorization": f"Bearer {token2}"})
+        response = self.client.put(f'/api/comments/{comment.id}/edit/', data=json.dumps(data), headers={"Authorization": f"Bearer {token2}"})
         
         # Assert the status code is 403 (forbidden)
         self.assertEqual(response.status_code, 403)

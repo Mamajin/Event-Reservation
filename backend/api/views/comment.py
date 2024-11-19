@@ -20,7 +20,7 @@ class CommentAPI:
             Response: Created comment details or error message.
         """
         strategy : CommentStrategy = CommentStrategy.get_strategy('create_comment')
-        return strategy.execute(request, event_id, Comment)
+        return strategy.execute(request, event_id, comment)
         
     @http_delete('/{comment_id}/delete/', response={200: dict, 404: ErrorResponseSchema}, auth=JWTAuth())
     def delete_comment(self, request: HttpRequest, comment_id: int):

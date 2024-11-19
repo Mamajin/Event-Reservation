@@ -333,11 +333,17 @@ class EventAPI:
         Returns:
             Response (dict): A dictionary containing comments for the event.
         """
-        event = get_object_or_404(Event, id=event_id)
-        comments = Comment.objects.filter(event=event, parent=None).select_related('user').prefetch_related('replies', 'reactions').order_by('-created_at')
-        response_data = [CommentResponseSchema.from_orm(comment) for comment in comments]
-        logger.info(f"Retrieved {len(comments)} comments for event {event_id}.")
-        return Response(response_data, status=200)
+        try:
+            event_comments = Comment.objects.filter(event_id=event_id, parent=None).select_related('user').prefetch_related('replies', 'reactions').order_by('-created_at')
+            response_data = [CommentResponseSchema.from_orm(comment) for comment in event_comments]
+            logger.info(f"Retrieved {len(event_comments)} comments for event {event_id}.")
+            return Response(response_data, status=200)
+        except Event.DoesNotExist:
+            logger.error(f"Event with ID {event_id} not found.")
+            return Response({'error': 'Event not found'}, status=404)
+        except Exception as e:
+            logger.error(f"Error retrieving comments for event {event_id}: {str(e)}")
+            return Response({'error': 'Internal server error'}, status=500)
     
     @router.get('/{event_id}/attendee-list', response=List[UserResponseSchema], auth=JWTAuth())
     def get_attendee_list(request: HttpRequest, event_id: int):

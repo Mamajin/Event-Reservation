@@ -17,7 +17,7 @@ class CommentResponseSchema(Schema):
     content: str
     created_at: datetime
     status: str
-    reactions: List[Dict] = []
+    reactions: List['CommentReactionResponseSchema'] = []
     replies: List['CommentResponseSchema'] = []
 
 class CommentReaction(Schema):
