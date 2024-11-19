@@ -174,7 +174,7 @@ export function CreateEventForm() {
                 onClick={() => setActiveTab('ticketing')}
               >
                 <IoTicketOutline className="mr-2 h-4 w-4" />
-                Ticketing
+                Ticketing (optional)
               </button>
               <button
                 type="button"
@@ -185,7 +185,7 @@ export function CreateEventForm() {
                 onClick={() => setActiveTab('contact')}
               >
                 <CiGlobe className="mr-2 h-4 w-4" />
-                Contact & Social
+                Contact & Social (optional)
               </button>
             </div>
             <div className="min-h-[500px] py-4">

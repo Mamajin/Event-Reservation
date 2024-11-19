@@ -2,7 +2,7 @@
 import { FaGlobe, FaFacebook, FaTwitter, FaInstagram, FaClock, FaRegCheckCircle  } from 'react-icons/fa';
 import { CiMail } from "react-icons/ci";
 import { FiPhone } from "react-icons/fi";
-import { LuCalendarDays, LuUsers } from "react-icons/lu";
+import { LuCalendarDays, LuUsers, LuShirt } from "react-icons/lu";
 import { format } from 'date-fns';
 import { CommentSection } from './Comment';
 import { useState, useEffect } from 'react';
@@ -96,7 +96,7 @@ export function EventInfo({ event }) {
             <div className="bg-white rounded-xl p-6 shadow-sm">
               <h2 className="text-2xl font-semibold mb-4 text-dark-purple">About the Event</h2>
               <p className="text-gray-600 leading-relaxed break-words">
-                {event.detailed_description || event.description}
+                {event.detailed_description}
               </p>
             </div>
           </div>
@@ -149,6 +149,16 @@ export function EventInfo({ event }) {
               </div>
             </div>
           </div>
+
+          {/* Dress Code */}
+          <div className="bg-white rounded-xl p-6 shadow-sm">
+            <h2 className="text-xl font-semibold mb-4 text-dark-purple">Dress Code</h2>
+              <p className="flex items-center gap-2 text-gray-600">
+                <LuShirt className="h-5 w-5 text-dark-purple" />
+                {event.dress_code.charAt(0) + event.dress_code.slice(1).toLowerCase()}
+              </p>
+          </div>
+            
           {/* Registration */}
           <div className="bg-white rounded-xl p-6 shadow-sm">
             <h3 className="text-xl font-semibold mb-4 text-dark-purple">Registration Details</h3>
@@ -194,6 +204,7 @@ export function EventInfo({ event }) {
               </p>
             )}
           </div>
+
           {/* Contact Information */}
           {(event.contact_email || event.contact_phone) &&(
           <div className="card bg-white">
