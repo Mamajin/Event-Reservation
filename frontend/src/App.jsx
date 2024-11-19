@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { GoogleOAuthProvider } from '@react-oauth/google';
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { scheduleTokenRefresh, getAccessToken } from './utils/tokenManager';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Home from './pages/Home';
@@ -31,6 +32,13 @@ import Logout from './pages/Logout';
 import EditEventPage from './pages/EditEvent';
 
 function App() {
+  useEffect(() => {
+    const token = getAccessToken();
+    
+    if (token) {
+      scheduleTokenRefresh();
+    }
+  }, []);
 
   return (
     <GoogleOAuthProvider clientId="987028649849-8uhmhr5qrkg494ren8um9prtdsavd6uv.apps.googleusercontent.com">
