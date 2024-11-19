@@ -89,6 +89,31 @@ function Discover() {
                       {status}
                     </button>
                   ))}
+                  {[
+                    ...new Set(
+                      events
+                        .flatMap((event) => (event.tags ? event.tags.split(",") : []))
+                    ),
+                  ].map((tag) => (
+                    <button
+                      key={tag}
+                      onClick={() =>
+                        setSelectedTags((prev) =>
+                          prev.includes(tag)
+                            ? prev.filter((t) => t !== tag)
+                            : [...prev, tag]
+                        )
+                      }
+                      className={`flex items-center px-3 py-1 rounded-full text-sm ${
+                        selectedTags.includes(tag)
+                          ? "bg-indigo-600 text-white"
+                          : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                      }`}
+                    >
+                      <LuTag className="h-4 w-4 mr-1" />
+                      {tag}
+                    </button>
+                  ))}
                 </div>
                 {filteredEvents.length > 0 ? (
                   <div className="grid grid-cols-1 md:grid-cols-1 gap-6">
