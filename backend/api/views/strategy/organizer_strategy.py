@@ -95,7 +95,7 @@ class UpdateOrganizerStrategy(OrganizerStrategy):
         try:
             organizer = get_object_or_404(Organizer, user=request.user)
 
-            if data.organizer_name and organizer.organizer_name == data.organizer_name:
+            if data.organizer_name and Organizer.objects.filter(organizer_name=data.organizer_name).exclude(user=request.user).exists():
                 logger.info(f"Organizer name '{data.organizer_name}' is already taken.")
                 return Response({'error': 'Organizer name is already taken'}, status=400)
             
@@ -123,9 +123,9 @@ class RevokeOrganizerStrategy(OrganizerStrategy):
     def execute(self, request: HttpRequest):
         """Revoke the organizer role of the authenticated user."""
         logger.info(f"User {request.user.id} is attempting to revoke their organizer role.")
-        
+
         try:
-            organizer = get_object_or_404(Organizer, user=request.user)
+            organizer = Organizer.objects.get(user=request.user)
             organizer.delete()
             logger.info(f"Organizer role revoked for user {request.user.id}.")
             return Response({'success': f'Organizer role revoked for user {request.user.id}.'}, status=200)
@@ -133,6 +133,9 @@ class RevokeOrganizerStrategy(OrganizerStrategy):
         except Organizer.DoesNotExist:
             logger.error(f"User {request.user.username} tried to revoke a non-existing organizer profile.")
             return Response({'error': 'User is not an organizer'}, status=404)
+        except Exception as e:
+            logger.error(f"Error revoking organizer role: {str(e)}")
+            return Response({'error': str(e)}, status=400)
 
 
 class ViewOrganizerStrategy(OrganizerStrategy):
@@ -229,7 +232,7 @@ class UploadLogoStrategy(OrganizerStrategy):
                 message="Upload successful",
                 file_name=os.path.basename(filename),
                 uploaded_at=timezone.now()
-            ), status=200)
+            ).dict(), status=200)
 
         except Exception as e:
             logger.error(f"Upload failed: {str(e)}")

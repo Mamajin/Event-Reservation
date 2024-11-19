@@ -241,7 +241,7 @@ class UserUploadProfilePicture(UserStrategy):
             return Response({'error': f"S3 upload failed: {str(e)}"}, status=400)
             
     
-    def execute(self, request,profile_picture):
+    def execute(self, request, profile_picture):
         try:
             user = request.user
             
