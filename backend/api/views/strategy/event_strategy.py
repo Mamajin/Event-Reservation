@@ -1,7 +1,10 @@
 from abc import ABC, abstractmethod
 from api.views.modules import *
 from api.views.schemas.event_schema import *
-from injector import inject
+from api.views.schemas.other_schema import *
+from api.views.schemas.comment_schema import CommentResponseSchema
+from api.views.schemas.user_schema import UserResponseSchema
+from api.views.schemas.ticket_schema import TicketResponseSchema
 
 
 class EventStrategy:
