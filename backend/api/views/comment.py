@@ -8,7 +8,7 @@ from api.views.strategy.comment_strategy import CommentStrategy
 class CommentAPI:
     
     @http_post('/write-comment/{event_id}', response={201: dict}, auth=JWTAuth())
-    def create_comment(self, request: HttpRequest, event_id: int, comment: CommentSchema):
+    def create_comment(self, request: HttpRequest, event_id: int, data: CommentSchema):
         """Create a new comment for a specific event.
 
         Args:
@@ -20,7 +20,7 @@ class CommentAPI:
             Response: Created comment details or error message.
         """
         strategy : CommentStrategy = CommentStrategy.get_strategy('create_comment')
-        return strategy.execute(request, event_id, comment)
+        return strategy.execute(request, event_id, data)
         
     @http_delete('/{comment_id}/delete/', response={200: dict, 404: ErrorResponseSchema}, auth=JWTAuth())
     def delete_comment(self, request: HttpRequest, comment_id: int):
