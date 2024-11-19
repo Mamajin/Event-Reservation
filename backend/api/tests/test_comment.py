@@ -6,13 +6,17 @@ class CommentTest(CommentModelsTest):
     
     
     def test_write_comment(self):
-        user = self.create_user("test",'test',"test")
+        user = self.create_user("test", "test", "test")
         token = self.get_token_for_user(user)
-        data = {'data' : "test description"}
-        response = self.client.post(self.write_comment_url + str(self.event_test.id), json = data, headers={"Authorization": f"Bearer {token}"})
-        print(response.json())
+        data = {"content": "test description"}
+        response = self.client.post(
+            f"{self.write_comment_url}{self.event_test.id}",
+            data=json.dumps(data),
+            content_type="application/json",
+            HTTP_AUTHORIZATION=f"Bearer {token}"
+        )
         self.assertEqual(response.status_code, 200)
-
+        self.assertEqual(response.json()['content'], "test description")
     
   
     def test_raise_exception(self):
@@ -20,8 +24,12 @@ class CommentTest(CommentModelsTest):
         token = self.get_token_for_user(user)
         non_exist_event = 0
         data = {'content' : "test description"}
-        response = self.client.post(self.write_comment_url + str(non_exist_event), json = data, headers={"Authorization": f"Bearer {token}"})
-        print(response.json())
+        response = self.client.post(
+            f"{self.write_comment_url}{non_exist_event}",
+            data=json.dumps(data),
+            content_type="application/json",
+            HTTP_AUTHORIZATION=f"Bearer {token}"
+        )
         self.assertEqual(response.status_code, 404)
         self.assertEqual(response.json()['error'], f"Event {non_exist_event} doesn't exist." )
         
@@ -64,7 +72,6 @@ class CommentTest(CommentModelsTest):
         
         # Perform the PUT request to edit the comment
         response = self.client.put(f'/api/comments/{comment.id}/edit/', data=json.dumps(data), headers={"Authorization": f"Bearer {token}"})
-        print(response.json())
         
         # Assert the status code is 200 (successful update)
         self.assertEqual(response.status_code, 200)
