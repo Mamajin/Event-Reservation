@@ -111,7 +111,11 @@ function AppliedEvents() {
                     <h1 className="text-2xl font-bold mb-6 text-center text-dark-purple">Applied Events</h1>
                     <div className="grid grid-cols-1 gap-4"> {/* Stacks EventCard components vertically with spacing */}
                         {events.map((event) => (
-                            <EventCard key={event.id} event={event} />
+                            <EventCard 
+                            key={event.id}
+                            event={event}
+                            showViewTicket={true}
+                            onViewTicket={() => navigate('/virtual-ticket/${event.id}')} />
                         ))}
                     </div>
                 </div>

@@ -1,12 +1,11 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FaShareAlt } from 'react-icons/fa';
 import LikeButton from './EventCardButton/LikeButton';
 import BookmarkButton from './EventCardButton/BookMarkButton';
 import ShareButton from './EventCardButton/ShareButton';
 import api from '../api';
 
-function EventCard({ event, onEdit, isEditable }) {
+function EventCard({ event, onEdit, isEditable, showViewTicket, onViewTicket }) {
   const navigate = useNavigate();
   const maxDescriptionLength = 110;
 
@@ -26,11 +25,25 @@ function EventCard({ event, onEdit, isEditable }) {
       console.error('Error deleting event:', error);
     }
   };
+
   return (
-    <div className="flex bg-white shadow-lg p-4 mb-4 rounded-lg">
+    <div className="relative flex bg-white shadow-lg p-4 mb-4 rounded-lg">
+      {/* Top-right View Ticket button */}
+      {showViewTicket && (
+        <button
+          onClick={onViewTicket}
+          className="absolute top-2 right-2 bg-indigo-300 text-dark-purple px-4 py-2 rounded-lg shadow-md"
+        >
+          View Ticket
+        </button>
+      )}
+      
       <img
         className="w-1/3 h-48 object-cover rounded-lg"
-        src={event?.event_image || "https://images.unsplash.com/photo-1513623935135-c896b59073c1?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTR8fGV2ZW50fGVufDB8fDB8fHww"}
+        src={
+          event?.event_image ||
+          "https://images.unsplash.com/photo-1513623935135-c896b59073c1?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTR8fGV2ZW50fGVufDB8fDB8fHww"
+        }
         alt="Event"
       />
       <div className="ml-4 flex-grow">
@@ -44,38 +57,44 @@ function EventCard({ event, onEdit, isEditable }) {
           </div>
           <p className="text-sm text-gray-600">{event.organizer.organizer_name}</p>
         </div>
-        <h2 className="text-3xl text-dark-purple font-bold mb-2 cursor-pointer" onClick={handleMoreDetailClick}>
+        <h2
+          className="text-3xl text-dark-purple font-bold mb-2 cursor-pointer"
+          onClick={handleMoreDetailClick}
+        >
           {event.event_name}
         </h2>
         <p className="text-sm text-gray-600 mt-1">
-          {new Date(event.start_date_event).toLocaleDateString()} - {new Date(event.end_date_event).toLocaleDateString()}
+          {new Date(event.start_date_event).toLocaleDateString()} -{' '}
+          {new Date(event.end_date_event).toLocaleDateString()}
         </p>
         <p className="mt-2 text-gray-700 break-words">
-          {event.description.length > maxDescriptionLength ? `${event.description.substring(0, maxDescriptionLength)}...` : event.description}
+          {event.description.length > maxDescriptionLength
+            ? `${event.description.substring(0, maxDescriptionLength)}...`
+            : event.description}
         </p>
 
-        {/* Engangement and Share Buttons */}
+        {/* Engagement and Share Buttons */}
         <div className="flex items-center mt-4 space-x-4">
-          <LikeButton eventId={event.id} isInitiallyLiked={hasUserLiked} />          
+          <LikeButton eventId={event.id} isInitiallyLiked={hasUserLiked} />
           <BookmarkButton eventId={event.id} />
-          <ShareButton eventId={event.id}/>
+          <ShareButton eventId={event.id} />
         </div>
 
         {isEditable && (
           <div>
-          <button
-            onClick={() => onEdit(event.id)}
-            className="btn bg-amber-300 text-dark-purple mt-4"
-          >
-            Edit Event
-          </button>
-              <button
+            <button
+              onClick={() => onEdit(event.id)}
+              className="btn bg-amber-300 text-dark-purple mt-4"
+            >
+              Edit Event
+            </button>
+            <button
               onClick={() => handleDelete(event.id)}
               className="btn bg-red-500 text-white mt-4 ml-2"
             >
               Delete Event
             </button>
-            </div>
+          </div>
         )}
       </div>
     </div>
