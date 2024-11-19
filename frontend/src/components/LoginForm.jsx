@@ -62,10 +62,6 @@ function LoginForm() {
             localStorage.setItem(USER_NAME, res.data.username);
             localStorage.setItem(USER_STATUS, res.data.status);
             localStorage.setItem(USER_ID, res.data.id);
-            console.log("Ninja access token",token.data.access)
-            console.log("Our api access token",res.data.access_token)
-            console.log("Ninja refresh token",token.data.refresh)
-            console.log("Our api refresh token",res.data.refresh_token)
             navigate("/");
         } catch (error) {
             console.error("Login error:", error);
@@ -158,11 +154,6 @@ function LoginForm() {
                                 size="large"
                             />
                         </div>
-
-
-
-
-
                         {/* Login Button */}
                         <button className="btn btn-dark-purple w-full" onClick={handleSubmit}>
                             Login
