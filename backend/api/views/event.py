@@ -3,9 +3,8 @@ from .modules import *
 from django.contrib.auth.models import AnonymousUser
 from typing import Union
 from .strategy.event_strategy import EventStrategy, EventEngagement
-from injector import Binder, inject
 
-import injector
+
 
 
 
