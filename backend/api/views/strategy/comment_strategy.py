@@ -127,7 +127,7 @@ class CommentListStrategy(CommentStrategy):
         """
         event = get_object_or_404(Event, id=event_id)
         comments = Comment.objects.filter(event=event, parent=None).select_related('user').prefetch_related('replies', 'reactions').order_by('-created_at')
-        response_data = [CommentResponseSchema.from_orm(comment) for comment in comments]
+        response_data = [CommentResponseSchema.from_comment(comment) for comment in comments]
         logger.info(f"Retrieved {len(comments)} comments for event {event_id}.")
         return Response(response_data, status=200)
     

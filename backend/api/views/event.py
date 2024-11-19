@@ -7,6 +7,7 @@ from api.views.schemas.ticket_schema import TicketResponseSchema
 from api.views.schemas.user_schema import UserResponseSchema
 from api.views.schemas.other_schema import ErrorResponseSchema, FileUploadResponseSchema
 from .strategy.event_strategy import EventStrategy
+from .strategy.comment_strategy import CommentStrategy
 from injector import Binder, inject
 
 import injector
@@ -199,7 +200,7 @@ class EventAPI(ControllerBase):
             return Response({'error': f"Upload failed: {str(e)}"}, status=400)
         
     @route.get('/{event_id}/engagement', response={200: dict})
-    def get_event_engagements(self,request: HttpRequest, event_id: int):
+    def get_event_engagements(self, request: HttpRequest, event_id: int):
         """
         Retrieve engagement metrics for a specific event.
 
@@ -215,7 +216,7 @@ class EventAPI(ControllerBase):
         return engagement_data  
     
     @route.get('/{event_id}/user-engagement', response={200: dict}, auth=JWTAuth())
-    def get_event_user_engagement(self,request: HttpRequest, event_id: int):
+    def get_event_user_engagement(self, request: HttpRequest, event_id: int):
         """
         Retrieve user engagement metrics for a specific event.
 
@@ -231,7 +232,7 @@ class EventAPI(ControllerBase):
         return user_engaged              
     
     @route.get('/{event_id}/comments', response=List[CommentResponseSchema])
-    def get_events_comments(self,request: HttpRequest, event_id: int):
+    def get_events_comments(self, request: HttpRequest, event_id: int):
         """
         Retrieve all comments for a specific event, including nested replies.
         
@@ -242,20 +243,11 @@ class EventAPI(ControllerBase):
         Returns:
             Response (dict): A dictionary containing comments for the event.
         """
-        try:
-            event_comments = Comment.objects.filter(event_id=event_id, parent=None).select_related('user').prefetch_related('replies', 'reactions').order_by('-created_at')
-            response_data = [CommentResponseSchema.from_orm(comment) for comment in event_comments]
-            logger.info(f"Retrieved {len(event_comments)} comments for event {event_id}.")
-            return Response(response_data, status=200)
-        except Event.DoesNotExist:
-            logger.error(f"Event with ID {event_id} not found.")
-            return Response({'error': 'Event not found'}, status=404)
-        except Exception as e:
-            logger.error(f"Error retrieving comments for event {event_id}: {str(e)}")
-            return Response({'error': 'Internal server error'}, status=500)
+        strategy : CommentStrategy = CommentStrategy.get_strategy('list_comment')
+        return strategy.execute(request, event_id)
     
     @route.get('/{event_id}/attendee-list', response=List[UserResponseSchema], auth=JWTAuth())
-    def get_attendee_list(self,request: HttpRequest, event_id: int):
+    def get_attendee_list(self, request: HttpRequest, event_id: int):
         """
         Retrieve the list of attendees for a specific event.
 
@@ -281,7 +273,7 @@ class EventAPI(ControllerBase):
             return Response({'error': 'User is not an organizer'}, status=403)
         
     @route.get('/{event_id}/ticket-list', response=List[TicketResponseSchema], auth=JWTAuth())
-    def get_ticket_list(self,request: HttpRequest, event_id: int):
+    def get_ticket_list(self, request: HttpRequest, event_id: int):
         """
         Retrieve the list of tickets for a specific event.
 
