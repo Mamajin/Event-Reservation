@@ -3,7 +3,7 @@ import api from '../api';
 import EventCard from '../components/EventCard';
 import PageLayout from '../components/PageLayout';
 import Sidebar from '../components/Discovery/Sidebar';
-import { LuSearch, LuTag  } from "react-icons/lu";
+import { LuSearch, LuTag, LuClock } from "react-icons/lu";
 import { ACCESS_TOKEN } from '../constants';
 
 function Discover() {
@@ -14,6 +14,7 @@ function Discover() {
   const [selectedDate, setSelectedDate] = useState(null);
   const [selectedTags, setSelectedTags] = useState([]);
   const [selectedStatus, setSelectedStatus] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState('');
 
   useEffect(() => {
     const fetchEvents = async () => {
@@ -40,17 +41,25 @@ function Discover() {
   if (error) {
     return <div>Error fetching data: {error.message}</div>;
   }
+  
+  const categories = [...new Set(events.flatMap((event => event.category))
+  ),
+  ];
 
+  const uniqueTags = [
+    ...new Set(events.flatMap((event) => (event.tags ? event.tags.split(",") : []))
+    ),
+  ];
 
   const filteredEvents = events.filter((event) => {
-    const matchesSearch = event.event_name
-      .toLowerCase()
-      .includes(searchTerm.toLowerCase());
     const matchesTags = selectedTags.length === 0 || 
-      selectedTags.some((tag) => event.tags.split(',').includes(tag));
+      selectedTags.some(tag => event.tags.split(',').includes(tag));
+    const matchesSearch = event.event_name.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesDate = !selectedDate || 
+      new Date(event.start_date_event).toDateString() === selectedDate.toDateString();
     const matchesStatus = !selectedStatus || event.status === selectedStatus;
-
-    return matchesSearch && matchesTags && matchesStatus;
+    const matchesCaregories  = !selectedCategory || event.category === selectedCategory;
+    return matchesTags && matchesSearch && matchesDate && matchesStatus && matchesCaregories;
   });
 
   return (
@@ -72,29 +81,38 @@ function Discover() {
                   />
                 </div>
                 <div className="flex flex-wrap gap-2">
-                {["UPCOMING", "ONGOING", "COMPLETED"].map((status) => (
+                {['UPCOMING', 'ONGOING', 'COMPLETED'].map((status) => (
+                  <button
+                    key={status}
+                    onClick={() => setSelectedStatus(selectedStatus === status ? null : status)}
+                    className={`flex items-center px-3 py-1 rounded-full text-sm ${
+                      selectedStatus === status
+                        ? 'bg-indigo-600 text-white'
+                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                    }`}
+                  >
+                    <LuClock className="h-4 w-4 mr-1" />
+                    {status.charAt(0) + status.slice(1).toLowerCase()}
+                  </button>
+                ))}
+              </div>
+              
+                <div className="flex flex-wrap gap-2">
+                {categories.map((category) => (
                     <button
-                      key={status}
-                      onClick={() =>
-                        setSelectedStatus((prev) =>
-                          prev === status ? "" : status
-                        )
-                      }
+                      key={category}
+                      onClick={() => setSelectedCategory(selectedCategory === category ? null : category)}
                       className={`flex items-center px-3 py-1 rounded-full text-sm ${
-                        selectedStatus === status
+                        selectedCategory === category
                           ? "bg-indigo-600 text-white"
                           : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                       }`}
                     >
-                      {status}
+                      <LuTag className="h-4 w-4 mr-1" />
+                      {category.charAt(0) + category.slice(1).toLowerCase()}
                     </button>
                   ))}
-                  {[
-                    ...new Set(
-                      events
-                        .flatMap((event) => (event.tags ? event.tags.split(",") : []))
-                    ),
-                  ].map((tag) => (
+                  {uniqueTags.map((tag) => (
                     <button
                       key={tag}
                       onClick={() =>

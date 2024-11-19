@@ -16,7 +16,6 @@ export function EventHeader({ event }) {
   const navigate = useNavigate();
 
   useEffect(() => {
-    console.log("Event user_engaged data:", event?.user_engaged);
     if (event?.user_engaged) {
       setIsLiked(event.user_engaged.is_liked);
       setIsBookmarked(event.user_engaged.is_bookmarked);

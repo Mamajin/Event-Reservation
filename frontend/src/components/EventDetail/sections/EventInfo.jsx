@@ -6,9 +6,8 @@ import { LuCalendarDays, LuUsers } from "react-icons/lu";
 import { format } from 'date-fns';
 import { CommentSection } from './Comment';
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import api from '../../../api';
-import { USER_ID } from '../../../constants';
+import { ACCESS_TOKEN, USER_ID } from '../../../constants';
 
 export function EventInfo({ event }) {
   const [loading, setLoading] = useState(false);
@@ -17,14 +16,16 @@ export function EventInfo({ event }) {
   const [ticketId, setTicketId] = useState(null);
   const userId = localStorage.getItem(USER_ID);
 
-  useEffect(() => {
-    console.log("Event user_engaged data:", event?.user_engaged);
-    
+  useEffect(() => {    
     if (event?.user_engaged) {
       setIsApplied(event.user_engaged.is_applied);
       const fetchTicket = async () => {
         try {
-          const response = await api.get(`/tickets/user/${userId}`);
+          const token = localStorage.getItem(ACCESS_TOKEN);
+          const response = await api.get(`/tickets/user/${userId}`,{
+            headers: {
+              'Authorization': `Bearer ${token}`,
+            }});
           const tickets = response.data;
   
           const ticket = tickets.find(ticket => ticket.event_id === event.id);
