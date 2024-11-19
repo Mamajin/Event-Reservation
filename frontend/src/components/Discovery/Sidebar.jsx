@@ -26,6 +26,12 @@ const Sidebar = ({ events = [], selectedDate, onSelectDate }) => {
   
   const days = Array.from({ length: daysInMonth }, (_, i) => i + 1);
   const previousMonthDays = Array.from({ length: firstDayOfMonth }, (_, i) => i);
+  const getEventsForDate = (date) => {
+    return events.filter(
+      (event) =>
+        new Date(event.start_date_event).toDateString() === date.toDateString()
+    );
+  };
   return (
   <div>
     <div className="flex items-center justify-between mb-4">
@@ -57,12 +63,22 @@ const Sidebar = ({ events = [], selectedDate, onSelectDate }) => {
       {previousMonthDays.map((_, index) => (
         <div key={`prev-${index}`} className="text-center py-1" />
       ))}
-
-      {days.map((day) => (
-        <button key={day} className="text-center py-1 rounded-full hover:bg-gray-100">
+    {days.map((day) => {
+      const date = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), day);
+      const dayEvents = getEventsForDate(date);
+      const hasEvents = dayEvents.length > 0;
+      return (
+        <button
+          key={day}
+          className="relative text-center py-1 rounded-full hover:bg-gray-100"
+        >
           {day}
+          {hasEvents && (
+            <span className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-1 h-1 rounded-full bg-indigo-600" />
+          )}
         </button>
-      ))}
+      );
+    })}
     </div>
   </div>
   );
