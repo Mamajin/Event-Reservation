@@ -22,10 +22,8 @@ export function EventInfo({ event }) {
       const fetchTicket = async () => {
         try {
           const token = localStorage.getItem(ACCESS_TOKEN);
-          const response = await api.get(`/tickets/user/${userId}`,{
-            headers: {
-              'Authorization': `Bearer ${token}`,
-            }});
+          const headers = token ? { Authorization: `Bearer ${token}` } : {};
+          const response = await api.get(`/tickets/user/${userId}`,{headers});
           const tickets = response.data;
   
           const ticket = tickets.find(ticket => ticket.event_id === event.id);
@@ -49,21 +47,22 @@ export function EventInfo({ event }) {
   ].filter(link => link.url);
 
   const handleApplyEvent = async () => {
-    setLoading(true); 
-
+    setLoading(true);
+  
     try {
-      const response = await api.post(`/tickets/event/${event.id}/register`);
-      alert("Event apply successfully!");
+      const token = localStorage.getItem(ACCESS_TOKEN);
+      const headers = token ? { Authorization: `Bearer ${token}` } : {};
+      const response = await api.post(`/tickets/event/${event.id}/register`, {}, { headers });
+      alert("Event applied successfully!");
       setIsApplied(true);
       window.location.reload();
     } catch (error) {
-      console.error("Error apply event:", error);
+      console.error("Error applying for the event:", error);
       let errorMessage = "Failed to apply for the event.";
       if (error.response) {
         errorMessage = error.response.data?.error || errorMessage;
       }
       alert(errorMessage);
-
     } finally {
       setLoading(false);
     }
@@ -72,7 +71,9 @@ export function EventInfo({ event }) {
   const handleUnapplyEvent = async () => {
     setCanceling(true);
     try {
-      const response = await api.delete(`/tickets/${parseInt(ticketId)}/cancel`);
+      const token = localStorage.getItem(ACCESS_TOKEN);
+      const headers = token ? { Authorization: `Bearer ${token}` } : {};
+      const response = await api.delete(`/tickets/${ticketId}/cancel`, { headers });
       alert("You have successfully unapplied from the event!");
       setIsApplied(false);
       window.location.reload();

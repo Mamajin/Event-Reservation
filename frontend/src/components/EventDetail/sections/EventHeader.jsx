@@ -24,7 +24,7 @@ export function EventHeader({ event }) {
   
   const handleShare = async (platform) => {
     const shareUrl = window.location.href;
-    const shareText = `Check out this event: ${event.title}`;
+    const shareText = `Check out this event: ${event.event_name}`;
   
     switch (platform) {
       case 'twitter':
