@@ -5,7 +5,7 @@ import BookmarkButton from './EventCardButton/BookMarkButton';
 import ShareButton from './EventCardButton/ShareButton';
 import api from '../api';
 
-function EventCard({ event, onEdit, isEditable, showViewTicket, onViewTicket }) {
+function EventCard({ event, onEdit, isEditable}) {
   const navigate = useNavigate();
   const maxDescriptionLength = 110;
 
@@ -28,15 +28,6 @@ function EventCard({ event, onEdit, isEditable, showViewTicket, onViewTicket }) 
 
   return (
     <div className="relative flex bg-white shadow-lg p-4 mb-4 rounded-lg">
-      {/* Top-right View Ticket button */}
-      {showViewTicket && (
-        <button
-          onClick={onViewTicket}
-          className="absolute top-2 right-2 bg-indigo-300 text-dark-purple px-4 py-2 rounded-lg shadow-md"
-        >
-          View Ticket
-        </button>
-      )}
       
       <img
         className="w-1/3 h-48 object-cover rounded-lg"
