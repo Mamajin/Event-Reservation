@@ -46,7 +46,8 @@ from pydantic import (
     HttpUrl, 
     condecimal, 
     conint, 
-    constr
+    constr,
+    field_validator,
 )
 # Local Modules
 from api.models.bookmarks import *
