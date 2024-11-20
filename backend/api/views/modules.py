@@ -39,8 +39,15 @@ from ninja_extra import (
 )
 from ninja_jwt.authentication import JWTAuth
 from ninja_jwt.tokens import AccessToken, RefreshToken
-from pydantic import EmailStr, Field, HttpUrl, condecimal, conint, constr
-
+from pydantic import (
+    BaseModel, 
+    EmailStr, 
+    Field, 
+    HttpUrl, 
+    condecimal, 
+    conint, 
+    constr
+)
 # Local Modules
 from api.models.bookmarks import *
 from api.models.comment import *
