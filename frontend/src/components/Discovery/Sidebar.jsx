@@ -36,6 +36,14 @@ const Sidebar = ({ events = [], selectedDate, onSelectDate }) => {
     setCurrentMonth(new Date(currentMonth.setMonth(currentMonth.getMonth() - 1)));
   };
 
+  const handleDateClick = (date) => {
+    if (selectedDate?.toDateString() === date.toDateString()) {
+      onSelectDate(null);
+    } else {
+      onSelectDate(date);
+    }
+  };
+
   return (
     <div className="w-80 bg-white p-6 rounded-lg shadow-md">
       <div className="flex items-center justify-between mb-4">
@@ -85,7 +93,7 @@ const Sidebar = ({ events = [], selectedDate, onSelectDate }) => {
           return (
             <button
               key={day}
-              onClick={() => onSelectDate(date)}
+              onClick={() => handleDateClick(date)}
               className={`
                 relative text-center py-1 rounded-full hover:bg-gray-100
                 ${isSelected ? 'bg-dark-purple text-white hover:bg-indigo-700' : ''}

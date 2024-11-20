@@ -5,6 +5,7 @@ import { FiEdit2, FiMessageSquare } from "react-icons/fi";
 import api from '../../../api';
 import { USER_ID } from '../../../constants';
 import { HiOutlineDotsVertical } from "react-icons/hi";
+import { ACCESS_TOKEN } from '../../../constants';
 
 export function CommentSection({ event }) {
   const [comments, setComments] = useState([]);
@@ -24,7 +25,11 @@ export function CommentSection({ event }) {
   const end_point = {
     getEventComments: async (eventId) => {
       try {
-        const response = await api.get(`/events/${eventId}/comments`);
+        const token = localStorage.getItem(ACCESS_TOKEN);
+        const headers = {
+          Authorization: `Bearer ${token}`,
+        };
+        const response = await api.get(`/events/${eventId}/comments`, { headers });
         return response.data;
       } catch (error) {
         throw new Error('Error fetching comments: ' + (error.response?.data?.detail));
@@ -32,7 +37,11 @@ export function CommentSection({ event }) {
     },
     writeComment: async (content, eventId) => {
       try {
-        const response = await api.post(`/comments/write-comment/${eventId}`, { content });
+        const token = localStorage.getItem(ACCESS_TOKEN);
+        const headers = {
+          Authorization: `Bearer ${token}`,
+        };
+        const response = await api.post(`/comments/write-comment/${eventId}`, { content }, { headers });
         return response.data;
       } catch (error) {
         throw new Error('Error creating comment: ' + (error.response?.data?.detail));
@@ -40,7 +49,11 @@ export function CommentSection({ event }) {
     },
     deleteComment: async (commentId) => {
       try {
-        const response = await api.delete(`/comments/${commentId}/delete/`);
+        const token = localStorage.getItem(ACCESS_TOKEN);
+        const headers = {
+          Authorization: `Bearer ${token}`,
+        };
+        const response = await api.delete(`/comments/${commentId}/delete/`, { headers });
         return response.status === 204;
       } catch (error) {
         throw new Error('Error deleting comment: ' + (error.response?.data?.detail));
@@ -48,7 +61,11 @@ export function CommentSection({ event }) {
     },
     editComment: async (commentId, content) => {
       try {
-        const response = await api.put(`/comments/${commentId}/edit/`, { content });
+        const token = localStorage.getItem(ACCESS_TOKEN);
+        const headers = {
+          Authorization: `Bearer ${token}`,
+        };
+        const response = await api.put(`/comments/${commentId}/edit/`, { content }, { headers });
         return response.data;
       } catch (error) {
         throw new Error('Error editing comment: ' + (error.response?.data?.detail));
