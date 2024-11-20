@@ -11,17 +11,17 @@ const LikeButton = ({ eventId }) => {
   useEffect(() => {
     const fetchInitialLikeState = async () => {
       try {
-        const response = await api.get(`/events/${eventId}/user-engagement`, {
+        const response = await api.get(`/events/${eventId}`, {
           headers: { Authorization: `Bearer ${localStorage.getItem(ACCESS_TOKEN)}` },
         });
-
-        const isLiked = response.data?.is_liked ?? false;
+  
+        const isLiked = response.data?.user_engaged?.is_liked ?? false;
         setLiked(isLiked);
       } catch (error) {
         console.error("Failed to fetch like state:", error);
       }
     };
-
+    
     fetchInitialLikeState();
   }, [eventId]);
 
