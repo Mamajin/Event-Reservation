@@ -3,9 +3,20 @@ from api.views.modules import *
 from api.views.schemas.ticket_schema import *
 
 class TicketStrategy(ABC):
-    
+    """
+    Abstract class for ticket strategies.
+    """
     @staticmethod
     def get_strategy(strategy_name):
+        """Get the ticket strategy instance based on the provided strategy name.
+
+        Args:
+            strategy_name (str): The name of the strategy to retrieve.
+
+        Returns:
+            TicketStrategy: An instance of the corresponding ticket strategy class,
+            or None if the strategy name is not found.
+        """
         strategies = {
             'get_user_ticket': TicketGetUserTicket(),
             'get_ticket_detail': TicketGetTicketDetail(),
@@ -17,12 +28,38 @@ class TicketStrategy(ABC):
     
     @abstractmethod
     def execute(self, *arg, **kwargs):
+        """Execute the ticket strategy with the given arguments.
+
+        Args:
+            *arg: Variable length argument list. The arguments passed to this method
+                depend on the specific strategy being executed.
+            **kwargs: Keyword argument dictionary. The keyword arguments passed to this
+                method depend on the specific strategy being executed.
+
+        Returns:
+            The result of executing the strategy.
+        """
         pass
     
 class TicketGetUserTicket(TicketStrategy):
-
+    """
+    Get a list of tickets for a specific user.
+    """
     
     def execute(self,id):
+        """
+        Execute the get user ticket strategy with the given user ID.
+
+        Args:
+            id (int): The ID of the user for which to retrieve tickets.
+
+        Returns:
+            List[TicketResponseSchema]: A list of TicketResponseSchema objects, each containing
+            detailed information about one of the user's tickets.
+
+        Raises:
+            404: If the user with the given ID does not exist.
+        """
         try:
             user = AttendeeUser.objects.get(id= id)
             tickets = Ticket.objects.filter(attendee=user, register_date__lte=timezone.now()).order_by("-register_date")
@@ -37,11 +74,25 @@ class TicketGetUserTicket(TicketStrategy):
         
         
 class TicketGetTicketDetail(TicketStrategy):
-    
+    """
+    Get detailed information about a specific ticket.
+    """
     def execute(self,id):
         """
-        Get detailed information about a specific ticket.
+        Execute the get ticket detail strategy with the given ticket ID.
+
+        Args:
+            id (int): The ID of the ticket for which to retrieve details.
+
+        Returns:
+            Response: A response containing the ticket details, or an error message if the
+            ticket does not exist or if an error occurs during the retrieval process.
+
+        Raises:
+            404: If the ticket with the given ID does not exist.
+            500: If an error occurs during the retrieval process.
         """
+
         try:
             ticket = get_object_or_404(Ticket, id=id)
             return Response(TicketResponseSchema(
@@ -56,9 +107,23 @@ class TicketGetTicketDetail(TicketStrategy):
         
         
 class TicketRegisterStrategy(TicketStrategy):
-    
+    """
+    Register for an event.
+    """
     def validate_event_registration(self, event, user):
-        """Validate conditions for event registration."""
+        """
+        Validate that the given user can register for the given event.
+
+        Raises a ValidationError if the event has reached maximum capacity, if the event is not open for registration, if the event is not currently open for registration, or if the user's email domain is not authorized to register for this event. Raises a PermissionDenied exception if the event is private and the user's email domain is not authorized to register for this event.
+
+        Args:
+            event (Event): The event for which to validate registration.
+            user (User): The user attempting to register for the event.
+
+        Raises:
+            ValidationError: If registration is not allowed for any reason.
+            PermissionDenied: If the event is private and the user's email domain is not authorized to register for this event.
+        """
         if event.is_max_attendee():
             raise ValidationError("This event has reached the maximum number of attendees.")
 
@@ -74,9 +139,25 @@ class TicketRegisterStrategy(TicketStrategy):
         if user.age is None:
             raise ValidationError("Please set your birth date in account information.")
     
-    def execute(self,request ,id):
+    def execute(self, request, id):
+        """
+        Execute the register for an event strategy with the given event ID.
+
+        Args:
+            request (Request): The request object containing the user making the request.
+            id (int): The ID of the event for which to register.
+
+        Returns:
+            Response: A response containing the registration details, or an error message if the
+            registration fails.
+
+        Raises:
+            400: If the registration fails due to invalid data.
+            403: If the event is private and the user's email domain is not authorized to register for this event.
+            500: If an error occurs during the registration process.
+        """
         user = request.user
-        event = get_object_or_404(Event, id= id)
+        event = get_object_or_404(Event, id=id)
         
         try: 
             self.validate_event_registration(event, user)
@@ -98,6 +179,10 @@ class TicketRegisterStrategy(TicketStrategy):
                 'error': f"You must be at least {event.min_age_requirement} years old to attend this event."
             }, status = 400)
             
+        if ticket.is_organizer_join_own_event():
+            return Response({
+                'error': "You cannot register for your own event."
+        }, status = 400)    
         try:
             ticket.clean()
             ticket.save()
@@ -115,8 +200,24 @@ class TicketRegisterStrategy(TicketStrategy):
 
 
 class TicketDeleteStrategy(TicketStrategy):
-    
+    """
+    Delete a ticket.
+    """
     def execute(self, request, ticket_id):
+        """
+        Cancel a ticket for the requesting user and send a cancellation notification email.
+
+        Args:
+            request (HttpRequest): The HTTP request object, containing user and request metadata.
+            ticket_id (int): The ID of the ticket to be canceled.
+
+        Returns:
+            Response: A response indicating the success or failure of the ticket cancellation and email notification.
+
+        Raises:
+            404: If the ticket does not exist or belongs to a different user.
+            500: If there is an error during the cancellation process or sending the email.
+        """
         this_user = request.user
         try:
             ticket = Ticket.objects.get(id=ticket_id, attendee=this_user)
@@ -144,8 +245,16 @@ class TicketDeleteStrategy(TicketStrategy):
         
         
 class TicketSendReminderStrategy(TicketStrategy):
-    
+    """
+    Send a reminder email to a specific ticket holder.
+    """
     def execute(self, ticket_id):
+        """
+        Send a reminder email to the ticket holder with the given ticket ID.
+
+        Args:
+            ticket_id (int): The ID of the ticket for which the reminder email is requested.
+        """
         ticket = get_object_or_404(Ticket, id=ticket_id)
         ticket.email_sent = True
         ticket.save()

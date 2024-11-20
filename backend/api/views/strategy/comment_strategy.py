@@ -4,6 +4,9 @@ from api.views.schemas.comment_schema import CommentResponseSchema, CommentSchem
 
 
 class CommentStrategy(ABC):
+    """
+    Abstract base class for comment strategies.
+    """
     @staticmethod
     def get_strategy(strategy_name):
         """Get the strategy based on the strategy name."""
@@ -11,7 +14,6 @@ class CommentStrategy(ABC):
             'create_comment': CommentCreateStrategy(),
             'update_comment': CommentUpdateStrategy(),
             'delete_comment': CommentDeleteStrategy(),
-            'comment_reactions': CommentReactionStrategy(),
         }
         return strategies.get(strategy_name)
     
@@ -119,46 +121,3 @@ class CommentDeleteStrategy(CommentStrategy):
             logger.error(f"Comment {comment_id} not found for delete.")
             return Response({'error': 'Comment not found'}, status=404)
         
-    
-class CommentReactionStrategy(CommentStrategy):
-    """React to a comment."""
-    def execute(self, request: HttpRequest, comment_id: int, reaction: str):
-        """React to a comment.
-
-        Args:
-            request (HttpRequest): HTTP request with authenticated user.
-            comment_id (int): ID of the comment to react to.
-            reaction_type (str): Reaction type.
-
-        Returns:
-            Response: Success message or error message.
-        """
-        try:
-            comment = get_object_or_404(Comment, id=comment_id)
-
-            if reaction not in dict(CommentReaction.REACTION_CHOICES):
-                logger.error(f"Invalid reaction type '{reaction}' by user {request.user.username}.")
-                return Response({'error': 'Invalid reaction type.'}, status=400)
-
-            existing_reaction = CommentReaction.objects.filter(
-                comment=comment, user=request.user, reaction_type=reaction
-            ).first()
-
-            if not existing_reaction:
-                CommentReaction.objects.create(
-                    comment=comment, user=request.user, reaction_type=reaction
-                )
-                logger.info(f"User {request.user.username} added reaction '{reaction}' to comment {comment_id}.")
-                return Response({'message': 'Reaction added successfully.'}, status=200)
-            else:
-                existing_reaction.delete()
-                logger.info(f"User {request.user.username} removed reaction '{reaction}' from comment {comment_id}.")
-                return Response({'message': 'Reaction removed successfully.'}, status=200)
-
-        except Comment.DoesNotExist:
-            logger.error(f"Comment {comment_id} not found for reaction.")
-            return Response({'error': 'Comment not found.'}, status=404)
-        except Exception as e:
-            logger.error(f"Error reacting to comment {comment_id}: {str(e)}")
-            return Response({'error': 'Internal server error.'}, status=500)
-            

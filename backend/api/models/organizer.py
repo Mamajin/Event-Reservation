@@ -102,14 +102,6 @@ class Organizer(models.Model):
         """
         return Organizer.objects.filter(organizer_name=name).exists()
 
-    # def update_verification_status(self, status, verified_by=None):
-    #     """Updates the verification status of the organizer."""
-    #     self.verification_status = status
-    #     if status == 'VERIFIED':
-    #         self.is_verified = True
-    #         self.verification_date = timezone.now()
-    #     self.save()
-
     def __str__(self) -> str:
         return f"Organizer: {self.organizer_name}"
 

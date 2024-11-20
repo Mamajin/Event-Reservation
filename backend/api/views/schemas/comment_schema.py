@@ -17,7 +17,6 @@ class CommentResponseSchema(Schema):
     content: str
     created_at: datetime
     status: str
-    reactions: List[Dict] = [] 
     replies: List['CommentResponseSchema'] = [] 
 
     @classmethod
@@ -33,18 +32,6 @@ class CommentResponseSchema(Schema):
             "content": comment.content,
             "created_at": comment.created_at,
             "status": comment.status,
-            "reactions": [
-                {
-                    "id": reaction.id,
-                    "reaction_type": reaction.reaction_type,
-                    "user": UserProfileSchema(
-                        id=reaction.user.id,
-                        username=reaction.user.username,
-                        profile_picture=reaction.user.profile_picture,
-                    ).dict(),
-                }
-                for reaction in comment.reactions.all()
-            ],
             "replies": [cls.from_comment(reply) for reply in comment.replies.all()],
         }
 
