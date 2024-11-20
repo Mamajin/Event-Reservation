@@ -3,7 +3,8 @@ import { useParams, useNavigate } from 'react-router-dom';
 import api from '../api';
 import { FaArrowLeft } from 'react-icons/fa';
 import PageLayout from '../components/PageLayout';
-import QRCode from 'react-qr-code'; // Import QR Code component
+import QRCode from 'react-qr-code';
+import { PROFILE_PICTURE } from '../constants';
 
 function VirtualTicket() {
   const { ticketId } = useParams();
@@ -66,6 +67,16 @@ function VirtualTicket() {
     );
   }
 
+  // Construct data for the QR code
+  const qrCodeData = {
+    ticket_id: ticket.ticket_id,
+    event_name: event.event_name,
+    fullname: ticket.fullname,
+    profile_picture: PROFILE_PICTURE, // Profile picture URL from constants
+    register_date: new Date(ticket.register_date).toLocaleDateString(),
+    status: ticket.status,
+  };
+
   return (
     <PageLayout>
       <div className="max-w-lg mx-auto p-6 bg-white shadow-xl rounded-lg mt-8 relative overflow-hidden">
@@ -111,14 +122,11 @@ function VirtualTicket() {
               <p className="text-lg mt-2">
                 <span className="font-semibold">Status:</span> {ticket?.status || 'Active'}
               </p>
-              <p className="text-lg mt-2">
-                <span className="font-semibold">Created At:</span> {new Date(ticket?.created_at).toLocaleDateString()}
-              </p>
             </div>
 
             {/* QR Code Section with Larger White Space */}
             <div className="mt-6 flex justify-center items-center p-6 bg-white rounded-lg shadow-lg">
-              <QRCode value={`Ticket ID: ${ticket?.ticket_id}, Event: ${event?.event_name}`} size={150} />
+              <QRCode value={JSON.stringify(qrCodeData)} size={200} />
             </div>
 
             {/* Ticket Footer */}

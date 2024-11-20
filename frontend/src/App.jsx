@@ -31,6 +31,7 @@ import Logout from './pages/Logout';
 import EditEventPage from './pages/EditEvent';
 import VirtualTicket from './pages/VirtualTicket';
 import MyTickets from './pages/MyTickets';
+import TicketDetail from './pages/TicketDetail';
 
 function App() {
 
@@ -73,6 +74,7 @@ function App() {
           <Route path="/bookmarks" element={<ProtectedRoute><Bookmark /></ProtectedRoute>} />
           <Route path="/my-tickets" element={<ProtectedRoute><MyTickets /></ProtectedRoute>} />
           <Route path="/virtual-ticket/:ticketId" element={<ProtectedRoute><VirtualTicket /></ProtectedRoute>} />
+          <Route path="/ticket/:ticketId" element={<ProtectedRoute><TicketDetail /></ProtectedRoute>} />
           <Route path="/events/:eventId/edit" element={<ProtectedRoute><EditEventPage /></ProtectedRoute>} />
 
           {/* Fallback Route */}
