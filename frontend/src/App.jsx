@@ -30,6 +30,7 @@ import Bookmark from './pages/BookMark';
 import Logout from './pages/Logout';
 import EditEventPage from './pages/EditEvent';
 import VirtualTicket from './pages/VirtualTicket';
+import MyTickets from './pages/MyTickets';
 
 function App() {
 
@@ -70,6 +71,7 @@ function App() {
           <Route path="/create-event" element={<ProtectedRoute><CreateEvent /></ProtectedRoute>} />
           <Route path="/my-events" element={<ProtectedRoute><MyEvents /></ProtectedRoute>} />
           <Route path="/bookmarks" element={<ProtectedRoute><Bookmark /></ProtectedRoute>} />
+          <Route path="/my-tickets" element={<ProtectedRoute><MyTickets /></ProtectedRoute>} />
           <Route path="/virtual-ticket/:ticketId" element={<ProtectedRoute><VirtualTicket /></ProtectedRoute>} />
           <Route path="/events/:eventId/edit" element={<ProtectedRoute><EditEventPage /></ProtectedRoute>} />
 

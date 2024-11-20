@@ -43,11 +43,11 @@ function MyTickets() {
           )
         );
 
-        // Create a map of event_id to event data
+        // Create a map of event_id to event_name
         const eventMap = {};
         eventResponses.forEach((response) => {
           const event = response.data;
-          eventMap[event.id] = event;
+          eventMap[event.id] = event.event_name;
         });
 
         setEvents(eventMap);
@@ -84,59 +84,37 @@ function MyTickets() {
 
   if (tickets.length === 0) {
     return (
-        <PageLayout>
-        <div className="flex justify-center items-start min-h-screen p-4">
-            <div className="w-full max-w-[1400px] max-w-lg bg-white rounded-lg shadow-lg p-6 space-y-4">
-                <h2 className="text-2xl font-bold mb-4 text-center text-dark-purple">My Tickets</h2>
-                <div className="grid grid-cols-1 gap-4">
-                    <div>You don't have any tickets at the moment.</div>
-                </div>
-            </div>
-        </div>
-    </PageLayout>
+      <PageLayout>
+        <div className="text-center mt-8 text-gray-500">You have no tickets yet.</div>
+      </PageLayout>
     );
   }
 
   return (
     <PageLayout>
-      <div className="max-w-4xl max-w-[1400px] mx-auto p-6 bg-white shadow-lg rounded-lg mt-8">
+      <div className="max-w-4xl mx-auto p-6 bg-white shadow-lg rounded-lg mt-8">
         <h1 className="text-2xl text-dark-purple mb-5 font-bold text-center">My Tickets</h1>
         <div className="grid gap-6">
-          {tickets.map((ticket) => {
-            const event = events[ticket.event_id] || {}; // Get the event details for this ticket
-            return (
-              <div
-                key={ticket.id}
-                className="flex border-2 border-solid border-gray-400 rounded-lg p-4 hover:bg-gray-100 cursor-pointer transition duration-300"
-                onClick={() => handleViewTicket(ticket.id)}
-              >
-                {/* Event Image */}
-                <div className="flex-shrink-0 w-32 h-32 mr-4">
-                  <img
-                    src={event.event_image || 'https://via.placeholder.com/400x200'}
-                    alt={event.event_name || 'Event'}
-                    className="w-full h-full object-cover rounded-lg"
-                  />
-                </div>
-
-                {/* Ticket Details */}
-                <div className="flex-grow">
-                  <p className="text-lg">
-                    <span className="font-semibold text-dark-purple">Event:</span> {event.event_name || 'Fetching...'}
-                  </p>
-                  <p className="text-lg mt-2">
-                    <span className="font-semibold text-dark-purple">Ticket Number:</span> {ticket.ticket_number}
-                  </p>
-                  <p className="text-lg mt-2">
-                    <span className="font-semibold text-dark-purple">Registration date:</span> {new Date(ticket.register_date).toLocaleDateString()}
-                  </p>
-                  <p className="text-lg mt-2">
-                    <span className="font-semibold text-dark-purple">Status:</span> {ticket.status || "Active"}
-                  </p>
-                </div>
-              </div>
-            );
-          })}
+          {tickets.map((ticket) => (
+            <div
+              key={ticket.ticket_id}
+              className="border-2 border-dashed border-gray-400 rounded-lg p-4 hover:bg-gray-100 cursor-pointer"
+              onClick={() => handleViewTicket(ticket.id)}
+            >
+              <p className="text-lg">
+                <span className="font-semibold text-dark-purple">Event:</span> {events[ticket.event_id] || 'Fetching...'}
+              </p>
+              <p className="text-lg mt-2">
+                <span className="font-semibold text-dark-purple">Ticket Number:</span> {ticket.ticket_number}
+              </p>
+              <p className="text-lg mt-2">
+                <span className="font-semibold text-dark-purple">Registration date:</span> {new Date(ticket.register_date).toLocaleDateString()}
+              </p>
+              <p className="text-lg mt-2">
+                <span className="font-semibold text-dark-purple">Status:</span> {ticket.status || "Active"}
+              </p>
+            </div>
+          ))}
         </div>
       </div>
     </PageLayout>

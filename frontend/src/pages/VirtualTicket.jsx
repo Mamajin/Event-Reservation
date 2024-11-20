@@ -3,7 +3,6 @@ import { useParams, useNavigate } from 'react-router-dom';
 import api from '../api';
 import { FaArrowLeft } from 'react-icons/fa';
 import PageLayout from '../components/PageLayout';
-import QRCode from 'react-qr-code'; // Import QR Code component
 
 function VirtualTicket() {
   const { ticketId } = useParams();
@@ -19,6 +18,7 @@ function VirtualTicket() {
         const token = localStorage.getItem('access_token');
         if (!token) throw new Error('Unauthorized: No access token found.');
 
+        // Fetch ticket details
         const ticketResponse = await api.get(`/tickets/${ticketId}`, {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -26,7 +26,8 @@ function VirtualTicket() {
         });
         setTicket(ticketResponse.data);
 
-        const eventId = ticketResponse.data.event_id;
+        // Use event_id from the ticket to fetch event details
+        const eventId = ticketResponse.data.event_id; // Ensure the event_id exists in the ticket response
         const eventResponse = await api.get(`/events/${eventId}`, {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -45,7 +46,7 @@ function VirtualTicket() {
   }, [ticketId]);
 
   const handleBackClick = () => {
-    navigate(-1);
+    navigate(-1); // Navigate back to the previous page
   };
 
   if (loading) {
@@ -66,74 +67,67 @@ function VirtualTicket() {
 
   return (
     <PageLayout>
-      <div className="max-w-lg mx-auto p-6 bg-white shadow-xl rounded-lg mt-8 relative overflow-hidden">
-        {/* Watermark */}
-        <div className="absolute inset-0 transform rotate-45 flex justify-center items-center text-7xl text-gray-300 font-bold opacity-20 pointer-events-none" style={{ zIndex: 1 }}>
-          EventEase
-        </div>
-
-        {/* Virtual Ticket Header */}
-        <div className="text-center mb-6">
-          <h1 className="text-3xl font-bold text-dark-purple">Virtual Ticket</h1>
-        </div>
-
-        {/* Back Button */}
+      <div className="max-w-4xl mx-auto p-6 bg-white shadow-lg rounded-lg mt-8 relative">
         <button className="absolute top-4 left-4 p-2" onClick={handleBackClick}>
           <FaArrowLeft className="text-gray-500" />
         </button>
+        <div className="text-center">
+          <h1 className="text-4xl text-dark-purple mb-5 font-bold">Virtual Ticket</h1>
+        </div>
+        
+        {/* Ticket Container */}
+        <div className="relative w-full max-w-3xl bg-gradient-to-r from-yellow-200 via-amber-200 to-yellow-400 border-4 border-dashed border-dark-purple rounded-lg p-6 shadow-xl overflow-hidden">
 
-        {/* Ticket Background */}
-        <div className="ticket-container p-6 bg-gradient-to-b from-blue-500 to-indigo-700 text-white rounded-2xl relative">
+          {/* Watermark */}
+          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-gray-500 opacity-30 text-6xl rotate-45 font-bold">
+            EventEase
+          </div>
+
+          {/* Cut-out Effect on Left & Right */}
+          <div className="absolute left-0 top-0 w-8 h-full bg-white transform -translate-x-3 rounded-tr-lg rounded-br-lg z-10"></div>
+          <div className="absolute right-0 top-0 w-8 h-full bg-white transform translate-x-3 rounded-tl-lg rounded-bl-lg z-10"></div>
+
           {/* Event Image */}
-          <div className="event-image mb-4">
+          <div className="w-full mb-4">
             <img
-              src={event?.event_image || 'https://via.placeholder.com/400x200'}
-              alt={event?.event_name || 'Event'}
-              className="w-full h-48 object-cover rounded-lg"
+              src={event?.event_image || '/path/to/default-image.jpg'}
+              alt="Event"
+              className="w-full h-56 object-cover rounded-md"
             />
           </div>
 
-          {/* Ticket Information */}
-          <div className="text-left">
-            <h1 className="text-2xl font-bold mb-2">{event?.event_name || 'Event Name'}</h1>
-            <div className="ticket-info">
-              <p className="text-lg">
-                <span className="font-semibold">Ticket Number:</span> {ticket?.ticket_number}
-              </p>
-              <p className="text-lg mt-2">
-                <span className="font-semibold">Registrant Name:</span> {ticket?.fullname}
-              </p>
-              <p className="text-lg mt-2">
-                <span className="font-semibold">Register Date:</span> {new Date(ticket?.register_date).toLocaleDateString()}
-              </p>
-              <p className="text-lg mt-2">
-                <span className="font-semibold">Status:</span> {ticket?.status || 'Active'}
-              </p>
-              <p className="text-lg mt-2">
-                <span className="font-semibold">Created At:</span> {new Date(ticket?.created_at).toLocaleDateString()}
-              </p>
-            </div>
-
-            {/* QR Code Section with Larger White Space */}
-            <div className="mt-6 flex justify-center items-center p-6 bg-white rounded-lg shadow-lg">
-              <QRCode value={`Ticket ID: ${ticket?.id}, Event: ${event?.event_name}, Full Name: ${ticket?.fullname}`} size={150} />
-            </div>
-
-            {/* Ticket Footer */}
-            <div className="mt-6 border-t-2 border-white pt-4">
-              <button
-                className="bg-amber-300 text-dark-purple py-2 px-6 rounded-lg font-semibold hover:bg-amber-400 transition-all duration-300"
-                onClick={() => alert('This ticket is valid for the event.')}
-              >
-                Validate Ticket
-              </button>
-            </div>
+          {/* Ticket Details */}
+          <div className="text-center text-dark-purple">
+            <p className="text-lg font-semibold">
+              <span className="text-lg font-bold text-dark-purple">Ticket Number:</span> {ticket.ticket_number}
+            </p>
+            <p className="text-lg mt-2">
+              <span className="text-lg font-bold text-dark-purple">Event Name:</span> {event?.event_name || 'N/A'}
+            </p>
+            <p className="text-lg mt-2">
+              <span className="font-bold text-dark-purple">Registrant Name:</span> {ticket.fullname}
+            </p>
+            <p className="text-lg mt-2">
+              <span className="font-bold text-dark-purple">Register Date:</span>{' '}
+              {new Date(ticket.register_date).toLocaleDateString()}
+            </p>
+            <p className="text-lg mt-2">
+              <span className="font-bold text-dark-purple">Status:</span> {ticket.status || 'Active'}
+            </p>
+            <p className="text-lg mt-2">
+              <span className="font-bold text-dark-purple">Registered At:</span>{' '}
+              {new Date(ticket.created_at).toLocaleDateString()}
+            </p>
           </div>
-        </div>
 
-        {/* Ticket Borders for realism */}
-        <div className="absolute top-0 left-0 right-0 bottom-0 border-4 border-white rounded-2xl p-2 pointer-events-none">
-          <div className="w-full h-full border-4 border-white opacity-40 rounded-xl"></div>
+          <div className="mt-6 text-center">
+            <button
+              className="btn bg-amber-300 text-dark-purple py-2 px-6 rounded-lg"
+              onClick={() => alert('This ticket is valid for the event.')}
+            >
+              Validate Ticket
+            </button>
+          </div>
         </div>
       </div>
     </PageLayout>
