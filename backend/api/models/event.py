@@ -2,24 +2,9 @@ import re
 from django.db import models
 from django.utils import timezone
 from django.core.files.storage import default_storage
-from django.core.validators import MinValueValidator, MaxValueValidator, FileExtensionValidator
+from django.core.validators import MaxValueValidator, FileExtensionValidator
 from django.core.exceptions import ValidationError
 from api.models.organizer import Organizer
-import re
-
-
-# class EventManager(models.Manager):
-#     def public(self):
-#         return self.filter(visibility='PUBLIC')
-
-#     def private(self):
-#         return self.filter(visibility='PRIVATE')
-    
-#     def filter_by_category(self, category):
-#         return self.filter(category=category)
-    
-#     def within_date_range(self, start_date, end_date):
-#         return self.filter(start_date_event__gte=start_date, end_date_event__lte=end_date)
 
 
 class Event(models.Model):
@@ -131,6 +116,7 @@ class Event(models.Model):
     facebook_url = models.URLField(max_length=200, null=True, blank=True)
     twitter_url = models.URLField(max_length=200, null=True, blank=True)
     instagram_url = models.URLField(max_length=200, null=True, blank=True)
+    other_url = models.URLField(max_length=1000, null=True, blank=True, help_text='Other social media URL. Separated by comma eg. https://www.example.com, https://www.example2.com')
 
     min_age_requirement = models.PositiveIntegerField(
         default=0,
@@ -148,11 +134,6 @@ class Event(models.Model):
     )
     
     terms_and_conditions = models.TextField(null=True, blank=True)
-    
-    # objects = EventManager()
-
-    # Existing methods remain the same
-    
 
         
     @property
