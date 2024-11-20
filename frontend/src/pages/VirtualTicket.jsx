@@ -142,8 +142,8 @@ function VirtualTicket() {
         </div>
 
         {/* Ticket Borders for realism */}
-        <div className="absolute top-0 left-0 right-0 bottom-0 border-4 border-white rounded-2xl p-2 pointer-events-none">
-          <div className="w-full h-full border-4 border-white opacity-40 rounded-xl"></div>
+        <div className="absolute top-0 left-0 right-0 bottom-0 border-4 border-grey rounded-2xl p-2 pointer-events-none">
+          <div className="w-full h-full border-4 border-grey opacity-40 rounded-xl"></div>
         </div>
       </div>
     </PageLayout>

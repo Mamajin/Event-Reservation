@@ -16,7 +16,6 @@ function EventCard({ event, onEdit, isEditable}) {
   // Destructure engagement and provide default values in case it's null or undefined
   const { user_engaged = {} } = event;
   const hasUserLiked = user_engaged.is_liked ?? false;
-  console.log(event.user_engaged)
 
   const handleDelete = async (eventId) => {
     try {
