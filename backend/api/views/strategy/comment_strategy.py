@@ -9,10 +9,8 @@ class CommentStrategy(ABC):
         """Get the strategy based on the strategy name."""
         strategies = {
             'create_comment': CommentCreateStrategy(),
-            'get_comment': CommentGetStrategy(),
             'update_comment': CommentUpdateStrategy(),
             'list_comment': CommentListStrategy(),
-            'reply_comment': CommentReplyStrategy(),
             'delete_comment': CommentDeleteStrategy(),
             'comment_reactions': CommentReactionStrategy(),
         }
@@ -57,27 +55,7 @@ class CommentCreateStrategy(CommentStrategy):
             logger.error(f"Error creating comment for event {event_id}: {str(e)}")
             return Response({'error': str(e)}, status=500)
         
-class CommentGetStrategy(CommentStrategy):
-    """Get a comment by ID."""
-    def execute(self, request: HttpRequest, comment_id: int):
-        """Get a comment by ID.
-
-        Args:
-            request (HttpRequest): HTTP request with authenticated user.
-            comment_id (int): ID of the comment to retrieve.
-
-        Returns:
-            Response: Comment details or error message.
-        """
-        try:
-            comment = get_object_or_404(Comment, id=comment_id)
-            return Response(CommentResponseSchema.from_orm(comment), status=200)
         
-        except Http404:
-            logger.error(f"Comment {comment_id} not found.")
-            return Response({'error': 'Comment not found'}, status=404)
-        
-
 class CommentUpdateStrategy(CommentStrategy):
     """Update a comment by ID."""
     def execute(self, request: HttpRequest, comment_id: int, data: CommentSchema):
@@ -130,38 +108,6 @@ class CommentListStrategy(CommentStrategy):
         response_data = [CommentResponseSchema.from_comment(comment) for comment in comments]
         logger.info(f"Retrieved {len(comments)} comments for event {event_id}.")
         return Response(response_data, status=200)
-    
-    
-class CommentReplyStrategy(CommentStrategy):
-    """Reply to a comment."""
-    def execute(self, request: HttpRequest, comment_id: int, data: CommentSchema):
-        """Reply to a comment.
-
-        Args:
-            request (HttpRequest): HTTP request with authenticated user.
-            comment_id (int): ID of the comment to reply to.
-            comment (CommentSchema): Reply content.
-
-        Returns:    
-            Response: Created reply details or error message.
-        """
-        try: 
-            parent_comment = get_object_or_404(Comment, id=comment_id)
-            user = request.user
-            comment = Comment.objects.create(
-                event=parent_comment.event, user=user, parent=parent_comment,
-                content=data.content, status=Comment.Status.APPROVED
-            )
-            logger.info(f"Reply created for comment {comment_id} by {user.username}.")
-            return Response(CommentResponseSchema.from_orm(comment), status=200)
-        
-        except Http404:
-            logger.error(f"Comment {comment_id} not found for reply.")
-            return Response({'error': 'Comment not found'}, status=404)
-        
-        except Exception as e:
-            logger.error(f"Error creating reply for comment {comment_id}: {str(e)}")
-            return Response({'error': str(e)}, status=500)
         
         
 class CommentDeleteStrategy(CommentStrategy):
