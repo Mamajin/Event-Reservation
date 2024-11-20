@@ -69,6 +69,11 @@ function VirtualTicket() {
   return (
     <PageLayout>
       <div className="max-w-lg mx-auto p-6 bg-white shadow-xl rounded-lg mt-8 relative overflow-hidden">
+        {/* Watermark */}
+        <div className="absolute inset-0 transform rotate-45 flex justify-center items-center text-7xl text-gray-300 font-bold opacity-20 pointer-events-none" style={{ zIndex: 1 }}>
+          EventEase
+        </div>
+
         {/* Virtual Ticket Header */}
         <div className="text-center mb-6">
           <h1 className="text-3xl font-bold text-dark-purple">Virtual Ticket</h1>
@@ -109,10 +114,11 @@ function VirtualTicket() {
               <p className="text-lg mt-2">
                 <span className="font-semibold">Created At:</span> {new Date(ticket?.created_at).toLocaleDateString()}
               </p>
-              {/* QR Code Section */}
-              <div className="mt-6 text-center">
-                <QRCode value={`Ticket ID: ${ticket?.ticket_id}, Event: ${event?.event_name}`} size={150} />
-              </div>
+            </div>
+
+            {/* QR Code Section with Larger White Space */}
+            <div className="mt-6 flex justify-center items-center p-6 bg-white rounded-lg shadow-lg">
+              <QRCode value={`Ticket ID: ${ticket?.ticket_id}, Event: ${event?.event_name}`} size={150} />
             </div>
 
             {/* Ticket Footer */}
