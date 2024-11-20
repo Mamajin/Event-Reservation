@@ -50,18 +50,3 @@ class CommentAPI:
         """
         strategy : CommentStrategy = CommentStrategy.get_strategy('update_comment')
         return strategy.execute(request, comment_id, data)
-        
-    @http_put('/{comment_id}/react/', response={200: dict, 404: ErrorResponseSchema}, auth=JWTAuth())
-    def react_to_comment(self, request: HttpRequest,  comment_id: int, reaction: CommentType):
-        """React to a comment with a specific reaction if user is authorized.
-
-        Args:
-            request (HttpRequest): HTTP request with authenticated user.
-            comment_id (int): ID of the comment to react to.
-            reaction (str): Reaction to apply.
-
-        Returns:
-            Response: Updated comment details or error if unauthorized/not found.
-        """
-        strategy : CommentStrategy = CommentStrategy.get_strategy('comment_reactions')
-        return strategy.execute(request, comment_id, reaction)
