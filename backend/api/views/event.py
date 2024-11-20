@@ -1,16 +1,13 @@
 from .modules import *
 from django.contrib.auth.models import AnonymousUser
 from typing import Union
-from api.views.schemas.event_schema import *
 from api.views.schemas.comment_schema import CommentResponseSchema
+from api.views.schemas.event_schema import *
 from api.views.schemas.ticket_schema import TicketResponseSchema
 from api.views.schemas.user_schema import UserResponseSchema
 from api.views.schemas.other_schema import ErrorResponseSchema, FileUploadResponseSchema
-from .strategy.event_strategy import EventStrategy
-from .strategy.comment_strategy import CommentStrategy
-from injector import Binder, inject
+from .strategy.event_strategy import EventStrategy,EventEngagement
 
-import injector
 
 
 @api_controller('/events/', tags = ["Events"])
@@ -75,29 +72,8 @@ class EventAPI(ControllerBase):
         Returns:
             EventResponseSchema: Updated event details or error response.
         """
-        try:
-            event = Event.objects.get(id=event_id)
-            organizer = Organizer.objects.get(user=request.user)
-            if event.organizer != organizer:
-                logger.warning(f"User {request.user.username} tried to edit an event they do not own.")
-                return Response({'error': 'You are not allowed to edit this event.'}, status=403)
-            
-            update_fields = data.dict(exclude_unset = True)
-            for field, value in update_fields.items():
-                setattr(event, field, value)
-            event.save()
-            event_data = EventUpdateSchema.from_orm(event)
-            logger.info(f"Organizer {organizer.organizer_name} edited their event {event_id}.")
-            return Response(event_data, status=200)
-        except Event.DoesNotExist:
-            logger.error(f"Event with ID {event_id} does not exist.")
-            return Response({'error': 'Event not found'}, status=404)
-        except Organizer.DoesNotExist:
-            logger.error(f"User {request.user.username} is not an organizer.")
-            return Response({'error': 'User is not an organizer'}, status=404)
-        except Exception as e:
-            logger.error(f"Error while editing event {event_id}: {str(e)}")
-            return Response({'error': str(e)}, status=400)
+        strategy : EventStrategy = EventStrategy.get_strategy('edit_event', request)
+        return strategy.execute(event_id, data)
 
     @route.get('/{event_id}', response=EventResponseSchema)
     def event_detail(self,request: HttpRequest, event_id: int):
@@ -128,76 +104,8 @@ class EventAPI(ControllerBase):
         Returns:
             FileUploadResponseSchema: Details of the uploaded image, including URL, or an error response.
         """
-        try:
-            event = get_object_or_404(Event, id=event_id)
-
-            organizer = Organizer.objects.get(user=request.user)
-            if event.organizer != organizer:
-                return Response({'error': 'You are not allowed to upload an image for this event.'}, status=403)
-            
-            if file.content_type not in ALLOWED_IMAGE_TYPES:
-                return Response({'error': 'Invalid file type. Only JPEG and PNG are allowed.'}, status=400)
-            
-            if file.size > MAX_FILE_SIZE:
-                return Response({'error': f'File size exceeds the limit of {MAX_FILE_SIZE / (1024 * 1024)} MB.'}, status=400)
-            
-            # Check if there's an existing image
-            if event.event_image:
-                old_filename = event.event_image.url
-                s3_client = boto3.client(
-                    's3',
-                    aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
-                    aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY,
-                    region_name=settings.AWS_S3_REGION_NAME
-                )
-                try:
-                    s3_client.delete_object(Bucket=settings.AWS_STORAGE_BUCKET_NAME, Key=old_filename)
-                    logger.info(f"Deleted old image from S3: {old_filename}")
-                except ClientError as e:
-                    logger.error(f"Failed to delete old image from S3: {str(e)}")
-
-            filename = f'event_images/{uuid.uuid4()}{os.path.splitext(file.name)[1]}'
-            logger.info(f"Starting upload for file: {filename}")
-            try:
-                # Direct S3 upload using boto3
-                s3_client = boto3.client(
-                    's3',
-                    aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
-                    aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY,
-                    region_name=settings.AWS_S3_REGION_NAME
-                )
-
-                # Upload file to S3
-                s3_client.upload_fileobj(
-                    file.file,
-                    settings.AWS_STORAGE_BUCKET_NAME,
-                    filename,
-                    ExtraArgs={
-                        'ContentType': file.content_type,
-                    }
-                )
-
-                file_url = f"https://{settings.AWS_S3_CUSTOM_DOMAIN}/{filename}"
-                logger.info(f"Successfully uploaded file to S3: {file_url}")
-
-                event.event_image = filename
-                event.save()
-            
-                return Response(FileUploadResponseSchema(
-                    file_url=file_url,
-                    message="Upload successful",
-                    file_name=os.path.basename(filename),
-                    uploaded_at=timezone.now()
-                ), status=200)
-            
-            except ClientError as e:
-                logger.error(f"S3 upload error: {str(e)}")
-                return Response({'error': f"S3 upload failed: {str(e)}"}, status=400)
-            
-        except Organizer.DoesNotExist:
-            return Response({'error': 'User is not an organizer'}, status=404)
-        except Exception as e:
-            return Response({'error': f"Upload failed: {str(e)}"}, status=400)
+        strategy : EventStrategy = EventStrategy.get_strategy('upload_event_image', request)
+        return strategy.execute(event_id,file)
         
     @route.get('/{event_id}/engagement', response={200: dict})
     def get_event_engagements(self, request: HttpRequest, event_id: int):
@@ -211,9 +119,8 @@ class EventAPI(ControllerBase):
         Returns:
             Response (dict): A dictionary containing engagement metrics for the event.
         """
-        event = get_object_or_404(Event, id=event_id)
-        engagement_data = EventResponseSchema.resolve_engagement(event)
-        return engagement_data  
+        strategy : EventEngagement= EventEngagement.get_engagement_strategy('event_engagement', request, event_id)
+        return strategy.execute()
     
     @route.get('/{event_id}/user-engagement', response={200: dict}, auth=JWTAuth())
     def get_event_user_engagement(self, request: HttpRequest, event_id: int):
@@ -227,9 +134,8 @@ class EventAPI(ControllerBase):
         Returns:
             Response (dict): A dictionary containing user engagement metrics for the event.
         """
-        event = get_object_or_404(Event, id=event_id)
-        user_engaged = EventResponseSchema.resolve_user_engagement(event, request.user)
-        return user_engaged              
+        strategy : EventEngagement = EventEngagement.get_engagement_strategy('event_user_engagement', request, event_id)
+        return strategy.execute()        
     
     @route.get('/{event_id}/comments', response=List[CommentResponseSchema])
     def get_events_comments(self, request: HttpRequest, event_id: int):
@@ -243,8 +149,8 @@ class EventAPI(ControllerBase):
         Returns:
             Response (dict): A dictionary containing comments for the event.
         """
-        strategy : CommentStrategy = CommentStrategy.get_strategy('list_comment')
-        return strategy.execute(request, event_id)
+        strategy: EventEngagement = EventEngagement.get_engagement_strategy('event_comment', request, event_id)
+        return strategy.execute()
     
     @route.get('/{event_id}/attendee-list', response=List[UserResponseSchema], auth=JWTAuth())
     def get_attendee_list(self, request: HttpRequest, event_id: int):
@@ -258,19 +164,8 @@ class EventAPI(ControllerBase):
         Returns:
             List[UserResponseSchema]: A list of attendee users for the event.
         """
-        try:
-            organizer = Organizer.objects.get(user=request.user)
-            event = get_object_or_404(Event, id=event_id)
-            if event.organizer != organizer:
-                logger.warning(f"User {request.user.username} tried to access attendee list but is not an organizer.")
-                return Response({'error': 'You are not allowed to access this event.'}, status=403)
-            tickets = Ticket.objects.filter(event=event).order_by('attendee__username')
-            response_data = [UserResponseSchema.from_orm(ticket.attendee) for ticket in tickets]
-            logger.info(f"Retrieved attendee list for event {event_id}.")
-            return Response(response_data, status=200)
-        except Organizer.DoesNotExist:
-            logger.error(f"User {request.user.username} tried to access attendee list but is not an organizer.")
-            return Response({'error': 'User is not an organizer'}, status=403)
+        strategy : EventEngagement = EventEngagement.get_engagement_strategy('event_attendee', request, event_id)
+        return strategy.execute()
         
     @route.get('/{event_id}/ticket-list', response=List[TicketResponseSchema], auth=JWTAuth())
     def get_ticket_list(self, request: HttpRequest, event_id: int):
@@ -284,14 +179,7 @@ class EventAPI(ControllerBase):
         Returns:
             List[TicketResponseSchema]: A list of tickets for the event.
         """
-        event = get_object_or_404(Event, id=event_id)
-        tickets = Ticket.objects.filter(event=event).order_by('id')
-        response_data = [TicketResponseSchema(
-                            **ticket.get_ticket_details()
-                        )
-                        for ticket in tickets]
-        logger.info(f"Retrieved ticket list for event {event_id}.")
-        return Response(response_data, status=200)
-    
+        strategy : EventEngagement = EventEngagement.get_engagement_strategy('event_ticket', request, event_id)
+        return strategy.execute()    
     
 
