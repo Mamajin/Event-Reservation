@@ -3,7 +3,7 @@ from django.utils import timezone
 from api.models import AttendeeUser, Organizer, Event, Ticket
 from datetime import datetime
 from ninja.testing import TestClient
-from api.urls import organizer_router
+from api.urls import api
 from ninja_jwt.tokens import RefreshToken
 from faker import Faker
 from unittest.mock import patch, Mock, MagicMock
@@ -19,17 +19,17 @@ class OrganizerModelsTest(TestCase):
     EXCEED_SIZE = 10 * 1024 * 1024
 
     def setUp(self):
+        client = TestClient(api)
         """
         Set up initial test data for models.
         """
         
-        self.client = TestClient(organizer_router)
-        self.apply_organizer_url = '/apply-organizer'
-        self.delete_event_url = f"/delete-event/"
-        self.update_organizer_url = '/update-organizer'
-        self.revoke_organizer_url = '/revoke-organizer'
-        self.view_organizer_url = "/view-organizer"
-        self.upload_logo_organizer_url = '/upload/logo/'
+        self.apply_organizer_url = '/api/organizers/apply-organizer'
+        self.delete_event_url = f"/api/organizers/delete-event/"
+        self.update_organizer_url = '/api/organizers/update-organizer'
+        self.revoke_organizer_url = '/api/organizers/revoke-organizer'
+        self.view_organizer_url = "/api/organizers/view-organizer"
+        self.upload_logo_organizer_url = '/api/organizers/upload/logo/'
         self.test_user = AttendeeUser.objects.create_user(
             username='attendeeuser3',
             password='password123',

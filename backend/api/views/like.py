@@ -1,7 +1,6 @@
-from .schemas import EventEngagementSchema, EventResponseSchema
 from .modules import *
 from api.views.strategy.like_strategy import *
-
+from api.views.schemas.event_schema import EventEngagementSchema, EventResponseSchema
 
 
 @api_controller('/likes/', tags=['Likes'])

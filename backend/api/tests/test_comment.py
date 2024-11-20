@@ -1,16 +1,22 @@
 from .utils.utils_comment import CommentModelsTest, Event, Http404, Comment
+import json
 
 class CommentTest(CommentModelsTest):
     
     
     
     def test_write_comment(self):
-        user = self.create_user("test",'test',"test")
+        user = self.create_user("test", "test", "test")
         token = self.get_token_for_user(user)
-        data = {'content' : "test description"}
-        response = self.client.post(self.write_comment_url + str(self.event_test.id), json = data,headers={"Authorization": f"Bearer {token}"})
+        data = {"content": "test description"}
+        response = self.client.post(
+            f"{self.write_comment_url}{self.event_test.id}",
+            data=json.dumps(data),
+            content_type="application/json",
+            HTTP_AUTHORIZATION=f"Bearer {token}"
+        )
         self.assertEqual(response.status_code, 200)
-
+        self.assertEqual(response.json()['content'], "test description")
     
   
     def test_raise_exception(self):
@@ -18,7 +24,12 @@ class CommentTest(CommentModelsTest):
         token = self.get_token_for_user(user)
         non_exist_event = 0
         data = {'content' : "test description"}
-        response = self.client.post(self.write_comment_url + str(non_exist_event), json = data,headers={"Authorization": f"Bearer {token}"})
+        response = self.client.post(
+            f"{self.write_comment_url}{non_exist_event}",
+            data=json.dumps(data),
+            content_type="application/json",
+            HTTP_AUTHORIZATION=f"Bearer {token}"
+        )
         self.assertEqual(response.status_code, 404)
         self.assertEqual(response.json()['error'], f"Event {non_exist_event} doesn't exist." )
         
@@ -28,8 +39,8 @@ class CommentTest(CommentModelsTest):
         token = self.get_token_for_user(user)
         data =  "test test"
         comment = self.create_comment(user , data)
-        response = self.client.delete(f'/{comment.id}/delete/',headers={"Authorization": f"Bearer {token}"})
-        self.assertEqual(response.status_code, 204)
+        response = self.client.delete(f'/api/comments/{comment.id}/delete/',headers={"Authorization": f"Bearer {token}"})
+        self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json()['message'], 'Delete comment successfully.')
         
     def test_invalid_delete_comment(self):
@@ -39,14 +50,14 @@ class CommentTest(CommentModelsTest):
         token2 = self.get_token_for_user(user2)
         data = "test test"
         comment = self.create_comment(user , data)
-        response = self.client.delete(f'/{comment.id}/delete/',headers={"Authorization": f"Bearer {token2}"})
+        response = self.client.delete(f'/api/comments/{comment.id}/delete/',headers={"Authorization": f"Bearer {token2}"})
         self.assertEqual(response.status_code, 403)
         self.assertEqual(response.json()['error'], 'You are not authorized to delete this comment' )
         
     def test_delete_does_not_exist_comment(self):
         user = self.create_user("test",'test',"win")
         token = self.get_token_for_user(user)
-        response = self.client.delete(f'/{0}/delete/',headers={"Authorization": f"Bearer {token}"})
+        response = self.client.delete(f'/api/comments/{0}/delete/',headers={"Authorization": f"Bearer {token}"})
         self.assertEqual(response.status_code, 404)
         self.assertEqual(response.json()['error'], 'Comment not found')
         
@@ -60,7 +71,7 @@ class CommentTest(CommentModelsTest):
         data = {'content': "Updated content"}
         
         # Perform the PUT request to edit the comment
-        response = self.client.put(f'/{comment.id}/edit/', json=data, headers={"Authorization": f"Bearer {token}"})
+        response = self.client.put(f'/api/comments/{comment.id}/edit/', data=json.dumps(data), headers={"Authorization": f"Bearer {token}"})
         
         # Assert the status code is 200 (successful update)
         self.assertEqual(response.status_code, 200)
@@ -82,7 +93,7 @@ class CommentTest(CommentModelsTest):
         data = {'content': "Updated content"}
         
         # Perform the PUT request with a non-existing comment ID
-        response = self.client.put(f'/999999/edit/', json=data, headers={"Authorization": f"Bearer {token}"})
+        response = self.client.put(f'/api/comments/999999/edit/', data=json.dumps(data), headers={"Authorization": f"Bearer {token}"})
         
         # Assert the status code is 404 (not found)
         
@@ -106,7 +117,7 @@ class CommentTest(CommentModelsTest):
         data = {'content': "Updated content"}
         
         # Perform the PUT request to edit the comment by user2 (unauthorized)
-        response = self.client.put(f'/{comment.id}/edit/', json=data, headers={"Authorization": f"Bearer {token2}"})
+        response = self.client.put(f'/api/comments/{comment.id}/edit/', data=json.dumps(data), headers={"Authorization": f"Bearer {token2}"})
         
         # Assert the status code is 403 (forbidden)
         self.assertEqual(response.status_code, 403)

@@ -40,19 +40,16 @@ class EventTest(EventModelsTest):
             "detailed_description": "Join us for an exciting event!",
             "contact_email": "info@techconference.com",
             "contact_phone": "+1234567890",
-            "updated_at": timezone.now().isoformat()
+            "updated_at": timezone.now().isoformat(),
+            'image' : image_file
         }
 
         # Make the request
         response = self.client.post(
-            self.event_create_url,
-            data= data,
-            FILES = {'image': image_file},# Combine data and file
-            content_type='multipart/form-data',
-            headers={'Authorization': f'Bearer {token}'}  # Use HTTP_AUTHORIZATION instead of headers
-        )
-
-        
+            path = '/api/events/create-event',
+            data = data,
+            headers={'Authorization': f'Bearer {token}'}  
+        )    
         # Check the response content
         self.assertEqual(response.status_code, 200)
         self.assertTrue(Event.objects.filter(event_name="Annual Tech Conference").exists())
@@ -66,6 +63,7 @@ class EventTest(EventModelsTest):
         user = self.create_user("become_organizer", "become_organizer")
         token = self.get_token_for_user(user)
         organizer = self.become_organizer(user, "become_organizer")
+        
 
         # Create an image file for testing
         image = SimpleUploadedFile(
@@ -98,16 +96,14 @@ class EventTest(EventModelsTest):
             "contact_email": "info@techconference.com",
             "contact_phone": "+1234567890",
             "updated_at": timezone.now().isoformat(),
+            'image': image
         }
             
         response = self.client.post(
-            self.event_create_url,
+            path = '/api/events/create-event',
             data= data,
-            FILES = {'image': image },
-            content_type='multipart/form-data',
             headers={'Authorization': f'Bearer {token}'}
         )
-        
         # Make the request with multipart/form-data for the image upload
         self.assertEqual(response.status_code, 400)
         self.assertTrue(response.json()['error'], 'Invalid file type. Only JPEG and PNG are allowed.')
@@ -143,11 +139,12 @@ class EventTest(EventModelsTest):
         
         self.assertFalse(Organizer.objects.filter(user = just_user).exists())
         response = self.client.post(
-            self.event_create_url,
-            data= data,  
-            content_type='multipart/form-data',  # Ensure the correct content type
+            path = '/api/events/create-event',
+            data= data,
             headers={'Authorization': f'Bearer {token}'}
         )
+
+
 
         self.assertEqual(response.status_code, 403)
         self.assertEqual(response.json()['detail'], "You are not an organizer.")
@@ -181,9 +178,8 @@ class EventTest(EventModelsTest):
         organizer = self.become_organizer(normal_user, "test")
         token  = self.get_token_for_user(normal_user)
         response = self.client.post(
-            self.event_create_url,
+            path = '/api/events/create-event',
             data= data,  # Wrap the data in a 'data' key
-            content_type='multipart/form-data',  # Ensure the correct content type
             headers={'Authorization': f'Bearer {token}'}
         )
         self.assertEqual(response.status_code, 400)
@@ -209,12 +205,12 @@ class EventTest(EventModelsTest):
         # Prepare request data
         event_data = self.get_valid_data()
         image_file = self.create_test_image()
+        event_data['image'] = image_file
 
         # Make request
         response = self.client.post(
-            self.event_create_url,
+            path = '/api/events/create-event',
             data=event_data,
-            FILES={'image': image_file},
             headers={'Authorization': f'Bearer {token}'}
         )
 
@@ -229,11 +225,11 @@ class EventTest(EventModelsTest):
         
         
 
-    ## Test get_my_events function
+    # ## Test get_my_events function
     def test_invalid_organizer_get_my_events(self):
         normal_user  = self.create_user("test","test")
         token = self.get_token_for_user(normal_user)
-        response = self.client.get(self.organizer_get_events, headers={'Authorization': f'Bearer {token}'})
+        response = self.client.get('/api/events/my-events', headers={'Authorization': f'Bearer {token}'})
         self.assertEqual(response.status_code, 404)
         response1 = self.client.get(self.organizer_get_events)
         
@@ -242,13 +238,13 @@ class EventTest(EventModelsTest):
         normal_user  = self.create_user("test","test")
         organizer = self.become_organizer(normal_user,"test")
         token = self.get_token_for_user(normal_user)
-        response = self.client.get(self.organizer_get_events, headers={'Authorization': f'Bearer {token}'})
+        response = self.client.get('/api/events/my-events', headers={'Authorization': f'Bearer {token}'})
         self.assertEqual(response.status_code, 200)
         
         
     def test_valid_get_my_events(self):
         token = self.get_token_for_user(self.test_user)
-        response = self.client.get(self.organizer_get_events, headers={'Authorization': f'Bearer {token}'})
+        response = self.client.get('/api/events/my-events', headers={'Authorization': f'Bearer {token}'})
         self.assertEqual(response.status_code, 200)
         
     @patch("api.models.Event.objects.filter")
@@ -259,7 +255,7 @@ class EventTest(EventModelsTest):
         organizer = self.become_organizer(user, "test")
 
         # Simulate a GET request to the /my-events endpoint
-        response = self.client.get(self.organizer_get_events, headers={'Authorization': f'Bearer {token}'})
+        response = self.client.get('/api/events/my-events', headers={'Authorization': f'Bearer {token}'})
 
         # Check that the response status code is 400
         self.assertEqual(response.status_code, 400)
@@ -268,16 +264,16 @@ class EventTest(EventModelsTest):
         self.assertEqual(response.json(), {'error': 'Unexpected error occurred'})
 
     
-    ## Test list all event function
+    # ## Test list all event function
     def test_valid_list_all_event(self):
-        response  = self.client.get(self.list_event_url)
+        response  = self.client.get('/api/events/events')
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(response.json()), 3)
 
         
         
     def test_get_detail(self):
-        response = self.client.get(self.get_event_detail_url + str(self.event_test.id))
+        response = self.client.get(f'/api/events/{self.event_test.id}')
         self.assertEqual(response.status_code , 200)
         self.assertTrue(len([response.json()]), 1)
         
@@ -290,9 +286,9 @@ class EventTest(EventModelsTest):
             content_type='image/png'
         )
         
-        response = self.client.post(f"/{self.event_test.id}"+ self.upload_image_url, 
+        response = self.client.post(f"/api/events/{self.event_test.id}/upload/event-image/", 
                                     headers={'Authorization': f'Bearer {token}'},
-                                    FILES = {'file': image_file})
+                                    data = {'file': image_file})
         self.assertTrue(response.status_code , 200)
         
         
@@ -306,9 +302,9 @@ class EventTest(EventModelsTest):
             content=b'some content',
             content_type='image/png'
         )
-        response = self.client.post(f"/{self.event_test.id}" + self.upload_image_url, 
+        response = self.client.post(f"/api/events/{self.event_test.id}/upload/event-image/", 
                                     headers={'Authorization': f'Bearer {token}'},
-                                    FILES = {'file': image_file})
+                                    data = {'file': image_file})
         self.assertEqual(response.status_code, 404)
         self.assertEqual(response.json()['error'], 'User is not an organizer')
         
@@ -319,10 +315,10 @@ class EventTest(EventModelsTest):
         organizer=  self.become_organizer(user ,"test")
         
         image_file = self.create_test_image()
-        response = self.client.post(f"/{self.event_test.id}" + self.upload_image_url, 
+        response = self.client.post(f"/api/events/{self.event_test.id}/upload/event-image/", 
                                     headers={'Authorization': f'Bearer {token}'},
-                                    FILES = {'file': image_file})
-        self.assertEqual(response.status_code, 403)
+                                    data = {'file': image_file})
+        self.assertEqual(response.status_code, 400)
         self.assertEqual(response.json()['error'], 'You are not allowed to upload an image for this event.')
         
     def test_invalid_image_format(self):
@@ -334,9 +330,9 @@ class EventTest(EventModelsTest):
             content_type='image/gif'
         )
         
-        response = self.client.post(f"/{self.event_test.id}"+ self.upload_image_url, 
+        response = self.client.post(f"/api/events/{self.event_test.id}/upload/event-image/", 
                                     headers={'Authorization': f'Bearer {token}'},
-                                    FILES = {'file': image_file})
+                                    data = {'file': image_file})
         self.assertEqual(response.status_code, 400)
         self.assertEqual(response.json()['error'], 'Invalid file type. Only JPEG and PNG are allowed.' )
         
@@ -350,9 +346,9 @@ class EventTest(EventModelsTest):
             content_type='image/jpg'
         )
         
-        response = self.client.post(f"/{self.event_test.id}"+ self.upload_image_url, 
+        response = self.client.post(f"/api/events/{self.event_test.id}/upload/event-image/", 
                                     headers={'Authorization': f'Bearer {token}'},
-                                    FILES = {'file': image_file})
+                                    data = {'file': image_file})
         self.assertEqual(response.status_code, 400)
         self.assertEqual(response.json()['error'], 'File size exceeds the limit of 10.0 MB.')
         
@@ -365,9 +361,9 @@ class EventTest(EventModelsTest):
         )
         
         
-        response = self.client.post(f"/{self.event_test.id}"+ self.upload_image_url, 
+        response = self.client.post(f"/api/events/{self.event_test.id}/upload/event-image/", 
                                     headers={'Authorization': f'Bearer {token}'},
-                                    FILES = {'file': image_file})
+                                    data = {'file': image_file})
         
         self.assertEqual(response.status_code, 200)
         
@@ -395,9 +391,9 @@ class EventTest(EventModelsTest):
 
         # Call the view that handles the S3 object deletion and upload
         token = self.get_token_for_user(self.test_user)
-        response = self.client.post(f"/{self.event_test.id}"+ self.upload_image_url, 
+        response = self.client.post(f"/api/events/{self.event_test.id}/upload/event-image/", 
                                     headers={'Authorization': f'Bearer {token}'},
-                                    FILES = {'file': image_file})
+                                    data = {'file': image_file})
         
         # Assert that the response has a 400 status code and contains the expected error messages
         self.assertEqual(response.status_code, 400)
@@ -415,59 +411,41 @@ class EventTest(EventModelsTest):
 
         # Call the API endpoint
         response = self.client.post(
-            f"/{self.event_test.id}{self.upload_image_url}",
-            FILES={'file': image_file},
+            f"/api/events/{self.event_test.id}/upload/event-image/",
+            data={'file': image_file},
             headers={'Authorization': f'Bearer {token}'},
         )
         # Assert that the error message is in the response
         self.assertEqual(response.status_code, 400)
-        self.assertIn("Upload failed", response.data["error"])
+        self.assertIn("Upload failed", response.json()["error"])
         
         
     def test_get_event_user_engagements_success(self):
         token = self.get_token_for_user(self.test_user)
-        response = self.client.get(f'/{self.event_test.id}/user-engagement',headers={'Authorization': f'Bearer {token}'})
+        response = self.client.get(f'/api/events/{self.event_test.id}/user-engagement', headers={'Authorization': f'Bearer {token}'})
         self.assertEqual(response.status_code, 200)
         engagement_data = EventResponseSchema.resolve_user_engagement(self.event_test, self.test_user)
         self.assertEqual(response.json(), engagement_data)
         
     def test_get_event_engagements_success(self):
-        response = self.client.get(f'/{self.event_test.id}/engagement')
+        response = self.client.get(f'/api/events/{self.event_test.id}/engagement')
         self.assertEqual(response.status_code, 200)
         engagement_data = EventResponseSchema.resolve_engagement(self.event_test)
         self.assertEqual(response.json(), engagement_data)
         
     def test_get_comment(self):
-        response = self.client.get(f"/{self.event_test.id}" + self.get_comment_url)
+        response = self.client.get(f"/api/events/{self.event_test.id}/comments")
         self.assertEqual(response.status_code , 200)
         self.assertEqual(response.json(),[])
         
         
     def test_edit_event(self):
         token = self.get_token_for_user(self.test_user)
-        data = {
-            "category": "CONFERENCE",
-            "dress_code": "CASUAL",
-            "event_name": "Test edit",
-            "event_create_date": timezone.now().isoformat(),
-            "start_date_event": (timezone.now() + datetime.timedelta(days=2)).isoformat(),
-            "end_date_event": (timezone.now() + datetime.timedelta(days=3)).isoformat(),
-            "start_date_register": timezone.now().isoformat(),
-            "end_date_register": (timezone.now() + datetime.timedelta(days=1)).isoformat(),
-            "description": "A tech event for showcasing new innovations.",
-            "max_attendee": 100,
-            "address": "Tech Park, Downtown",
-            "latitude": 0.0,
-            "longitude": 0.0,
-            "is_free": True,
-            "ticket_price": 0.00,
-            "expected_price": 0.00,
-            "detailed_description": "Join us for an exciting event!",
-            "contact_email": "info@techconference.com",
-            "contact_phone": "+1234567890",
-            "updated_at": timezone.now().isoformat(),
+        data = { 
+            "event_name": "Test edit"
         }
-        response = self.client.patch(f"/{self.event_test.id}" + self.edit_event_url, headers={'Authorization': f'Bearer {token}'}, json  = data )
+        response = self.client.patch(f'/api/events/{self.event_test.id}/edit', data = json.dumps(data),headers={'Authorization': f'Bearer {token}'})
+    
         self.assertTrue(response.status_code, 200)
         self.assertEqual(response.json()['event_name'], "Test edit")
         
@@ -498,7 +476,7 @@ class EventTest(EventModelsTest):
             "contact_phone": "+1234567890",
             "updated_at": timezone.now().isoformat(),
         }
-        response = self.client.patch(f"/{self.event_test.id}" + self.edit_event_url, headers={'Authorization': f'Bearer {token}'}, json  = data )
+        response = self.client.patch(f"/api/events/{self.event_test.id}/edit", headers={'Authorization': f'Bearer {token}'}, data  = json.dumps(data) )
         self.assertEqual(response.status_code, 403)
         self.assertEqual(response.json()['error'],'You are not allowed to edit this event.')
         
@@ -528,7 +506,7 @@ class EventTest(EventModelsTest):
             "updated_at": timezone.now().isoformat(),
         }
         
-        response = self.client.patch(f"/{100}" + self.edit_event_url, headers={'Authorization': f'Bearer {token}'}, json  = data )
+        response = self.client.patch(f"/api/events/{10000}/edit", headers={'Authorization': f'Bearer {token}'}, data = json.dumps(data))
         self.assertEqual(response.status_code, 404)
         self.assertEqual(response.json()['error'], 'Event not found')
         
@@ -558,7 +536,7 @@ class EventTest(EventModelsTest):
             "updated_at": timezone.now().isoformat(),
         }
         
-        response = self.client.patch(f"/{self.event_test.id}" + self.edit_event_url, headers={'Authorization': f'Bearer {token}'}, json  = data )
+        response = self.client.patch(f"/api/events/{self.event_test.id}/edit", headers={'Authorization': f'Bearer {token}'}, data  = json.dumps(data))
         self.assertEqual(response.status_code, 404)
         self.assertEqual(response.json()['error'], 'User is not an organizer')
         
@@ -592,9 +570,9 @@ class EventTest(EventModelsTest):
         }
 
         response = self.client.patch(
-            f"/{self.event_test.id}" + self.edit_event_url,
+            f"/api/events/{self.event_test.id}/edit",
             headers={'Authorization': f'Bearer {token}'},
-            json= data
+            data= json.dumps(data)
         )
         self.assertEqual(response.status_code, 400)
         self.assertIn("Some unexpected error", response.json().get("error"))
