@@ -68,6 +68,7 @@ class TicketTestAPI(TicketModelsTest):
         )
         normal_user = self.create_user("test","test")
         token = self.get_token_for_user(normal_user)
+        Ticket.objects.create(attendee= self.test_user, event=  event_test)
         response = self.client.post(self.user_reserve_event_url + str(event_test.id) + '/register',  headers={'Authorization': f'Bearer {token}'})
         self.assertEqual(response.status_code, 400)
         self.assertIn('This event has reached the maximum number of attendees', response.json().get("error", ""))
