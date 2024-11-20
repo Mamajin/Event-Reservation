@@ -103,7 +103,7 @@ class UpdateOrganizerStrategy(OrganizerStrategy):
             for field, value in update_fields.items():
                 setattr(organizer, field, value)
             
-            organizer.full_clean()
+            organizer.full_clean(exclude=['logo'])
             organizer.save()
             
             logger.info(f"User {request.user.id} updated their organizer profile.")
@@ -158,7 +158,7 @@ class ViewOrganizerStrategy(OrganizerStrategy):
 
 class UploadLogoStrategy(OrganizerStrategy):
     """Upload a logo for an organizer"""
-    ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png']
+    ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/jpg']
     MAX_FILE_SIZE = 10 * 1024 * 1024  # 10MB
     
     def _delete_existing_logo(self, old_filename):

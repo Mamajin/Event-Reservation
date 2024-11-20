@@ -98,8 +98,11 @@ class OrganizerTestAPI(OrganizerModelsTest):
         response = self.client.patch(
             '/api/organizers/update-organizer', 
             data=json.dumps(data),
-            headers={'Authorization': f'Bearer {token}'} )
-        print(response.json())
+            headers={
+                'Authorization': f'Bearer {token}',
+                'Content-Type': 'application/json'
+                },
+            )
         self.assertEqual(response.status_code, 200)
  
         
@@ -155,8 +158,9 @@ class OrganizerTestAPI(OrganizerModelsTest):
             f"/api/organizers/{organizer.id}/upload/logo/", 
             headers={'Authorization': f'Bearer {token}'}, 
             organizer_id = organizer.id,
-            data = {'logo': image_file})
-        # print(response.json())
+            data = {'logo': image_file},
+            format='multipart'
+            )
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json()['message'], 'Upload successful')
         
