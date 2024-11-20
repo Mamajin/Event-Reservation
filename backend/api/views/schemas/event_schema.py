@@ -45,6 +45,8 @@ class EventResponseSchema(ModelSchema):
     organizer : OrganizerResponseSchema
     engagement: Optional[Dict] = None
     user_engaged: Optional[Dict] = None
+    current_attendees: Optional[int] = 0
+    status_registeration: Optional[str] = None
     
     @classmethod
     def resolve_engagement(cls, event: Event) -> Dict:
@@ -92,6 +94,7 @@ class EventResponseSchema(ModelSchema):
     def set_status_event(cls, event: Event):
         event.set_registeration_status()
         event.set_status_event()
+        event.current_attendees = event.current_number_attendee
     
     class Meta:
         model = Event

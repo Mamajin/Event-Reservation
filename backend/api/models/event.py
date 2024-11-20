@@ -7,20 +7,6 @@ from api.models.organizer import Organizer
 import re
 
 
-# class EventManager(models.Manager):
-#     def public(self):
-#         return self.filter(visibility='PUBLIC')
-
-#     def private(self):
-#         return self.filter(visibility='PRIVATE')
-    
-#     def filter_by_category(self, category):
-#         return self.filter(category=category)
-    
-#     def within_date_range(self, start_date, end_date):
-#         return self.filter(start_date_event__gte=start_date, end_date_event__lte=end_date)
-
-
 class Event(models.Model):
     """
     Represents an event with enhanced fields for better event management.
@@ -148,11 +134,6 @@ class Event(models.Model):
     
     terms_and_conditions = models.TextField(null=True, blank=True)
     
-    # objects = EventManager()
-
-    # Existing methods remain the same
-    
-
         
     @property
     def current_number_attendee(self):
@@ -183,9 +164,9 @@ class Event(models.Model):
         Return:
             int: Number of slots available for the event
         """
-        return self.max_attendee - self.current_number_attendee
-    
-    
+        if self.max_attendee == 0:
+            return self.current_number_attendee
+        return self.max_attendee - self.current_number_attendee  
     
     def is_max_attendee(self) -> bool:
         """
@@ -194,12 +175,23 @@ class Event(models.Model):
         Return:
             bool: True if event is full on slots, False if event is not full
         """
+        if self.max_attendee == 0:
+            return False
         if self.current_number_attendee == self.max_attendee:
             return True
-        return False
-    
+        return False  
     
     def is_valid_date(self) -> bool:
+        """
+        Check if the event's start and end dates are valid.
+
+        The start date of registration must be before the end date of registration,
+        and the end date of registration must be before the start date of the event,
+        and the start date of the event must be before the end date of the event.
+
+        Return:
+            bool: True if the dates are valid, False if the dates are invalid
+        """
         return self.start_date_register <= self.end_date_register <= self.start_date_event <= self.end_date_event
         
     def can_register(self) -> bool:
@@ -234,13 +226,17 @@ class Event(models.Model):
             self.status = 'ENDED'
             
     def set_registeration_status(self):
+        """Set the registration status of the event based on the current date and time."""
+        if not self.end_date_register:
+            raise ValueError("End date of registration cannot be null")
         now = timezone.now()
         if now > self.end_date_register:
             self.status_registeration = "CLOSED"
-        elif self.current_number_attendee >= self.max_attendee:
+        elif self.max_attendee <= 0 and self.current_number_attendee >= self.max_attendee:
             self.status_registeration = "FULL"
+        else:
+            self.status_registeration = "OPEN"
         self.save()
-            
  
     def is_email_allowed(self, email: str) -> bool:
         """
