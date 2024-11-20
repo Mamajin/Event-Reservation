@@ -3,7 +3,7 @@ import api from '../api';
 import EventCard from '../components/EventCard';
 import PageLayout from '../components/PageLayout';
 import Sidebar from '../components/Discovery/Sidebar';
-import { LuSearch, LuTag, LuClock } from "react-icons/lu";
+import { LuSearch, LuTag, LuClock,LuChevronUp, LuChevronDown } from "react-icons/lu";
 import { ACCESS_TOKEN } from '../constants';
 
 function Discover() {
@@ -15,6 +15,8 @@ function Discover() {
   const [selectedTags, setSelectedTags] = useState([]);
   const [selectedStatus, setSelectedStatus] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('');
+  const [showAllTags, setShowAllTags] = useState(false);
+  const MAX_VISIBLE_TAGS = 5;
 
   useEffect(() => {
     const fetchEvents = async () => {
@@ -50,6 +52,10 @@ function Discover() {
     ...new Set(events.flatMap((event) => (event.tags ? event.tags.split(",") : []))
     ),
   ];
+  const visibleTags = showAllTags 
+    ? uniqueTags 
+    : uniqueTags.slice(0, MAX_VISIBLE_TAGS);
+  const hasMoreTags = uniqueTags.length > MAX_VISIBLE_TAGS;
 
   const filteredEvents = events.filter((event) => {
     const matchesTags = selectedTags.length === 0 || 
@@ -112,7 +118,7 @@ function Discover() {
                       {category.charAt(0) + category.slice(1).toLowerCase()}
                     </button>
                   ))}
-                  {uniqueTags.map((tag) => (
+                  {visibleTags.map((tag) => (
                     <button
                       key={tag}
                       onClick={() =>
@@ -132,6 +138,26 @@ function Discover() {
                       {tag}
                     </button>
                   ))}
+                    {hasMoreTags && (
+                      <button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setShowAllTags(!showAllTags)}
+                        className="flex items-center text-sm text-gray-600 hover:text-gray-900"
+                      >
+                        {showAllTags ? (
+                          <>
+                            <LuChevronUp className="h-4 w-4 mr-1 inline-block align-middle" />
+                            Show Less Tags
+                          </>
+                        ) : (
+                          <>
+                            <LuChevronDown className="h-4 w-4 mr-1 inline-block align-middle" />
+                            Show {uniqueTags.length - MAX_VISIBLE_TAGS} More Tags
+                          </>
+                        )}
+                      </button>
+                    )}
                 </div>
                 {filteredEvents.length > 0 ? (
                   <div className="grid grid-cols-1 md:grid-cols-1 gap-6">

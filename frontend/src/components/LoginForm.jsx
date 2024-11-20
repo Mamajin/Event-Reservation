@@ -138,6 +138,12 @@ function LoginForm() {
                                 </a>
                             </label>
                         </div>
+                        
+                        {/* Login Button */}
+                        <button className="btn btn-dark-purple w-full" onClick={handleSubmit}>
+                            Login
+                        </button>
+
                         {/* Divider */}
                         <div className="divider">OR</div>
 
@@ -154,10 +160,6 @@ function LoginForm() {
                                 size="large"
                             />
                         </div>
-                        {/* Login Button */}
-                        <button className="btn btn-dark-purple w-full" onClick={handleSubmit}>
-                            Login
-                        </button>
 
                         {/* Sign Up Link */}
                         <p className="text-center text-sm">
