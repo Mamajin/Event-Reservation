@@ -40,6 +40,7 @@ omit =
     api/__init__.py
     api/*/__init__.py
     api/utils.py
+    api/*/*/__init__.py
 
     #test file
     */tests/*

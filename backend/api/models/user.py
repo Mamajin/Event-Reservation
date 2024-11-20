@@ -98,26 +98,7 @@ class AttendeeUser(AbstractUser):
         if not self.username:
             self.username = self.email  # Set username to email if not provided
         super().save(*args, **kwargs)
-
-    def get_upcoming_events(self):
-        """Returns all upcoming events the user is registered for."""
-        return self.ticket_set.filter(
-            event__start_date_event__gt=timezone.now()
-        ).order_by('event__start_date_event')
-
-    def get_past_events(self):
-        """Returns all past events the user has attended."""
-        return self.ticket_set.filter(
-            event__end_date_event__lt=timezone.now()
-        ).order_by('-event__end_date_event')
-
-    def update_event_counts(self):
-        """Updates the attended and cancelled event counts."""
-        self.attended_events_count = self.ticket_set.filter(
-            event__end_date_event__lt=timezone.now()
-        ).count()
-        self.save()
-        
+                
     def send_verification_email(self):
         """Generate and send verification email with a secure token."""
         token = EmailVerification.generate_verification_token(self)

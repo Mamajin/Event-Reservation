@@ -10,7 +10,6 @@ class CommentStrategy(ABC):
         strategies = {
             'create_comment': CommentCreateStrategy(),
             'update_comment': CommentUpdateStrategy(),
-            'list_comment': CommentListStrategy(),
             'delete_comment': CommentDeleteStrategy(),
             'comment_reactions': CommentReactionStrategy(),
         }
@@ -90,24 +89,6 @@ class CommentUpdateStrategy(CommentStrategy):
             logger.error(f"Error editing comment {comment_id}: {str(e)}")
             return Response({'error': str(e)}, status=500)
         
-    
-class CommentListStrategy(CommentStrategy):
-    """List comments for a specific event."""
-    def execute(self, request: HttpRequest, event_id: int):
-        """List comments for a specific event.
-
-        Args:
-            request (HttpRequest): HTTP request with authenticated user.
-            event_id (int): ID of the event to list comments for.
-
-        Returns:
-            Response: List of comment details or error message.
-        """
-        event = get_object_or_404(Event, id=event_id)
-        comments = Comment.objects.filter(event=event, parent=None).select_related('user').prefetch_related('replies', 'reactions').order_by('-created_at')
-        response_data = [CommentResponseSchema.from_comment(comment) for comment in comments]
-        logger.info(f"Retrieved {len(comments)} comments for event {event_id}.")
-        return Response(response_data, status=200)
         
         
 class CommentDeleteStrategy(CommentStrategy):
