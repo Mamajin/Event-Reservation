@@ -179,9 +179,9 @@ class TicketRegisterStrategy(TicketStrategy):
                 'error': f"You must be at least {event.min_age_requirement} years old to attend this event."
             }, status = 400)
             
-        if ticket.is_organizer_join_own_event():
+        if ticket.is_organizer_join_own_event(user):
             return Response({
-                'error': "You cannot register for your own event."
+                'error': "Organizer cannot register for their own event."
         }, status = 400)    
         try:
             ticket.clean()
