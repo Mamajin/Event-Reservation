@@ -6,7 +6,7 @@ import Sidebar from '../components/Discovery/Sidebar';
 import { LuSearch, LuTag, LuClock,LuChevronUp, LuChevronDown } from "react-icons/lu";
 import { ACCESS_TOKEN } from '../constants';
 
-function Discover() {
+export default function Discover() {
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -186,5 +186,3 @@ function Discover() {
     </PageLayout>
   );
 }
-
-export default Discover;

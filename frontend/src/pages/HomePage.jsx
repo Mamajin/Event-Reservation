@@ -5,7 +5,7 @@ import PageLayout from '../components/PageLayout';
 import { useNavigate,Link } from 'react-router-dom';
 import {USER_STATUS} from '../constants'
 
-function Home() {
+export default function Home() {
   const [latestEvents, setLatestEvents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -84,5 +84,3 @@ function Home() {
     </PageLayout>
   );
 }
-
-export default Home;

@@ -6,7 +6,7 @@ import { ACCESS_TOKEN, REFRESH_TOKEN,USER_NAME,USER_STATUS, PROFILE_PICTURE, USE
 import "../style/index.css";
 import qs from "qs";
 
-function LoginForm() {
+function Login() {
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
     const [error, setError] = useState('');
@@ -138,7 +138,7 @@ function LoginForm() {
                                 </a>
                             </label>
                         </div>
-                        
+
                         {/* Login Button */}
                         <button className="btn btn-dark-purple w-full" onClick={handleSubmit}>
                             Login
@@ -182,4 +182,4 @@ function LoginForm() {
     );
 }
 
-export default LoginForm;
+export default Login;

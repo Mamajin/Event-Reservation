@@ -3,7 +3,7 @@ import api from "../api";
 import { useNavigate } from "react-router-dom";
 import qs from "qs";
 
-function SignupForm() {
+export default function Register() {
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
     const [password2, setPassword2] = useState("");
@@ -191,5 +191,3 @@ function SignupForm() {
         </div>
     );
 }
-
-export default SignupForm;
