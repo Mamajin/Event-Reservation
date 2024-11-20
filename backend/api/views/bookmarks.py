@@ -9,7 +9,7 @@ class BookmarkAPI:
     API endpoints for managing bookmarks.
     """
     @route.get('/my-favorite/', response=List[EventResponseSchema], auth=JWTAuth())
-    def show_bookmark(request: HttpRequest):
+    def show_bookmark(self, request: HttpRequest):
         """
         Retrieves a list of events that are bookmarked by the authenticated user.
 
@@ -23,7 +23,7 @@ class BookmarkAPI:
         return strategy.execute()
     
     @route.put('/{event_id}/toggle-bookmark', auth=JWTAuth())
-    def toggle_bookmark(request, event_id: int):
+    def toggle_bookmark(self, request, event_id: int):
         """
         Toggles the bookmark status for a given event and user.
 
