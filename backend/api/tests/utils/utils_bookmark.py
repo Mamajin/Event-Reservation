@@ -4,7 +4,7 @@ from api.models import AttendeeUser, Organizer, Event, Ticket, Bookmarks
 from unittest.mock import patch
 from datetime import datetime
 from ninja.testing import TestClient
-from api.urls import bookmark_router
+from api.urls import BookmarkAPI
 from ninja_jwt.tokens import RefreshToken
 from faker import Faker
 from django.contrib.auth import get_user_model
@@ -13,13 +13,12 @@ import datetime
 fake = Faker()
 
 class BookmarkModelsTest(TestCase):
-
+    client = TestClient(BookmarkAPI)
     def setUp(self):
         """
         Set up initial test data for models.
         """
-        self.client = TestClient(bookmark_router)
-        self.show_bookmark_url = "/my-favorite/"
+        self.show_bookmark_url = "/api/bookmarks/my-favorite/"
         self.test_user = AttendeeUser.objects.create_user(
             username='attendeeuser3',
             password='password123',

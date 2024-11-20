@@ -21,10 +21,18 @@ class OrganizerAdmin(admin.ModelAdmin):
     actions = ['approve_organizer', 'reject_organizer']
 
     def approve_organizer(self, request, queryset):
+        """
+        Verify selected organizers, setting their verification status to 'VERIFIED' and
+        their is_verified flag to True.
+        """
         queryset.update(verification_status='VERIFIED')
         queryset.update(is_verified = True)
 
     def reject_organizer(self, request, queryset):
+        """
+        Reject selected organizers, setting their verification status to 'REJECTED' and
+        their is_verified flag to False.
+        """
         queryset.update(verification_status='REJECTED')
         queryset.update(is_verified = False)
 
@@ -39,10 +47,18 @@ class Event(admin.ModelAdmin):
     actions = ['verified_event', 'rejected_event']
 
     def verified_event(self, request, queryset):
+        """
+        Verify selected events, setting their verification status to 'VERIFIED' and
+        their is_verified flag to True.
+        """
         queryset.update(is_verified = True)
         queryset.update(verification_status='VERIFIED')
 
     def rejected_event(self, request, queryset):
+        """
+        Reject selected events, setting their verification status to 'REJECTED' and
+        their is_verified flag to False.
+        """
         queryset.update(is_verified = False)
         queryset.update(verification_status='REJECTED')
 

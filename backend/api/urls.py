@@ -4,7 +4,7 @@ from ninja_jwt.controller import NinjaJWTDefaultController
 from api.views.user import UserAPI
 from api.views.event import EventAPI
 from api.views.ticket import TicketAPI
-from api.views.bookmarks import router as bookmark_router
+from api.views.bookmarks import BookmarkAPI
 from api.views.like import LikeAPI
 from api.views.comment import CommentAPI
 from api.views.organizer import OrganizerAPI
@@ -19,10 +19,7 @@ api.register_controllers(OrganizerAPI)
 api.register_controllers(TicketAPI)
 api.register_controllers(LikeAPI)
 api.register_controllers(CommentAPI)
-
-# Register routers for different models/views
-
-api.add_router('/bookmarks/', bookmark_router)
+api.register_controllers(BookmarkAPI)
 
 urlpatterns = [
     path("", api.urls),  # Prefix all API routes with /api/

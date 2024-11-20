@@ -12,8 +12,9 @@ from .strategy.event_strategy import EventStrategy,EventEngagement
 
 @api_controller('/events/', tags = ["Events"])
 class EventAPI(ControllerBase):
-    
-        
+    """
+    API endpoints for event management.
+    """
     @route.post('/create-event', response =EventResponseSchema, auth=JWTAuth())
     def create_event(self,request, data: EventInputSchema = Form(...), image: UploadedFile = File(None)):
         """
@@ -105,7 +106,7 @@ class EventAPI(ControllerBase):
             FileUploadResponseSchema: Details of the uploaded image, including URL, or an error response.
         """
         strategy : EventStrategy = EventStrategy.get_strategy('upload_event_image', request)
-        return strategy.execute(event_id,file)
+        return strategy.execute(event_id, file)
         
     @route.get('/{event_id}/engagement', response={200: dict})
     def get_event_engagements(self, request: HttpRequest, event_id: int):
@@ -120,22 +121,7 @@ class EventAPI(ControllerBase):
             Response (dict): A dictionary containing engagement metrics for the event.
         """
         strategy : EventEngagement= EventEngagement.get_engagement_strategy('event_engagement', request, event_id)
-        return strategy.execute()
-    
-    @route.get('/{event_id}/user-engagement', response={200: dict}, auth=JWTAuth())
-    def get_event_user_engagement(self, request: HttpRequest, event_id: int):
-        """
-        Retrieve user engagement metrics for a specific event.
-
-        Args:
-            request (HttpRequest): The HTTP request object, containing user and request metadata.
-            event_id (int): The ID of the event for which user engagement metrics are requested.
-
-        Returns:
-            Response (dict): A dictionary containing user engagement metrics for the event.
-        """
-        strategy : EventEngagement = EventEngagement.get_engagement_strategy('event_user_engagement', request, event_id)
-        return strategy.execute()        
+        return strategy.execute()     
     
     @route.get('/{event_id}/comments', response=List[CommentResponseSchema])
     def get_events_comments(self, request: HttpRequest, event_id: int):

@@ -1,3 +1,4 @@
+import re
 from django.db import models
 from django.utils import timezone
 from django.core.files.storage import default_storage
@@ -5,6 +6,20 @@ from django.core.validators import MinValueValidator, MaxValueValidator, FileExt
 from django.core.exceptions import ValidationError
 from api.models.organizer import Organizer
 import re
+
+
+# class EventManager(models.Manager):
+#     def public(self):
+#         return self.filter(visibility='PUBLIC')
+
+#     def private(self):
+#         return self.filter(visibility='PRIVATE')
+    
+#     def filter_by_category(self, category):
+#         return self.filter(category=category)
+    
+#     def within_date_range(self, start_date, end_date):
+#         return self.filter(start_date_event__gte=start_date, end_date_event__lte=end_date)
 
 
 class Event(models.Model):
@@ -134,6 +149,11 @@ class Event(models.Model):
     
     terms_and_conditions = models.TextField(null=True, blank=True)
     
+    # objects = EventManager()
+
+    # Existing methods remain the same
+    
+
         
     @property
     def current_number_attendee(self):
@@ -182,16 +202,6 @@ class Event(models.Model):
         return False  
     
     def is_valid_date(self) -> bool:
-        """
-        Check if the event's start and end dates are valid.
-
-        The start date of registration must be before the end date of registration,
-        and the end date of registration must be before the start date of the event,
-        and the start date of the event must be before the end date of the event.
-
-        Return:
-            bool: True if the dates are valid, False if the dates are invalid
-        """
         return self.start_date_register <= self.end_date_register <= self.start_date_event <= self.end_date_event
         
     def can_register(self) -> bool:
@@ -226,7 +236,15 @@ class Event(models.Model):
             self.status = 'ENDED'
             
     def set_registeration_status(self):
-        """Set the registration status of the event based on the current date and time."""
+        """
+        Set the status of the event registration based on the current date and time.
+
+        The status can be 'CLOSED', 'FULL', or 'OPEN' depending on whether the current time is
+        after the event registration end date, whether the maximum number of attendee has been
+        reached, or neither of the above has occurred.
+
+        The function will save the event object after setting the status.
+        """
         if not self.end_date_register:
             raise ValueError("End date of registration cannot be null")
         now = timezone.now()
@@ -265,6 +283,17 @@ class Event(models.Model):
         return domain in allowed_domains
 
     def clean(self):
+        """
+        Validate the event object before saving.
+
+        If the event is private, this function will check if the allowed email domains
+        contain any invalid domains (i.e. domains that do not match the regular expression
+        [a-zA-Z0-9-]+(\.[a-zA-Z0-9-]+)*). If any are found, a ValidationError is raised.
+
+        Additionally, this function will check if the start date of the event is after the
+        end date. If it is, a ValidationError is raised.
+
+        """
         super().clean()
         if self.visibility == 'PRIVATE' and self.allowed_email_domains:
             domains = [d.strip() for d in self.allowed_email_domains.split(',')]
@@ -277,4 +306,7 @@ class Event(models.Model):
             raise ValidationError("End date must be after start date.")
 
     def __str__(self) -> str:
+        """
+        Return a string representation of the event, displaying its name.
+        """
         return f"Event: {self.event_name}"

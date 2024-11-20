@@ -6,11 +6,22 @@ from api.views.schemas.other_schema import FileUploadResponseSchema
 logger = logging.getLogger(__name__)
 
 class OrganizerStrategy(ABC):
-    """Abstract base class for organizer operations"""
+    """
+    Abstract base class for organizer operations.
+    """
     
     @staticmethod
     def get_strategy(name):
-        """Get the strategy based on the name"""
+        """
+        Retrieve the organizer-related strategy based on the provided strategy name.
+
+        Args:
+            name (str): The name of the strategy to retrieve.
+
+        Returns:
+            An instance of the strategy corresponding to the given name,
+            or None if the name is not recognized.
+        """
         strategies = {
             'apply_organizer': ApplyOrganizerStrategy(),
             'delete_event': DeleteEventStrategy(),
@@ -23,14 +34,32 @@ class OrganizerStrategy(ABC):
     
     @abstractmethod
     def execute(self, request: HttpRequest):
-        """Execute the strategy"""
+        """
+        Execute the organizer-related operation.
+
+        Args:
+            request (HttpRequest): The HTTP request object, containing user and request metadata.
+
+        Raises:
+            NotImplementedError: If the execute method is not implemented in the derived class.
+        """
         pass
 
 class ApplyOrganizerStrategy(OrganizerStrategy):
     """Apply to be an organizer"""
     
     def execute(self, request: HttpRequest, form: OrganizerSchema = Form(...)):
-        """Apply to be an organizer"""
+        """
+        Apply to be an organizer
+
+        Args:
+            request (HttpRequest): The HTTP request object.
+            form (OrganizerSchema): The organizer registration data.
+
+        Returns:
+            OrganizerResponseSchema: The created organizer object on successful registration.
+        """
+        
         try:
             logger.info(f"User {request.user.id} is attempting to apply as an organizer.")
             
@@ -70,7 +99,18 @@ class DeleteEventStrategy(OrganizerStrategy):
     """Delete an event"""
     
     def execute(self, request: HttpRequest, event_id: int):
-        """Delete an event"""
+        """
+        Delete an event by the authenticated organizer.
+
+        Args:
+            request (HttpRequest): The HTTP request object containing user details.
+            event_id (int): The ID of the event to be deleted.
+
+        Returns:
+            Response: A success message with status code 204 if the event is deleted.
+            ErrorResponseSchema: Error message with status code 403 if the user is not an organizer,
+            or 404 if the event does not exist or the user does not have permission to delete it.
+        """
         logger.info(f"User {request.user.id} is attempting to delete an event.")
         try:
             organizer = Organizer.objects.get(user=request.user)
@@ -90,7 +130,18 @@ class UpdateOrganizerStrategy(OrganizerStrategy):
     """Update an organizer profile"""
     
     def execute(self, request: HttpRequest, data: OrganizerUpdateSchema):
-        """Update the profile information of the authenticated organizer."""
+        """
+        Update the profile information of the authenticated organizer.
+
+        Args:
+            request (HttpRequest): The HTTP request object containing user details.
+            data (OrganizerUpdateSchema): The updated organizer data.
+
+        Returns:
+            Response: A success message with status code 200 if the organizer is updated.
+            ErrorResponseSchema: Error message with status code 400 if the organizer name is already taken,
+            or 404 if the organizer profile does not exist.
+        """
         logger.info(f"User {request.user.id} is attempting to update their organizer profile.")
         try:
             organizer = get_object_or_404(Organizer, user=request.user)
@@ -121,7 +172,17 @@ class RevokeOrganizerStrategy(OrganizerStrategy):
     """Revoke an organizer role"""
     
     def execute(self, request: HttpRequest):
-        """Revoke the organizer role of the authenticated user."""
+        """
+        Revoke an organizer role.
+
+        Args:
+            request (HttpRequest): The HTTP request object containing user details.
+
+        Returns:
+            Response: A success message with status code 200 if the organizer role is revoked.
+            ErrorResponseSchema: Error message with status code 404 if the user is not an organizer,
+            or 400 if there is an error revoking the organizer role.
+        """
         logger.info(f"User {request.user.id} is attempting to revoke their organizer role.")
 
         try:
@@ -142,7 +203,17 @@ class ViewOrganizerStrategy(OrganizerStrategy):
     """View an organizer profile"""
     
     def execute(self, request: HttpRequest):
-        """View the organizer profile."""
+        """
+        Retrieve the profile information of the authenticated organizer.
+
+        Args:
+            request (HttpRequest): The HTTP request object containing user details.
+
+        Returns:
+            Response: Organizer profile details if successful with status code 200.
+            ErrorResponseSchema: Error message with status code 404 if the user is not an organizer,
+            or 400 in case of other errors.
+        """
         logger.info(f"User {request.user.id} is attempting to view their organizer profile.")
         try:
             organizer = get_object_or_404(Organizer, user=request.user)
@@ -162,7 +233,15 @@ class UploadLogoStrategy(OrganizerStrategy):
     MAX_FILE_SIZE = 10 * 1024 * 1024  # 10MB
     
     def _delete_existing_logo(self, old_filename):
-        """Delete the old logo from S3"""
+        """
+        Delete an existing logo from S3.
+
+        Args:
+            old_filename (str): The name of the existing logo file to be deleted.
+
+        Returns:
+            None
+        """
         logger.info(f"Deleting old image from S3: {old_filename}")
         try:
             s3_client = boto3.client(
@@ -177,7 +256,16 @@ class UploadLogoStrategy(OrganizerStrategy):
             logger.error(f"Failed to delete old image from S3: {str(e)}")
 
     def _upload_to_s3(self, file_obj, filename):
-        """Upload a file to S3"""
+        """
+        Upload a file to S3 directly using boto3.
+
+        Args:
+            file_obj (File): The file to be uploaded.
+            filename (str): The filename to use when uploading the file.
+
+        Returns:
+            str: The URL of the uploaded file.
+        """
         try:
             s3_client = boto3.client(
                 's3',
@@ -202,7 +290,17 @@ class UploadLogoStrategy(OrganizerStrategy):
             raise
 
     def execute(self, request: HttpRequest, organizer_id: int, logo: UploadedFile = File(...)):
-        """Upload a logo for an organizer"""    
+        """
+        Upload a logo for an organizer.
+
+        Args:
+            request (HttpRequest): The HTTP request object.
+            organizer_id (int): The ID of the organizer to upload a logo for.
+            logo (UploadedFile): The logo file to be uploaded.
+
+        Returns:
+            Response: A response indicating success with file details or an error response if the upload fails.
+        """
         try:
             organizer = get_object_or_404(Organizer, id=organizer_id)
 

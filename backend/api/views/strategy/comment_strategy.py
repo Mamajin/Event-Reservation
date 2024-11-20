@@ -4,6 +4,9 @@ from api.views.schemas.comment_schema import CommentResponseSchema, CommentSchem
 
 
 class CommentStrategy(ABC):
+    """
+    Abstract base class for comment strategies.
+    """
     @staticmethod
     def get_strategy(strategy_name):
         """Get the strategy based on the strategy name."""
