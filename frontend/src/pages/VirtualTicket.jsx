@@ -19,7 +19,6 @@ function VirtualTicket() {
         const token = localStorage.getItem('access_token');
         if (!token) throw new Error('Unauthorized: No access token found.');
 
-        // Fetch ticket details
         const ticketResponse = await api.get(`/tickets/${ticketId}`, {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -27,7 +26,6 @@ function VirtualTicket() {
         });
         setTicket(ticketResponse.data);
 
-        // Use event_id from the ticket to fetch event details
         const eventId = ticketResponse.data.event_id;
         const eventResponse = await api.get(`/events/${eventId}`, {
           headers: {
@@ -47,7 +45,7 @@ function VirtualTicket() {
   }, [ticketId]);
 
   const handleBackClick = () => {
-    navigate(-1); // Navigate back to the previous page
+    navigate(-1);
   };
 
   if (loading) {
@@ -118,7 +116,7 @@ function VirtualTicket() {
 
             {/* QR Code Section with Larger White Space */}
             <div className="mt-6 flex justify-center items-center p-6 bg-white rounded-lg shadow-lg">
-              <QRCode value={`Ticket ID: ${ticket?.ticket_id}, Event: ${event?.event_name}`} size={150} />
+              <QRCode value={`Ticket ID: ${ticket?.id}, Event: ${event?.event_name}, Full Name: ${ticket?.fullname}`} size={150} />
             </div>
 
             {/* Ticket Footer */}
