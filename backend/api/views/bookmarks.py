@@ -1,15 +1,15 @@
 from .modules import *
 from api.views.schemas.event_schema import EventResponseSchema
-from .strategy.bookmark_strategy import BookmarkStrategy
+from api.views.strategy.bookmark_strategy import BookmarkStrategy
 
 
-router = Router()
-
-
+@api_controller('/bookmarks', tags=['Bookmarks'])
 class BookmarkAPI:
-    
-    @router.get('/my-favorite/', response=List[EventResponseSchema], auth=JWTAuth())
-    def show_bookmark(request: HttpRequest):
+    """
+    API endpoints for managing bookmarks.
+    """
+    @route.get('/my-favorite/', response=List[EventResponseSchema], auth=JWTAuth())
+    def show_bookmark(self, request: HttpRequest):
         """
         Retrieves a list of events that are bookmarked by the authenticated user.
 
@@ -22,12 +22,18 @@ class BookmarkAPI:
         strategy : BookmarkStrategy = BookmarkStrategy.get_strategy('bookmark_show', request)
         return strategy.execute()
     
-    @router.put('/{event_id}/toggle-bookmark', auth=JWTAuth())
-    def toggle_bookmark(request, event_id: int):
+    @route.put('/{event_id}/toggle-bookmark', auth=JWTAuth())
+    def toggle_bookmark(self, request, event_id: int):
         """
-        Toggle bookmark on an event. If the user has not bookmarked the event before, this will create a new bookmark.
-        If the user has already bookmarked the event, this will toggle the bookmark status.
+        Toggles the bookmark status for a given event and user.
+
+        Args:
+            request (HttpRequest): The HTTP request object.
+            event_id (int): The ID of the event to be bookmarked or unbookmarked.
+
+        Returns:
+            Response: A response containing a success message and the user's bookmark status.
         """
-        straegy : BookmarkStrategy = BookmarkStrategy.get_strategy('bookmark_toggle', request)
-        return straegy.execute(event_id)
+        strategy : BookmarkStrategy = BookmarkStrategy.get_strategy('bookmark_toggle', request)
+        return strategy.execute(event_id)
     

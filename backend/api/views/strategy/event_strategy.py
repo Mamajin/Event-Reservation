@@ -8,16 +8,27 @@ from api.views.schemas.ticket_schema import TicketResponseSchema
 
 
 class EventStrategy:
-    
+    """
+    Base class for event strategies.
+    """
 
     def __init__(self, request: HttpRequest):
         self.user = request.user
         self.request = request
 
-    
-
     @staticmethod
     def get_strategy(strategy_name, request):
+        """
+        Retrieve the event strategy instance based on the provided strategy name.
+
+        Args:
+            strategy_name (str): The name of the strategy to retrieve.
+            request (HttpRequest): The HTTP request object, containing user and request metadata.
+
+        Returns:
+            An instance of the strategy corresponding to the given strategy name,
+            or None if the strategy name is not recognized.
+        """
         strategies = {
             'create_event': EventCreateStrategy(request),
             'organizer_get_events': EventOrganizerStrategy(request),
@@ -30,9 +41,34 @@ class EventStrategy:
     
     @abstractmethod
     def execute(self, *arg, **kwargs):
+        """
+        Execute the event strategy with the given arguments.
+
+        Args:
+            *arg: Variable length argument list. The arguments passed to this method
+                depend on the specific strategy being executed.
+            **kwargs: Keyword argument dictionary. The keyword arguments passed to this
+                method depend on the specific strategy being executed.
+
+        Raises:
+            NotImplementedError: If the execute method is not implemented in the derived class.
+        """
+
         pass
     
     def upload_image(self,image,event):
+        """
+        Upload an image for an event.
+
+        Args:
+            image (InMemoryUploadedFile): The image file to upload.
+            event (Event): The event for which to upload the image.
+
+        Returns:
+            Response: A response containing the uploaded image URL, or an error response if the
+                upload fails.
+        """
+
         if image.content_type not in ALLOWED_IMAGE_TYPES:
                 return Response({'error': 'Invalid file type. Only JPEG and PNG are allowed.'}, status=400)
             
@@ -50,6 +86,16 @@ class EventStrategy:
         return EventResponseSchema.from_orm(event)
 
     def upload_s3(self, image, filename):
+        """
+        Upload an image file to an S3 bucket.
+
+        Args:
+            image (InMemoryUploadedFile): The image file to be uploaded.
+            filename (str): The target filename for the uploaded image in the S3 bucket.
+
+        Returns:
+            None
+        """
         s3_client = boto3.client(
                 's3',
                 aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
@@ -64,6 +110,13 @@ class EventStrategy:
             )
     
     def add_event(self,event_list: list,events):
+        """
+        Add event data to a list, including engagement information and user engagement status.
+
+        Args:
+            event_list (list): The list to which event data will be added.
+            events (QuerySet): The events for which data will be added to the list.
+        """
         for event in events:
                 engagement = EventResponseSchema.resolve_engagement(event)
                 user_engaged = EventResponseSchema.resolve_user_engagement(event, self.user)
@@ -75,6 +128,16 @@ class EventStrategy:
                 
                 
     def autheticate_user(self):
+        """
+        Authenticate the user using a JWT token in the Authorization header, or else use the
+        user from the request object.
+
+        Args:
+            None
+
+        Returns:
+            None
+        """
         if self.request.headers.get("Authorization"):
             token = self.request.headers.get('Authorization')
             if token != None and token.startswith('Bearer '):
@@ -88,9 +151,21 @@ class EventStrategy:
     
     
 class EventCreateStrategy(EventStrategy):
-    
+    """
+    Strategy for creating an event.
+    """
             
     def execute(self, data: EventInputSchema = Form(...), image : UploadedFile = File(None)):
+        """
+        Create an event with the given data and optional image file.
+
+        Args:
+            data (EventInputSchema): The event data, passed as a form.
+            image (UploadedFile, optional): The image file for the event, passed as a file.
+
+        Returns:
+            Response: The created event object, or an error response if the creation fails.
+        """
         try:
             organizer = Organizer.objects.get(user=self.user)
         except Organizer.DoesNotExist:
@@ -106,9 +181,22 @@ class EventCreateStrategy(EventStrategy):
         return EventResponseSchema.from_orm(event)
     
 class EventOrganizerStrategy(EventStrategy):
-
+    """
+    Strategy for retrieving events for an organizer.
+    """
         
     def execute(self):
+        """
+        Retrieve events created by the authenticated organizer.
+
+        Args:
+            None
+
+        Returns:
+            Response: List of events created by the organizer, ordered by event creation date in descending order.
+            ErrorResponseSchema: Error message with status code 404 if the user is not an organizer,
+            or 400 in case of other errors.
+        """
         try:
             organizer = Organizer.objects.get(user=self.user)
             events = Event.objects.filter(organizer=organizer, event_create_date__lte=timezone.now()).order_by("-event_create_date")
@@ -125,8 +213,20 @@ class EventOrganizerStrategy(EventStrategy):
     
     
 class EventListStrategy(EventStrategy):
-    
+    """
+    Strategy for retrieving all public events.
+    """
     def execute(self):
+        """
+        Retrieve all public events for the homepage.
+
+        Args:
+            None
+
+        Returns:
+            Response: List of all public events, ordered by event creation date in descending order.
+            ErrorResponseSchema: Error message with status code 400 in case of other errors.
+        """
         events = Event.objects.filter(event_create_date__lte=timezone.now()).order_by("-event_create_date")
         event_list = []
         self.autheticate_user()
@@ -140,8 +240,20 @@ class EventListStrategy(EventStrategy):
     
     
 class EventDetailStrategy(EventStrategy):
-    
+    """
+    Strategy for retrieving details of a specific event.
+    """
     def execute(self,event_id):
+        """
+        Retrieve detailed information for a specific event, including engagement data.
+
+        Args:
+            event_id (int): The ID of the event.
+
+        Returns:
+            EventResponseSchema: The event details along with engagement data, user-specific engagement status,
+            and updated event status.
+        """
         self.autheticate_user()
         logger.info(f"Fetching details for event ID: {event_id} by user {self.request.user.username}.")
         event = get_object_or_404(Event, id=event_id)
@@ -156,8 +268,22 @@ class EventDetailStrategy(EventStrategy):
     
     
 class EventEditStrategy(EventStrategy):
-    
+    """
+    Strategy for editing an event.    
+    """
     def execute(self, event_id : int, data):
+        """
+        Edit an existing event if the user is the organizer.
+
+        Args:
+            event_id (int): The ID of the event to be edited.
+            data: The updated event data.
+
+        Returns:
+            Response: The updated event details with status code 200 if successful.
+            Response: Error message with status code 403 if the user is not allowed to edit the event,
+                    404 if the event or organizer does not exist, or 400 for other errors.
+        """
         try:
             event = Event.objects.get(id=event_id)
             organizer = Organizer.objects.get(user=self.user)
@@ -184,8 +310,20 @@ class EventEditStrategy(EventStrategy):
         
         
 class EventUploadImageStrategy(EventStrategy):
-    
+    """Strategy for uploading an image for an event."""
     def replace_old_image(self, old_filename):
+        """
+        Delete an existing image from S3.
+
+        Args:
+            old_filename (str): The key of the image file to be deleted in the S3 bucket.
+
+        Returns:
+            None
+
+        Logs:
+            Logs information about the deletion process. Logs an error if deletion fails.
+        """
         s3_client = boto3.client(
                     's3',
                     aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
@@ -199,6 +337,18 @@ class EventUploadImageStrategy(EventStrategy):
             logger.error(f"Failed to delete old image from S3: {str(e)}")
             
     def validate_image(self,event, organizer, file):
+        """
+        Validate an image before uploading it to S3.
+
+        Args:
+            event (Event): The event to which the image is to be uploaded.
+            organizer (Organizer): The organizer uploading the image.
+            file (UploadedFile): The image file to be uploaded.
+
+        Raises:
+            ValidationError: If the image is not of the correct type or is too large.
+        """
+
         if event.organizer != organizer:
             raise ValidationError('You are not allowed to upload an image for this event.')
             
@@ -211,6 +361,16 @@ class EventUploadImageStrategy(EventStrategy):
 
     
     def execute(self, event_id, file):
+        """
+        Upload an image for a specific event.
+
+        Args:
+            event_id (int): The ID of the event to upload an image for.
+            file (UploadedFile): The image file to be uploaded.
+
+        Returns:
+            FileUploadResponseSchema: Details of the uploaded image, including URL, or an error response.
+        """
         try:
             event = get_object_or_404(Event, id=event_id)
 
@@ -257,13 +417,25 @@ class EventUploadImageStrategy(EventStrategy):
         
     
 class EventEngagement:
-
+    """Base class for event engagement strategies."""
     def __init__(self, request, event_id):
         self.user = request.user
         self.event = get_object_or_404(Event, id=event_id)
         
     @staticmethod
     def get_engagement_strategy(strategy_name,request, event_id):
+        """
+        Retrieve the event engagement strategy based on the provided strategy name.
+
+        Args:
+            strategy_name (str): The name of the strategy to retrieve.
+            request (HttpRequest): The HTTP request object containing user details.
+            event_id (int): The ID of the event to be retrieved.
+
+        Returns:
+            An instance of the strategy corresponding to the given name,
+            or None if the name is not recognized.
+        """
         strategies = {
             'event_engagement': EventGetEngagementStrategy(request,event_id),
             'event_user_engagement': EventUserEngagementStrategy(request,event_id),
@@ -276,25 +448,68 @@ class EventEngagement:
     
     @abstractmethod    
     def execute(self,event_id):
+        """
+        Execute the event engagement strategy based on the given event ID.
+
+        Args:
+            event_id (int): The ID of the event to be retrieved.
+
+        Returns:
+            The result of executing the strategy, which varies depending on the
+            specific strategy being executed.
+
+        Raises:
+            400: If the request is invalid due to missing or invalid data.
+            404: If the event does not exist.
+            500: If an error occurs during the execution of the strategy.
+        """
         pass
     
 class EventGetEngagementStrategy(EventEngagement):
-    
+    """Strategy to retrieve engagement data for an event."""
     def execute(self):
+        """
+        Execute the event engagement strategy based on the given event ID.
+
+        Returns:
+            The result of executing the strategy, which is a dictionary containing
+            engagement data for the event, including the total number of likes and
+            bookmarks.
+
+        Raises:
+            400: If the request is invalid due to missing or invalid data.
+            404: If the event does not exist.
+            500: If an error occurs during the execution of the strategy.
+        """
         engagement_data = EventResponseSchema.resolve_engagement(self.event)
         return engagement_data  
     
     
 class EventUserEngagementStrategy(EventEngagement):
-    
+    """Strategy to retrieve user engagement data for an event."""
     def execute(self):
+        """
+        Execute the user engagement strategy for the event.
+
+        Returns:
+            dict: A dictionary containing the user's engagement data for the event,
+                including like, bookmark, and application status.
+        """
         user_engaged = EventResponseSchema.resolve_user_engagement(self.event, self.user)
         return user_engaged      
 
 
 class EventCommentStrategy(EventEngagement):
-    
+    """Strategy to retrieve comments for an event."""
     def execute(self):
+        """
+        Execute the strategy to retrieve top-level comments for the event.
+
+        Returns:
+            Response: A response containing a list of serialized top-level comments
+            for the event, including related user, replies, and reactions.
+            The comments are ordered by creation date in descending order.
+        """
         comments = Comment.objects.filter(event=self.event, parent=None).select_related('user').prefetch_related('replies', 'reactions').order_by('-created_at')
         response_data = [CommentResponseSchema.from_orm(comment) for comment in comments]
         logger.info(f"Retrieved {len(comments)} comments for event {self.event.id}.")
@@ -302,8 +517,16 @@ class EventCommentStrategy(EventEngagement):
     
     
 class EventAllAttendee(EventEngagement):
-    
+    """Strategy to retrieve all attendees for an event."""
     def execute(self):
+        """
+        Execute the strategy to retrieve all attendees for the event.
+
+        Returns:
+            Response: A response containing a list of serialized attendees for the event,
+                ordered by username in ascending order. If the user is not an organizer of the event,
+                a 403 error is raised with an appropriate error message.
+        """
         try:
             organizer = Organizer.objects.get(user=self.user)
             if self.event.organizer != organizer:
@@ -319,8 +542,14 @@ class EventAllAttendee(EventEngagement):
         
         
 class EventAllTicket(EventEngagement):
-    
+    """Strategy to retrieve all tickets for an event."""
     def execute(self):
+        """
+        Execute the strategy to retrieve all tickets for the event.
+
+        Returns:
+            Response: A response containing a list of serialized tickets for the event, ordered by ticket ID.
+        """
         tickets = Ticket.objects.filter(event=self.event).order_by('id')
         response_data = [TicketResponseSchema(
                             **ticket.get_ticket_details()

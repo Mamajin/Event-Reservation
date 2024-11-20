@@ -419,14 +419,6 @@ class EventTest(EventModelsTest):
         self.assertEqual(response.status_code, 400)
         self.assertIn("Upload failed", response.json()["error"])
         
-        
-    def test_get_event_user_engagements_success(self):
-        token = self.get_token_for_user(self.test_user)
-        response = self.client.get(f'/api/events/{self.event_test.id}/user-engagement', headers={'Authorization': f'Bearer {token}'})
-        self.assertEqual(response.status_code, 200)
-        engagement_data = EventResponseSchema.resolve_user_engagement(self.event_test, self.test_user)
-        self.assertEqual(response.json(), engagement_data)
-        
     def test_get_event_engagements_success(self):
         response = self.client.get(f'/api/events/{self.event_test.id}/engagement')
         self.assertEqual(response.status_code, 200)

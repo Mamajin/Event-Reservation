@@ -34,6 +34,19 @@ class EventInputSchema(ModelSchema):
     dress_code : DressCode
     visibility: EventVisibility = EventVisibility.PUBLIC
     allowed_email_domains: Optional[str] = None
+    max_attendee: Optional[int] = None
+    
+    @field_validator("max_attendee", mode="before")
+    def validate_max_attendee(cls, value):
+        # Convert empty strings or None to None
+        if value in (None, ""):
+            return None
+        # Ensure the value can be parsed as an integer
+        try:
+            return int(value)
+        except ValueError:
+            raise ValueError("max_attendee must be a valid integer or null")
+    
     class Meta:
         model = Event
         exclude = ('organizer', 'id', 'status_registeration','tags','status', 'event_image','updated_at')     
@@ -45,6 +58,8 @@ class EventResponseSchema(ModelSchema):
     organizer : OrganizerResponseSchema
     engagement: Optional[Dict] = None
     user_engaged: Optional[Dict] = None
+    current_attendees: Optional[int] = 0
+    status_registeration: Optional[str] = None
     
     @classmethod
     def resolve_engagement(cls, event: Event) -> Dict:
@@ -92,6 +107,7 @@ class EventResponseSchema(ModelSchema):
     def set_status_event(cls, event: Event):
         event.set_registeration_status()
         event.set_status_event()
+        event.current_attendees = event.current_number_attendee
     
     class Meta:
         model = Event
@@ -104,6 +120,7 @@ class EventUpdateSchema(Schema):
     end_date_event: Optional[datetime] = None
     start_date_register: Optional[datetime] = None
     end_date_register: Optional[datetime] = None
+    tags : Optional[str] = None
     description: Optional[str] = None
     max_attendee: Optional[int] = 0
     address: Optional[str] = None

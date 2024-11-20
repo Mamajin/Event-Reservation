@@ -63,15 +63,16 @@ class TicketTestAPI(TicketModelsTest):
             end_date_register=timezone.now() + datetime.timedelta(days = 1),  # Registration ends when the event starts
             start_date_event=timezone.now(),
             end_date_event= timezone.now() + datetime.timedelta(days = 1),  # Ensure it ends after it starts
-            max_attendee=0,
+            max_attendee=1,
             description=fake.text(max_nb_chars=200)
         )
         normal_user = self.create_user("test","test")
         token = self.get_token_for_user(normal_user)
+        Ticket.objects.create(attendee= self.test_user, event=  event_test)
         response = self.client.post(self.user_reserve_event_url + str(event_test.id) + '/register',  headers={'Authorization': f'Bearer {token}'})
-       
         self.assertEqual(response.status_code, 400)
         self.assertIn('This event has reached the maximum number of attendees', response.json().get("error", ""))
+
         
         
     def test_user_not_falls_in_register_dates(self):

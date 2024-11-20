@@ -7,9 +7,21 @@ from .strategy.user_strategy import UserStrategy
 
 @api_controller("/users/", tags = ["Users"])
 class UserAPI:
- 
+    """
+    Controller for user-related operations.
+    """
     @route.post('/register', response={201: UserSchema, 400: ErrorResponseSchema})
     def create_user(self,request, form: UserSchema = Form(...)):
+        """
+        Create a new user and return the created user object.
+
+        Args:
+            request: The HTTP request object.
+            form (UserSchema): The user registration data.
+
+        Returns:
+            UserSchema: The created user object on successful registration.
+        """
         strategy : UserStrategy = UserStrategy.get_strategy('user_register')
         return strategy.execute(form)
     
@@ -117,12 +129,33 @@ class UserAPI:
         
     @route.get('/verify-email/{user_id}/{token}', response={200: EmailVerificationResponseSchema, 400: ErrorResponseSchema})
     def verify_email(self,request, user_id: str, token: str):
-        """Verify user's email address with the secure token."""
+        """
+        Verify the email address of the user with the specified user ID and verification token.
+
+        Args:
+            request: The request object.
+            user_id (str): The ID of the user whose email is to be verified.
+            token (str): The verification token sent to the user's email address.
+
+        Returns:
+            EmailVerificationResponseSchema: Verification success message or error response.
+        """
+        
         strategy: UserStrategy = UserStrategy.get_strategy('user_verify_email')
         return strategy.execute(user_id, token)
 
     @route.post('/resend-verification', response={200: EmailVerificationResponseSchema, 400: ErrorResponseSchema})
     def resend_verification(self,request, email: str):
-        """Resend verification email if user is not verified."""
+        """
+        Resend the verification email to the specified email address.
+
+        Args:
+            request: The request object.
+            email (str): The email address to which the verification email is to be resent.
+
+        Returns:
+            EmailVerificationResponseSchema: Verification success message or error response.
+        """
+        
         strategy : UserStrategy = UserStrategy.get_strategy('user_resend_verification')
         return strategy.execute(email)

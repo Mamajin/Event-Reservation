@@ -4,7 +4,9 @@ from api.views.schemas.event_schema import EventResponseSchema
 
 
 class LikeStrategy(ABC):
-    """Like strategy."""
+    """
+    Like strategy.
+    """
     
     @staticmethod
     def get_strategy(strategy_name):
@@ -21,7 +23,7 @@ class LikeStrategy(ABC):
     
     
 class LikeEventStrategy(LikeStrategy):
-    """Like an event."""
+    """Like event strategy."""
     def execute(self, request, event_id):
         """Toggle the like status for a given event and user.
 

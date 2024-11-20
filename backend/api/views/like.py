@@ -5,9 +5,11 @@ from api.views.schemas.event_schema import EventEngagementSchema, EventResponseS
 
 @api_controller('/likes/', tags=['Likes'])
 class LikeAPI:
-    """Like an event."""
+    """
+    API endpoints for event likes.
+    """
     
-    @http_put('/{event_id}/toggle-like', response={200: dict}, auth=JWTAuth())
+    @route.put('/{event_id}/toggle-like', response={200: dict}, auth=JWTAuth())
     def toggle_like(self, request: HttpRequest, event_id: int) -> dict:
         """Toggle the like status for a given event and user.
 

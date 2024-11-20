@@ -20,12 +20,27 @@ logger = logging.getLogger(__name__)
 class EmailVerification:
     @staticmethod
     def generate_verification_token(user):
-        """Generate a secure verification token tied to the user instance."""
+        """
+        Generates a verification token for the given user.
+
+        The verification token is used in the verification email sent to the user.
+
+        :param user: The user to generate the verification token for.
+        :return: The verification token.
+        """
         return default_token_generator.make_token(user)
     
     @staticmethod
     def send_verification_email(user, token):
-        """Send an HTML verification email to the user."""
+        """
+        Sends a verification email to the given user.
+
+        The verification email contains a link with a verification token that the user
+        can use to verify their email address.
+
+        :param user: The user to send the verification email to.
+        :param token: The verification token to include in the email.
+        """
         user_id = urlsafe_base64_encode(force_bytes(user.id))
         verification_url = f"{settings.SITE_URL}api/users/verify-email/{user_id}/{token}"
         
@@ -65,7 +80,17 @@ class TicketEmailService:
     """
         
     def send_email(self, to_email: str, subject: str, html_content: str) -> bool:
-        """Send email using SMTP"""
+        """Send an email to a given recipient with the given subject and HTML content
+
+        Args:
+            to_email (str): The recipient's email address
+            subject (str): The email subject
+            html_content (str): The HTML content of the email
+
+        Returns:
+            bool: True if the email was sent successfully, False otherwise
+        """
+
         try:
             # Create message
             message = MIMEMultipart('alternative')
@@ -100,7 +125,12 @@ class TicketNotificationManager:
         self.email_service = TicketEmailService()
 
     def send_registration_confirmation(self) -> bool:
-        """Send registration confirmation email"""
+        """
+        Sends a registration confirmation email to the attendee after a ticket has been registered.
+        
+        Returns:
+            bool: True if the email was sent successfully, False otherwise
+        """
         html_content = self._generate_registration_html()
         subject = f"Registration Confirmed - {self.event.event_name}"
         
@@ -117,7 +147,12 @@ class TicketNotificationManager:
         return success
 
     def send_cancellation_notification(self) -> bool:
-        """Send cancellation confirmation email"""
+        """
+        Sends a cancellation notification email to the attendee after a ticket has been cancelled.
+        
+        Returns:
+            bool: True if the email was sent successfully, False otherwise
+        """
         html_content = self._generate_cancellation_html()
         subject = f"Ticket Cancelled - {self.event.event_name}"
         
@@ -128,7 +163,12 @@ class TicketNotificationManager:
         )
     
     def send_reminder_notification(self) -> bool:
-        """Send reminder email one day before the event."""
+        """
+        Sends a reminder notification email to the attendee a day before the event.
+        
+        Returns:
+            bool: True if the email was sent successfully, False otherwise
+        """        
         if not self.ticket.email_sent:
             return False  
         subject = f'Reminder: {self.ticket.event.event_name} is tomorrow!'
@@ -144,7 +184,12 @@ class TicketNotificationManager:
         return success
 
     def _generate_reminder_html(self) -> str:
-        """Generate HTML content for reminder email."""
+        """
+        Generate HTML content for the event reminder email.
+        
+        Returns:
+            str: The rendered HTML content
+        """
         return f"""
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
             <h2 style="color: #333;">Event Reminder</h2>
@@ -167,7 +212,12 @@ class TicketNotificationManager:
         """
 
     def _generate_registration_html(self) -> str:
-        """Generate HTML content for registration confirmation"""
+        """
+        Generate HTML content for the registration confirmation email.
+        
+        Returns:
+            str: The rendered HTML content
+        """
         return f"""
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
             <h2 style="color: #333;">Registration Confirmed</h2>
@@ -196,7 +246,12 @@ class TicketNotificationManager:
         """
 
     def _generate_cancellation_html(self) -> str:
-        """Generate HTML content for cancellation confirmation"""
+        """
+        Generate HTML content for the cancellation confirmation email.
+        
+        Returns:
+            str: The rendered HTML content
+        """
         return f"""
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
             <h2 style="color: #333;">Ticket Cancellation Confirmation</h2>
@@ -220,7 +275,16 @@ class TicketNotificationManager:
 
 @shared_task
 def send_reminder_emails():
-    """Send reminder emails."""
+    """
+    Sends reminder emails to attendees with tickets for events occurring tomorrow.
+
+    This task queries for tickets associated with events starting the next day
+    and sends reminder emails to those attendees whose `email_sent` flag is set to True.
+
+    The task iterates over each ticket meeting the criteria, creates a 
+    TicketNotificationManager instance, and invokes the send_reminder_notification 
+    method to dispatch the reminder email.
+    """
     from api.models.ticket import Ticket
     tomorrow = timezone.now() + timedelta(days=1)
     tickets = Ticket.objects.filter(

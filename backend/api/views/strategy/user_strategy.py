@@ -5,9 +5,21 @@ from api.views.schemas.other_schema import FileUploadResponseSchema
 
 
 class UserStrategy(ABC):
-    
+    """
+    Abstract base class for user-related strategies.
+    """
     @staticmethod
     def get_strategy(strategy_name):
+        """
+        Retrieve the user-related strategy based on the provided strategy name.
+
+        Args:
+            strategy_name (str): The name of the strategy to retrieve.
+
+        Returns:
+            An instance of the strategy corresponding to the given strategy name,
+            or None if the strategy name is not recognized.
+        """
         strategies = {
             'user_register': UserRegisterStrategy(),
             'user_logout': UserlogoutStrategy(),
@@ -24,13 +36,38 @@ class UserStrategy(ABC):
     
     @abstractmethod
     def execute(self, *arg, **kwargs):
+        """
+        Executes the strategy based on the given arguments.
+
+        Args:
+            *arg: A variable length argument list.
+            **kwargs: A dictionary of keyword arguments.
+
+        Raises:
+            NotImplementedError: If the execute method is not implemented in the
+                derived class.
+        """
         pass
     
     
 class UserRegisterStrategy(UserStrategy):
-    
+    """ 
+    Strategy for user registration. 
+    """
     def validate_input_information(self, form):
-        """Validate conditions for event registration."""
+        """
+        Validates the input information from the registration form.
+
+        Args:
+            form: The user registration form containing input fields such as 
+                username, password, email, and phone number.
+
+        Raises:
+            ValidationError: If the form is empty, passwords do not match, 
+                            username or email is already taken, 
+                            or required fields such as username, email, 
+                            and phone number are missing or invalid.
+        """
         if form is None:
             raise ValidationError('Form data is empty')
 
@@ -61,6 +98,20 @@ class UserRegisterStrategy(UserStrategy):
     
     
     def execute(self, form):
+        """
+        Execute the user registration strategy. This method validates the form data, 
+        creates a new user with the provided information, and sends an email to the user
+        to verify their account.
+
+        Args:
+            form: The user registration form containing input fields such as 
+                username, password, email, and phone number.
+
+        Returns:
+            A Response object containing the newly created user object if the operation
+            is successful, or a Response object with a 400 error code containing an
+            error message if the operation fails.
+        """
         try: 
             self.validate_input_information(form)
         except ValidationError as e:
@@ -81,15 +132,41 @@ class UserRegisterStrategy(UserStrategy):
     
     
 class UserlogoutStrategy(UserStrategy):
-    
+    """
+    Strategy for user logout.
+    """
     def execute(self, request):
+        """
+        Execute the user logout strategy. This method logs out the current user
+        and returns a success message.
+
+        Args:
+            request: The HTTP request object containing user session information.
+
+        Returns:
+            Response: A response object with a success message and a 200 status code 
+            indicating the user has been logged out successfully.
+        """
         logout(request)
         return Response({"message": "Logged out successfully"}, status=200)
         
 
 class UserloginStrategy(UserStrategy):
-    
+    """
+    Strategy for user login.
+    """
     def execute(self, request, form):
+        """
+        Authenticate and log in a user, returning access and refresh tokens along with user details.
+
+        Args:
+            request: The HTTP request object containing user credentials.
+            form: A form object containing login details (username and password).
+
+        Returns:
+            Response: A response object containing tokens, user details, and a success message 
+                    if authentication is successful, or an error message if authentication fails.
+        """
         user = authenticate(request, username=form.username, password=form.password)
         if user is not None:
             login(request, user)
@@ -123,8 +200,20 @@ class UserloginStrategy(UserStrategy):
             
             
 class UserGoogleAuthStrategy(UserStrategy):
-    
+    """
+    Strategy for authenticating a user via Google OAuth2.
+    """
     def execute(self, request ,data):
+        """
+        Authenticate a user via Google OAuth2 and retrieve access and refresh tokens.
+
+        Args:
+            request: The request object.
+            data (GoogleAuthSchema): Google authentication token data.
+
+        Returns:
+            Response: A response containing user details and tokens on successful authentication.
+        """
         idinfo = id_token.verify_oauth2_token(
             data.token, 
             requests.Request(),
@@ -170,8 +259,20 @@ class UserGoogleAuthStrategy(UserStrategy):
         )
         
 class UserViewProfile(UserStrategy):
-    
+    """
+    Strategy for retrieving a user's profile information.
+    """
     def execute(self, request):
+        """
+        Retrieve the profile information of the currently logged-in user.
+
+        Args:
+            request (HttpRequest): The request object.
+
+        Returns:
+            UserResponseSchema: The profile details of the user.
+        """
+        
         user = request.user
         profile_user = get_object_or_404(AttendeeUser, username=user.username)
         profile_dict = UserResponseSchema.from_orm(profile_user).dict()
@@ -180,8 +281,20 @@ class UserViewProfile(UserStrategy):
             
 
 class UserEditProfile(UserStrategy):
-    
+    """
+    Strategy for updating a user's profile information.
+    """
     def execute(self, user_id, new_data):
+        """
+        Update the profile information of a user by user ID.
+
+        Args:
+            user_id (int): The ID of the user to be updated.
+            new_data (UserupdateSchema): New profile data for the user.
+
+        Returns:
+            UserupdateSchema: Updated user profile details.
+        """
         user = get_object_or_404(AttendeeUser, id=user_id)
         update_fields = new_data.dict(exclude={'profile_picture'}, exclude_unset = True)
         for field, value in update_fields.items():
@@ -191,8 +304,20 @@ class UserEditProfile(UserStrategy):
         return UserupdateSchema.from_orm(user)
 
 class UserDeleteAccount(UserStrategy):
-    
+    """
+    Strategy for deleting a user account.
+    """
     def execute(self, request):
+        """
+        Delete a user account by user ID.
+
+        Args:
+            request (HttpRequest): The request object.
+
+        Returns:
+            Response: A response containing a success message upon successful deletion.
+        """
+
         user = request.user
         get_user = AttendeeUser.objects.get(id = user.id)
 
@@ -201,9 +326,22 @@ class UserDeleteAccount(UserStrategy):
         return Response({'success': 'Your account has been deleted'})
     
 class UserUploadProfilePicture(UserStrategy):
-    
+    """
+    Strategy for uploading a user's profile picture.
+    """
     @staticmethod
     def upload_file_to_s3(user,filename, profile_picture):
+        """
+        Upload a file to S3 directly using boto3.
+
+        Args:
+            user (AttendeeUser): The user who is uploading the file.
+            filename (str): The filename to use when uploading the file.
+            profile_picture (UploadedFile): The file to be uploaded.
+
+        Returns:
+            Response: A response containing the uploaded file's details upon successful upload.
+        """
         try:
                 # Direct S3 upload using boto3
                 s3_client = boto3.client(
@@ -242,6 +380,16 @@ class UserUploadProfilePicture(UserStrategy):
             
     
     def execute(self, request, profile_picture):
+        """
+        Handles the upload of a user's profile picture to S3.
+
+        Args:
+            request (HttpRequest): The HTTP request containing the user and file information.
+        profile_picture (UploadedFile): The profile picture file to be uploaded.
+
+        Returns:
+            Response: A response indicating success with file details or an error message if the upload fails.
+        """
         try:
             user = request.user
             
@@ -261,8 +409,21 @@ class UserUploadProfilePicture(UserStrategy):
         
     
 class UserVerifyEmail(UserStrategy):
-    
+    """
+    Strategy for verifying a user's email address.
+    """
     def execute(self,user_id,token):
+        """
+        Verify a user's email address using a verification token.
+
+        Args:
+            user_id (str): The ID of the user to verify.
+            token (str): The verification token sent to the user's email address.
+
+        Returns:
+            Response: A response indicating success if the token is valid and not expired, or an error message if the token is invalid or expired.
+        """
+
         try:
             uid = force_str(urlsafe_base64_decode(user_id))
             user = AttendeeUser.objects.get(pk=uid)
@@ -287,8 +448,19 @@ class UserVerifyEmail(UserStrategy):
             }, status=400)
             
 class UserResendVeification(UserStrategy):
-    
+    """
+    Strategy for resending a verification email to a user.
+    """
     def execute(self, email):
+        """
+        Resend a verification email to a user with the given email address.
+
+        Args:
+            email (str): The email address of the user to resend the verification email to.
+
+        Returns:
+            Response: A response indicating success if the email is sent successfully, or an error message if the user is not found or already verified.
+        """
         try:
             user = AttendeeUser.objects.get(email=email, is_email_verified=False)
             user.send_verification_email()
