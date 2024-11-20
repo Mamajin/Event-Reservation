@@ -3,7 +3,8 @@ import api from '../api';
 import EventCard from '../components/EventCard';
 import PageLayout from '../components/PageLayout';
 import Sidebar from '../components/Discovery/Sidebar';
-import { LuSearch, LuTag, LuClock,LuChevronUp, LuChevronDown } from "react-icons/lu";
+import { MdOutlineCategory } from "react-icons/md";
+import { LuSearch, LuTag, LuClock,LuChevronUp, LuChevronDown, LuListFilter } from "react-icons/lu";
 import { ACCESS_TOKEN } from '../constants';
 
 export default function Discover() {
@@ -16,7 +17,7 @@ export default function Discover() {
   const [selectedStatus, setSelectedStatus] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('');
   const [showAllTags, setShowAllTags] = useState(false);
-  const MAX_VISIBLE_TAGS = 5;
+  const MAX_VISIBLE_TAGS = 6;
 
   useEffect(() => {
     const fetchEvents = async () => {
@@ -76,7 +77,8 @@ export default function Discover() {
             {/* Main Content */}
             <div className="flex-1 overflow-y-auto">
               <div className="mb-8 space-y-4">
-                <div className="relative">
+              <div className="flex items-center gap-4">
+                <div className="relative w-7/12 max-w">
                   <LuSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
                   <input
                     type="search"
@@ -86,38 +88,92 @@ export default function Discover() {
                     className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg bg-gray-200 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                   />
                 </div>
-                <div className="flex flex-wrap gap-2">
-                {['UPCOMING', 'ONGOING', 'COMPLETED'].map((status) => (
-                  <button
-                    key={status}
-                    onClick={() => setSelectedStatus(selectedStatus === status ? null : status)}
-                    className={`flex items-center px-3 py-1 rounded-full text-sm ${
-                      selectedStatus === status
-                        ? 'bg-indigo-600 text-white'
-                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                    }`}
+                <div className="dropdown">
+                  <label
+                    tabIndex={0}
+                    className="btn btn-sm bg-dark-purple hover:bg-gray-100 hover:text-black text-white px-4 py-2 rounded-md transition-colors duration-300 flex items-center gap-2"
                   >
-                    <LuClock className="h-4 w-4 mr-1" />
-                    {status.charAt(0) + status.slice(1).toLowerCase()}
-                  </button>
-                ))}
+                    <LuClock className="h-4 w-4" />
+                    <span className="hidden sm:block">Status</span>
+                  </label>
+                  <ul
+                    tabIndex={0}
+                    className="dropdown-content menu p-1 shadow bg-white rounded-box w-40 text-sm"
+                  >
+                    {['UPCOMING', 'ONGOING', 'COMPLETED'].map((status) => (
+                      <li key={status}>
+                        <button
+                          onClick={() => setSelectedStatus(selectedStatus === status ? null : status)}
+                          className={`flex items-center gap-2 px-2 py-1 rounded-md ${
+                            selectedStatus === status
+                              ? 'bg-indigo-600 text-white'
+                              : 'hover:bg-gray-200 text-gray-700'
+                          }`}
+                        >
+                          {status.charAt(0) + status.slice(1).toLowerCase()}
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+                <div className="dropdown">
+                  <label
+                    tabIndex={0}
+                    className="btn btn-sm bg-dark-purple text-white hover:bg-gray-100 hover:text-black px-4 py-2 rounded-md transition-colors duration-300 flex items-center gap-2"
+                  >
+                    <MdOutlineCategory className="h-4 w-4"/>
+                    <span className="hidden sm:block">Category</span>
+                  </label>
+                  <ul
+                    tabIndex={0}
+                    className="dropdown-content menu p-1 shadow bg-white rounded-box w-40 text-sm"
+                  >
+                    {categories.map((category) => (
+                      <li key={category}>
+                        <button
+                          onClick={() => setSelectedCategory(selectedStatus === category ? null : category)}
+                          className={`flex items-center gap-2 px-2 py-1 rounded-md ${
+                            selectedStatus === category
+                              ? 'bg-indigo-600 text-white'
+                              : 'hover:bg-gray-200 text-gray-700'
+                          }`}
+                        >
+                          {category.charAt(0) + category.slice(1).toLowerCase()}
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+                <div className="dropdown">
+                  <label
+                    tabIndex={0}
+                    className="btn btn-sm bg-dark-purple hover:bg-gray-100 hover:text-black text-white px-4 py-2 rounded-md transition-colors duration-300 flex items-center gap-2"
+                  >
+                    <LuListFilter className="h-4 w-4" />
+                    <span className="hidden sm:block">Sort By</span>
+                  </label>
+                  <ul
+                    tabIndex={0}
+                    className="dropdown-content menu p-1 shadow bg-white rounded-box w-40 text-sm"
+                  >
+                    {['POPULAR', 'RECENT'].map((status) => (
+                      <li key={status}>
+                        <button
+                          onClick={() => setSelectedStatus(selectedStatus === status ? null : status)}
+                          className={`flex items-center gap-2 px-2 py-1 rounded-md ${
+                            selectedStatus === status
+                              ? 'bg-indigo-600 text-white'
+                              : 'hover:bg-gray-200 text-gray-700'
+                          }`}
+                        >
+                          {status.charAt(0) + status.slice(1).toLowerCase()}
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
               </div>
-              
                 <div className="flex flex-wrap gap-2">
-                {categories.map((category) => (
-                    <button
-                      key={category}
-                      onClick={() => setSelectedCategory(selectedCategory === category ? null : category)}
-                      className={`flex items-center px-3 py-1 rounded-full text-sm ${
-                        selectedCategory === category
-                          ? "bg-indigo-600 text-white"
-                          : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                      }`}
-                    >
-                      <LuTag className="h-4 w-4 mr-1" />
-                      {category.charAt(0) + category.slice(1).toLowerCase()}
-                    </button>
-                  ))}
                   {visibleTags.map((tag) => (
                     <button
                       key={tag}
@@ -160,7 +216,7 @@ export default function Discover() {
                     )}
                 </div>
                 {filteredEvents.length > 0 ? (
-                  <div className="grid grid-cols-1 md:grid-cols-1 gap-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     {filteredEvents.map((event) => (
                       <EventCard key={event.id} event={event} />
                     ))}

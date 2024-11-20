@@ -1,8 +1,6 @@
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { CiCalendar, CiGlobe, CiCircleInfo } from "react-icons/ci";
-import { FiMapPin } from "react-icons/fi";
-import { IoTicketOutline } from "react-icons/io5";
+import { LuInfo, LuCalendarDays, LuGlobe, LuMapPin, LuTicket} from "react-icons/lu";
 import PageLayout from "../components/PageLayout";
 import BasicDetails from '../components/CreateEvent/sections/BasicDetails';
 import LocationDetails from '../components/CreateEvent/sections/LocationDetails';
@@ -44,7 +42,7 @@ export default function CreateEvent() {
         end_date_register: formatDateTime(formValues.end_date_register) || '',
         start_date_event: formatDateTime(formValues.start_date_event) || '',
         end_date_event: formatDateTime(formValues.end_date_event) || '',
-        max_attendee: parseInt(formValues.max_attendee, 10) || 0,
+        max_attendee: parseInt(formValues.max_attendee) || '',
         description: formValues.description || '',
         category: formValues.category || 'CONFERENCE',
         dress_code: formValues.dress_code || 'CASUAL',
@@ -142,8 +140,8 @@ export default function CreateEvent() {
                     : 'text-gray-600 hover:text-purple-700'}`}
                 onClick={() => setActiveTab('basic')}
               >
-                <CiCircleInfo className="mr-2 h-4 w-4" />
-                Basic Details
+                <LuInfo className="mr-2 h-4 w-4" />
+                <span className="hidden sm:block">Basic Details</span>
               </button>
               <button
                 type="button"
@@ -153,8 +151,8 @@ export default function CreateEvent() {
                     : 'text-gray-600 hover:text-purple-700'}`}
                 onClick={() => setActiveTab('location')}
               >
-                <FiMapPin className="mr-2 h-4 w-4" />
-                Location
+                <LuMapPin className="mr-2 h-4 w-4" />
+                <span className="hidden sm:block">Location</span>
               </button>
               <button
                 type="button"
@@ -164,8 +162,8 @@ export default function CreateEvent() {
                     : 'text-gray-600 hover:text-purple-700'}`}
                 onClick={() => setActiveTab('datetime')}
               >
-                <CiCalendar className="mr-2 h-4 w-4" />
-                Date & Time
+                <LuCalendarDays className="mr-2 h-4 w-4" />
+                <span className="hidden sm:block">Date & Time</span>
               </button>
               <button
                 type="button"
@@ -175,8 +173,8 @@ export default function CreateEvent() {
                     : 'text-gray-600 hover:text-purple-700'}`}
                 onClick={() => setActiveTab('ticketing')}
               >
-                <IoTicketOutline className="mr-2 h-4 w-4" />
-                Ticketing (optional)
+                <LuTicket className="mr-2 h-4 w-4" />
+                <span className="hidden sm:block">Ticketing (optional)</span>
               </button>
               <button
                 type="button"
@@ -186,8 +184,8 @@ export default function CreateEvent() {
                     : 'text-gray-600 hover:text-purple-700'}`}
                 onClick={() => setActiveTab('contact')}
               >
-                <CiGlobe className="mr-2 h-4 w-4" />
-                Contact & Social (optional)
+                <LuGlobe className="mr-2 h-4 w-4" />
+                <span className="hidden sm:block">Contact & Social (optional)</span>
               </button>
             </div>
             <div className="min-h-[500px] py-4">
