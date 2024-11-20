@@ -62,7 +62,7 @@ class Event(models.Model):
     start_date_register = models.DateTimeField('Registration Start Date', default=timezone.now)
     end_date_register = models.DateTimeField('Registration End Date', null=False, blank=False)
     description = models.TextField(max_length=400) 
-    max_attendee = models.IntegerField(default=0, validators=[MinValueValidator(0)])
+    max_attendee = models.PositiveIntegerField(default = None, null = True, blank= True)
     address = models.CharField(max_length=500, null = True, blank = True)
     latitude = models.DecimalField(max_digits=9, decimal_places=6, null = True, blank= True, default= 0.00)
     longitude = models.DecimalField(max_digits=9, decimal_places=6, null = True, blank= True, default= 0.00)
@@ -230,10 +230,11 @@ class Event(models.Model):
         if not self.end_date_register:
             raise ValueError("End date of registration cannot be null")
         now = timezone.now()
-        if now > self.end_date_register:
+        if self.max_attendee:
+            if self.current_number_attendee >= self.max_attendee:
+                self.status_registeration = "FULL"
+        elif now > self.end_date_register:
             self.status_registeration = "CLOSED"
-        elif self.max_attendee <= 0 and self.current_number_attendee >= self.max_attendee:
-            self.status_registeration = "FULL"
         else:
             self.status_registeration = "OPEN"
         self.save()

@@ -43,7 +43,7 @@ export function CreateEventForm() {
         end_date_register: formatDateTime(formValues.end_date_register) || '',
         start_date_event: formatDateTime(formValues.start_date_event) || '',
         end_date_event: formatDateTime(formValues.end_date_event) || '',
-        max_attendee: parseInt(formValues.max_attendee, 10) || 0,
+        max_attendee: parseInt(formValues.max_attendee) || '',
         description: formValues.description || '',
         category: formValues.category || 'CONFERENCE',
         dress_code: formValues.dress_code || 'CASUAL',
