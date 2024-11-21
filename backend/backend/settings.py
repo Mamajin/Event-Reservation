@@ -16,6 +16,7 @@ from decouple import config,Csv
 from dotenv import load_dotenv
 from celery.schedules import crontab
 import dj_database_url
+import sys
 import os
 
 load_dotenv()
@@ -154,14 +155,22 @@ WSGI_APPLICATION = "backend.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
-DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
+if "test" in sys.argv:
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": BASE_DIR / "test_db.sqlite3",  # Use a separate file for test DB
+        }
     }
-}
-database_url = os.getenv('DATABASE_URL')
-DATABASES['default'] = dj_database_url.parse(database_url)
+else:
+    DATABASES = {
+        "default": dj_database_url.parse(
+            config(
+                'DATABASE_URL',
+                default='postgresql://user:password@localhost:5432/mydatabase'
+            )
+        ),
+    }
 
 #postgresql://event_ease_database_user:MtgavvuxtpQl1JyJX9ELWaW8LSVCx95j@dpg-csvdqv3v2p9s73cvjl8g-a.singapore-postgres.render.com/event_ease_database
 
