@@ -3,17 +3,18 @@ import { useForm } from 'react-hook-form';
 import { CiCalendar, CiGlobe, CiCircleInfo } from "react-icons/ci";
 import { FiMapPin } from "react-icons/fi";
 import { IoTicketOutline } from "react-icons/io5";
-import BasicDetails from './sections/BasicDetails';
-import LocationDetails from './sections/LocationDetails';
-import DateTimeDetails from './sections/DateTimeDetails';
-import TicketingDetails from './sections/TicketDetails';
-import ContactDetails from './sections/ContactDetails';
-import SocialMedia from './sections/SocialMedia';
-import { ACCESS_TOKEN } from '../../constants';
-import api from '../../api';
+import PageLayout from '../components/PageLayout';
+import BasicDetails from '../components/CreateEvent/sections/BasicDetails';
+import LocationDetails from '../components/CreateEvent/sections/LocationDetails';
+import DateTimeDetails from '../components/CreateEvent/sections/DateTimeDetails';
+import TicketingDetails from '../components/CreateEvent/sections/TicketDetails';
+import ContactDetails from '../components/CreateEvent/sections/ContactDetails';
+import SocialMedia from '../components/CreateEvent/sections/SocialMedia';
+import { ACCESS_TOKEN } from '../constants';
+import api from '../api';
 import { useNavigate, useParams } from 'react-router-dom';
 
-export function EditEventForm() {
+export default function EditEvent() {
   const { eventId } = useParams();
   const [activeTab, setActiveTab] = useState('basic');
   const [loading, setLoading] = useState(false);
@@ -137,6 +138,7 @@ export function EditEventForm() {
   }
 
   return (
+    <PageLayout>
     <div className="container mx-auto py-10">
       <div className="card bg-white shadow-xl">
         <div className="card-body">
@@ -210,5 +212,6 @@ export function EditEventForm() {
         </div>
       </div>
     </div>
+    </PageLayout>
   );
 }

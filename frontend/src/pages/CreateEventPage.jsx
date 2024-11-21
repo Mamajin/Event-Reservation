@@ -1,19 +1,18 @@
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { CiCalendar, CiGlobe, CiCircleInfo } from "react-icons/ci";
-import { FiMapPin } from "react-icons/fi";
-import { IoTicketOutline } from "react-icons/io5";
-import BasicDetails from './sections/BasicDetails';
-import LocationDetails from './sections/LocationDetails';
-import DateTimeDetails from './sections/DateTimeDetails';
-import TicketingDetails from './sections/TicketDetails';
-import ContactDetails from './sections/ContactDetails';
-import SocialMedia from './sections/SocialMedia';
-import { ACCESS_TOKEN } from '../../constants';
-import api from '../../api';
+import { LuInfo, LuCalendarDays, LuGlobe, LuMapPin, LuTicket} from "react-icons/lu";
+import PageLayout from "../components/PageLayout";
+import BasicDetails from '../components/CreateEvent/sections/BasicDetails';
+import LocationDetails from '../components/CreateEvent/sections/LocationDetails';
+import DateTimeDetails from '../components/CreateEvent/sections/DateTimeDetails';
+import TicketingDetails from '../components/CreateEvent/sections/TicketDetails';
+import ContactDetails from '../components/CreateEvent/sections/ContactDetails';
+import SocialMedia from '../components/CreateEvent/sections/SocialMedia';
+import { ACCESS_TOKEN } from '../constants';
+import api from '../api';
 import { useNavigate } from 'react-router-dom';
 
-export function CreateEventForm() {
+export default function CreateEvent() {
   const [activeTab, setActiveTab] = useState('basic');
   const [loading, setLoading] = useState(false);
   const form = useForm({
@@ -125,6 +124,7 @@ export function CreateEventForm() {
   };
 
   return (
+    <PageLayout>
     <div className="container mx-auto py-10">
       <div className="card bg-white shadow-xl">
         <div className="card-body">
@@ -140,8 +140,8 @@ export function CreateEventForm() {
                     : 'text-gray-600 hover:text-purple-700'}`}
                 onClick={() => setActiveTab('basic')}
               >
-                <CiCircleInfo className="mr-2 h-4 w-4" />
-                Basic Details
+                <LuInfo className="mr-2 h-4 w-4" />
+                <span className="hidden sm:block">Basic Details</span>
               </button>
               <button
                 type="button"
@@ -151,8 +151,8 @@ export function CreateEventForm() {
                     : 'text-gray-600 hover:text-purple-700'}`}
                 onClick={() => setActiveTab('location')}
               >
-                <FiMapPin className="mr-2 h-4 w-4" />
-                Location
+                <LuMapPin className="mr-2 h-4 w-4" />
+                <span className="hidden sm:block">Location</span>
               </button>
               <button
                 type="button"
@@ -162,8 +162,8 @@ export function CreateEventForm() {
                     : 'text-gray-600 hover:text-purple-700'}`}
                 onClick={() => setActiveTab('datetime')}
               >
-                <CiCalendar className="mr-2 h-4 w-4" />
-                Date & Time
+                <LuCalendarDays className="mr-2 h-4 w-4" />
+                <span className="hidden sm:block">Date & Time</span>
               </button>
               <button
                 type="button"
@@ -173,8 +173,8 @@ export function CreateEventForm() {
                     : 'text-gray-600 hover:text-purple-700'}`}
                 onClick={() => setActiveTab('ticketing')}
               >
-                <IoTicketOutline className="mr-2 h-4 w-4" />
-                Ticketing
+                <LuTicket className="mr-2 h-4 w-4" />
+                <span className="hidden sm:block">Ticketing (optional)</span>
               </button>
               <button
                 type="button"
@@ -184,8 +184,8 @@ export function CreateEventForm() {
                     : 'text-gray-600 hover:text-purple-700'}`}
                 onClick={() => setActiveTab('contact')}
               >
-                <CiGlobe className="mr-2 h-4 w-4" />
-                Contact & Social
+                <LuGlobe className="mr-2 h-4 w-4" />
+                <span className="hidden sm:block">Contact & Social (optional)</span>
               </button>
             </div>
             <div className="min-h-[500px] py-4">
@@ -201,5 +201,6 @@ export function CreateEventForm() {
         </div>
       </div>
     </div>
+    </PageLayout>
   );
 }

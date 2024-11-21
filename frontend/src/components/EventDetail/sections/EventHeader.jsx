@@ -16,7 +16,6 @@ export function EventHeader({ event }) {
   const navigate = useNavigate();
 
   useEffect(() => {
-    console.log("Event user_engaged data:", event?.user_engaged);
     if (event?.user_engaged) {
       setIsLiked(event.user_engaged.is_liked);
       setIsBookmarked(event.user_engaged.is_bookmarked);
@@ -25,7 +24,7 @@ export function EventHeader({ event }) {
   
   const handleShare = async (platform) => {
     const shareUrl = window.location.href;
-    const shareText = `Check out this event: ${event.title}`;
+    const shareText = `Check out this event: ${event.event_name}`;
   
     switch (platform) {
       case 'twitter':
@@ -201,7 +200,7 @@ export function EventHeader({ event }) {
               <div className="flex items-center gap-2">
                 <FaUsers className="h-5 w-5" />
                 <span className="text-lg">
-                  {event.max_attendee === 0 ? "No attendees limit" : `${event.max_attendee} attendees max`}
+                  {event.max_attendee === null ? "No attendees limit" : `${event.max_attendee} attendees max`}
                 </span>
 
               </div>

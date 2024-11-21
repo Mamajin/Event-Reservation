@@ -27,8 +27,7 @@ function EventCard({ event, onEdit, isEditable}) {
   };
 
   return (
-    <div className="relative flex bg-white shadow-lg p-4 mb-4 rounded-lg">
-      
+    <div className="flex bg-white shadow-lg p-4 mb-4 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer duration-200">
       <img
         className="w-1/3 h-48 object-cover rounded-lg"
         src={

@@ -108,20 +108,6 @@ class EventAPI(ControllerBase):
         strategy : EventStrategy = EventStrategy.get_strategy('upload_event_image', request)
         return strategy.execute(event_id, file)
         
-    @route.get('/{event_id}/engagement', response={200: dict})
-    def get_event_engagements(self, request: HttpRequest, event_id: int):
-        """
-        Retrieve engagement metrics for a specific event.
-
-        Args:
-            request (HttpRequest): The HTTP request object, containing user and request metadata.
-            event_id (int): The ID of the event for which engagement metrics are requested.
-
-        Returns:
-            Response (dict): A dictionary containing engagement metrics for the event.
-        """
-        strategy : EventEngagement= EventEngagement.get_engagement_strategy('event_engagement', request, event_id)
-        return strategy.execute()     
     
     @route.get('/{event_id}/comments', response=List[CommentResponseSchema])
     def get_events_comments(self, request: HttpRequest, event_id: int):

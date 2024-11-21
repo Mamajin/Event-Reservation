@@ -7,7 +7,7 @@ from api.views.schemas.user_schema import UserResponseSchema
 from api.views.schemas.ticket_schema import TicketResponseSchema
 
 
-class EventStrategy:
+class EventStrategy(ABC):
     """
     Base class for event strategies.
     """
@@ -437,8 +437,6 @@ class EventEngagement:
             or None if the name is not recognized.
         """
         strategies = {
-            'event_engagement': EventGetEngagementStrategy(request,event_id),
-            'event_user_engagement': EventUserEngagementStrategy(request,event_id),
             'event_comment': EventCommentStrategy(request,event_id),
             'event_attendee': EventAllAttendee(request,event_id),
             'event_ticket' : EventAllTicket(request, event_id)
@@ -465,38 +463,6 @@ class EventEngagement:
         """
         pass
     
-class EventGetEngagementStrategy(EventEngagement):
-    """Strategy to retrieve engagement data for an event."""
-    def execute(self):
-        """
-        Execute the event engagement strategy based on the given event ID.
-
-        Returns:
-            The result of executing the strategy, which is a dictionary containing
-            engagement data for the event, including the total number of likes and
-            bookmarks.
-
-        Raises:
-            400: If the request is invalid due to missing or invalid data.
-            404: If the event does not exist.
-            500: If an error occurs during the execution of the strategy.
-        """
-        engagement_data = EventResponseSchema.resolve_engagement(self.event)
-        return engagement_data  
-    
-    
-class EventUserEngagementStrategy(EventEngagement):
-    """Strategy to retrieve user engagement data for an event."""
-    def execute(self):
-        """
-        Execute the user engagement strategy for the event.
-
-        Returns:
-            dict: A dictionary containing the user's engagement data for the event,
-                including like, bookmark, and application status.
-        """
-        user_engaged = EventResponseSchema.resolve_user_engagement(self.event, self.user)
-        return user_engaged      
 
 
 class EventCommentStrategy(EventEngagement):
