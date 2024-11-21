@@ -7,7 +7,7 @@ from api.views.schemas.user_schema import UserResponseSchema
 from api.views.schemas.ticket_schema import TicketResponseSchema
 
 
-class EventStrategy:
+class EventStrategy(ABC):
     """
     Base class for event strategies.
     """
