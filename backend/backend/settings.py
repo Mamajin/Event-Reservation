@@ -160,8 +160,8 @@ DATABASES = {
         "NAME": BASE_DIR / "db.sqlite3",
     }
 }
-
-DATABASES['default'] = dj_database_url.parse('postgresql://event_ease_database_user:MtgavvuxtpQl1JyJX9ELWaW8LSVCx95j@dpg-csvdqv3v2p9s73cvjl8g-a.singapore-postgres.render.com/event_ease_database')
+database_url = os.getenv('DATABASE_URL')
+DATABASES['default'] = dj_database_url.parse(database_url)
 
 #postgresql://event_ease_database_user:MtgavvuxtpQl1JyJX9ELWaW8LSVCx95j@dpg-csvdqv3v2p9s73cvjl8g-a.singapore-postgres.render.com/event_ease_database
 

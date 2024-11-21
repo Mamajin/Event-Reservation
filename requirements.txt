@@ -45,6 +45,7 @@ executing==2.1.0
 Faker==30.6.0
 fastjsonschema==2.20.0
 google-auth==2.35.0
+gunicorn==23.0.0
 h11==0.14.0
 idna==3.10
 iniconfig==2.0.0
