@@ -15,6 +15,7 @@ from datetime import timedelta
 from decouple import config,Csv
 from dotenv import load_dotenv
 from celery.schedules import crontab
+import dj_database_url
 import os
 
 load_dotenv()
@@ -159,6 +160,10 @@ DATABASES = {
         "NAME": BASE_DIR / "db.sqlite3",
     }
 }
+
+DATABASES['default'] = dj_database_url.parse('postgresql://event_ease_database_user:MtgavvuxtpQl1JyJX9ELWaW8LSVCx95j@dpg-csvdqv3v2p9s73cvjl8g-a.singapore-postgres.render.com/event_ease_database')
+
+#postgresql://event_ease_database_user:MtgavvuxtpQl1JyJX9ELWaW8LSVCx95j@dpg-csvdqv3v2p9s73cvjl8g-a.singapore-postgres.render.com/event_ease_database
 
 
 # Password validation
