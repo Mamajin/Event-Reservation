@@ -142,6 +142,10 @@ function OrganizerInfo() {
       <div className="flex-1 p-6 bg-white rounded-lg shadow-lg w-full max-w-screen-lg mx-auto">
         <div className="max-w-3xl mx-auto">
           <h1 className="text-2xl font-bold mb-6 text-dark-purple">Organizer Profile</h1>
+          <div className="relative">
+            <div className="absolute top-4 right-4 text-4xl font-bold text-light-purple">
+              EventEase
+            </div>
 
           <div className="mt-6">
             <button
@@ -240,6 +244,7 @@ function OrganizerInfo() {
                 Edit Profile
               </button>
             )}
+          </div>
           </div>
         </div>
       </div>
