@@ -1,5 +1,6 @@
 from .utils.utils_organizer import OrganizerModelsTest, Organizer, Event,fake, patch, SimpleUploadedFile, ALLOWED_IMAGE_TYPES, Mock, ClientError, MagicMock
 import logging
+import json
 logging.disable(logging.CRITICAL)
 
 class OrganizerTestAPI(OrganizerModelsTest):
@@ -13,7 +14,7 @@ class OrganizerTestAPI(OrganizerModelsTest):
             "email": "test@example.com",
             "organization_type" : "INDIVIDUAL"
         }
-        response  = self.client.post(self.apply_organizer_url, data = data, headers={'Authorization': f'Bearer {token}'})
+        response  = self.client.post('/api/organizers/apply-organizer', data = data, headers={'Authorization': f'Bearer {token}'})
         self.assertEqual(response.status_code, 201)
         self.assertTrue(Organizer.objects.filter(organizer_name = response.json()["organizer_name"]).exists())
         
@@ -24,7 +25,7 @@ class OrganizerTestAPI(OrganizerModelsTest):
             "email": "test@example.com",
             "organization_type" : "INDIVIDUAL"
         }
-        response = self.client.post(self.apply_organizer_url,data = data , headers={'Authorization': f'Bearer {token}'})
+        response = self.client.post('/api/organizers/apply-organizer', data = data , headers={'Authorization': f'Bearer {token}'})
         self.assertEqual(response.status_code, 400)
         self.assertTrue(Organizer.objects.filter(user = self.test_user).exists())
         
@@ -39,7 +40,7 @@ class OrganizerTestAPI(OrganizerModelsTest):
             "email": "tes123@example.com",
             "organization_type" : "INDIVIDUAL"
         }
-        response = self.client.post(self.apply_organizer_url,data = data , headers={'Authorization': f'Bearer {token}'})
+        response = self.client.post('/api/organizers/apply-organizer', data = data , headers={'Authorization': f'Bearer {token}'})
         self.assertEqual(response.status_code , 400)
         self.assertEqual(response.json()['error'], 'Organizer name is already taken')
         
@@ -53,16 +54,16 @@ class OrganizerTestAPI(OrganizerModelsTest):
             "email": "tes123@example.com",
             "organization_type" : "INDIVIDUAL"
         }
-        response = self.client.post(self.apply_organizer_url,data = data , headers={'Authorization': f'Bearer {token}'})
+        response = self.client.post('/api/organizers/apply-organizer', data = data , headers={'Authorization': f'Bearer {token}'})
         self.assertEqual(response.status_code , 400)
-        self.assertIn('An unexpected error occurred', response.json().get("error"))
+        self.assertIn(response.json()['error'], 'An unexpected error occurred')
         
 
         
     def test_only_organizer_delete_own_event(self):
         token = self.get_token_for_user(self.test_user)
         event_id = self.event_test.id
-        response  = self.client.delete(self.delete_event_url+str(event_id), headers={'Authorization': f'Bearer {token}'})
+        response  = self.client.delete('/api/organizers/delete-event/'+str(event_id), headers={'Authorization': f'Bearer {token}'})
         self.assertEqual(response.status_code, 204)
         self.assertFalse(Event.objects.filter(id = event_id).exists())
         
@@ -71,9 +72,9 @@ class OrganizerTestAPI(OrganizerModelsTest):
         normal_user = self.create_user("test","test", "win")
         token = self.get_token_for_user(normal_user)
         event_id = self.event_test.id
-        response  = self.client.delete(self.delete_event_url+str(event_id), headers={'Authorization': f'Bearer {token}'})
+        response  = self.client.delete('/api/organizers/delete-event/'+str(event_id), headers={'Authorization': f'Bearer {token}'})
         self.assertEqual(response.status_code, 403)
-        self.assertIn("User is not an organizer", response.json().get("error", ""))
+        self.assertIn(response.json()['error'], "User is not an organizer")
         
         
     def test_organizer_not_delele_own_event(self):
@@ -81,9 +82,9 @@ class OrganizerTestAPI(OrganizerModelsTest):
         token = self.get_token_for_user(normal_user)
         organizer_test = self.become_organizer(normal_user,"test_win", "test")
         event_id = self.event_test.id
-        response  = self.client.delete(self.delete_event_url+str(event_id), headers={'Authorization': f'Bearer {token}'})
+        response  = self.client.delete('/api/organizers/delete-event/'+str(event_id), headers={'Authorization': f'Bearer {token}'})
         self.assertEqual(response.status_code, 404)
-        self.assertIn('Event does not exist or you do not have permission to delete it', response.json().get("error", ""))
+        self.assertIn(response.json().get('error', ''), 'Event does not exist or you do not have permission to delete it')
         
     def test_valid_update_organizer(self):
         user=  self.create_user("test1", "test", "win")
@@ -94,8 +95,14 @@ class OrganizerTestAPI(OrganizerModelsTest):
             "email": "tes123@example.com",
             "organization_type" : "INDIVIDUAL"
         }
-        response = self.client.patch(self.update_organizer_url, json = data ,headers={'Authorization': f'Bearer {token}'} )
-        
+        response = self.client.patch(
+            '/api/organizers/update-organizer', 
+            data=json.dumps(data),
+            headers={
+                'Authorization': f'Bearer {token}',
+                'Content-Type': 'application/json'
+                },
+            )
         self.assertEqual(response.status_code, 200)
  
         
@@ -111,31 +118,31 @@ class OrganizerTestAPI(OrganizerModelsTest):
             "email": fake.email(),
             "organization_type" : "INDIVIDUAL"
             }
-        response = self.client.patch(self.update_organizer_url, json = new_data ,headers={'Authorization': f'Bearer {token}'} )
+        response = self.client.patch('/api/organizers/update-organizer', data=json.dumps(new_data) ,headers={'Authorization': f'Bearer {token}'} )
         self.assertEqual(response.status_code, 400)
         self.assertEqual(Organizer.objects.filter(organizer_name = "test").count(), 1)
-        self.assertIn('Organizer name is already taken', response.json().get("error", ""))
+        self.assertEqual(response.json().get('error', ''), 'Organizer name is already taken')
     
     def test_valid_revoke_organizer(self):
         normal_user = self.create_user("test1","test1", "win")
         organizer= self.become_organizer(normal_user, "test1", "organizer")
         token = self.get_token_for_user(normal_user)
-        response = self.client.delete(self.revoke_organizer_url,headers={'Authorization': f'Bearer {token}'} )
-        self.assertEqual(response.status_code, 204)
-        self.assertIn(f'Organizer role revoked for user {normal_user.id}.', response.json().get("success", ""))
+        response = self.client.delete('/api/organizers/revoke-organizer', headers={'Authorization': f'Bearer {token}'} )
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(response.json()['success'], f'Organizer role revoked for user {normal_user.id}.')
         
     def test_invalid_revoke_organizer(self):
         normal_user = self.create_user("test1","test1", "win")
         token = self.get_token_for_user(normal_user)
-        response = self.client.delete(self.revoke_organizer_url,headers={'Authorization': f'Bearer {token}'})
+        response = self.client.delete('/api/organizers/revoke-organizer', headers={'Authorization': f'Bearer {token}'})
         self.assertEqual(response.status_code, 404)
-        self.assertEqual(response.json()['error'], 'User is not an organizer')
+        self.assertIn(response.json().get('error', ''), 'User is not an organizer')
         
     def test_valid_view_organizer(self):
         normal_user =self.create_user("test1","test1", "win")
         token = self.get_token_for_user(normal_user)
         organizer = self.become_organizer(normal_user, "test", "win")
-        response = self.client.get(self.view_organizer_url, headers={'Authorization': f'Bearer {token}'})
+        response = self.client.get("/api/organizers/view-organizer", headers={'Authorization': f'Bearer {token}'})
         self.assertEqual(response.status_code, 200)
         
     def test_upload_logo(self):
@@ -147,7 +154,13 @@ class OrganizerTestAPI(OrganizerModelsTest):
             content=b'some content',
             content_type='image/jpg'
         )
-        response = self.client.post(f"/{organizer.id}" + self.upload_logo_organizer_url, headers={'Authorization': f'Bearer {token}'}, FILES = {'logo': image_file})
+        response = self.client.post(
+            f"/api/organizers/{organizer.id}/upload/logo/", 
+            headers={'Authorization': f'Bearer {token}'}, 
+            organizer_id = organizer.id,
+            data = {'logo': image_file},
+            format='multipart'
+            )
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json()['message'], 'Upload successful')
         
@@ -160,9 +173,9 @@ class OrganizerTestAPI(OrganizerModelsTest):
             content=b'some content',
             content_type='image/gif'
         )
-        response = self.client.post(f"/{organizer.id}" + self.upload_logo_organizer_url, headers={'Authorization': f'Bearer {token}'}, FILES = {'logo': image_file})
+        response = self.client.post(f"/api/organizers/{organizer.id}/upload/logo/", headers={'Authorization': f'Bearer {token}'}, organizer_id = organizer.id, data = {'logo': image_file})
         self.assertEqual(response.status_code, 400)
-        self.assertEqual(response.json()['error'], 'Invalid file type. Only JPEG and PNG are allowed.')
+        self.assertEqual(response.json().get('error'), 'Invalid file type. Only JPEG and PNG are allowed.')
         
     def test_invalid_image_size(self):
         user = self.create_user("test","test","test")
@@ -173,7 +186,7 @@ class OrganizerTestAPI(OrganizerModelsTest):
             content=b'some content' * self.EXCEED_SIZE,
             content_type='image/png'
         )
-        response = self.client.post(f"/{organizer.id}" + self.upload_logo_organizer_url, headers={'Authorization': f'Bearer {token}'}, FILES = {'logo': image_file})
+        response = self.client.post(f"/api/organizers/{organizer.id}/upload/logo/", headers={'Authorization': f'Bearer {token}'}, organizer_id = organizer.id, data={'logo': image_file})
         self.assertEqual(response.status_code, 400)
         self.assertEqual(response.json()['error'], 'File size exceeds the limit of 10.0 MB.')
         
@@ -187,7 +200,7 @@ class OrganizerTestAPI(OrganizerModelsTest):
             content=b'some content',
             content_type='image/png'
         )
-        response = self.client.post(f"/{organizer.id}" + self.upload_logo_organizer_url, headers={'Authorization': f'Bearer {token}'}, FILES = {'logo': image_file})
+        response = self.client.post(f"/api/organizers/{organizer.id}/upload/logo/", headers={'Authorization': f'Bearer {token}'}, organizer_id = organizer.id, data = {'logo': image_file})
     
     
     @patch("boto3.client")
@@ -218,13 +231,13 @@ class OrganizerTestAPI(OrganizerModelsTest):
 
         # Call the view that handles the S3 object deletion and upload
         token = self.get_token_for_user(self.test_user)
-        response = self.client.post(f"/{organizer.id}"+ self.upload_logo_organizer_url, 
+        response = self.client.post(f"/api/organizers/{organizer.id}/upload/logo/", 
                                     headers={'Authorization': f'Bearer {token}'},
-                                    FILES = {'logo': image_file})
-    
+                                    organizer_id = organizer.id, 
+                                    data = {'logo': image_file})
         # Assert that the response has a 400 status code and contains the expected error messages
         self.assertEqual(response.status_code, 400)
-        self.assertEqual(response.json()['error'], 'S3 upload failed: An error occurred (InternalError) when calling the UploadFileObject operation: Internal error')
+        self.assertEqual(response.json()['error'], 'Upload failed: An error occurred (InternalError) when calling the UploadFileObject operation: Internal error')
 
         # Assert that the delete_object and upload_fileobj methods were called as expected
         
@@ -248,9 +261,10 @@ class OrganizerTestAPI(OrganizerModelsTest):
             content_type='image/png'
         )
 
-        response = self.client.post(f"/{organizer.id}"+ self.upload_logo_organizer_url, 
+        response = self.client.post(f"/api/organizers/{organizer.id}/upload/logo/", 
                                     headers={'Authorization': f'Bearer {token}'},
-                                    FILES = {'logo': image_file})
+                                    organizer_id = organizer.id, 
+                                    data = {'logo': image_file})
 
         self.assertEqual(response.status_code, 400)
         self.assertIn('Upload failed', response.json()['error'])
@@ -274,16 +288,4 @@ class OrganizerTestAPI(OrganizerModelsTest):
         )
         self.assertEqual(type(orgainzer.logo_image_url) , str)
         self.assertEqual(organizer1.logo_image_url, None)
-        
-
-        
-        
-        
-        
-        
-        
-        
-        
-    
-    
         

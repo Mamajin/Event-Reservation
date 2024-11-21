@@ -200,7 +200,7 @@ export function EventHeader({ event }) {
               <div className="flex items-center gap-2">
                 <FaUsers className="h-5 w-5" />
                 <span className="text-lg">
-                  {event.max_attendee === 0 ? "No attendees limit" : `${event.max_attendee} attendees max`}
+                  {event.max_attendee === null ? "No attendees limit" : `${event.max_attendee} attendees max`}
                 </span>
 
               </div>

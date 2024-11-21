@@ -11,11 +11,11 @@ const BookmarkButton = ({ eventId }) => {
   useEffect(() => {
     const fetchInitialBookmarkState = async () => {
       try {
-        const response = await api.get(`/events/${eventId}/user-engagement`, {
+        const response = await api.get(`/events/${eventId}`, {
           headers: { Authorization: `Bearer ${localStorage.getItem(ACCESS_TOKEN)}` },
         });
 
-        const isBookmarked = response.data?.is_bookmarked ?? false;
+        const isBookmarked = response.data?.user_engaged?.is_bookmarked ?? false;
         setBookmarked(isBookmarked);
       } catch (error) {
         console.error("Failed to fetch bookmark state:", error);

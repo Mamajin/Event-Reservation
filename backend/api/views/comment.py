@@ -1,14 +1,16 @@
-from  .schemas import CommentSchema, CommentResponseSchema, CommentReaction, ErrorResponseSchema
 from .modules import *
+from api.views.schemas.comment_schema import *
+from api.views.schemas.other_schema import ErrorResponseSchema
+from api.views.strategy.comment_strategy import CommentStrategy
 
 
-router = Router()
-
-
+@api_controller('/comments/', tags=['Comments'])
 class CommentAPI:
-    
-    @router.post('/write-comment/{event_id}', response={201: CommentResponseSchema, 400: ErrorResponseSchema, 404: ErrorResponseSchema}, auth=JWTAuth())
-    def create_comment(request: HttpRequest, event_id: int, comment: CommentSchema):
+    """
+    API for managing comments on events.
+    """
+    @route.post('/write-comment/{event_id}', response={201: dict}, auth=JWTAuth())
+    def create_comment(self, request: HttpRequest, event_id: int, data: CommentSchema):
         """
         Create a new comment for a specific event.
 
@@ -20,25 +22,11 @@ class CommentAPI:
         Returns:
             Response: Created comment details or error message.
         """
-        try:
-            user = request.user
-            event = get_object_or_404(Event, id=event_id)
-            parent_comment = Comment.objects.filter(id=comment.parent_id).first() if comment.parent_id else None
-            
-            logger.info(f"User {user.username} attempted to comment.")
-            comment = Comment.objects.create(
-                event=event, user=user, parent=parent_comment,
-                content=comment.content, status=Comment.Status.APPROVED
-            )
-            logger.info(f"Comment created for event {event_id} by {user.username}.")
-            return Response(CommentResponseSchema.from_orm(comment), status=200)
+        strategy : CommentStrategy = CommentStrategy.get_strategy('create_comment')
+        return strategy.execute(request, event_id, data)
         
-        except Http404:
-            logger.error(f"Event {event_id} doesn't exist.")
-            return Response({'error': f"Event {event_id} doesn't exist."}, status=404)
-        
-    @router.delete('/{comment_id}/delete/', response={204: None, 404: ErrorResponseSchema}, auth=JWTAuth())
-    def delete_comment(request: HttpRequest, comment_id: int):
+    @route.delete('/{comment_id}/delete/', response={200: dict, 404: ErrorResponseSchema}, auth=JWTAuth())
+    def delete_comment(self, request: HttpRequest, comment_id: int):
         """
         Delete a comment by ID if user is authorized.
 
@@ -49,24 +37,11 @@ class CommentAPI:
         Returns:
             Response: Success message or error if unauthorized/not found.
         """
-        try:
-            comment = get_object_or_404(Comment, id=comment_id)
-            if comment.user != request.user:
-                logger.warning(f"Unauthorized delete attempt by '{request.user.username}' on comment {comment_id}.")
-                return Response({
-                    'error': 'You are not authorized to delete this comment'
-                }, status=403)
-                
-            comment.delete()
-            logger.info(f"Comment {comment_id} deleted by user {request.user.username}")
-            return Response({'message': 'Delete comment successfully.'}, status=204)
-        
-        except Http404:
-            logger.error(f"Comment {comment_id} not found for deletion.")
-            return Response({'error': 'Comment not found'}, status=404)
+        strategy : CommentStrategy = CommentStrategy.get_strategy('delete_comment')
+        return strategy.execute(request, comment_id)
             
-    @router.put('/{comment_id}/edit/', response={200: CommentResponseSchema, 404: ErrorResponseSchema}, auth=JWTAuth())
-    def edit_comment(request: HttpRequest, comment_id: int, data: CommentSchema):
+    @route.put('/{comment_id}/edit/', response={200: dict, 404: ErrorResponseSchema}, auth=JWTAuth())
+    def edit_comment(self, request: HttpRequest, comment_id: int, data: CommentSchema):
         """
         Edit a comment's content if user is authorized.
 
@@ -78,21 +53,5 @@ class CommentAPI:
         Returns:
             Response: Updated comment details or error if unauthorized/not found.
         """
-        try:
-            comment = get_object_or_404(Comment, id=comment_id)
-
-            if comment.user != request.user:
-                logger.warning(f"Unauthorized edit attempt by '{request.user.username}' on comment {comment_id}.")
-                return Response({'error': 'Unauthorized to edit this comment'}, status=403)
-
-            comment.content = data.content
-            comment.save(update_fields=['content'])
-
-            logger.info(f"Comment {comment_id} edited by user {request.user.username}")
-            return Response(CommentResponseSchema.from_orm(comment), status=200)
-
-        except Http404:
-            logger.error(f"Comment {comment_id} not found for edit.")
-            return Response({'error': 'Comment not found'}, status=404)
-
-            
+        strategy : CommentStrategy = CommentStrategy.get_strategy('update_comment')
+        return strategy.execute(request, comment_id, data)

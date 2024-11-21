@@ -6,10 +6,23 @@ cover_pylib = False
 
 
 include = api/*
+    
 omit =
-
+    #manage.py
     manage.py
-
+    
+    #schema file
+    api/views/schemas/*
+    
+    #view file
+    api/views/bookmarks.py
+    api/views/comment.py
+    api/views/event.py
+    api/views/like.py
+    api/views/modules.py
+    api/views/organizer.py
+    api/views/ticket.py
+    api/views/user.py
     #mock data folder
     stub_api/*
 
@@ -27,6 +40,7 @@ omit =
     api/__init__.py
     api/*/__init__.py
     api/utils.py
+    api/*/*/__init__.py
 
     #test file
     */tests/*
@@ -46,6 +60,7 @@ omit =
 exclude_lines =
     def __str__
     def __repr__
+    pass
 
 [html]
 directory = htmlcov

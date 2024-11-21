@@ -17,6 +17,7 @@ export default function Discover() {
   const [selectedStatus, setSelectedStatus] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('');
   const [showAllTags, setShowAllTags] = useState(false);
+  const [sortBy, setSortBy] = useState('');
   const MAX_VISIBLE_TAGS = 6;
 
   useEffect(() => {
@@ -58,15 +59,36 @@ export default function Discover() {
     : uniqueTags.slice(0, MAX_VISIBLE_TAGS);
   const hasMoreTags = uniqueTags.length > MAX_VISIBLE_TAGS;
 
-  const filteredEvents = events.filter((event) => {
-    const matchesTags = selectedTags.length === 0 || 
-      selectedTags.some(tag => event.tags.split(',').includes(tag));
-    const matchesSearch = event.event_name.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesDate = !selectedDate || 
-      new Date(event.start_date_event).toDateString() === selectedDate.toDateString();
+  const filteredEvents = events
+  .filter((event) => {
+    const matchesTags =
+      selectedTags.length === 0 ||
+      selectedTags.some((tag) => event.tags.split(",").includes(tag));
+    const matchesSearch = event.event_name
+      .toLowerCase()
+      .includes(searchTerm.toLowerCase());
+    const matchesDate =
+      !selectedDate ||
+      new Date(event.start_date_event).toDateString() ===
+        selectedDate.toDateString();
     const matchesStatus = !selectedStatus || event.status === selectedStatus;
-    const matchesCaregories  = !selectedCategory || event.category === selectedCategory;
-    return matchesTags && matchesSearch && matchesDate && matchesStatus && matchesCaregories;
+    const matchesCategory = !selectedCategory || event.category === selectedCategory;
+    return (
+      matchesTags &&
+      matchesSearch &&
+      matchesDate &&
+      matchesStatus &&
+      matchesCategory
+    );
+  })
+  .sort((a, b) => {
+    if (sortBy === 'POPULARITY') {
+      return b.engagement.total_like - a.engagement.total_like ; // Sort descending by likes
+    }
+    if (sortBy === 'DATE') {
+      return new Date(b.start_date_event) - new Date(a.start_date_event); // Sort descending by date
+    }
+    return 0; // Default: no sorting
   });
 
   return (
@@ -122,7 +144,7 @@ export default function Discover() {
                     className="btn btn-sm bg-dark-purple text-white hover:bg-gray-100 hover:text-black px-4 py-2 rounded-md transition-colors duration-300 flex items-center gap-2"
                   >
                     <MdOutlineCategory className="h-4 w-4"/>
-                    <span className="hidden sm:block">Category</span>
+                    <span className="hidden inline-block sm:inline-block">Category</span>
                   </label>
                   <ul
                     tabIndex={0}
@@ -156,17 +178,17 @@ export default function Discover() {
                     tabIndex={0}
                     className="dropdown-content menu p-1 shadow bg-white rounded-box w-40 text-sm"
                   >
-                    {['POPULAR', 'RECENT'].map((status) => (
-                      <li key={status}>
+                    {['POPULARITY', 'DATE'].map((sortOption) => (
+                      <li key={sortOption}>
                         <button
-                          onClick={() => setSelectedStatus(selectedStatus === status ? null : status)}
+                          onClick={() => setSortBy(sortOption)}
                           className={`flex items-center gap-2 px-2 py-1 rounded-md ${
-                            selectedStatus === status
+                            sortBy === sortOption
                               ? 'bg-indigo-600 text-white'
                               : 'hover:bg-gray-200 text-gray-700'
                           }`}
                         >
-                          {status.charAt(0) + status.slice(1).toLowerCase()}
+                          {sortOption.charAt(0) + sortOption.slice(1).toLowerCase()}
                         </button>
                       </li>
                     ))}

@@ -30,6 +30,10 @@ import Advertisement from './pages/footerpage/Advertisement';
 import Branding from './pages/footerpage/Branding';
 import Design from './pages/footerpage/Design';
 import Marketing from './pages/footerpage/Marketing';
+import VirtualTicket from './pages/VirtualTicket';
+import MyTickets from './pages/MyTickets';
+import TicketDetail from './pages/TicketDetail';
+
 function App() {
   useEffect(() => {
     const token = getAccessToken();
@@ -76,6 +80,9 @@ function App() {
           <Route path="/create-event" element={<ProtectedRoute><CreateEvent /></ProtectedRoute>} />
           <Route path="/my-events" element={<ProtectedRoute><MyEvents /></ProtectedRoute>} />
           <Route path="/bookmarks" element={<ProtectedRoute><Bookmark /></ProtectedRoute>} />
+          <Route path="/my-tickets" element={<ProtectedRoute><MyTickets /></ProtectedRoute>} />
+          <Route path="/virtual-ticket/:ticketId" element={<ProtectedRoute><VirtualTicket /></ProtectedRoute>} />
+          <Route path="/ticket/:ticketId" element={<ProtectedRoute><TicketDetail /></ProtectedRoute>} />
           <Route path="/events/:eventId/edit" element={<ProtectedRoute><EditEvent /></ProtectedRoute>} />
 
           {/* Fallback Route */}

@@ -166,7 +166,7 @@ export function EventInfo({ event }) {
             <div className="space-y-4 mb-6">
               <p className="flex items-center gap-2 text-gray-600">
                 <LuUsers className="w-5 h-5 text-dark-purple" />
-                {event.max_attendee === 0 ? "No attendees limit" : `Limited to ${event.max_attendee} attendees attendees max`}
+                {event.max_attendee === null ? "No attendees limit" : `Limited to ${event.max_attendee} attendees attendees max`}
               </p>
               <p className="flex items-center gap-2 text-gray-600">
                 <LuCalendarDays className="w-5 h-5 text-dark-purple" />
