@@ -172,15 +172,15 @@ function OrganizerInfo() {
           </div>
 
           <div className="space-y-6">
-            <div className="grid grid-cols-2 gap-4">
-              <label className="block text-sm font-medium text-gray-700">ID</label>
+            <div className="grid grid-cols-3 gap-4">
+              <label className="block text-l font-medium text-gray-700">ID</label>
               <p className="mt-0 text-gray-900">{organizerData.id.toLocaleString() || 'N/A'}</p>
             </div>
 
             {/* Organizer Fields */}
             {['organizer_name', 'email'].map((field) => (
-              <div key={field} className="grid grid-cols-2 gap-4">
-                <label className="block text-sm font-medium text-gray-700 capitalize">{field.replace('_', ' ')}</label>
+              <div key={field} className="grid grid-cols-3 gap-4">
+                <label className="block text-l font-medium text-gray-700 capitalize">{field.replace('_', ' ')}</label>
                 {isEditing ? (
                   <input
                     type="text"
@@ -198,8 +198,8 @@ function OrganizerInfo() {
             {nameError && <p className="text-red-500">{nameError}</p>}
 
             {/* Organization Type Dropdown */}
-            <div className="grid grid-cols-2 gap-4">
-              <label className="block text-sm font-medium text-gray-700">Organization Type</label>
+            <div className="grid grid-cols-3 gap-4">
+              <label className="block text-l font-medium text-gray-700">Organization Type</label>
               {isEditing ? (
                 <select
                   value={organizerData.organization_type || ''}

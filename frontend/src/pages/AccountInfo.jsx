@@ -198,19 +198,19 @@ function AccountInfo() {
           </div>
 
           <div className="space-y-6">
-            <div className="grid grid-cols-2 gap-4">
+            {/* <div className="grid grid-cols-2 gap-4">
               <label className="block text-sm font-medium text-gray-700">ID</label>
               <p className="mt-0 text-gray-900">{userData.id.toLocaleString() || 'N/A'}</p>
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <label className="block text-sm font-medium text-gray-700">Status</label>
+            </div> */}
+            <div className="grid grid-cols-3 gap-4">
+              <label className="block text-l font-medium text-gray-700">Status</label>
               <p className="mt-0 text-gray-900">{userData.status.toLocaleString() || 'N/A'}</p>
             </div>
 
             {/* User Fields */}
             {['username', 'first_name', 'last_name', 'email', 'phone_number'].map((field) => (
-              <div key={field} className="grid grid-cols-2 gap-4">
-                <label className="block text-sm font-medium text-gray-700 capitalize">{field.replace('_', ' ')}</label>
+              <div key={field} className="grid grid-cols-3 gap-4">
+                <label className="block text-l font-medium text-gray-700 capitalize">{field.replace('_', ' ')}</label>
                 {isEditing ? (
                   <input
                     type="text"
@@ -225,8 +225,8 @@ function AccountInfo() {
             ))}
 
             {/*User Birthdate Field*/}
-              <div className="grid grid-cols-2 gap-4">
-                <label className="block text-sm font-medium text-gray-700">Birth Date</label>
+              <div className="grid grid-cols-3 gap-4">
+                <label className="block text-l font-medium text-gray-700">Birth Date</label>
                 {isEditing ? (
                   <DateInput
                     name="birth_date"
@@ -242,8 +242,8 @@ function AccountInfo() {
                 )}
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
-              <label className="block text-sm font-medium text-gray-700">Address</label>
+              <div className="grid grid-cols-3 gap-4">
+              <label className="block text-l font-medium text-gray-700">Address</label>
               {isEditing ? (
                 <input
                   id="address-input"
@@ -266,8 +266,8 @@ function AccountInfo() {
 
             {/* User Fields */}
             {['nationality', 'facebook_profile', 'instagram_handle'].map((field) => (
-              <div key={field} className="grid grid-cols-2 gap-4">
-                <label className="block text-sm font-medium text-gray-700 capitalize">{field.replace('_', ' ')}</label>
+              <div key={field} className="grid grid-cols-3 gap-4">
+                <label className="block text-l font-medium text-gray-700 capitalize">{field.replace('_', ' ')}</label>
                 {isEditing ? (
                   <input
                     type="text"
@@ -281,17 +281,17 @@ function AccountInfo() {
               </div>
             ))}
 
-            <div className="grid grid-cols-2 gap-4">
-              <label className="block text-sm font-medium text-gray-700">Attended Events</label>
+            <div className="grid grid-cols-3 gap-4">
+              <label className="block text-l font-medium text-gray-700">Attended Events</label>
               <p className="mt-0 text-gray-900">{userData.attended_events_count.toLocaleString() || 'N/A'}</p>
             </div>
-            <div className="grid grid-cols-2 gap-4">
-              <label className="block text-sm font-medium text-gray-700">Cancelled Events</label>
+            <div className="grid grid-cols-3 gap-4">
+              <label className="block text-l font-medium text-gray-700">Cancelled Events</label>
               <p className="mt-0 text-gray-900">{userData.cancelled_events_count.toLocaleString() || 'N/A'}</p>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
-            <label className="block text-sm font-medium text-gray-700">Account Created</label>
+            <div className="grid grid-cols-3 gap-4">
+            <label className="block text-l font-medium text-gray-700">Account Created</label>
             <p className="mt-0 text-gray-900">
               {userData.created_at ? 
                 new Date(userData.created_at).toLocaleDateString("en-US", { year: 'numeric', month: 'long', day: 'numeric' }) + 
@@ -301,8 +301,8 @@ function AccountInfo() {
             </p>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <label className="block text-sm font-medium text-gray-700">Account Updated</label>
+          <div className="grid grid-cols-3 gap-4">
+            <label className="block text-l font-medium text-gray-700">Account Updated</label>
             <p className="mt-0 text-gray-900">
               {userData.updated_at ? 
                 new Date(userData.updated_at).toLocaleDateString("en-US", { year: 'numeric', month: 'long', day: 'numeric' }) + 
