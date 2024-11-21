@@ -1,18 +1,24 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { GoogleOAuthProvider } from '@react-oauth/google';
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import Login from './pages/Login';
-import Register from './pages/Register';
-import Home from './pages/Home';
-import NotFound from './pages/NotFound';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { scheduleTokenRefresh, getAccessToken } from './utils/tokenManager';
 import ProtectedRoute from './components/ProtectedRoute';
 import Navbar from './components/Navbar';
-import CreateEvent from './pages/CreateEvent';
+import Login from './pages/LoginPage';
+import Register from './pages/RegisterPage';
+import Home from './pages/HomePage';
+import NotFound from './pages/NotFound';
+import CreateEvent from './pages/CreateEventPage';
 import AccountInfo from './pages/AccountInfo';
 import AppliedEvents from './pages/AppliedEvents';
-import ApplyOrganizer from './pages/ApplyOrganizer';
-import EventDetailPage from './pages/EventDetailPage';
-import Discover from './pages/Discover';
+import ApplyOrganizer from './pages/ApplyOrganizerPage';
+import EventDetail from './pages/EventDetailPage';
+import Discover from './pages/DiscoverPage';
+import MyEvents from './pages/MyEvents';
+import OrganizerInfo from './pages/OrganizerInfo';
+import Bookmark from './pages/BookMark';
+import Logout from './pages/LogoutPage';
+import EditEvent from './pages/EditEventPage';
 import TermsOfUse from './pages/footerpage/TermsOfUse';
 import PrivacyInfo from './pages/footerpage/PrivacyInfo';
 import BiscuitInfo from './pages/footerpage/BiscuitInfo';
@@ -24,13 +30,18 @@ import Advertisement from './pages/footerpage/Advertisement';
 import Branding from './pages/footerpage/Branding';
 import Design from './pages/footerpage/Design';
 import Marketing from './pages/footerpage/Marketing';
-import MyEvents from './pages/MyEvents';
-import OrganizerInfo from './pages/OrganizerInfo';
-import Bookmark from './pages/BookMark';
-import Logout from './pages/Logout';
-import EditEventPage from './pages/EditEvent';
+import VirtualTicket from './pages/VirtualTicket';
+import MyTickets from './pages/MyTickets';
+import TicketDetail from './pages/TicketDetail';
 
 function App() {
+  useEffect(() => {
+    const token = getAccessToken();
+    
+    if (token) {
+      scheduleTokenRefresh();
+    }
+  }, []);
 
   return (
     <GoogleOAuthProvider clientId="987028649849-8uhmhr5qrkg494ren8um9prtdsavd6uv.apps.googleusercontent.com">
@@ -44,7 +55,7 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/become-organizer" element={<ApplyOrganizer />} />
-          <Route path="/events/:eventId" element={<EventDetailPage />} />
+          <Route path="/events/:eventId" element={<EventDetail />} />
           <Route path="/logout" element={<Logout />} />
 
           {/* Footer Page */}
@@ -69,7 +80,10 @@ function App() {
           <Route path="/create-event" element={<ProtectedRoute><CreateEvent /></ProtectedRoute>} />
           <Route path="/my-events" element={<ProtectedRoute><MyEvents /></ProtectedRoute>} />
           <Route path="/bookmarks" element={<ProtectedRoute><Bookmark /></ProtectedRoute>} />
-          <Route path="/events/:eventId/edit" element={<ProtectedRoute><EditEventPage /></ProtectedRoute>} />
+          <Route path="/my-tickets" element={<ProtectedRoute><MyTickets /></ProtectedRoute>} />
+          <Route path="/virtual-ticket/:ticketId" element={<ProtectedRoute><VirtualTicket /></ProtectedRoute>} />
+          <Route path="/ticket/:ticketId" element={<ProtectedRoute><TicketDetail /></ProtectedRoute>} />
+          <Route path="/events/:eventId/edit" element={<ProtectedRoute><EditEvent /></ProtectedRoute>} />
 
           {/* Fallback Route */}
           <Route path="*" element={<NotFound />} />

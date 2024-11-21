@@ -4,7 +4,7 @@ from api.models import AttendeeUser, Organizer, Event, Ticket, Bookmarks, Like
 from unittest.mock import patch
 from datetime import datetime
 from ninja.testing import TestClient
-from api.urls import like_router
+from api.urls import api
 from ninja_jwt.tokens import RefreshToken
 from faker import Faker
 from django.contrib.auth import get_user_model
@@ -15,10 +15,10 @@ fake = Faker()
 class LikeModelsTest(TestCase):
 
     def setUp(self):
+        client = TestClient(api)
         """
         Set up initial test data for models.
         """
-        self.client = TestClient(like_router)
         
         self.test_user = AttendeeUser.objects.create_user(
             username='attendeeuser3',

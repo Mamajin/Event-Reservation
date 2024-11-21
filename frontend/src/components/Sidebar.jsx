@@ -17,6 +17,7 @@ function Sidebar() {
         { title: "Discover", path: "/discover" },
         { title: "Applied Events", path: "/applied-events" },
         ...(isLoggedIn && isOrganizer ? [{ title: "My Events", path: "/my-events" }] : []),  // Only show if the user is an organizer
+        { title: "My Tickets", path: "/my-tickets" },
         { title: "Bookmarks", path: "/bookmarks" },
         { title: "Become Organizer", path: "/become-organizer" },
         
@@ -28,7 +29,11 @@ function Sidebar() {
 
     return (
         <div className="flex">
-            <div className={`bg-dark-purple h-screen p-5 pt-20 fixed ${open ? "w-72" : "w-20"} duration-300`}>
+            <div 
+                className={`bg-dark-purple h-screen p-5 pt-20 fixed ${open ? "w-72" : "w-20"} duration-500 transition-all`} 
+                onMouseEnter={() => setOpen(true)}
+                onMouseLeave={() => setOpen(false)}
+            >
                 <ArrowLeftCircleIcon 
                     className={`bg-white text-dark-purple w-9 h-9 rounded-full absolute -right-5 top-40 border-dark-purple cursor-pointer ${!open && "rotate-180"}`} 
                     onClick={() => setOpen(!open)} 
@@ -42,16 +47,27 @@ function Sidebar() {
                     <MagnifyingGlassIcon className={`text-white text-lg w-5 h-5 cursor-pointer ${open && "mr-2"}`} />
                 </div>
                 <ul className="pt-6">
-                    {Menus.map((menu, index) => (
-                        <li key={index} className="text-white text-md flex items-center gap-x-4 cursor-pointer p-6">
-                            <Link to={menu.path} className="flex items-center w-full">
-                                <span className={`text-base font-medium flex-1 ${!open && "hidden"}`}>{menu.title}</span>
-                            </Link>
-                        </li>
-                    ))}
-                </ul>
+  {Menus.map((menu, index) => (
+    <li
+      key={index}
+      className="text-white text-md flex items-center gap-x-4 cursor-pointer p-6"
+    >
+      <Link to={menu.path} className="flex items-center w-full">
+        <span
+          className={`text-base font-medium flex-1 ${
+            !open
+              ? "opacity-0 translate-x-4"
+              : "opacity-100 translate-x-0 transition-all duration-1000 ease-out"
+          }`}
+        >
+          {menu.title}
+        </span>
+      </Link>
+    </li>
+  ))}
+</ul>
             </div>
-            <div className={`p-7 pr-0 transition-all duration-300 w-full ${open ? "ml-72" : "ml-20"}`}>
+            <div className={`p-7 pr-0 transition-all duration-500 w-full ${open ? "ml-72" : "ml-20"}`}>
             </div>
         </div>
     );

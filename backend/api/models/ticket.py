@@ -3,7 +3,7 @@ from django.db import models
 from django.utils import timezone
 import random
 import string
-from django.core.exceptions import ValidationError
+from django.core.exceptions import ValidationError, PermissionDenied
 from api.models.organizer import Organizer
 from api.models.event import Event
 from api.models.user import AttendeeUser

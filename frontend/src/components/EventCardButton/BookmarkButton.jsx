@@ -3,27 +3,18 @@ import { FaBookmark, FaRegBookmark } from 'react-icons/fa';
 import api from '../../api';
 import { ACCESS_TOKEN } from '../../constants';
 
-const BookmarkButton = ({ eventId }) => {
+const BookmarkButton = ({ eventId, eventInfo }) => {
   const [bookmarked, setBookmarked] = useState(false);
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState(null);
 
   useEffect(() => {
-    const fetchInitialBookmarkState = async () => {
-      try {
-        const response = await api.get(`/events/${eventId}/user-engagement`, {
-          headers: { Authorization: `Bearer ${localStorage.getItem(ACCESS_TOKEN)}` },
-        });
-
-        const isBookmarked = response.data?.is_bookmarked ?? false;
-        setBookmarked(isBookmarked);
-      } catch (error) {
-        console.error("Failed to fetch bookmark state:", error);
-      }
-    };
-
-    fetchInitialBookmarkState();
-  }, [eventId]);
+    if (eventInfo) {
+      const isBookmarked = eventInfo.user_engaged?.is_bookmarked ?? false;
+      setBookmarked(isBookmarked);
+    }
+  }, [eventInfo]);
+  
 
   const handleToggleBookmark = async () => {
     setLoading(true);
