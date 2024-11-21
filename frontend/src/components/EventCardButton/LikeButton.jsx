@@ -3,27 +3,17 @@ import { FaHeart, FaRegHeart } from 'react-icons/fa';
 import api from '../../api';
 import { ACCESS_TOKEN } from '../../constants';
 
-const LikeButton = ({ eventId }) => {
+const LikeButton = ({ eventId, eventInfo }) => {
   const [liked, setLiked] = useState(false);
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState(null);
 
   useEffect(() => {
-    const fetchInitialLikeState = async () => {
-      try {
-        const response = await api.get(`/events/${eventId}`, {
-          headers: { Authorization: `Bearer ${localStorage.getItem(ACCESS_TOKEN)}` },
-        });
-  
-        const isLiked = response.data?.user_engaged?.is_liked ?? false;
-        setLiked(isLiked);
-      } catch (error) {
-        console.error("Failed to fetch like state:", error);
-      }
-    };
-    
-    fetchInitialLikeState();
-  }, [eventId]);
+    if (eventInfo) {
+      const isLiked = eventInfo.user_engaged?.is_liked ?? false;
+      setLiked(isLiked);
+    }
+  }, [eventInfo]);
 
   const handleToggleLike = async () => {
     setLoading(true);

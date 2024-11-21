@@ -66,8 +66,8 @@ function EventCard({ event, onEdit, isEditable}) {
 
         {/* Engagement and Share Buttons */}
         <div className="flex items-center mt-4 space-x-4">
-          <LikeButton eventId={event.id} isInitiallyLiked={hasUserLiked} />
-          <BookmarkButton eventId={event.id} />
+          <LikeButton eventId={event.id} eventInfo={event} isInitiallyLiked={hasUserLiked} />
+          <BookmarkButton eventId={event.id} eventInfo={event} />
           <ShareButton eventId={event.id} />
         </div>
 
