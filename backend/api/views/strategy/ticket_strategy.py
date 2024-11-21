@@ -46,30 +46,31 @@ class TicketGetUserTicket(TicketStrategy):
     Get a list of tickets for a specific user.
     """
     
-    def execute(self,id):
+    def execute(self, user_id: int) -> Response:
         """
         Execute the get user ticket strategy with the given user ID.
 
         Args:
-            id (int): The ID of the user for which to retrieve tickets.
+            user_id (int): The ID of the user for which to retrieve tickets.
 
         Returns:
-            List[TicketResponseSchema]: A list of TicketResponseSchema objects, each containing
-            detailed information about one of the user's tickets.
+            Response: A response containing a list of TicketResponseSchema objects,
+            each containing detailed information about one of the user's tickets.
 
         Raises:
             404: If the user with the given ID does not exist.
         """
         try:
-            user = AttendeeUser.objects.get(id= id)
-            tickets = Ticket.objects.filter(attendee=user, register_date__lte=timezone.now()).order_by("-register_date")
-            return [
-                TicketResponseSchema(
-                    **ticket.get_ticket_details()
-                ) for ticket in tickets
+            user = AttendeeUser.objects.get(id=user_id)
+            tickets = Ticket.objects.filter(
+                attendee=user, register_date__lte=timezone.now()
+            ).order_by("-register_date")
+            response_data = [
+                TicketResponseSchema(**ticket.get_ticket_details()) for ticket in tickets
             ]
+            return Response(response_data, status=200)
         except AttendeeUser.DoesNotExist:
-            logger.error(f"User with ID {id} does not exist.")
+            logger.error(f"User with ID {user_id} does not exist.")
             return Response({'error': 'User not found'}, status=404)
         
         
@@ -77,12 +78,12 @@ class TicketGetTicketDetail(TicketStrategy):
     """
     Get detailed information about a specific ticket.
     """
-    def execute(self,id):
+    def execute(self, ticket_id: int) -> Response:
         """
         Execute the get ticket detail strategy with the given ticket ID.
 
         Args:
-            id (int): The ID of the ticket for which to retrieve details.
+            ticket_id (int): The ID of the ticket for which to retrieve details.
 
         Returns:
             Response: A response containing the ticket details, or an error message if the
@@ -92,17 +93,15 @@ class TicketGetTicketDetail(TicketStrategy):
             404: If the ticket with the given ID does not exist.
             500: If an error occurs during the retrieval process.
         """
-
         try:
-            ticket = get_object_or_404(Ticket, id=id)
+            ticket = get_object_or_404(Ticket, id=ticket_id)
             return Response(TicketResponseSchema(
                 **ticket.get_ticket_details()), status=200)
-            
         except Http404:
-            logger.error(f"Ticket with ID {id} does not exist.")
+            logger.error("Ticket with ID %d does not exist.", ticket_id)
             return Response({'error': 'Ticket not found'}, status=404)
-        except Exception as e:
-            logger.error(f"Error fetching ticket details: {str(e)}")
+        except Exception as error:
+            logger.error("Error fetching ticket details: %s", str(error))
             return Response({'error': 'Internal server error'}, status=500)
         
         
@@ -139,13 +138,13 @@ class TicketRegisterStrategy(TicketStrategy):
         if user.age is None:
             raise ValidationError("Please set your birth date in account information.")
     
-    def execute(self, request, id):
+    def execute(self, request: HttpRequest, event_id: int) -> Response:
         """
         Execute the register for an event strategy with the given event ID.
 
         Args:
-            request (Request): The request object containing the user making the request.
-            id (int): The ID of the event for which to register.
+            request (HttpRequest): The request object containing the user making the request.
+            event_id (int): The ID of the event for which to register.
 
         Returns:
             Response: A response containing the registration details, or an error message if the
@@ -157,15 +156,15 @@ class TicketRegisterStrategy(TicketStrategy):
             500: If an error occurs during the registration process.
         """
         user = request.user
-        event = get_object_or_404(Event, id=id)
-        
-        try: 
+        event = get_object_or_404(Event, id=event_id)
+
+        try:
             self.validate_event_registration(event, user)
-        except ValidationError as e:
-            return Response({'error': e.messages[0]}, status=400)
-        except PermissionDenied as e:
-            return Response({'error': str(e)}, status=403)
-        
+        except ValidationError as validation_error:
+            return Response({'error': validation_error.messages[0]}, status=400)
+        except PermissionDenied as permission_error:
+            return Response({'error': str(permission_error)}, status=403)
+
         ticket = Ticket(
             event=event,
             attendee=user,
@@ -173,29 +172,32 @@ class TicketRegisterStrategy(TicketStrategy):
             status='ACTIVE',
             created_at=timezone.now(),
         )
-        
+
         if not ticket.is_valid_min_age_requirement():
-            return Response({
-                'error': f"You must be at least {event.min_age_requirement} years old to attend this event."
-            }, status = 400)
-            
+            return Response(
+                {'error': f"You must be at least {event.min_age_requirement} years old to attend this event."},
+                status=400
+            )
+
         if ticket.is_organizer_join_own_event(user):
-            return Response({
-                'error': "Organizer cannot register for their own event."
-        }, status = 400)    
+            return Response(
+                {'error': "Organizer cannot register for their own event."},
+                status=400
+            )
+
         try:
             ticket.clean()
             ticket.save()
-            
+
             notification_manager = TicketNotificationManager(ticket)
             notification_manager.send_registration_confirmation()
             return Response(TicketResponseSchema(
                 **ticket.get_ticket_details()).dict(), status=201)
-                
-        except ValidationError as e:
-            return Response({'error': str(e.messages[0])}, status=400)
-        except Exception as e:
-            logger.error(f"Error during ticket registration: {str(e)}")
+
+        except ValidationError as validation_error:
+            return Response({'error': str(validation_error.messages[0])}, status=400)
+        except Exception as error:
+            logger.error("Error during ticket registration: %s", str(error))
             return Response({'error': 'Internal server error'}, status=500)
 
 
@@ -203,7 +205,7 @@ class TicketDeleteStrategy(TicketStrategy):
     """
     Delete a ticket.
     """
-    def execute(self, request, ticket_id):
+    def execute(self, request: HttpRequest, ticket_id: int) -> Response:
         """
         Cancel a ticket for the requesting user and send a cancellation notification email.
 
@@ -226,21 +228,21 @@ class TicketDeleteStrategy(TicketStrategy):
                 notification_manager = TicketNotificationManager(ticket)
                 notification_manager.send_cancellation_notification()
             except Exception as email_error:
-                logger.error(f"Failed to send cancellation email: {str(email_error)}")
+                logger.error("Failed to send cancellation email: %s", email_error)
                 return Response({'error': 'Failed to send cancellation email'}, status=500)
-            
+
             ticket.delete()
             return Response({
                 "success": f"Ticket with ID {ticket_id} has been canceled."
             }, status=200)
-            
+
         except Ticket.DoesNotExist:
-            logger.error(f"Ticket with ID {ticket_id} does not exist or belongs to a different user.")
+            logger.error("Ticket with ID %d does not exist or belongs to a different user.", ticket_id)
             return Response({
                 "error": f"Ticket with ID {ticket_id} does not exist or you do not have permission to cancel it."
             }, status=404)
-        except Exception as e:
-            logger.error(f"Error during ticket cancellation: {str(e)}")
+        except Exception as error:
+            logger.error("Error during ticket cancellation: %s", error)
             return Response({'error': 'Internal server error'}, status=500)
         
         
