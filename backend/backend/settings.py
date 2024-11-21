@@ -169,7 +169,7 @@ else:
             'NAME': os.getenv('DATABASE_NAME', 'django_db'),
             'USER': os.getenv('DATABASE_USER', 'django_user'),
             'PASSWORD': os.getenv('DATABASE_PASSWORD', 'django_password'),
-            'HOST': "db",
+            'HOST': os.getenv('DATABASE_HOST', 'db'),
             'PORT': os.getenv('DB_PORT', '5432'),  # Default PostgreSQL port
     }
 }
