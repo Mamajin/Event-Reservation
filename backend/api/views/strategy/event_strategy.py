@@ -17,7 +17,7 @@ class EventStrategy(ABC):
         self.request = request
 
     @staticmethod
-    def get_strategy(strategy_name, request):
+    def get_strategy(strategy_name : str, request : HttpRequest):
         """
         Retrieve the event strategy instance based on the provided strategy name.
 
@@ -109,7 +109,7 @@ class EventStrategy(ABC):
                 ExtraArgs={'ContentType': image.content_type}
             )
     
-    def add_event(self,event_list: list,events):
+    def add_event(self, event_list: list, events : list):
         """
         Add event data to a list, including engagement information and user engagement status.
 
@@ -243,7 +243,7 @@ class EventDetailStrategy(EventStrategy):
     """
     Strategy for retrieving details of a specific event.
     """
-    def execute(self,event_id):
+    def execute(self, event_id: int) -> EventResponseSchema:
         """
         Retrieve detailed information for a specific event, including engagement data.
 
@@ -255,12 +255,12 @@ class EventDetailStrategy(EventStrategy):
             and updated event status.
         """
         self.autheticate_user()
-        logger.info(f"Fetching details for event ID: {event_id} by user {self.request.user.username}.")
+        logger.info("Fetching details for event ID: %d by user %s.", event_id, self.request.user.username)
         event = get_object_or_404(Event, id=event_id)
         engagement_data = EventResponseSchema.resolve_engagement(event)
         user_engaged = EventResponseSchema.resolve_user_engagement(event, self.user)
         EventResponseSchema.set_status_event(event)
-        
+
         event_data = EventResponseSchema.from_orm(event)
         event_data.engagement = engagement_data
         event_data.user_engaged = user_engaged
@@ -360,7 +360,7 @@ class EventUploadImageStrategy(EventStrategy):
             
 
     
-    def execute(self, event_id, file):
+    def execute(self, event_id: int, file: UploadedFile) -> Response:
         """
         Upload an image for a specific event.
 
@@ -373,45 +373,43 @@ class EventUploadImageStrategy(EventStrategy):
         """
         try:
             event = get_object_or_404(Event, id=event_id)
-
             organizer = Organizer.objects.get(user=self.user)
+
             try:
                 self.validate_image(event, organizer, file)
-            except ValidationError as e:
-                return Response({'error': str(e.messages[0])}, status=400)
-            
-            # Check if there's an existing image
+            except ValidationError as validation_error:
+                return Response({'error': str(validation_error.messages[0])}, status=400)
+
             if event.event_image:
                 old_filename = event.event_image.url
                 self.replace_old_image(old_filename)
 
             filename = f'event_images/{uuid.uuid4()}{os.path.splitext(file.name)[1]}'
-            logger.info(f"Starting upload for file: {filename}")
-            try:
-                # Direct S3 upload using boto3
-                self.upload_s3(file,filename)
+            logger.info("Starting upload for file: %s", filename)
 
+            try:
+                self.upload_s3(file, filename)
                 file_url = f"https://{settings.AWS_S3_CUSTOM_DOMAIN}/{filename}"
-                logger.info(f"Successfully uploaded file to S3: {file_url}")
+                logger.info("Successfully uploaded file to S3: %s", file_url)
 
                 event.event_image = filename
                 event.save()
-            
+
                 return Response(FileUploadResponseSchema(
                     file_url=file_url,
                     message="Upload successful",
                     file_name=os.path.basename(filename),
                     uploaded_at=timezone.now()
                 ), status=200)
-            
-            except ClientError as e:
-                logger.error(f"S3 upload error: {str(e)}")
-                return Response({'error': f"S3 upload failed: {str(e)}"}, status=400)
-            
+
+            except ClientError as client_error:
+                logger.error("S3 upload error: %s", str(client_error))
+                return Response({'error': f"S3 upload failed: {str(client_error)}"}, status=400)
+
         except Organizer.DoesNotExist:
             return Response({'error': 'User is not an organizer'}, status=404)
-        except Exception as e:
-            return Response({'error': f"Upload failed: {str(e)}"}, status=400)
+        except Exception as generic_error:
+            return Response({'error': f"Upload failed: {str(generic_error)}"}, status=400)
         
         
         
