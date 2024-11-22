@@ -149,11 +149,12 @@ function AccountInfo() {
       <div className="flex-1 p-6 bg-white rounded-lg shadow-lg w-full max-w-screen-lg mx-auto">
         <div className="max-w-3xl mx-auto">
           <h1 className="text-2xl font-bold mb-6 text-dark-purple">Account Details</h1>
-            <div className="relative">
-              <div className="absolute top-4 right-4 text-4xl font-bold text-light-purple">
-                EventEase
-              </div>
-
+          <div className="relative">
+            <div className="absolute top-4 right-4 text-4xl font-bold text-light-purple">
+              EventEase
+            </div>
+          </div>
+  
           {isOrganizer && (
             <div className="mt-6">
               <button
@@ -164,148 +165,175 @@ function AccountInfo() {
               </button>
             </div>
           )}
-
+  
           <p className="mt-6 text-gray-600 mb-6">View or edit your user login details.</p>
-
-          <div className="flex items-center mb-6">
-            <div className="w-24 h-24 rounded-full overflow-hidden flex justify-center items-center bg-gray-200">
-              {previewImage ? (
-                <img src={previewImage} alt="Profile" className="w-full h-full object-cover" />
-              ) : (
-                <div className="w-24 h-24 bg-white rounded-full"></div>
-              )}
-            </div>
-            {isEditing && (
-              <input
-                type="file"
-                accept="image/*"
-                onChange={handleImageChange}
-                className="ml-4"
-              />
-            )}
-          </div>
-
-          <div className="space-y-6">
-            <div className="grid grid-cols-3 gap-4">
-              <label className="block text-l font-medium text-gray-700">Status</label>
-              <p className="mt-0 text-gray-900">{userData.status?.toLocaleString() || 'N/A'}</p>
-            </div>
-
-            {['username', 'first_name', 'last_name', 'email', 'phone_number'].map((field) => (
-              <div key={field} className="grid grid-cols-3 gap-4">
-                <label className="block text-l font-medium text-gray-700 capitalize">{field.replace('_', ' ')}</label>
-                {isEditing ? (
-                  <input
-                    type="text"
-                    value={userData[field] || ''}
-                    onChange={(e) => handleInputChange(field, e.target.value)}
-                    className="mt-1 p-2 text-gray-600 bg-gray-100 border border-gray-300 rounded w-full"
+  
+          {/* Profile picture and user details layout */}
+          <div className="flex gap-8">
+            {/* Profile Picture Section */}
+            {/* Profile Picture Section */}
+            <div className="flex flex-col items-center space-y-4">
+              <div className="w-36 h-36 rounded-full overflow-hidden bg-gray-200 border-4 border-yellow-500">
+                {previewImage ? (
+                  <img
+                    src={previewImage}
+                    alt="Profile"
+                    className="w-full h-full object-cover"
                   />
                 ) : (
-                  <p className="mt-0 text-gray-900">{userData[field] || 'N/A'}</p>
+                  <div className="w-full h-full bg-white"></div>
                 )}
               </div>
-            ))}
-
-            <div className="grid grid-cols-3 gap-4">
-              <label className="block text-l font-medium text-gray-700">Birth Date</label>
-              {isEditing ? (
-                <DateInput
-                  name="birth_date"
-                  value={userData.birth_date || ''}
-                  onChange={(e) => handleInputChange('birth_date', e.target.value)}
-                  required
-                  type="date"
-                />
-              ) : (
-                <p className="mt-0 text-gray-900">
-                  {userData.birth_date
-                    ? new Date(userData.birth_date).toLocaleDateString()
-                    : 'N/A'}
-                </p>
-              )}
-            </div>
-
-            <div className="grid grid-cols-3 gap-4">
-              <label className="block text-l font-medium text-gray-700">Address</label>
-              {isEditing ? (
-                <input
-                  id="address-input"
-                  type="text"
-                  placeholder="Enter venue address"
-                  className="input input-bordered bg-white"
-                  {...register('address')}
-                />
-              ) : (
-                <p className="mt-0 text-gray-900">{userData.address || 'N/A'}</p>
-              )}
-            </div>
-
-            {isEditing && <Map onMapClick={handleMapClick} setError={setError} />}
-            {error && <div className="text-red-500">{error}</div>}
-
-            {['nationality', 'facebook_profile', 'instagram_handle'].map((field) => (
-            <div key={field} className="grid grid-cols-3 gap-4">
-              <label className="block text-l font-medium text-gray-700">
-                {field.replace('_', ' ').replace(/\b\w/g, (char) => char.toUpperCase())}
-              </label>
-              {isEditing ? (
-                <input
-                  type="text"
-                  value={userData[field] || ''}
-                  onChange={(e) => handleInputChange(field, e.target.value)}
-                  className="mt-1 p-2 text-gray-600 bg-gray-100 border border-gray-300 rounded w-full"
-                />
-              ) : (
-                field === 'nationality' ? (
-                  <p className="mt-0 text-gray-900">{userData[field] || 'N/A'}</p>
-                ) : (
-                  <a
-                    href={userData[field]}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-blue-500 underline hover:text-blue-700"
-                  >
-                    {field === 'facebook_profile' ? 'Facebook' : 'Instagram'}
-                  </a>
-                )
-              )}
-            </div>
-          ))}
-
-
-
-            {/* Footer with account information inside the box */}
-            <div className="mt-6 text-xs text-right text-gray-500">
-              <p>Account created: {new Date(userData.created_at).toLocaleDateString()}</p>
-              <p>Last updated: {new Date(userData.updated_at).toLocaleDateString()}</p>
-              <p>Attended events: {userData.attended_events || 0}</p>
-              <p>Cancelled events: {userData.cancelled_events || 0}</p>
-            </div>
-            
-            <div className="flex justify-between space-x-4">
               {isEditing && (
-                <button
-                  onClick={handleSubmit(handleSaveChanges)}
-                  className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 transition duration-200"
-                >
-                  Save Changes
-                </button>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageChange}
+                  className="text-center"
+                />
               )}
+            </div>
 
+  
+            {/* User Details Section */}
+            <div className="ml-10 space-y-6">
+              <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-l font-medium text-gray-700">Status</label>
+                <p
+                  className={`mt-0 text-gray-900 font-bold ${
+                    userData.status === 'Organizer'
+                      ? 'text-orange-300' // Dark orange for Organizer
+                      : userData.status === 'Attendee'
+                      ? 'text-red-700' // Dark red for Attendee
+                      : ''
+                  }`}
+                >
+                  {userData.status?.toLocaleString() || 'N/A'}
+                </p>
+              </div>
+              </div>
+  
+              {['username', 'first_name', 'last_name', 'email', 'phone_number'].map((field) => (
+                <div key={field} className="grid grid-cols-2 gap-4">
+                  <label className="block text-l font-medium text-gray-700 capitalize">
+                    {field.replace('_', ' ')}
+                  </label>
+                  {isEditing ? (
+                    <input
+                      type="text"
+                      value={userData[field] || ''}
+                      onChange={(e) => handleInputChange(field, e.target.value)}
+                      className="mt-1 p-2 text-gray-600 bg-gray-100 border border-gray-300 rounded w-full"
+                    />
+                  ) : (
+                    <p className="mt-0 text-gray-900">{userData[field] || 'N/A'}</p>
+                  )}
+                </div>
+              ))}
+  
+              <div className="grid grid-cols-2 gap-4">
+                <label className="block text-l font-medium text-gray-700">Birth Date</label>
+                {isEditing ? (
+                  <DateInput
+                    name="birth_date"
+                    value={userData.birth_date || ''}
+                    onChange={(e) => handleInputChange('birth_date', e.target.value)}
+                    required
+                    type="date"
+                  />
+                ) : (
+                  <p className="mt-0 text-gray-900">
+                    {userData.birth_date
+                      ? new Date(userData.birth_date).toLocaleDateString()
+                      : 'N/A'}
+                  </p>
+                )}
+              </div>
+  
+              {/* Address and Map Section */}
+              <div className="grid grid-cols-2 gap-4">
+                <label className="block text-l font-medium text-gray-700">Address</label>
+                {isEditing ? (
+                  <input
+                    id="address-input"
+                    type="text"
+                    placeholder="Enter venue address"
+                    className="input input-bordered bg-white"
+                    {...register('address')}
+                  />
+                ) : (
+                  <p className="mt-0 text-gray-900">{userData.address || 'N/A'}</p>
+                )}
+              </div>
+  
+              {isEditing && <Map onMapClick={handleMapClick} setError={setError} />}
+              {error && <div className="text-red-500">{error}</div>}
+  
+              {/* Nationality and Social Links */}
+              {['nationality', 'facebook_profile', 'instagram_handle'].map((field) => (
+                <div key={field} className="grid grid-cols-2 gap-4">
+                  <label className="block text-l font-medium text-gray-700">
+                    {field.replace('_', ' ').replace(/\b\w/g, (char) => char.toUpperCase())}
+                  </label>
+                  {isEditing ? (
+                    <input
+                      type="text"
+                      value={userData[field] || ''}
+                      onChange={(e) => handleInputChange(field, e.target.value)}
+                      className="mt-1 p-2 text-gray-600 bg-gray-100 border border-gray-300 rounded w-full"
+                    />
+                  ) : field === 'nationality' ? (
+                    <p className="mt-0 text-gray-900">{userData[field] || 'N/A'}</p>
+                  ) : (
+                    <a
+                      href={userData[field]}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-blue-500 underline hover:text-blue-700"
+                    >
+                      {field === 'facebook_profile' ? 'Facebook' : 'Instagram'}
+                    </a>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+  
+          {/* Footer with account information inside the box */}
+          <div className="mt-6 text-xs text-right text-gray-500">
+            <p>Account created: {new Date(userData.created_at).toLocaleDateString()}</p>
+            <p>Last updated: {new Date(userData.updated_at).toLocaleDateString()}</p>
+            <p>Attended events: {userData.attended_events || 0}</p>
+            <p>Cancelled events: {userData.cancelled_events || 0}</p>
+          </div>
+  
+          {/* Save and Edit buttons */}
+          <div className="flex justify-between space-x-4 mt-6">
+            {isEditing && (
               <button
-                onClick={handleEditToggle}
-                className={`px-4 py-2 text-white rounded ${isEditing ? 'bg-red-500 hover:bg-red-600' : 'bg-blue-500 hover:bg-blue-600'} transition duration-200`}
+                onClick={handleSubmit(handleSaveChanges)}
+                className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 transition duration-200"
               >
-                {isEditing ? 'Cancel' : 'Edit'}
+                Save Changes
               </button>
-            </div>
-            </div>
+            )}
+  
+            <button
+              onClick={handleEditToggle}
+              className={`px-4 py-2 text-white rounded ${
+                isEditing
+                  ? 'bg-red-500 hover:bg-red-600'
+                  : 'bg-blue-500 hover:bg-blue-600'
+              } transition duration-200`}
+            >
+              {isEditing ? 'Cancel' : 'Edit'}
+            </button>
           </div>
         </div>
       </div>
     </PageLayout>
-  );
+  );  
 }
 
 export default AccountInfo;
