@@ -14,18 +14,20 @@ export function EventInfo({ event }) {
   const [isApplied, setIsApplied] = useState(false);
   const [canceling, setCanceling] = useState(false);
   const [ticketId, setTicketId] = useState(null);
+  const [attendees, setAttendees] = useState([]);
+  const [showApplicants, setShowApplicants] = useState(false);
   const userId = localStorage.getItem(USER_ID);
 
-  useEffect(() => {    
+  useEffect(() => {
     if (event?.user_engaged) {
       setIsApplied(event.user_engaged.is_applied);
       const fetchTicket = async () => {
         try {
           const token = localStorage.getItem(ACCESS_TOKEN);
           const headers = token ? { Authorization: `Bearer ${token}` } : {};
-          const response = await api.get(`/tickets/user/${userId}`,{headers});
+          const response = await api.get(`/tickets/user/${userId}`, { headers });
           const tickets = response.data;
-  
+
           const ticket = tickets.find(ticket => ticket.event_id === event.id);
           if (ticket) {
             setTicketId(ticket.id);
@@ -34,10 +36,24 @@ export function EventInfo({ event }) {
           console.error("Error fetching tickets:", error);
         }
       };
-  
-      fetchTicket();
-    }}, [userId, event.id]);
 
+      fetchTicket();
+
+    // Fetch attendees
+    const fetchAttendees = async () => {
+      try {
+        const token = localStorage.getItem(ACCESS_TOKEN);
+        const headers = token ? { Authorization: `Bearer ${token}` } : {};
+        const response = await api.get(`/api/events/${event.id}/attendee-list`, { headers });
+        const attendees = response.data;
+        setAttendees(attendees);
+      } catch (error) {
+        console.error("Error fetching attendees:", error);
+      }
+    };
+    fetchAttendees();
+  }
+}, [userId, event.id]);
 
   const socialLinks = [
     { icon: FaGlobe, url: event.website_url, label: 'Website' },
