@@ -15,6 +15,7 @@ from datetime import timedelta
 from decouple import config,Csv
 from dotenv import load_dotenv
 from celery.schedules import crontab
+import dj_database_url
 import sys
 import os
 
@@ -154,7 +155,7 @@ WSGI_APPLICATION = "backend.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
-if "test" or "runserver" in sys.argv:
+if "test" in sys.argv:
     DATABASES = {
         "default": {
             "ENGINE": "django.db.backends.sqlite3",
@@ -175,7 +176,7 @@ else:
 
 #postgresql://event_ease_database_user:MtgavvuxtpQl1JyJX9ELWaW8LSVCx95j@dpg-csvdqv3v2p9s73cvjl8g-a.singapore-postgres.render.com/event_ease_database
 
-
+DATABASES['default'] = dj_database_url.parse(os.getenv("DATABASE_URL"))
 # Password validation
 # https://docs.djangoproject.com/en/5.0/ref/settings/#auth-password-validators
 
