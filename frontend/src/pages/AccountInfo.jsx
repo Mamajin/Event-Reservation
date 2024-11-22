@@ -171,7 +171,6 @@ function AccountInfo() {
           {/* Profile picture and user details layout */}
           <div className="flex gap-8">
             {/* Profile Picture Section */}
-            {/* Profile Picture Section */}
             <div className="flex flex-col items-center space-y-4">
               <div className="w-36 h-36 rounded-full overflow-hidden bg-gray-200 border-4 border-yellow-500">
                 {previewImage ? (
@@ -197,7 +196,7 @@ function AccountInfo() {
   
             {/* User Details Section */}
             <div className="ml-10 space-y-6">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-2">
               <div>
                 <label className="block text-l font-medium text-gray-700">Status</label>
                 <p
@@ -215,7 +214,7 @@ function AccountInfo() {
               </div>
   
               {['username', 'first_name', 'last_name', 'email', 'phone_number'].map((field) => (
-                <div key={field} className="grid grid-cols-2 gap-4">
+                <div key={field} className="grid grid-cols-2">
                   <label className="block text-l font-medium text-gray-700 capitalize">
                     {field.replace('_', ' ')}
                   </label>
@@ -232,7 +231,7 @@ function AccountInfo() {
                 </div>
               ))}
   
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-2">
                 <label className="block text-l font-medium text-gray-700">Birth Date</label>
                 {isEditing ? (
                   <DateInput
@@ -252,7 +251,7 @@ function AccountInfo() {
               </div>
   
               {/* Address and Map Section */}
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-2">
                 <label className="block text-l font-medium text-gray-700">Address</label>
                 {isEditing ? (
                   <input
@@ -272,7 +271,7 @@ function AccountInfo() {
   
               {/* Nationality and Social Links */}
               {['nationality', 'facebook_profile', 'instagram_handle'].map((field) => (
-                <div key={field} className="grid grid-cols-2 gap-4">
+                <div key={field} className="grid grid-cols-2">
                   <label className="block text-l font-medium text-gray-700">
                     {field.replace('_', ' ').replace(/\b\w/g, (char) => char.toUpperCase())}
                   </label>
@@ -327,7 +326,7 @@ function AccountInfo() {
                   : 'bg-blue-500 hover:bg-blue-600'
               } transition duration-200`}
             >
-              {isEditing ? 'Cancel' : 'Edit'}
+              {isEditing ? 'Cancel' : 'Edit Profile'}
             </button>
           </div>
         </div>
