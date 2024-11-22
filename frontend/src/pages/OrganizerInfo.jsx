@@ -167,12 +167,14 @@ function OrganizerInfo() {
                 <div className="w-24 h-24 bg-white rounded-full"></div>
               )}
             </div>
-            <input
-              type="file"
-              accept="image/*"
-              onChange={handleLogoChange}
-              className="ml-4"
-            />
+            {isEditing && (
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleLogoChange}
+                className="ml-4"
+              />
+            )}
           </div>
 
           <div className="space-y-6">

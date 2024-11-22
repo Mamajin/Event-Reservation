@@ -175,7 +175,14 @@ function AccountInfo() {
                 <div className="w-24 h-24 bg-white rounded-full"></div>
               )}
             </div>
-            <input type="file" accept="image/*" onChange={handleImageChange} className="ml-4" />
+            {isEditing && (
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleImageChange}
+                className="ml-4"
+              />
+            )}
           </div>
 
           <div className="space-y-6">
@@ -238,20 +245,35 @@ function AccountInfo() {
             {error && <div className="text-red-500">{error}</div>}
 
             {['nationality', 'facebook_profile', 'instagram_handle'].map((field) => (
-              <div key={field} className="grid grid-cols-3 gap-4">
-                <label className="block text-l font-medium text-gray-700">{field.replace('_', ' ')}</label>
-                {isEditing ? (
-                  <input
-                    type="text"
-                    value={userData[field] || ''}
-                    onChange={(e) => handleInputChange(field, e.target.value)}
-                    className="mt-1 p-2 text-gray-600 bg-gray-100 border border-gray-300 rounded w-full"
-                  />
-                ) : (
+            <div key={field} className="grid grid-cols-3 gap-4">
+              <label className="block text-l font-medium text-gray-700">
+                {field.replace('_', ' ').replace(/\b\w/g, (char) => char.toUpperCase())}
+              </label>
+              {isEditing ? (
+                <input
+                  type="text"
+                  value={userData[field] || ''}
+                  onChange={(e) => handleInputChange(field, e.target.value)}
+                  className="mt-1 p-2 text-gray-600 bg-gray-100 border border-gray-300 rounded w-full"
+                />
+              ) : (
+                field === 'nationality' ? (
                   <p className="mt-0 text-gray-900">{userData[field] || 'N/A'}</p>
-                )}
-              </div>
-            ))}
+                ) : (
+                  <a
+                    href={userData[field]}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-blue-500 underline hover:text-blue-700"
+                  >
+                    {field === 'facebook_profile' ? 'Facebook' : 'Instagram'}
+                  </a>
+                )
+              )}
+            </div>
+          ))}
+
+
 
             {/* Footer with account information inside the box */}
             <div className="mt-6 text-xs text-right text-gray-500">
