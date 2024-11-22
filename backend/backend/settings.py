@@ -35,7 +35,7 @@ SECRET_KEY = config('SECRET_KEY', default='fake-secret-key')
 DEBUG = config('DEBUG', default = False, cast = bool)
 
 ALLOWED_HOSTS = config('ALLOWED_HOSTS', 
-                       default='localhost,127.0.0.1,testserver', 
+                       default= 'localhost,127.0.0.1,testserver', 
                        cast=Csv())
 
 GOOGLE_MAPS_API_KEY = config("GOOGLE_MAPS_API_KEY")
@@ -164,13 +164,15 @@ if "test" in sys.argv:
     }
 else:
     DATABASES = {
-        "default": dj_database_url.parse(
-            config(
-                'DATABASE_URL',
-                default='postgresql://user:password@localhost:5432/mydatabase'
-            )
-        ),
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': os.getenv('DATABASE_NAME', 'django_db'),
+            'USER': os.getenv('DATABASE_USER', 'django_user'),
+            'PASSWORD': os.getenv('DATABASE_PASSWORD', 'django_password'),
+            'HOST': os.getenv('DATABASE_HOST', 'db'),
+            'PORT': os.getenv('DB_PORT', '5432'),  # Default PostgreSQL port
     }
+}
 
 #postgresql://event_ease_database_user:MtgavvuxtpQl1JyJX9ELWaW8LSVCx95j@dpg-csvdqv3v2p9s73cvjl8g-a.singapore-postgres.render.com/event_ease_database
 
