@@ -15,7 +15,6 @@ from datetime import timedelta
 from decouple import config,Csv
 from dotenv import load_dotenv
 from celery.schedules import crontab
-import dj_database_url
 import sys
 import os
 
@@ -155,7 +154,7 @@ WSGI_APPLICATION = "backend.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
-if "test" in sys.argv:
+if "test" or "runserver" in sys.argv:
     DATABASES = {
         "default": {
             "ENGINE": "django.db.backends.sqlite3",
@@ -170,7 +169,7 @@ else:
             'USER': os.getenv('DATABASE_USER', 'django_user'),
             'PASSWORD': os.getenv('DATABASE_PASSWORD', 'django_password'),
             'HOST': os.getenv('DATABASE_HOST', 'db'),
-            'PORT': os.getenv('DB_PORT', '5432'),  # Default PostgreSQL port
+            'PORT': os.getenv('DB_PORT', '5432'),  
     }
 }
 
@@ -251,6 +250,11 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 # CORS settings
 CORS_ALLOW_ALL_ORIGINS = True
+
+CORS_ALLOWED_ORIGINS = [
+    "https://your-frontend-service.vercel.app",
+]
+
 CORS_ALLOW_CREDENTIALS = True
 
 AUTH_USER_MODEL = 'api.AttendeeUser'
