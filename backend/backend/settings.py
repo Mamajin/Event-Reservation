@@ -36,7 +36,7 @@ DEBUG = config('DEBUG', default = False, cast = bool)
 
 ALLOWED_HOSTS = config('ALLOWED_HOSTS', 
                        default= 'localhost,127.0.0.1,testserver', 
-                       cast=Csv())
+                       ).split(',')
 
 GOOGLE_MAPS_API_KEY = config("GOOGLE_MAPS_API_KEY")
 
@@ -150,7 +150,7 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = "backend.wsgi.application"
-
+database_url = os.getenv("DATABASE_URL")
 
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
@@ -162,6 +162,7 @@ if "test" in sys.argv:
             "NAME": BASE_DIR / "test_db.sqlite3",  # Use a separate file for test DB
         }
     }
+    
 else:
     DATABASES = {
         'default': {
@@ -174,9 +175,7 @@ else:
     }
 }
 
-#postgresql://event_ease_database_user:MtgavvuxtpQl1JyJX9ELWaW8LSVCx95j@dpg-csvdqv3v2p9s73cvjl8g-a.singapore-postgres.render.com/event_ease_database
 
-DATABASES['default'] = dj_database_url.parse(os.getenv("DATABASE_URL"))
 # Password validation
 # https://docs.djangoproject.com/en/5.0/ref/settings/#auth-password-validators
 
