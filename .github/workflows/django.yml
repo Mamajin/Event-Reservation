@@ -53,7 +53,7 @@ jobs:
         DATABASE_USER: ${{ secrets.DATABASE_USER }}
         DATABASE_NAME: ${{ secrets.DATABASE_NAME }}
         DATABASE_HOST: ${{ secrets.DATABASE_HOST }}
-        DB_PORT: ${{ secrets.DATABASE_PORT }}
+        DB_PORT: ${{ secrets.DB_PORT }}
         
       run: |
         cd backend
