@@ -265,15 +265,14 @@ class Event(models.Model):
 
     def clean(self):
         """
-        Validate the event object before saving.
+        Validate the event data.
 
-        If the event is private, this function will check if the allowed email domains
-        contain any invalid domains (i.e. domains that do not match the regular expression
-        [a-zA-Z0-9-]+(\.[a-zA-Z0-9-]+)*). If any are found, a ValidationError is raised.
+        This method is called by the model's full_clean() method and is used to
+        validate the data before saving it to the database.
 
-        Additionally, this function will check if the start date of the event is after the
-        end date. If it is, a ValidationError is raised.
-
+        Raises:
+            ValidationError: If the allowed email domains contain invalid domains.
+            ValidationError: If the end date is not after the start date.
         """
         super().clean()
         if self.visibility == 'PRIVATE' and self.allowed_email_domains:
