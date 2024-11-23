@@ -3,19 +3,25 @@ import { motion } from 'framer-motion';
 import { LuClock, LuCalendar, LuUsers, LuBadgeCheck, LuHeart, LuBookmark, LuTag } from 'react-icons/lu';
 import { ACCESS_TOKEN } from '../../constants';
 import api from '../../api';
+import { useNavigate } from 'react-router-dom';
 
 const EventCard = ({ event }) => {
   const [isBookmarked, setIsBookmarked] = useState(false);
   const [isLiked, setIsLiked] = useState(false);
   const [likeCount, setLikeCount] = useState(event?.engagement?.total_likes || 0);
   const [bookmarkCount, setBookmarkCount] = useState(event?.engagement?.total_bookmarks || 0);
-
+  const navigate = useNavigate();
+  
   useEffect(() => {
     if (event?.user_engaged) {
       setIsLiked(event.user_engaged.is_liked);
       setIsBookmarked(event.user_engaged.is_bookmarked);
     }
   }, [event]);
+
+  const handleMoreDetailClick = () => {
+    navigate(`/events/${event.id}`);
+  };
 
   const handleLike = async (eventId) => {
     try {
@@ -72,7 +78,7 @@ const EventCard = ({ event }) => {
           className="w-full h-48 object-cover transition-transform duration-300 group-hover:scale-105"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-        <h3 className="absolute bottom-4 left-4 text-xl font-semibold text-white">
+        <h3 className="absolute bottom-4 left-4 text-xl font-semibold text-white cursor-pointer" onClick={handleMoreDetailClick}>
           {event.event_name}
         </h3>
         <div className="absolute top-4 right-4 flex gap-2">
