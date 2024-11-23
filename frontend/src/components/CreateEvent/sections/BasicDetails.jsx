@@ -110,6 +110,7 @@ export default function BasicDetails({ form }) {
           className="textarea textarea-bordered h-24 bg-white"
           placeholder="Brief overview of your event"
           {...form.register('description', { required: true })}
+          maxLength={350}
         />
       </div>
 

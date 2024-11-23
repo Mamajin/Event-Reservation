@@ -27,8 +27,8 @@ function Navbar() {
         {isLoggedIn ? (
           <>
             {isOrganizer && (
-              <Link to="/create-event" className="btn ml-2 bg-amber-300 text-dark-purple">
-                Create Event
+              <Link to="/create-event" className="btn ml-2 bg-gradient-to-r from-slate-300 to-amber-500  bg-amber-300 text-dark-purple">
+                Create Event +
               </Link>
             )}
             <div className="avatar placeholder pl-4 pr-3 dropdown dropdown-end">
