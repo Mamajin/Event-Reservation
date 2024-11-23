@@ -18,7 +18,6 @@ export default function Discover() {
   const [selectedCategory, setSelectedCategory] = useState('');
   const [selectedvisibility, setSelectedVisibility] = useState('');
   const [showAllTags, setShowAllTags] = useState(false);
-  const [sortBy, setSortBy] = useState('');
   const MAX_VISIBLE_TAGS = 6;
 
   useEffect(() => {
