@@ -132,7 +132,7 @@ export function EventHeader({ event }) {
             className="p-2 bg-white/10 backdrop-blur-md rounded-full hover:bg-white/20 transition-colors"
             title="Share event"
           >
-            <LuShare2 share2 className="w-5 h-5 text-white" />
+            <LuShare2 className="w-5 h-5 text-white" />
           </button>
           {showShareMenu && (
             <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-2 z-50">
