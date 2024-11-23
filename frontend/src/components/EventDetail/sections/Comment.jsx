@@ -184,7 +184,7 @@ export function CommentSection({ event }) {
             : comment
         )
       );
-  
+      toggleReplies(replyingTo);
       setReplyContent('');
       setReplyingTo(null); // Reset replyingTo
     } catch (error) {
