@@ -58,6 +58,12 @@ jobs:
           DEFAULT_FROM_EMAIL: ${{ secrets.DEFAULT_FROM_EMAIL }}
           JWT_SECRET: ${{ secrets.JWT_SECRET }}
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          DATABASE_PASSWORD : ${{ secrets.DATABASE_PASSWORD }}
+          DATABASE_USER : ${{ secrets.DATABASE_USER }}
+          DATABASE_NAME : ${{ secrets.DATABASE_NAME }}
+          DATABASE_HOST : ${{ secrets.DATABASE_HOST }}
+          DB_PORT : ${{ secrets.DB_PORT }}
+
 
       - name: Run tests
         run: |
