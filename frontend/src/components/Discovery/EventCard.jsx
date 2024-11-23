@@ -1,8 +1,50 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { LuClock, LuCalendar, LuUsers, LuBadgeCheck } from 'react-icons/lu';
+import { LuClock, LuCalendar, LuUsers, LuBadgeCheck, LuHeart, LuBookmark } from 'react-icons/lu';
+import { ACCESS_TOKEN } from '../../constants';
+import api from '../../api';
 
 const EventCard = ({ event }) => {
+  const [isBookmarked, setIsBookmarked] = useState(false);
+  const [isLiked, setIsLiked] = useState(false);
+  const [likeCount, setLikeCount] = useState(event?.engagement?.total_likes || 0);
+  const [bookmarkCount, setBookmarkCount] = useState(event?.engagement?.total_bookmarks || 0);
+
+  useEffect(() => {
+    if (event?.user_engaged) {
+      setIsLiked(event.user_engaged.is_liked);
+      setIsBookmarked(event.user_engaged.is_bookmarked);
+    }
+  }, [event]);
+
+  const handleLike = async (eventId) => {
+    try {
+      const token = localStorage.getItem(ACCESS_TOKEN);
+      const headers = {
+        Authorization: `Bearer ${token}`,
+      };
+      await api.put(`/likes/${eventId}/toggle-like`, {}, { headers });
+      setIsLiked(!isLiked);
+      setLikeCount((prev) => (isLiked ? prev - 1 : prev + 1));
+    } catch (error) {
+      console.error('Error liking event:', error);
+      alert('Failed to like the event. Please try again.');
+    }
+  };
+  
+  const handleBookmark = async (eventId) => {
+    try {
+      const token = localStorage.getItem(ACCESS_TOKEN);
+      const headers = {
+        Authorization: `Bearer ${token}`,
+      };
+      await api.put(`/bookmarks/${eventId}/toggle-bookmark`, {}, { headers });
+      setIsBookmarked(!isBookmarked);
+      setBookmarkCount((prev) => (isBookmarked ? prev - 1 : prev + 1));
+    } catch (error) {
+      console.error('Error bookmarking event:', error);
+    }
+  };
   if (!event) return null;
 
   const formatDate = (date) => {
@@ -31,6 +73,33 @@ const EventCard = ({ event }) => {
         <h3 className="absolute bottom-4 left-4 text-xl font-semibold text-white">
           {event.event_name}
         </h3>
+        <div className="absolute top-4 right-4 flex gap-2">
+          <motion.button
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.9 }}
+            onClick={() => handleLike(event.id)}
+            className={`flex h-8 items-center gap-1 p-2 rounded-full bg-white/90 backdrop-blur-sm shadow-sm transition-colors ${
+              isLiked? 'text-red-500' : 'text-gray-600 hover:text-red-500'
+            }`}
+          >
+            <LuHeart className="h-5 w-5" fill={isLiked ? 'currentColor' : 'none'}/>
+            <span className="text-sm font-medium">{likeCount}</span>
+          </motion.button>
+          <motion.button
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.9 }}
+            onClick={() => handleBookmark(event.id)}
+            className={`flex h-8 items-center gap-1 p-2 rounded-full bg-white/90 backdrop-blur-sm shadow-sm transition-colors ${
+              isBookmarked ? 'text-yellow-500' : 'text-gray-600 hover:text-yellow-500'
+            }`}
+          >
+            <LuBookmark
+              className="h-5 w-5"
+              fill={isBookmarked ? 'currentColor' : 'none'}
+            />
+            <span className="text-sm font-medium">{bookmarkCount}</span>
+          </motion.button>
+        </div>
       </div>
       
       <div className="p-6">
