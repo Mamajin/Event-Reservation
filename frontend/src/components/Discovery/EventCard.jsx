@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { LuClock, LuCalendar, LuUsers, LuBadgeCheck, LuHeart, LuBookmark, LuTag } from 'react-icons/lu';
+import { LuClock, LuCalendar, LuTag, LuHeart, LuBookmark, LuUsers, LuBadgeCheck } from 'react-icons/lu';
 import { ACCESS_TOKEN } from '../../constants';
 import api from '../../api';
 import { useNavigate } from 'react-router-dom';
@@ -11,17 +11,13 @@ const EventCard = ({ event }) => {
   const [likeCount, setLikeCount] = useState(event?.engagement?.total_likes || 0);
   const [bookmarkCount, setBookmarkCount] = useState(event?.engagement?.total_bookmarks || 0);
   const navigate = useNavigate();
-  
+
   useEffect(() => {
     if (event?.user_engaged) {
       setIsLiked(event.user_engaged.is_liked);
       setIsBookmarked(event.user_engaged.is_bookmarked);
     }
   }, [event]);
-
-  const handleMoreDetailClick = () => {
-    navigate(`/events/${event.id}`);
-  };
 
   const handleLike = async (eventId) => {
     try {
@@ -44,14 +40,21 @@ const EventCard = ({ event }) => {
       const headers = {
         Authorization: `Bearer ${token}`,
       };
-      await api.put(`/bookmarks/${eventId}/toggle-bookmark`, {}, { headers });
-      setIsBookmarked(!isBookmarked);
+      const response = await api.put(`/bookmarks/${eventId}/toggle-bookmark`, {}, { headers });
+      setIsBookmarked(! isBookmarked);
       setBookmarkCount((prev) => (isBookmarked ? prev - 1 : prev + 1));
+      console.log('Bookmarked:', response.data.message);
     } catch (error) {
       console.error('Error bookmarking event:', error);
     }
+  };  
+
+  if (!event || !event.user_engaged) {
+    return null;
+  }
+  const handleMoreDetailClick = () => {
+    navigate(`/events/${event.id}`);
   };
-  if (!event) return null;
 
   const formatDate = (date) => {
     return new Date(date).toLocaleDateString('en-US', {
@@ -61,7 +64,7 @@ const EventCard = ({ event }) => {
       day: 'numeric',
     });
   };
-  
+
   const tags = event.tags ? event.tags.split(',').filter(Boolean) : [];
 
   return (
@@ -75,12 +78,9 @@ const EventCard = ({ event }) => {
         <img
           src={event?.event_image ||  "https://images.unsplash.com/photo-1513623935135-c896b59073c1?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTR8fGV2ZW50fGVufDB8fDB8fHww"} 
           alt={event.event_name}
-          className="w-full h-48 object-cover transition-transform duration-300 group-hover:scale-105"
+          className="w-full h-48 object-cover transition-transform duration-300 group-hover:scale-105" onClick={handleMoreDetailClick}
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-        <h3 className="absolute bottom-4 left-4 text-xl font-semibold text-white cursor-pointer" onClick={handleMoreDetailClick}>
-          {event.event_name}
-        </h3>
         <div className="absolute top-4 right-4 flex gap-2">
           <motion.button
             whileHover={{ scale: 1.1 }}
@@ -111,6 +111,13 @@ const EventCard = ({ event }) => {
         <div className="absolute top-4 text-white left-4 badge bg-dark-purple">
           {event.status.charAt(0) + event.status.slice(1).toLowerCase()}
         </div>
+        <div className="absolute bottom-4 left-4 right-4 cursor-pointer">
+          <h3 className="text-xl font-semibold text-white mb-2" onClick={handleMoreDetailClick}>{event.event_name}</h3>
+          <div className="flex items-center text-white/90 text-sm">
+            <LuUsers className="h-4 w-4 mr-1" />
+            <span>{event.max_attendee === null || event.max_attendee === 0 ? "No attendees limit" : `${event.max_attendee} attendees max`}</span>
+          </div>
+        </div>
       </div>
       
       <div className="p-6">
@@ -137,10 +144,6 @@ const EventCard = ({ event }) => {
           <div className="flex items-center text-gray-600">
             <LuClock className="h-4 w-4 mr-2 text-indigo-500" />
             <span className="text-sm">Registration ends: {formatDate(event.end_date_register)}</span>
-          </div>
-          <div className="flex items-center text-gray-600">
-            <LuUsers className="h-4 w-4 mr-1" />
-            <span>{event.max_attendee === null || event.max_attendee === 0 ? "No attendees limit" : `${event.max_attendee} attendees max`}</span>
           </div>
         </div>
 

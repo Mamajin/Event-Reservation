@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import api from '../api';
-import EventCard from '../components/EventCard';
+import EventCard from '../components/Discovery/EventCard';
 import PageLayout from '../components/PageLayout';
 import { useNavigate,Link } from 'react-router-dom';
 import {USER_STATUS} from '../constants'
