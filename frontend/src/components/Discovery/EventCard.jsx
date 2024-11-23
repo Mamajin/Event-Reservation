@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { LuClock, LuCalendar, LuUsers, LuBadgeCheck, LuHeart, LuBookmark } from 'react-icons/lu';
+import { LuClock, LuCalendar, LuUsers, LuBadgeCheck, LuHeart, LuBookmark, LuTag } from 'react-icons/lu';
 import { ACCESS_TOKEN } from '../../constants';
 import api from '../../api';
 
@@ -56,6 +56,8 @@ const EventCard = ({ event }) => {
     });
   };
   
+  const tags = event.tags ? event.tags.split(',').filter(Boolean) : [];
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -100,6 +102,9 @@ const EventCard = ({ event }) => {
             <span className="text-sm font-medium">{bookmarkCount}</span>
           </motion.button>
         </div>
+        <div className="absolute top-4 text-white left-4 badge bg-dark-purple">
+          {event.status.charAt(0) + event.status.slice(1).toLowerCase()}
+        </div>
       </div>
       
       <div className="p-6">
@@ -134,6 +139,22 @@ const EventCard = ({ event }) => {
         </div>
 
         <p className="text-gray-600 mb-6 line-clamp-6 text-sm">{event.description}</p>
+      <div className="space-y-4">
+          <div className="flex gap-2 overflow-x-auto scrollbar-hide">
+            <span className="badge bg-dark-purple text-white" variant={event.is_free ? 'success' : 'default'}>
+              {event.is_free ? 'Free' : 'Paid'}
+            </span>
+            <span className="badge bg-dark-purple text-white" variant="secondary">
+              {event.category.charAt(0) + event.category.slice(1).toLowerCase()}
+            </span>
+            {tags.map((tag) => (
+              <span className="badge bg-dark-purple text-white flex-shrink-0" key={tag} variant="default">
+                <LuTag className="h-3 w-3 mr-1" />
+                {tag.trim()}
+              </span>
+            ))}
+          </div>
+        </div>
       </div>
     </motion.div>
   );
