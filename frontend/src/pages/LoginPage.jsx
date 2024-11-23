@@ -28,8 +28,19 @@ function Login() {
             localStorage.setItem(USER_NAME, authResponse.data.username);
             localStorage.setItem(USER_ID, authResponse.data.id);
             console.log(authResponse.data.picture)
-            // Navigate to the dashboard or home after successful login
-            navigate("/");
+            const profileResponse = await api.get('/users/profile', {
+                headers: {
+                    Authorization: `Bearer ${authResponse.data.access_token}`
+                }
+            });
+            
+            const { phone_number, birth_date } = profileResponse.data;
+            console.log(phone_number, birth_date)
+            if (!phone_number || !birth_date) {
+                navigate("/complete-profile");
+            } else {
+                navigate("/");
+            }
         } catch (error) {
             console.error('Authentication Error:', error);
             setError(

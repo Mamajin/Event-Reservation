@@ -19,7 +19,7 @@ function Sidebar() {
         ...(isLoggedIn && isOrganizer ? [{ title: "My Events", path: "/my-events" }] : []),  // Only show if the user is an organizer
         { title: "My Tickets", path: "/my-tickets" },
         { title: "Bookmarks", path: "/bookmarks" },
-        { title: "Become Organizer", path: "/become-organizer" },
+        ...(!isOrganizer ? [{ title: "Become Organizer", path: "/become-organizer" }] : []),
         
     ];
 

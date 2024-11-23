@@ -33,7 +33,7 @@ import Marketing from './pages/footerpage/Marketing';
 import VirtualTicket from './pages/VirtualTicket';
 import MyTickets from './pages/MyTickets';
 import TicketDetail from './pages/TicketDetail';
-
+import CompleteProfile from './pages/CompleteProfilePage';
 function App() {
   useEffect(() => {
     const token = getAccessToken();
@@ -54,6 +54,7 @@ function App() {
           <Route path="/discover" element={<Discover />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/complete-profile" element={<CompleteProfile />} />
           <Route path="/become-organizer" element={<ApplyOrganizer />} />
           <Route path="/events/:eventId" element={<EventDetail />} />
           <Route path="/logout" element={<Logout />} />

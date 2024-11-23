@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import api from '../api';
-import EventCard from '../components/EventCard';
+import EventCard from '../components/Discovery/EventCard';
 import PageLayout from '../components/PageLayout';
 import Sidebar from '../components/Discovery/Sidebar';
 import { MdOutlineCategory } from "react-icons/md";
-import { LuSearch, LuTag, LuClock,LuChevronUp, LuChevronDown, LuListFilter } from "react-icons/lu";
+import { LuSearch, LuTag, LuClock,LuChevronUp, LuChevronDown, LuListFilter, LuGlobe2 } from "react-icons/lu";
 import { ACCESS_TOKEN } from '../constants';
 
 export default function Discover() {
@@ -16,8 +16,8 @@ export default function Discover() {
   const [selectedTags, setSelectedTags] = useState([]);
   const [selectedStatus, setSelectedStatus] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('');
+  const [selectedvisibility, setSelectedVisibility] = useState('');
   const [showAllTags, setShowAllTags] = useState(false);
-  const [sortBy, setSortBy] = useState('');
   const MAX_VISIBLE_TAGS = 6;
 
   useEffect(() => {
@@ -73,23 +73,17 @@ export default function Discover() {
         selectedDate.toDateString();
     const matchesStatus = !selectedStatus || event.status === selectedStatus;
     const matchesCategory = !selectedCategory || event.category === selectedCategory;
+    const matchesvisibility = !selectedvisibility || event.visibility === selectedvisibility;
     return (
       matchesTags &&
       matchesSearch &&
       matchesDate &&
       matchesStatus &&
-      matchesCategory
+      matchesCategory &&
+      matchesvisibility
     );
   })
-  .sort((a, b) => {
-    if (sortBy === 'POPULARITY') {
-      return b.engagement.total_like - a.engagement.total_like ; // Sort descending by likes
-    }
-    if (sortBy === 'DATE') {
-      return new Date(b.start_date_event) - new Date(a.start_date_event); // Sort descending by date
-    }
-    return 0; // Default: no sorting
-  });
+
 
   return (
     <PageLayout>
@@ -99,7 +93,7 @@ export default function Discover() {
             {/* Main Content */}
             <div className="flex-1 overflow-y-auto">
               <div className="mb-8 space-y-4">
-              <div className="flex items-center gap-4">
+              <div className="flex items-center gap-4 overflow-visible">
                 <div className="relative w-7/12 max-w">
                   <LuSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
                   <input
@@ -113,14 +107,14 @@ export default function Discover() {
                 <div className="dropdown">
                   <label
                     tabIndex={0}
-                    className="btn btn-sm bg-dark-purple hover:bg-gray-100 hover:text-black text-white px-4 py-2 rounded-md transition-colors duration-300 flex items-center gap-2"
+                    className="btn btn-sm w-36 bg-dark-purple hover:bg-gray-100 hover:text-black text-white px-4 py-2 rounded-md transition-colors duration-300 flex items-center gap-2"
                   >
                     <LuClock className="h-4 w-4" />
-                    <span className="hidden sm:block">Status</span>
-                  </label>
+                    <span className="hidden sm:block">{selectedStatus ? `${selectedStatus.charAt(0) + selectedStatus.slice(1).toLowerCase()}` : 'Status'}</span>
+                </label>
                   <ul
                     tabIndex={0}
-                    className="dropdown-content menu p-1 shadow bg-white rounded-box w-40 text-sm"
+                    className="dropdown-content menu p-1 shadow bg-white rounded-box w-40 text-sm z-50"
                   >
                     {['UPCOMING', 'ONGOING', 'COMPLETED'].map((status) => (
                       <li key={status}>
@@ -141,21 +135,21 @@ export default function Discover() {
                 <div className="dropdown">
                   <label
                     tabIndex={0}
-                    className="btn btn-sm bg-dark-purple text-white hover:bg-gray-100 hover:text-black px-4 py-2 rounded-md transition-colors duration-300 flex items-center gap-2"
+                    className="btn btn-sm bg-dark-purple w-36 text-white hover:bg-gray-100 hover:text-black px-4 py-2 rounded-md transition-colors duration-300 flex items-center gap-2"
                   >
                     <MdOutlineCategory className="h-4 w-4"/>
-                    <span className="hidden inline-block sm:inline-block">Category</span>
+                    <span className="hidden sm:block">{selectedCategory ? `${selectedCategory.charAt(0) + selectedCategory.slice(1).toLowerCase()}` : 'Category'}</span>
                   </label>
                   <ul
                     tabIndex={0}
-                    className="dropdown-content menu p-1 shadow bg-white rounded-box w-40 text-sm"
+                    className="dropdown-content menu p-1 shadow bg-white rounded-box w-40 text-sm z-50"
                   >
                     {categories.map((category) => (
                       <li key={category}>
                         <button
-                          onClick={() => setSelectedCategory(selectedStatus === category ? null : category)}
+                          onClick={() => setSelectedCategory(selectedCategory === category ? null : category)}
                           className={`flex items-center gap-2 px-2 py-1 rounded-md ${
-                            selectedStatus === category
+                            selectedCategory === category
                               ? 'bg-indigo-600 text-white'
                               : 'hover:bg-gray-200 text-gray-700'
                           }`}
@@ -166,34 +160,34 @@ export default function Discover() {
                     ))}
                   </ul>
                 </div>
-                <div className="dropdown">
-                  <label
-                    tabIndex={0}
-                    className="btn btn-sm bg-dark-purple hover:bg-gray-100 hover:text-black text-white px-4 py-2 rounded-md transition-colors duration-300 flex items-center gap-2"
-                  >
-                    <LuListFilter className="h-4 w-4" />
-                    <span className="hidden sm:block">Sort By</span>
-                  </label>
-                  <ul
-                    tabIndex={0}
-                    className="dropdown-content menu p-1 shadow bg-white rounded-box w-40 text-sm"
-                  >
-                    {['POPULARITY', 'DATE'].map((sortOption) => (
-                      <li key={sortOption}>
-                        <button
-                          onClick={() => setSortBy(sortOption)}
-                          className={`flex items-center gap-2 px-2 py-1 rounded-md ${
-                            sortBy === sortOption
-                              ? 'bg-indigo-600 text-white'
-                              : 'hover:bg-gray-200 text-gray-700'
-                          }`}
-                        >
-                          {sortOption.charAt(0) + sortOption.slice(1).toLowerCase()}
-                        </button>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
+              <div className="dropdown">
+                <label
+                  tabIndex={0}
+                  className="btn btn-sm w-32 bg-dark-purple hover:bg-gray-100 hover:text-black text-white px-4 py-2 rounded-md transition-colors duration-300 flex items-center gap-2"
+                >
+                  <LuGlobe2 className="h-4 w-4" />
+                  <span className="hidden sm:block">{selectedvisibility ? `${selectedvisibility.charAt(0) + selectedvisibility.slice(1).toLowerCase()}` : 'Visibility'}</span>
+                </label>
+                <ul
+                  tabIndex={0}
+                  className="dropdown-content menu p-1 shadow bg-white rounded-box w-40 text-sm z-50"
+                >
+                  {['PUBLIC', 'PRIVATE'].map((visibility) => (
+                    <li key={visibility}>
+                      <button
+                        onClick={() => setSelectedVisibility(selectedvisibility === visibility ? null : visibility)}
+                        className={`flex items-center gap-2 px-2 py-1 rounded-md ${
+                          selectedvisibility === visibility
+                            ? 'bg-indigo-600 text-white'
+                            : 'hover:bg-gray-200 text-gray-700'
+                        }`}
+                      >
+                        {visibility.charAt(0) + visibility.slice(1).toLowerCase()}
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              </div>
               </div>
                 <div className="flex flex-wrap gap-2">
                   {visibleTags.map((tag) => (
@@ -237,17 +231,19 @@ export default function Discover() {
                       </button>
                     )}
                 </div>
-                {filteredEvents.length > 0 ? (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {filteredEvents.map((event) => (
-                      <EventCard key={event.id} event={event} />
-                    ))}
-                  </div>
-                ) : (
-                  <h2 className="flex items-center font-bold justify-center h-64 text-4xl text-dark-purple">
-                    No events found
-                  </h2>
-                )}
+                  <div className='flex flex-col h-[800px] overflow-y-auto z-0'>
+                  {filteredEvents.length > 0 ? (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      {filteredEvents.map((event) => (
+                        <EventCard key={event.id} event={event} />
+                      ))}
+                    </div>
+                  ) : (
+                    <h2 className="flex items-center font-bold justify-center h-64 text-4xl text-dark-purple">
+                      No events found
+                    </h2>
+                  )}
+                </div>
               </div>
             </div>
             {/* Sidebar */}

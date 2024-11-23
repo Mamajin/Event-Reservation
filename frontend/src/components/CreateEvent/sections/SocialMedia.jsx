@@ -30,6 +30,16 @@ export default function SocialMedia({ form }) {
           {...form.register('instagram_url')}
         />
       </div>
+
+      <div className="form-control">
+        <label className="label font-medium text-dark-purple bg-white">Other social media URL (separated by comma)</label>
+        <input
+          type="text"
+          className="input input-bordered bg-white"
+          placeholder="https://www.example.com, https://www.example2.com"
+          {...form.register('other_url')}
+        />
+      </div>
     </div>
   );
 }
