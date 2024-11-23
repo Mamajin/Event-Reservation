@@ -1,7 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import LikeButton from './EventCardButton/LikeButton';
-import BookmarkButton from './EventCardButton/BookMarkButton';
+import BookmarkButton from './EventCardButton/BookmarkButton';
 import ShareButton from './EventCardButton/ShareButton';
 import api from '../api';
 
