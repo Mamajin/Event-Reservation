@@ -63,6 +63,7 @@ export default function CreateEvent() {
         facebook_url: formValues.facebook_url || '',
         twitter_url: formValues.twitter_url || '',
         instagram_url: formValues.instagram_url || '',
+        other_url: formValues.other_url || '',
         min_age_requirement: parseInt(formValues.min_age_requirement || 0, 10),
         terms_and_conditions: formValues.terms_and_conditions || '',
         tags: formValues.tags || '',

@@ -38,7 +38,7 @@ export default function Home() {
   return (
     <PageLayout>
       <div className='pr-6 pt-4'>
-      <div className="hero h-screen bg-cover bg-center " style={{ backgroundImage: `url('https://i.pinimg.com/564x/92/57/6b/92576be9601f00886b03e58363369647.jpg')` }}>
+      <div className="hero h-screen bg-cover bg-center h-[500px]" style={{ backgroundImage: `url('https://i.pinimg.com/564x/92/57/6b/92576be9601f00886b03e58363369647.jpg')` }}>
         <div className="hero-overlay bg-opacity-60 bg-black"></div>
         <div className="hero-content text-center text-neutral-content">
           <div className="max-w-md">
