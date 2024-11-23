@@ -59,7 +59,7 @@ function App() {
           <Route path="/events/:eventId" element={<EventDetail />} />
           <Route path="/logout" element={<Logout />} />
 
-          {/* Footer Page */}
+          {/* Footer Pages */}
           <Route path="/legal/terms-of-use" element={<TermsOfUse />} />
           <Route path="/legal/privacy-policy" element={<PrivacyInfo />} />
           <Route path="/legal/cookie-policy" element={<BiscuitInfo />} />
