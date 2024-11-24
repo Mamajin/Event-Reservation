@@ -61,7 +61,7 @@ function AccountInfo() {
   };
 
   const handleSaveChanges = async () => {
-    if (!validateSocialLinks()) return;
+    if (!validateSocialLinks() || !validatePhoneNumber()) return;
   
     try {
       const token = localStorage.getItem(ACCESS_TOKEN);
@@ -136,6 +136,12 @@ function AccountInfo() {
     const isInstagramValid = !userData.instagram_handle || instagramPattern.test(userData.instagram_handle);
   
     return isFacebookValid && isInstagramValid;
+  };
+
+  const validatePhoneNumber = () => {
+    const phoneNumberPattern = /^\d{10}$/;
+    const isPhoneNumberValid = !userData.phone_number || phoneNumberPattern.test(userData.phone_number);
+    return isPhoneNumberValid;
   };
   
 
@@ -229,7 +235,7 @@ function AccountInfo() {
               </div>
               </div>
   
-              {['username', 'first_name', 'last_name', 'email', 'phone_number'].map((field) => (
+              {['username', 'first_name', 'last_name', 'email'].map((field) => (
                 <div key={field} className="grid grid-cols-2">
                   <label className="block text-l font-medium text-gray-700 capitalize">
                     {field.replace('_', ' ')}
@@ -240,12 +246,34 @@ function AccountInfo() {
                       value={userData[field] || ''}
                       onChange={(e) => handleInputChange(field, e.target.value)}
                       className="mt-1 p-2 text-gray-600 bg-gray-100 border border-gray-300 rounded w-full"
+                      placeholder={field.replace('_', ' ')}
                     />
                   ) : (
                     <p className="mt-0 text-gray-900">{userData[field] || 'N/A'}</p>
                   )}
                 </div>
               ))}
+
+              <div key="phone_number" className="grid grid-cols-2">
+                <label className="block text-l font-medium text-gray-700">Phone Number</label>
+                {isEditing ? (
+                  <>
+                    <input
+                      type="text"
+                      value={userData.phone_number || ''}
+                      onChange={(e) => handleInputChange('phone_number', e.target.value)}
+                      className={`mt-1 p-2 text-gray-600 bg-gray-100 border ${error?.phone_number ? 'border-red-500' : 'border-gray-300'} rounded w-full`}
+                      placeholder="Must only be 10 digits"
+                    />
+                    {error?.phone_number && (
+                      <p className="text-red-500 text-sm mt-1">{error.phone_number}</p>
+                    )}
+                  </>
+                ) : (
+                  <p className="mt-0 text-gray-900">{userData.phone_number || 'N/A'}</p>
+                )}
+              </div>
+
   
               <div className="grid grid-cols-2">
                 <label className="block text-l font-medium text-gray-700">Birth Date</label>
@@ -294,6 +322,7 @@ function AccountInfo() {
                     value={userData.nationality || ''}
                     onChange={(e) => handleInputChange('nationality', e.target.value)}
                     className="mt-1 p-2 text-gray-600 bg-gray-100 border border-gray-300 rounded w-full"
+                    placeholder="Nationality"
                   />
                 ) : (
                   <p className="mt-0 text-gray-900">{userData.nationality || 'N/A'}</p>
