@@ -129,20 +129,13 @@ function AccountInfo() {
   };
 
   const validateSocialLinks = () => {
-    const errors = {};
     const facebookPattern = /^https?:\/\/(www\.)?facebook\.com\/.+$/i;
     const instagramPattern = /^https?:\/\/(www\.)?instagram\.com\/.+$/i;
   
-    if (userData.facebook_profile && !facebookPattern.test(userData.facebook_profile)) {
-      errors.facebook_profile = 'Invalid Facebook URL.';
-    }
+    const isFacebookValid = !userData.facebook_profile || facebookPattern.test(userData.facebook_profile);
+    const isInstagramValid = !userData.instagram_handle || instagramPattern.test(userData.instagram_handle);
   
-    if (userData.instagram_handle && !instagramPattern.test(userData.instagram_handle)) {
-      errors.instagram_handle = 'Invalid Instagram URL.';
-    }
-  
-    setError(errors);
-    return Object.keys(errors).length === 0; // Return true if no errors
+    return isFacebookValid && isInstagramValid;
   };
   
 
@@ -321,6 +314,7 @@ function AccountInfo() {
                       className={`mt-1 p-2 text-gray-600 bg-gray-100 border ${
                         error?.[field] ? 'border-red-500' : 'border-gray-300'
                       } rounded w-full`}
+                      placeholder={`Use a valid link or empty`}
                     />
                     {error?.[field] && (
                       <p className="text-red-500 text-sm mt-1">{error[field]}</p>
