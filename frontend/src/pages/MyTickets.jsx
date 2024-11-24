@@ -72,6 +72,9 @@ function MyTickets() {
     return (
       <PageLayout>
         <div className="text-center mt-8">Loading your tickets...</div>
+        <div className="flex justify-center items-center h-screen -mt-24">
+          <span className="loading loading-spinner loading-lg"></span>
+        </div>
       </PageLayout>
     );
   }
