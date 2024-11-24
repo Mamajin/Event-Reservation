@@ -261,7 +261,7 @@ function AccountInfo() {
                     id="address-input"
                     type="text"
                     placeholder="Enter venue address"
-                    className="input input-bordered bg-white"
+                    className="input input-bordered text-gray-600 bg-gray-100 border border-gray-300"
                     {...register('address')}
                   />
                 ) : (
