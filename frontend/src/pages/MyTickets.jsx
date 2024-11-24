@@ -64,6 +64,10 @@ function MyTickets() {
     navigate(`/virtual-ticket/${ticketId}`);
   };
 
+  const handleMoreDetailClick = (eventId) => {
+    navigate(`/events/${eventId}`);
+  };
+
   if (loading) {
     return (
       <PageLayout>
@@ -105,15 +109,16 @@ function MyTickets() {
             return (
               <div
                 key={ticket.id}
-                className="flex border-2 border-solid border-gray-400 rounded-lg p-4 hover:bg-gray-100 cursor-pointer transition duration-300"
-                onClick={() => handleViewTicket(ticket.id)}
+                className="flex border-2 border-solid border-gray-400 rounded-lg p-5 hover:bg-gray-100 cursor-pointer transition duration-300"
+                // add on click here
               >
                 {/* Event Image */}
                 <div className="flex-shrink-0 w-30 h-32 mr-4">
                   <img
-                    src={event.event_image || 'https://via.placeholder.com/400x200'}
+                    src={event.event_image || 'https://images.unsplash.com/photo-1513623935135-c896b59073c1?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTR8fGV2ZW50fGVufDB8fDB8fHww'}
                     alt={event.event_name || 'Event'}
                     className="w-full h-full object-cover rounded-lg"
+                    onClick={() => handleMoreDetailClick(ticket.event_id)}
                   />
                 </div>
 
@@ -135,7 +140,10 @@ function MyTickets() {
 
                 {/* Ticket Icon */}
                 <div className="flex-shrink-0 ml-4 flex items-center">
-                  <FaTicketAlt className="text-yellow-500 hover:text-dark-purple" size={55} />
+                  <FaTicketAlt 
+                  className="text-yellow-500 hover:text-yellow-800"
+                  onClick={() => handleViewTicket(ticket.id)} size={70} 
+                  />
                 </div>
               </div>
             );
