@@ -39,7 +39,14 @@ export default function Discover() {
   }, []);
 
   if (loading) {
-    return <div>Loading...</div>;
+    return (
+      <PageLayout>
+      <div className="text-center mt-8">Loading Discover...  Prepare to be amazed!</div>
+      <div className="flex justify-center items-center h-screen -mt-24">
+          <span className="loading loading-spinner loading-lg"></span>
+      </div>
+    </PageLayout>
+  );
   }
 
   if (error) {

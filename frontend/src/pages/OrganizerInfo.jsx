@@ -124,7 +124,10 @@ function OrganizerInfo() {
   if (loading) {
     return (
       <PageLayout>
-        <div>Loading...</div>
+      <div className="text-center mt-8">Loading Organizer Information...</div>
+      <div className="flex justify-center items-center h-screen -mt-24">
+          <span className="loading loading-spinner loading-lg"></span>
+      </div>
       </PageLayout>
     );
   }

@@ -54,15 +54,11 @@ function MyEvents() {
     if (loading || userLoading) {
         return (
             <PageLayout>
-                <div className="flex justify-center items-start min-h-screen p-4">
-                    <div className="w-full max-w-[1400px] max-w-lg bg-white rounded-lg shadow-lg p-6 space-y-4">
-                        <h2 className="text-2xl font-bold mb-4 text-center text-dark-purple">My Events</h2>
-                        <div className="grid grid-cols-1 gap-4">
-                            <div className="text-center">Loading...</div>
-                        </div>
-                    </div>
-                </div>
-            </PageLayout>
+            <div className="text-center mt-8">Loading your events...</div>
+            <div className="flex justify-center items-center h-screen -mt-24">
+                <span className="loading loading-spinner loading-lg"></span>
+            </div>
+          </PageLayout>
         );
     }
 
