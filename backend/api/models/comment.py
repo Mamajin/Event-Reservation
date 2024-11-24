@@ -31,7 +31,7 @@ class Comment(models.Model):
         ordering = ['-created_at']
 
     def __str__(self):
-        return f"Comment by {self.user.username} on {self.session.session_name}"
+        return f"Comment by {self.user.username}"
     
     
 class CommentReaction(models.Model):

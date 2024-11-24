@@ -124,7 +124,10 @@ function OrganizerInfo() {
   if (loading) {
     return (
       <PageLayout>
-        <div>Loading...</div>
+      <div className="text-center mt-8">Loading Organizer Information...</div>
+      <div className="flex justify-center items-center h-screen -mt-24">
+          <span className="loading loading-spinner loading-lg"></span>
+      </div>
       </PageLayout>
     );
   }
@@ -197,6 +200,7 @@ function OrganizerInfo() {
                         value={organizerData[field] || ''}
                         onChange={(e) => handleInputChange(field, e.target.value)}
                         className="mt-1 p-2 text-gray-600 bg-gray-100 border border-gray-300 rounded w-full"
+                        placeholder={field.replace('_', ' ')}
                       />
                     ) : (
                       <p className="mt-0 text-gray-900">{organizerData[field] || 'N/A'}</p>

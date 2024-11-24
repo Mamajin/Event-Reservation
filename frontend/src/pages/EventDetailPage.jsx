@@ -31,7 +31,14 @@ export default function EventDetail() {
     fetchEvent();
   }, [eventId]);
 
-  if (loading) return <div>Loading...</div>;
+  if (loading) 
+    return (
+      <PageLayout>
+      <div className="text-center mt-8">Loading Event Detail!</div>
+      <div className="flex justify-center items-center h-screen -mt-24">
+          <span className="loading loading-spinner loading-lg"></span>
+      </div>
+    </PageLayout>)
   if (error) return <div>Error loading event details.</div>;
   if (!event) return <div>No event found.</div>;
 

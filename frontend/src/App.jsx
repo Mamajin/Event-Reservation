@@ -10,7 +10,6 @@ import Home from './pages/HomePage';
 import NotFound from './pages/NotFound';
 import CreateEvent from './pages/CreateEventPage';
 import AccountInfo from './pages/AccountInfo';
-import AppliedEvents from './pages/AppliedEvents';
 import ApplyOrganizer from './pages/ApplyOrganizerPage';
 import EventDetail from './pages/EventDetailPage';
 import Discover from './pages/DiscoverPage';
@@ -77,7 +76,6 @@ function App() {
           {/* Protected Routes */}
           <Route path="/account-info" element={<ProtectedRoute><AccountInfo /></ProtectedRoute>} />
           <Route path="/organizer-info" element={<ProtectedRoute><OrganizerInfo /></ProtectedRoute>} />
-          <Route path="/applied-events" element={<ProtectedRoute><AppliedEvents /></ProtectedRoute>} />
           <Route path="/create-event" element={<ProtectedRoute><CreateEvent /></ProtectedRoute>} />
           <Route path="/my-events" element={<ProtectedRoute><MyEvents /></ProtectedRoute>} />
           <Route path="/bookmarks" element={<ProtectedRoute><Bookmark /></ProtectedRoute>} />

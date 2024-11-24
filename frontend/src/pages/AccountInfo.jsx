@@ -61,10 +61,12 @@ function AccountInfo() {
   };
 
   const handleSaveChanges = async () => {
+    if (!validateSocialLinks() || !validatePhoneNumber()) return;
+  
     try {
       const token = localStorage.getItem(ACCESS_TOKEN);
       const userId = userData.id;
-
+  
       const updatedData = {
         ...userData,
         address: watch('address'),
@@ -72,11 +74,11 @@ function AccountInfo() {
         longitude: watch('longitude'),
         updated_at: new Date().toISOString(),
       };
-
+  
       const response = await api.patch(`users/edit-profile/${userId}/`, updatedData, {
         headers: { Authorization: `Bearer ${token}` },
       });
-
+  
       console.log("User data updated successfully:", response.data);
       setIsEditing(false);
       window.location.reload();
@@ -126,12 +128,32 @@ function AccountInfo() {
     }));
   };
 
+  const validateSocialLinks = () => {
+    const facebookPattern = /^https?:\/\/(www\.)?facebook\.com\/.+$/i;
+    const instagramPattern = /^https?:\/\/(www\.)?instagram\.com\/.+$/i;
+  
+    const isFacebookValid = !userData.facebook_profile || facebookPattern.test(userData.facebook_profile);
+    const isInstagramValid = !userData.instagram_handle || instagramPattern.test(userData.instagram_handle);
+  
+    return isFacebookValid && isInstagramValid;
+  };
+
+  const validatePhoneNumber = () => {
+    const phoneNumberPattern = /^\d{10}$/;
+    const isPhoneNumberValid = !userData.phone_number || phoneNumberPattern.test(userData.phone_number);
+    return isPhoneNumberValid;
+  };
+  
+
   const goToOrganizerInfo = () => navigate('/organizer-info');
 
   if (loading) {
     return (
       <PageLayout>
-        <div>Loading...</div>
+      <div className="text-center mt-8">Loading Accont Information...</div>
+      <div className="flex justify-center items-center h-screen -mt-24">
+          <span className="loading loading-spinner loading-lg"></span>
+      </div>
       </PageLayout>
     );
   }
@@ -213,7 +235,7 @@ function AccountInfo() {
               </div>
               </div>
   
-              {['username', 'first_name', 'last_name', 'email', 'phone_number'].map((field) => (
+              {['username', 'first_name', 'last_name', 'email'].map((field) => (
                 <div key={field} className="grid grid-cols-2">
                   <label className="block text-l font-medium text-gray-700 capitalize">
                     {field.replace('_', ' ')}
@@ -224,12 +246,34 @@ function AccountInfo() {
                       value={userData[field] || ''}
                       onChange={(e) => handleInputChange(field, e.target.value)}
                       className="mt-1 p-2 text-gray-600 bg-gray-100 border border-gray-300 rounded w-full"
+                      placeholder={field.replace('_', ' ')}
                     />
                   ) : (
                     <p className="mt-0 text-gray-900">{userData[field] || 'N/A'}</p>
                   )}
                 </div>
               ))}
+
+              <div key="phone_number" className="grid grid-cols-2">
+                <label className="block text-l font-medium text-gray-700">Phone Number</label>
+                {isEditing ? (
+                  <>
+                    <input
+                      type="text"
+                      value={userData.phone_number || ''}
+                      onChange={(e) => handleInputChange('phone_number', e.target.value)}
+                      className={`mt-1 p-2 text-gray-600 bg-gray-100 border ${error?.phone_number ? 'border-red-500' : 'border-gray-300'} rounded w-full`}
+                      placeholder="Must only be 10 digits"
+                    />
+                    {error?.phone_number && (
+                      <p className="text-red-500 text-sm mt-1">{error.phone_number}</p>
+                    )}
+                  </>
+                ) : (
+                  <p className="mt-0 text-gray-900">{userData.phone_number || 'N/A'}</p>
+                )}
+              </div>
+
   
               <div className="grid grid-cols-2">
                 <label className="block text-l font-medium text-gray-700">Birth Date</label>
@@ -258,7 +302,7 @@ function AccountInfo() {
                     id="address-input"
                     type="text"
                     placeholder="Enter venue address"
-                    className="input input-bordered bg-white"
+                    className="input input-bordered text-gray-600 bg-gray-100 border border-gray-300"
                     {...register('address')}
                   />
                 ) : (
@@ -270,32 +314,56 @@ function AccountInfo() {
               {error && <div className="text-red-500">{error}</div>}
   
               {/* Nationality and Social Links */}
-              {['nationality', 'facebook_profile', 'instagram_handle'].map((field) => (
-                <div key={field} className="grid grid-cols-2">
-                  <label className="block text-l font-medium text-gray-700">
-                    {field.replace('_', ' ').replace(/\b\w/g, (char) => char.toUpperCase())}
-                  </label>
-                  {isEditing ? (
+              <div className="grid grid-cols-2">
+                <label className="block text-l font-medium text-gray-700">Nationality</label>
+                {isEditing ? (
+                  <input
+                    type="text"
+                    value={userData.nationality || ''}
+                    onChange={(e) => handleInputChange('nationality', e.target.value)}
+                    className="mt-1 p-2 text-gray-600 bg-gray-100 border border-gray-300 rounded w-full"
+                    placeholder="Nationality"
+                  />
+                ) : (
+                  <p className="mt-0 text-gray-900">{userData.nationality || 'N/A'}</p>
+                )}
+              </div>
+
+              {['facebook_profile', 'instagram_handle'].map((field) => (
+              <div key={field} className="grid grid-cols-2">
+                <label className="block text-l font-medium text-gray-700">
+                  {field.replace('_', ' ').replace(/\b\w/g, (char) => char.toUpperCase())}
+                </label>
+                {isEditing ? (
+                  <>
                     <input
                       type="text"
                       value={userData[field] || ''}
                       onChange={(e) => handleInputChange(field, e.target.value)}
-                      className="mt-1 p-2 text-gray-600 bg-gray-100 border border-gray-300 rounded w-full"
+                      className={`mt-1 p-2 text-gray-600 bg-gray-100 border ${
+                        error?.[field] ? 'border-red-500' : 'border-gray-300'
+                      } rounded w-full`}
+                      placeholder={`Use a valid link or empty`}
                     />
-                  ) : field === 'nationality' ? (
-                    <p className="mt-0 text-gray-900">{userData[field] || 'N/A'}</p>
-                  ) : (
-                    <a
-                      href={userData[field]}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-blue-500 underline hover:text-blue-700"
-                    >
-                      {field === 'facebook_profile' ? 'Facebook' : 'Instagram'}
-                    </a>
-                  )}
-                </div>
-              ))}
+                    {error?.[field] && (
+                      <p className="text-red-500 text-sm mt-1">{error[field]}</p>
+                    )}
+                  </>
+                ) : userData[field] ? (
+                  <a
+                    href={userData[field]}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-blue-500 underline hover:text-blue-700"
+                  >
+                    {field === 'facebook_profile' ? 'Facebook' : 'Instagram'}
+                  </a>
+                ) : (
+                  <p className="text-gray-500">N/A</p>
+                )}
+              </div>
+            ))}
+
             </div>
           </div>
   
