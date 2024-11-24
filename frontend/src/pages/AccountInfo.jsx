@@ -61,10 +61,12 @@ function AccountInfo() {
   };
 
   const handleSaveChanges = async () => {
+    if (!validateSocialLinks()) return;
+  
     try {
       const token = localStorage.getItem(ACCESS_TOKEN);
       const userId = userData.id;
-
+  
       const updatedData = {
         ...userData,
         address: watch('address'),
@@ -72,11 +74,11 @@ function AccountInfo() {
         longitude: watch('longitude'),
         updated_at: new Date().toISOString(),
       };
-
+  
       const response = await api.patch(`users/edit-profile/${userId}/`, updatedData, {
         headers: { Authorization: `Bearer ${token}` },
       });
-
+  
       console.log("User data updated successfully:", response.data);
       setIsEditing(false);
       window.location.reload();
@@ -125,6 +127,24 @@ function AccountInfo() {
       longitude,
     }));
   };
+
+  const validateSocialLinks = () => {
+    const errors = {};
+    const facebookPattern = /^https?:\/\/(www\.)?facebook\.com\/.+$/i;
+    const instagramPattern = /^https?:\/\/(www\.)?instagram\.com\/.+$/i;
+  
+    if (userData.facebook_profile && !facebookPattern.test(userData.facebook_profile)) {
+      errors.facebook_profile = 'Invalid Facebook URL.';
+    }
+  
+    if (userData.instagram_handle && !instagramPattern.test(userData.instagram_handle)) {
+      errors.instagram_handle = 'Invalid Instagram URL.';
+    }
+  
+    setError(errors);
+    return Object.keys(errors).length === 0; // Return true if no errors
+  };
+  
 
   const goToOrganizerInfo = () => navigate('/organizer-info');
 
@@ -273,32 +293,54 @@ function AccountInfo() {
               {error && <div className="text-red-500">{error}</div>}
   
               {/* Nationality and Social Links */}
-              {['nationality', 'facebook_profile', 'instagram_handle'].map((field) => (
-                <div key={field} className="grid grid-cols-2">
-                  <label className="block text-l font-medium text-gray-700">
-                    {field.replace('_', ' ').replace(/\b\w/g, (char) => char.toUpperCase())}
-                  </label>
-                  {isEditing ? (
+              <div className="grid grid-cols-2">
+                <label className="block text-l font-medium text-gray-700">Nationality</label>
+                {isEditing ? (
+                  <input
+                    type="text"
+                    value={userData.nationality || ''}
+                    onChange={(e) => handleInputChange('nationality', e.target.value)}
+                    className="mt-1 p-2 text-gray-600 bg-gray-100 border border-gray-300 rounded w-full"
+                  />
+                ) : (
+                  <p className="mt-0 text-gray-900">{userData.nationality || 'N/A'}</p>
+                )}
+              </div>
+
+              {['facebook_profile', 'instagram_handle'].map((field) => (
+              <div key={field} className="grid grid-cols-2">
+                <label className="block text-l font-medium text-gray-700">
+                  {field.replace('_', ' ').replace(/\b\w/g, (char) => char.toUpperCase())}
+                </label>
+                {isEditing ? (
+                  <>
                     <input
                       type="text"
                       value={userData[field] || ''}
                       onChange={(e) => handleInputChange(field, e.target.value)}
-                      className="mt-1 p-2 text-gray-600 bg-gray-100 border border-gray-300 rounded w-full"
+                      className={`mt-1 p-2 text-gray-600 bg-gray-100 border ${
+                        error?.[field] ? 'border-red-500' : 'border-gray-300'
+                      } rounded w-full`}
                     />
-                  ) : field === 'nationality' ? (
-                    <p className="mt-0 text-gray-900">{userData[field] || 'N/A'}</p>
-                  ) : (
-                    <a
-                      href={userData[field]}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-blue-500 underline hover:text-blue-700"
-                    >
-                      {field === 'facebook_profile' ? 'Facebook' : 'Instagram'}
-                    </a>
-                  )}
-                </div>
-              ))}
+                    {error?.[field] && (
+                      <p className="text-red-500 text-sm mt-1">{error[field]}</p>
+                    )}
+                  </>
+                ) : userData[field] ? (
+                  <a
+                    href={userData[field]}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-blue-500 underline hover:text-blue-700"
+                  >
+                    {field === 'facebook_profile' ? 'Facebook' : 'Instagram'}
+                  </a>
+                ) : (
+                  <p className="text-gray-500">N/A</p>
+                )}
+              </div>
+            ))}
+
             </div>
           </div>
   
