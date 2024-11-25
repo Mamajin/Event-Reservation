@@ -42,24 +42,13 @@ This application is developed as part of the Individual Software Process course 
 git clone https://github.com/Mamajin/Event-Reservation.git
 cd Event-Reservation
 ```
-
-**2. Install dependencies and load data:**
-```bash
-pip install -r requirements.txt
-```
-
-**3. Load data:**
-```bash
-py backend/manage.py loaddata data/data.json
-```
-
-**4. Navigate to the backend directory and create a virtual environment:**
+**2. Navigate to the backend directory and create a virtual environment:**
 ```bash
 cd backend
 python -m venv venv
 ```
 
-**5. Activate the virtual environment:**
+**3. Activate the virtual environment:**
 ```bash
 # On Windows
 venv\Scripts\activate
@@ -68,9 +57,24 @@ venv\Scripts\activate
 source venv/bin/activate
 ```
 
-**6. Run the migrations and start the development server:**
+
+**4. Install dependencies and load data:**
 ```bash
+pip install -r requirements.txt
+```
+**5. Run the migrations**
+```bash
+
 python manage.py migrate
+```
+
+**6. Load data:**
+```bash
+py backend/manage.py loaddata data/data.json
+```
+
+**7.start the development server:**
+```bash
 python manage.py runserver
 ```
 ### Frontend Setup

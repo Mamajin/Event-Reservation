@@ -122,7 +122,7 @@ class EventUpdateSchema(Schema):
     end_date_register: Optional[datetime] = None
     tags : Optional[str] = None
     description: Optional[str] = None
-    max_attendee: Optional[int] = 0
+    max_attendee: Optional[int] = None
     address: Optional[str] = None
     is_free: Optional[bool] = True
     ticket_price: Optional[Decimal] = Decimal('0.00')
@@ -142,6 +142,17 @@ class EventUpdateSchema(Schema):
     instagram_url: Optional[str] = None
     min_age_requirement: Optional[int] = 0
     terms_and_conditions: Optional[str] = None
+
+    @field_validator("max_attendee", mode="before")
+    def validate_max_attendee(cls, value):
+        # Convert empty strings or None to None
+        if value in (None, ""):
+            return None
+        # Ensure the value can be parsed as an integer
+        try:
+            return int(value)
+        except ValueError:
+            raise ValueError("max_attendee must be a valid integer or null")
     
 class EventEngagementSchema(Schema):
     total_likes: int

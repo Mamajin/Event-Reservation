@@ -10,7 +10,6 @@ import Home from './pages/HomePage';
 import NotFound from './pages/NotFound';
 import CreateEvent from './pages/CreateEventPage';
 import AccountInfo from './pages/AccountInfo';
-import AppliedEvents from './pages/AppliedEvents';
 import ApplyOrganizer from './pages/ApplyOrganizerPage';
 import EventDetail from './pages/EventDetailPage';
 import Discover from './pages/DiscoverPage';
@@ -33,7 +32,7 @@ import Marketing from './pages/footerpage/Marketing';
 import VirtualTicket from './pages/VirtualTicket';
 import MyTickets from './pages/MyTickets';
 import TicketDetail from './pages/TicketDetail';
-
+import CompleteProfile from './pages/CompleteProfilePage';
 function App() {
   useEffect(() => {
     const token = getAccessToken();
@@ -54,11 +53,12 @@ function App() {
           <Route path="/discover" element={<Discover />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/complete-profile" element={<CompleteProfile />} />
           <Route path="/become-organizer" element={<ApplyOrganizer />} />
           <Route path="/events/:eventId" element={<EventDetail />} />
           <Route path="/logout" element={<Logout />} />
 
-          {/* Footer Page */}
+          {/* Footer Pages */}
           <Route path="/legal/terms-of-use" element={<TermsOfUse />} />
           <Route path="/legal/privacy-policy" element={<PrivacyInfo />} />
           <Route path="/legal/cookie-policy" element={<BiscuitInfo />} />
@@ -76,7 +76,6 @@ function App() {
           {/* Protected Routes */}
           <Route path="/account-info" element={<ProtectedRoute><AccountInfo /></ProtectedRoute>} />
           <Route path="/organizer-info" element={<ProtectedRoute><OrganizerInfo /></ProtectedRoute>} />
-          <Route path="/applied-events" element={<ProtectedRoute><AppliedEvents /></ProtectedRoute>} />
           <Route path="/create-event" element={<ProtectedRoute><CreateEvent /></ProtectedRoute>} />
           <Route path="/my-events" element={<ProtectedRoute><MyEvents /></ProtectedRoute>} />
           <Route path="/bookmarks" element={<ProtectedRoute><Bookmark /></ProtectedRoute>} />

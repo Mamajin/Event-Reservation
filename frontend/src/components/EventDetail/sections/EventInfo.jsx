@@ -7,6 +7,7 @@ import { format } from 'date-fns';
 import { CommentSection } from './Comment';
 import { useState, useEffect } from 'react';
 import api from '../../../api';
+import ApplicantsList from './ApplicantsList';
 import { ACCESS_TOKEN, USER_ID } from '../../../constants';
 
 export function EventInfo({ event }) {
@@ -14,18 +15,20 @@ export function EventInfo({ event }) {
   const [isApplied, setIsApplied] = useState(false);
   const [canceling, setCanceling] = useState(false);
   const [ticketId, setTicketId] = useState(null);
+  const [attendees, setAttendees] = useState([]);
+  const [showApplicants, setShowApplicants] = useState(false);
   const userId = localStorage.getItem(USER_ID);
 
-  useEffect(() => {    
+  useEffect(() => {
     if (event?.user_engaged) {
       setIsApplied(event.user_engaged.is_applied);
       const fetchTicket = async () => {
         try {
           const token = localStorage.getItem(ACCESS_TOKEN);
           const headers = token ? { Authorization: `Bearer ${token}` } : {};
-          const response = await api.get(`/tickets/user/${userId}`,{headers});
+          const response = await api.get(`/tickets/user/${userId}`, { headers });
           const tickets = response.data;
-  
+
           const ticket = tickets.find(ticket => ticket.event_id === event.id);
           if (ticket) {
             setTicketId(ticket.id);
@@ -34,10 +37,24 @@ export function EventInfo({ event }) {
           console.error("Error fetching tickets:", error);
         }
       };
-  
-      fetchTicket();
-    }}, [userId, event.id]);
 
+      fetchTicket();
+
+    // Fetch attendees
+    const fetchAttendees = async () => {
+      try {
+        const token = localStorage.getItem(ACCESS_TOKEN);
+        const headers = token ? { Authorization: `Bearer ${token}` } : {};
+        const response = await api.get(`/events/${event.id}/attendee-list`, { headers });
+        const attendees = response.data;
+        setAttendees(attendees);
+      } catch (error) {
+        console.error("Error fetching attendees:", error);
+      }
+    };
+    fetchAttendees();
+  }
+}, [userId, event.id]);
 
   const socialLinks = [
     { icon: FaGlobe, url: event.website_url, label: 'Website' },
@@ -123,7 +140,7 @@ export function EventInfo({ event }) {
               <h3 className="font-semibold text-lg mb-4 text-dark-purple">Date & Time</h3>
               <div className="space-y-4">
                 <div className="flex items-start gap-3">
-                  <LuCalendarDays className="h-5 w-5 mt-1 text-dark-purple" />
+                  <LuCalendarDays className="h-5 w-5 mt-1 text-blue-600" />
                   <div>
                     <p className="font-medium text-dark-purple">Start</p>
                     <p className="text-sm text-gray-600">
@@ -136,7 +153,7 @@ export function EventInfo({ event }) {
                 </div>
                 <div className="divider my-2"></div>
                 <div className="flex items-start gap-3">
-                  <FaClock className="h-5 w-5 mt-1 text-dark-purple" />
+                  <FaClock className="h-5 w-5 mt-1 text-blue-600" />
                   <div>
                     <p className="font-medium text-dark-purple">End</p>
                     <p className="text-sm text-gray-600">
@@ -155,7 +172,7 @@ export function EventInfo({ event }) {
           <div className="bg-white rounded-xl p-6 shadow-sm">
             <h2 className="text-xl font-semibold mb-4 text-dark-purple">Dress Code</h2>
               <p className="flex items-center gap-2 text-gray-600">
-                <LuShirt className="h-5 w-5 text-dark-purple" />
+                <LuShirt className="h-5 w-5 text-blue-600" />
                 {event.dress_code.charAt(0) + event.dress_code.slice(1).toLowerCase()}
               </p>
           </div>
@@ -164,12 +181,25 @@ export function EventInfo({ event }) {
           <div className="bg-white rounded-xl p-6 shadow-sm">
             <h3 className="text-xl font-semibold mb-4 text-dark-purple">Registration Details</h3>
             <div className="space-y-4 mb-6">
+              <button
+                onClick={() => setShowApplicants(true)}
+                disabled={attendees.length === 0}
+                className={`flex items-center gap-2 text-gray-600 ${
+                  attendees.length === 0 ? 'opacity-50' : 'hover:text-blue-600 transition-colors'
+                }`}
+              >
+                <LuUsers className="w-5 h-5 text-blue-600" />
+                {attendees.length === 0 ? (
+                  event.max_attendee === null ? (
+                    'No attendee limit'
+                  ) : (
+                    `Limited to ${event.max_attendee} attendees`
+                  )
+                ) : (
+                  `View ${attendees.length} applicants`
+                )} </button>
               <p className="flex items-center gap-2 text-gray-600">
-                <LuUsers className="w-5 h-5 text-dark-purple" />
-                {event.max_attendee === null ? "No attendees limit" : `Limited to ${event.max_attendee} attendees attendees max`}
-              </p>
-              <p className="flex items-center gap-2 text-gray-600">
-                <LuCalendarDays className="w-5 h-5 text-dark-purple" />
+                <LuCalendarDays className="w-5 h-5 text-blue-600" />
                 Registration closes {new Date(event.end_date_register).toLocaleDateString()}
               </p>
             </div>
@@ -231,9 +261,8 @@ export function EventInfo({ event }) {
               </div>
             </div>
           </div>)}
-
           {/* Social Links */}
-          {socialLinks.length > 0 && (
+          {socialLinks.length > 0 || event.other_url && (
             <div className="card bg-white">
               <div className="card-body">
                 <h3 className="font-semibold text-dark-purple text-lg mb-4">Social Media</h3>
@@ -249,12 +278,32 @@ export function EventInfo({ event }) {
                       <Icon className="h-5 w-5 text-dark-purple" />
                     </a>
                   ))}
+                  {event.other_url && (
+                    <div className="flex flex-wrap gap-4">
+                      {event.other_url.split(',').map((url, index) => (
+                        <a
+                          key={index}
+                          href={url.trim()}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="btn btn-circle btn-ghost"
+                        >
+                          <FaGlobe className="h-5 w-5 text-dark-purple" />
+                        </a>
+                      ))}
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
           )}
         </div>
       </div>
+      <ApplicantsList
+        isOpen={showApplicants}
+        onClose={() => setShowApplicants(false)}
+        applicants={attendees}
+      />
     </div>
   );
 }

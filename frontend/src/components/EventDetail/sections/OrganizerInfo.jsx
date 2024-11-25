@@ -1,4 +1,4 @@
-import { LuCheckCircle2 } from "react-icons/lu";
+import { LuBadgeCheck } from "react-icons/lu";
 
 export function OrganizerInfo({ organizer }) {
   return (
@@ -15,7 +15,7 @@ export function OrganizerInfo({ organizer }) {
               <div className="flex items-center gap-2">
                 <h2 className="text-xl text-dark-purple font-semibold">{organizer.organizer_name}</h2>
                 {organizer.is_verified && (
-                  <LuCheckCircle2 className="h-5 w-5 text-dark-purple" />
+                  <LuBadgeCheck className="w-4 h-4 ml-1 text-blue-500" />
                 )}
               </div>
               <p className="text-sm text-base-content/70">{organizer.organization_type}</p>

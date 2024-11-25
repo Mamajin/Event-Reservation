@@ -15,11 +15,10 @@ function Sidebar() {
     // Define the menu items with conditional inclusion of "My Events"
     const Menus = [
         { title: "Discover", path: "/discover" },
-        { title: "Applied Events", path: "/applied-events" },
         ...(isLoggedIn && isOrganizer ? [{ title: "My Events", path: "/my-events" }] : []),  // Only show if the user is an organizer
         { title: "My Tickets", path: "/my-tickets" },
         { title: "Bookmarks", path: "/bookmarks" },
-        { title: "Become Organizer", path: "/become-organizer" },
+        ...(!isOrganizer ? [{ title: "Become Organizer", path: "/become-organizer" }] : []),
         
     ];
 
