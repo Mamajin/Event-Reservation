@@ -74,7 +74,7 @@ GOOGLE_OAUTH_SCOPES = [
 ]
 
 
-SITE_URL = 'http://127.0.0.1:8000/'
+SITE_URL = 'https://event-reservation-1-lpob.onrender.com/'
 
 
 # Email Configuration

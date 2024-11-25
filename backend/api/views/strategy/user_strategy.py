@@ -423,28 +423,27 @@ class UserVerifyEmail(UserStrategy):
         Returns:
             Response: A response indicating success if the token is valid and not expired, or an error message if the token is invalid or expired.
         """
-
         try:
             uid = force_str(urlsafe_base64_decode(user_id))
             user = AttendeeUser.objects.get(pk=uid)
             
-            # Check if token is valid and user is not yet verified
-            if default_token_generator.check_token(user, token) and not user.is_email_verified:
-                user.is_email_verified = True
-                user.is_active = True
-                user.save()
+            if user is None:
+                raise AttendeeUser.DoesNotExist
+            
+            if not default_token_generator.check_token(user, token):
+                raise ValueError("Invalid verification token")
+            
+            user.is_email_verified = True
+            user.is_active = True
+            user.save()
                 
-                return Response({
-                    "message": "Email verified successfully",
-                    "verified": True
-                }, status=200)
-            else:
-                return Response({
-                    "error": "Invalid or expired token"
-                }, status=400)
-        except (TypeError, ValueError, OverflowError, AttendeeUser.DoesNotExist):
             return Response({
-                "error": "Invalid verification token"
+                "message": "Email verified successfully",
+                "verified": True
+            }, status=200)
+        except (TypeError, ValueError, OverflowError, AttendeeUser.DoesNotExist) as e:
+            return Response({
+                "error": str(e)
             }, status=400)
             
 class UserResendVeification(UserStrategy):
