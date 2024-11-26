@@ -57,7 +57,8 @@ function App() {
           <Route path="/become-organizer" element={<ApplyOrganizer />} />
           <Route path="/events/:eventId" element={<EventDetail />} />
           <Route path="/logout" element={<Logout />} />
-
+          <Route path="/verify-email/:user_id/:token" element={<EmailVerification />} />
+          
           {/* Footer Pages */}
           <Route path="/legal/terms-of-use" element={<TermsOfUse />} />
           <Route path="/legal/privacy-policy" element={<PrivacyInfo />} />
