@@ -37,7 +37,7 @@ class EmailVerification:
         site_url = settings.SITE_URL.rstrip('/') + '/'
         
         # Construct verification URL
-        verification_url = f"{site_url}verify-email/{user_id}/{token}/"
+        verification_url = f"{site_url}api/users/verify-email/{user_id}/{token}/"
         
         subject = 'EventEase - Verify your email address'
         
