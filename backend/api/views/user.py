@@ -127,7 +127,7 @@ class UserAPI:
         strategy: UserStrategy = UserStrategy.get_strategy('user_upload_picture')
         return strategy.execute(request, profile_picture)
         
-    @route.get('/verify-email/{user_id}/{token}', response={200: EmailVerificationResponseSchema, 400: ErrorResponseSchema})
+    @route.get('/verify-email/{user_id}/{token}/', response={200: EmailVerificationResponseSchema, 400: ErrorResponseSchema})
     def verify_email(self,request, user_id: str, token: str):
         """
         Verify the email address of the user with the specified user ID and verification token.

@@ -1,32 +1,23 @@
-from django.conf import settings
-from celery import shared_task
-from django.utils.http import urlsafe_base64_encode
-from django.utils.encoding import force_bytes
-from django.contrib.auth.tokens import default_token_generator
-from django.utils import timezone
-from email.mime.text import MIMEText
-from email.mime.multipart import MIMEMultipart
-from datetime import timedelta
-from celery import shared_task
-from django.utils import timezone
-from datetime import timedelta
 import logging
 import smtplib
+from celery import shared_task
+from django.conf import settings
+from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
+from django.utils.encoding import force_bytes, force_str
+from django.contrib.auth.tokens import default_token_generator
+from django.utils import timezone
+from datetime import timedelta
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
 
 
 logger = logging.getLogger(__name__)
-
 
 class EmailVerification:
     @staticmethod
     def generate_verification_token(user):
         """
         Generates a verification token for the given user.
-
-        The verification token is used in the verification email sent to the user.
-
-        :param user: The user to generate the verification token for.
-        :return: The verification token.
         """
         return default_token_generator.make_token(user)
     
@@ -34,45 +25,85 @@ class EmailVerification:
     def send_verification_email(user, token):
         """
         Sends a verification email to the given user.
-
-        The verification email contains a link with a verification token that the user
-        can use to verify their email address.
-
-        :param user: The user to send the verification email to.
-        :param token: The verification token to include in the email.
         """
+        if not user or not token:
+            logger.error("Failed to send verification email to user: %s", user)
+            return False
+        
+        # Encode user ID as URL-safe base64
         user_id = urlsafe_base64_encode(force_bytes(user.id))
-        verification_url = f"{settings.SITE_URL}api/users/verify-email/{user_id}/{token}"
         
-        subject = 'EventEase Verify your email address'
+        # Ensure SITE_URL ends with a slash
+        site_url = settings.SITE_URL.rstrip('/') + '/'
         
-        plain_message = f"Hi,\n\nPlease verify your email by visiting this link: {verification_url}\n\nIf you didn’t sign up, please ignore this email."
+        # Construct verification URL
+        verification_url = f"{site_url}api/users/verify-email/{user_id}/{token}/"
         
+        subject = 'EventEase - Verify your email address'
+        
+        # Create plain text version
+        plain_message = f"""
+            Hi {user.get_full_name() or user.email},
+            
+            Please verify your email address by clicking the link below:
+            {verification_url}
+            
+            This link will expire in 24 hours.
+            
+            If you didn't sign up for an account, please ignore this email.
+            
+            Best regards,
+            EventEase Team
+                    """
+        
+        # Create HTML version
         html_message = f"""
         <html>
-            <body>
-                <p>Hi,</p>
-                <p>Thank you for registering! Please click the link below to verify your email address:</p>
-                <a href="{verification_url}">Verify Email</a>
-                <p>If you didn’t sign up, please ignore this email.</p>
+            <body style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+                <h2 style="color: #333;">Verify Your Email Address</h2>
+                <p>Hi {user.get_full_name() or user.email},</p>
+                <p>Thank you for registering! Please verify your email address by clicking the button below:</p>
+                <div style="text-align: center; margin: 30px 0;">
+                    <a href="{verification_url}" 
+                       style="background-color: #4CAF50; color: white; padding: 12px 24px; 
+                              text-decoration: none; border-radius: 4px; display: inline-block;">
+                        Verify Email Address
+                    </a>
+                </div>
+                <p style="color: #666;">Or copy and paste this link in your browser:</p>
+                <p style="word-break: break-all; color: #666;">{verification_url}</p>
+                <p style="color: #666;">This link will expire in 24 hours.</p>
+                <p style="margin-top: 30px; font-size: 0.9em; color: #666;">
+                    If you didn't sign up for an account, please ignore this email.
+                </p>
+                <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee;">
+                    <p style="color: #666; font-size: 0.8em;">
+                        This is an automated message, please do not reply to this email.
+                    </p>
+                </div>
             </body>
         </html>
         """
         
-        msg = MIMEMultipart('alternative')
-        msg['From'] = settings.EMAIL_HOST_USER
-        msg['To'] = user.email
-        msg['Subject'] = subject
-        
-        msg.attach(MIMEText(plain_message, 'plain'))
-        msg.attach(MIMEText(html_message, 'html'))
-
-        with smtplib.SMTP(settings.EMAIL_HOST, settings.EMAIL_PORT) as server:
-            server.starttls()
-            server.login(settings.EMAIL_HOST_USER, settings.EMAIL_HOST_PASSWORD)
-            server.sendmail(msg['From'], [msg['To']], msg.as_string())
-            logger.info("Email sent successfully to %s", user.email)
+        try:
+            msg = MIMEMultipart('alternative')
+            msg['From'] = settings.EMAIL_HOST_USER
+            msg['To'] = user.email
+            msg['Subject'] = subject
             
+            msg.attach(MIMEText(plain_message, 'plain'))
+            msg.attach(MIMEText(html_message, 'html'))
+            
+            with smtplib.SMTP(settings.EMAIL_HOST, settings.EMAIL_PORT) as server:
+                server.starttls()
+                server.login(settings.EMAIL_HOST_USER, settings.EMAIL_HOST_PASSWORD)
+                server.sendmail(msg['From'], [msg['To']], msg.as_string())
+                logger.info("Verification email sent successfully to %s", user.email)
+                return True
+        except Exception as e:
+            logger.error("Failed to send verification email to %s: %s", user.email, str(e))
+            return False
+        
 
 class TicketEmailService:
     """
