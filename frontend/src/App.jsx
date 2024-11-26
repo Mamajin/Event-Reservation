@@ -33,6 +33,7 @@ import VirtualTicket from './pages/VirtualTicket';
 import MyTickets from './pages/MyTickets';
 import TicketDetail from './pages/TicketDetail';
 import CompleteProfile from './pages/CompleteProfilePage';
+import EmailVerification from './pages/VerifyEmail';
 function App() {
   useEffect(() => {
     const token = getAccessToken();
@@ -57,7 +58,8 @@ function App() {
           <Route path="/become-organizer" element={<ApplyOrganizer />} />
           <Route path="/events/:eventId" element={<EventDetail />} />
           <Route path="/logout" element={<Logout />} />
-
+          <Route path="/verify-email/:user_id/:token" element={<EmailVerification />} />
+          
           {/* Footer Pages */}
           <Route path="/legal/terms-of-use" element={<TermsOfUse />} />
           <Route path="/legal/privacy-policy" element={<PrivacyInfo />} />

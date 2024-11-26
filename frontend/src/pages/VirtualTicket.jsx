@@ -54,7 +54,10 @@ function VirtualTicket() {
   if (loading) {
     return (
       <PageLayout>
-        <div className="text-center mt-8">Loading ticket details...</div>
+        <div className="text-center mt-8">Loading virtual ticket...</div>
+        <div className="flex justify-center items-center h-screen -mt-24">
+          <span className="loading loading-spinner loading-lg"></span>
+        </div>
       </PageLayout>
     );
   }
