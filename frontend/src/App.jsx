@@ -33,6 +33,7 @@ import VirtualTicket from './pages/VirtualTicket';
 import MyTickets from './pages/MyTickets';
 import TicketDetail from './pages/TicketDetail';
 import CompleteProfile from './pages/CompleteProfilePage';
+import EmailVerification from './pages/VerifyEmail';
 function App() {
   useEffect(() => {
     const token = getAccessToken();

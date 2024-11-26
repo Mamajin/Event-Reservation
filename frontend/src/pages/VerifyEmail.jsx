@@ -101,9 +101,8 @@ const EmailVerification = () => {
     useEffect(() => {
         const verifyEmail = async () => {
             try {
-                const response = api.get(`/users/verify-email/${user_id}/${token}/`, {
-                    method: 'GET',
-                });
+                const response = api.get(`/users/verify-email/${user_id}/${token}/`);
+                
                 if (response.ok) {
                     setStatus('success');
                 } else {
