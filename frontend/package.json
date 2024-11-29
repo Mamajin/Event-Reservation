@@ -14,6 +14,7 @@
     "@heroicons/react": "^2.1.5",
     "@react-oauth/google": "^0.12.1",
     "axios": "^1.7.7",
+    "cypress": "^13.16.0",
     "date-fns": "^4.1.0",
     "fast-average-color": "^9.4.0",
     "framer-motion": "^11.11.11",
