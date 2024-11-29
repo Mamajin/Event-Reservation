@@ -16,7 +16,6 @@ function Bookmark() {
     useEffect(() => {
         const fetchBookmarkedEvents = async () => {
             try {
-                console.log('Fetching bookmarked events...');
                 const token = localStorage.getItem(ACCESS_TOKEN);
                 if (!token || !userId) {
                     throw new Error('No access token or user ID found');
@@ -30,7 +29,6 @@ function Bookmark() {
                 });
 
                 setEvents(response.data);
-                console.log('Fetched bookmarked events:', response.data);
             } catch (err) {
                 console.error('Error fetching bookmarked events:', err);
                 setError(err);

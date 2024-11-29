@@ -20,7 +20,6 @@ function MyEvents() {
     useEffect(() => {
         const fetchOrganizerEvents = async () => {
             try {
-                console.log('Fetching organizer events...');
                 const token = localStorage.getItem(ACCESS_TOKEN);
                 if (!token || !userId) {
                     throw new Error('No access token or user ID found');
@@ -35,7 +34,6 @@ function MyEvents() {
                 });
 
                 setEvents(response.data);
-                console.log('Fetched organizer events:', response.data);
             } catch (err) {
                 console.error('Error fetching organizer events:', err);
                 setError(err);

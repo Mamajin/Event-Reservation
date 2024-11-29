@@ -79,7 +79,6 @@ function AccountInfo() {
         headers: { Authorization: `Bearer ${token}` },
       });
   
-      console.log("User data updated successfully:", response.data);
       setIsEditing(false);
       window.location.reload();
     } catch (err) {
