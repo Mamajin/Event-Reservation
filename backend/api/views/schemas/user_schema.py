@@ -89,3 +89,14 @@ class UserupdateSchema(Schema):
     instagram_handle: Optional[str] = Field(None)
     company: Optional[str] = Field(None)
     profile_picture: Optional[str] = Field(None)
+    
+class ForgotPasswordSchema(Schema):
+    email: str
+
+class ResetPasswordSchema(Schema):
+    new_password: str
+    confirm_password: str
+    
+class ResetPasswordValidationSchema(Schema):
+    is_valid: bool
+    message: str

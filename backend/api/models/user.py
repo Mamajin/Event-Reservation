@@ -107,6 +107,16 @@ class AttendeeUser(AbstractUser):
         self.save()
         
         EmailVerification.send_verification_email(self, token)
+        
+    def reset_password(self, new_password):
+        """
+        Reset the user's password
+        
+        Args:
+            new_password (str): New password to set
+        """
+        self.set_password(new_password)
+        self.save()
 
     def __str__(self):
         return f"{self.full_name} ({self.email})"
