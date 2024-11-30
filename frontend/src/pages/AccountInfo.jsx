@@ -234,8 +234,15 @@ function AccountInfo() {
                 </p>
               </div>
               </div>
+
+              <div>
+              <div key="username" className="grid grid-cols-2">
+                <label className="block text-l font-medium text-gray-700">Username</label>
+                <p className="mt-0 text-gray-900">{userData.username || 'N/A'}</p>
+              </div>
+              </div>
   
-              {['username', 'first_name', 'last_name', 'email'].map((field) => (
+              {['first_name', 'last_name', 'email'].map((field) => (
                 <div key={field} className="grid grid-cols-2">
                   <label className="block text-l font-medium text-gray-700 capitalize">
                     {field.replace('_', ' ')}

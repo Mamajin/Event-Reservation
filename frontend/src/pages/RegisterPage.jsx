@@ -127,7 +127,7 @@ export default function Register() {
                                 required
                             />
                             <input
-                                className="input bg-white input-bordered w-full mb-3"
+                                className="input bg-white hover:bg-gray-300 transition-colors duration-200 input-bordered w-full mb-3"
                                 type="date"
                                 value={birthDate}
                                 onChange={(e) => setBirthDate(e.target.value)}

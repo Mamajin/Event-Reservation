@@ -75,7 +75,7 @@ GOOGLE_OAUTH_SCOPES = [
 ]
 
 
-SITE_URL = 'https://event-reservation-1-lpob.onrender.com/'
+SITE_URL = 'https://event-reservation-isp.vercel.app/'
 
 
 # Email Configuration

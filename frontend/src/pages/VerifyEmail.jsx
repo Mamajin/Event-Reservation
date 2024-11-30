@@ -1,109 +1,18 @@
-// import React, { useEffect, useState } from 'react';
-// import PageLayout from '../components/PageLayout';
-// import { useNavigate } from 'react-router-dom';
-// import EventCard from '../components/EventCard';
-// import { ACCESS_TOKEN } from "../constants";
-// import useUserProfile from '../hooks/useUserProfile';
-// import api from '../api';
-
-// function VerifyEmail() {
-//     const [loading, setLoading] = useState(true);
-//     const [error, setError] = useState(null);
-//     const navigate = useNavigate();
-//     const { userId, loading: userLoading, error: userError } = useUserProfile(navigate);
-
-//     useEffect(() => {
-//         const fetchUserData = async () => {
-//             try {
-//                 console.log('Fetching bookmarked events...');
-//                 const token = localStorage.getItem(ACCESS_TOKEN);
-//                 if (!token || !userId) {
-//                     throw new Error('No access token or user ID found');
-//                 }
-//             } catch (err) {
-//                 console.error('Error fetching bookmarked events:', err);
-//                 setError(err);
-//             } finally {
-//                 setLoading(false);
-//             }
-//         };
-
-//     }, [navigate, userId, userLoading]);
-
-//     if (loading || userLoading) {
-//         return (
-//             <PageLayout>
-//             <div className="text-center mt-8">Loading your Vef...</div>
-//             <div className="flex justify-center items-center h-screen -mt-24">
-//                 <span className="loading loading-spinner loading-lg"></span>
-//             </div>
-//           </PageLayout>
-//         );
-//     }
-
-//     if (error || userError) {
-//         return (
-//             <PageLayout>
-//                 <div className="flex justify-center items-start min-h-screen p-4">
-//                     <div className="w-full max-w-[1400px] max-w-lg bg-white rounded-lg shadow-lg p-6 space-y-4">
-//                         <h2 className="text-2xl font-bold mb-4 text-center text-dark-purple">Error</h2>
-//                         <div className="text-center">
-//                             <div>Error fetching bookmarked events: {error?.message || userError?.message}</div>
-//                         </div>
-//                     </div>
-//                 </div>
-//             </PageLayout>
-//         );
-//     }
-
-//     if (events.length === 0) {
-//         return (
-//             <PageLayout>
-//                 <div className="flex justify-center items-start min-h-screen p-4">
-//                     <div className="w-full max-w-[1400px] max-w-lg bg-white rounded-lg shadow-lg p-6 space-y-4">
-//                         <h2 className="text-2xl font-bold mb-4 text-center text-dark-purple">Bookmarked Events</h2>
-//                         <div className="grid grid-cols-1 gap-4">
-//                             <div>No bookmarked events available</div>
-//                         </div>
-//                     </div>
-//                 </div>
-//             </PageLayout>
-//         );
-//     }
-
-//     return (
-//         <PageLayout>
-//             <div className="flex justify-center items-start min-h-screen p-4">
-//                 <div className="w-full max-w-[1400px] bg-white rounded-lg shadow-lg p-6 space-y-4">
-//                     <h1 className="text-2xl font-bold mb-6 text-center text-dark-purple">Bookmarked Events</h1>
-//                     <div className="grid grid-cols-1 gap-4">
-//                         {events.map((event) => (
-//                             <EventCard key={event.id} event={event} />
-//                         ))}
-//                     </div>
-//                 </div>
-//             </div>
-//         </PageLayout>
-//     );
-// }
-
-// export default VerifyEmail;
-
-
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import api from '../api';
+import api from '../api'; // Replace with your API configuration
 
 const EmailVerification = () => {
     const { user_id, token } = useParams();
     const [status, setStatus] = useState('loading');
+    const [email, setEmail] = useState('');
+    const [resendStatus, setResendStatus] = useState(null); // 'success', 'error', or null
 
     useEffect(() => {
         const verifyEmail = async () => {
             try {
-                const response = api.get(`/users/verify-email/${user_id}/${token}/`);
-                
-                if (response.ok) {
+                const response = await api.get(`/users/verify-email/${user_id}/${token}/`);
+                if (response.status === 200) {
                     setStatus('success');
                 } else {
                     setStatus('error');
@@ -117,13 +26,81 @@ const EmailVerification = () => {
         verifyEmail();
     }, [user_id, token]);
 
+    const handleResendVerification = async (e) => {
+        e.preventDefault();
+        try {
+            const response = await api.post(`/users/resend-verification/`, { email });
+            if (response.status === 200) {
+                setResendStatus('success');
+            } else {
+                setResendStatus('error');
+            }
+        } catch (error) {
+            console.error('Resend verification failed:', error);
+            setResendStatus('error');
+        }
+    };
+
     if (status === 'loading') {
-        return <p>Verifying your email...</p>;
+        return (
+            <div className="flex justify-center items-center h-screen">
+                <div className="text-center">
+                    <p className="text-lg font-semibold">Verifying your email...</p>
+                    <progress className="progress w-56"></progress>
+                </div>
+            </div>
+        );
     }
+
     if (status === 'success') {
-        return <p>Your email has been verified successfully! <a href="/login">Login here</a>.</p>;
+        return (
+            <div className="flex justify-center items-center h-screen">
+                <div className="card shadow-lg p-8 bg-green-100 text-green-800">
+                    <h1 className="text-2xl font-bold">Email Verified!</h1>
+                    <p className="my-4">Your email has been successfully verified. You can now log in to your account.</p>
+                    <a href="/login" className="bg-black text-white hover:bg-white hover:text-black btn btn-primary">
+                        Login
+                    </a>
+                </div>
+            </div>
+        );
     }
-    return <p>Verification failed. The link may have expired. <a href="/resend-verification">Resend verification email</a>.</p>;
+
+    return (
+        <div className="flex justify-center items-center h-screen">
+            <div className="card shadow-lg p-8 bg-red-100 text-red-800 w-full max-w-md">
+                <h1 className="text-2xl font-bold mb-4">Email Verification Failed</h1>
+                <p className="mb-4">
+                    The verification link may have expired. Please try resending the verification email.
+                </p>
+                <form onSubmit={handleResendVerification}>
+                    <div className="form-control mb-4">
+                        <label className="label" htmlFor="email">
+                            <span className="label-text">Email Address</span>
+                        </label>
+                        <input
+                            type="email"
+                            id="email"
+                            className="input input-bordered w-full"
+                            placeholder="Enter your email"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                            required
+                        />
+                    </div>
+                    <button type="submit" className="bg-black text-white hover:bg-white hover:text-black btn btn-error w-full">
+                        Resend Verification Email
+                    </button>
+                </form>
+                {resendStatus === 'success' && (
+                    <p className="text-green-500 mt-4">Verification email has been resent successfully.</p>
+                )}
+                {resendStatus === 'error' && (
+                    <p className="text-red-500 mt-4">Failed to resend verification email. Please try again.</p>
+                )}
+            </div>
+        </div>
+    );
 };
 
 export default EmailVerification;
