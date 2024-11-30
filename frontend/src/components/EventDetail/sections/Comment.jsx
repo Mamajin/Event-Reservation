@@ -48,24 +48,26 @@ export function CommentSection({ event }) {
       }
     },
     writeComment: async (content, eventId, parentId = null) => {
-      try {
-        const token = localStorage.getItem(ACCESS_TOKEN);
-        if (!token) {
-          alert('User is not authenticated. Please log in.');
-        } else {
+      const token = localStorage.getItem(ACCESS_TOKEN);
+      if (!token) {
+        const error = new Error('Authentication required');
+        error.name = 'AuthenticationError';
+        throw error;
+      }
     
+      try {
         const headers = {
           Authorization: `Bearer ${token}`,
         };
+        
         const response = await api.post(
           `/comments/write-comment/${eventId}`,
           { content, parent_id: parentId },
           { headers }
         );
-        return response.data;}
+        return response.data;
       } catch (error) {
-        const errorMessage = error.response?.data?.detail || error.message || 'Error creating comment';
-        alert(errorMessage);
+        throw error;
       }
     },
     
@@ -116,23 +118,87 @@ export function CommentSection({ event }) {
   // Handle form submission for new comment
   const onSubmit = async () => {
     if (!event?.id || !comment.trim()) return;
+    
     try {
       setIsLoading(true);
+      
+      // Check for authentication before attempting to post
+      const token = localStorage.getItem(ACCESS_TOKEN);
+      if (!token) {
+        console.error('No authentication token found');
+        alert('Please log in to post a comment');
+        window.location.href = '/login';
+        
+        return;
+      }
+  
       const newComment = await end_point.writeComment(
         replyingTo ? replyContent : comment,
         event.id,
         replyingTo ? replyingTo : null
       );
+  
+
       setComments(prev => [newComment, ...prev]);
-      setComment(''); // Clear comment field
-      setReplyContent(''); // Clear reply field
-      setReplyingTo(null); // Reset replyingTo
+      setComment('');
+      setReplyContent('');
+      setReplyingTo(null);
+      setError(null);
     } catch (error) {
-      setError(error.message);
+      console.error('Comment submission error:', {
+        message: error.message,
+        response: error.response,
+        fullError: error
+      });
+
+      if (error.response) {
+ 
+        const errorMessage = error.response.data?.detail 
+          || error.response.data?.message 
+          || 'An error occurred while posting the comment';
+        
+        alert(errorMessage);
+      } else if (error.request) {
+        // The request was made but no response was received
+        alert('No response received from server. Please check your connection.');
+      } else {
+        // Something happened in setting up the request
+        alert('Error: ' + error.message);
+      }
     } finally {
       setIsLoading(false);
     }
   };
+  
+  writeComment: async (content, eventId, parentId = null) => {
+    const token = localStorage.getItem(ACCESS_TOKEN);
+    if (!token) {
+      const error = new Error('Authentication required');
+      error.name = 'AuthenticationError';
+      throw error;
+    }
+  
+    try {
+      const headers = {
+        Authorization: `Bearer ${token}`,
+      };
+      
+      const response = await api.post(
+        `/comments/write-comment/${eventId}`,
+        { content, parent_id: parentId },
+        { headers }
+      );
+      return response.data;
+    } catch (error) {
+      console.error('Write comment API error:', {
+        message: error.message,
+        response: error.response,
+        fullError: error
+      });
+      throw error;
+    }
+  }
+
 
   // Handle delete
   const handleDelete = async (commentId) => {
