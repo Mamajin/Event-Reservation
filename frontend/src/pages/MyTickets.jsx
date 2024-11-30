@@ -104,7 +104,7 @@ function MyTickets() {
 
   return (
     <PageLayout>
-      <div className="max-w-4xl max-w-[1400px] mx-auto p-6 bg-white shadow-lg rounded-lg mt-8">
+      <div className="max-w-4xl max-w-[1400px] mx-auto p-6 bg-white shadow-lg rounded-lg mt-8" data-testid="virtual-ticket-exist">
         <h1 className="text-2xl text-dark-purple mb-5 font-bold text-center">My Tickets</h1>
         <div className="grid gap-6">
           {tickets.map((ticket) => {

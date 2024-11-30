@@ -82,10 +82,7 @@ function VirtualTicket() {
 
   return (
     <PageLayout>
-      <div 
-      className="max-w-lg mx-auto p-6 bg-white shadow-xl rounded-lg mt-8 relative overflow-hidden"
-      data-testid="virtual-ticket"
-      >
+      <div className="max-w-lg mx-auto p-6 bg-white shadow-xl rounded-lg mt-8 relative overflow-hidden">
         {/* Watermark */}
         <div className="absolute inset-0 transform rotate-45 flex justify-center items-center text-7xl text-gray-300 font-bold opacity-20 pointer-events-none" style={{ zIndex: 1 }}>
           EventEase
