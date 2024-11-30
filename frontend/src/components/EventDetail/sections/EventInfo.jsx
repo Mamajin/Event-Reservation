@@ -111,14 +111,14 @@ export function EventInfo({ event }) {
     }
   };
   return (
-    <div className="container bg-gray-50 py-8 min-h-screen ">
+    <div className="container bg-gray-50 py-8 min-h-screen" data-testid="event-info">
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 h-full">
         {/* Main Content */}
         <div className="lg:col-span-2 space-y-8 flex flex-col">
           <div className="space-y-8">
             <div className="bg-white rounded-xl p-6 shadow-sm">
               <h2 className="text-2xl font-semibold mb-4 text-dark-purple">About the Event</h2>
-              <p className="text-gray-600 leading-relaxed break-words">
+              <p className="text-gray-600 leading-relaxed break-words" data-testid="event-info">
                 {event.detailed_description}
               </p>
             </div>

@@ -73,9 +73,9 @@ function Bookmark() {
     if (events.length === 0) {
         return (
             <PageLayout>
-                <div className="flex justify-center items-start min-h-screen p-4">
+                <div className="flex justify-center items-start min-h-screen p-4" data-testid="empty-bookmarks-message">
                     <div className="w-full max-w-[1400px] max-w-lg bg-white rounded-lg shadow-lg p-6 space-y-4">
-                        <h2 className="text-2xl font-bold mb-4 text-center text-dark-purple">Bookmarked Events</h2>
+                        <h1 className="text-2xl font-bold mb-4 text-center text-dark-purple">Bookmarked Events</h1>
                         <div className="grid grid-cols-1 gap-4">
                             <div>No bookmarked events available</div>
                         </div>
@@ -87,7 +87,7 @@ function Bookmark() {
 
     return (
         <PageLayout>
-            <div className="flex justify-center items-start min-h-screen p-4">
+            <div className="flex justify-center items-start min-h-screen p-4" data-testid="bookmarks-exist">
                 <div className="w-full max-w-[1400px] bg-white rounded-lg shadow-lg p-6 space-y-4">
                     <h1 className="text-2xl font-bold mb-6 text-center text-dark-purple">Bookmarked Events</h1>
                     <div className="grid grid-cols-1 gap-4">
