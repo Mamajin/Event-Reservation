@@ -1,5 +1,5 @@
 describe('Login and View Event', () => {
-    it('Should login and navigate to event details', () => {
+    it('should login and navigate to event details', () => {
       cy.visit('/login');
   
       cy.get('input[placeholder="Username"]').type('testuser');
@@ -13,7 +13,6 @@ describe('Login and View Event', () => {
       // Navigate to Discover page
       cy.contains('a', 'Explore Events').click();
   
-      // Wait for events to load
       cy.intercept('GET', '/api/events/events').as('getEvents');
       cy.wait('@getEvents');
   
