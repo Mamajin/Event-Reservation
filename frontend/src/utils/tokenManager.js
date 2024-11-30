@@ -62,5 +62,8 @@ export const refreshToken = async () => {
   }
 };
 export const logoutUser = () => {
-  window.location.href = "/logout";
+  const token = getAccessToken();
+  if (!token || isTokenExpired(token)) {
+    window.location.href = "/logout";
+  }
 };

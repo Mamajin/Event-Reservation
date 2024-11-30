@@ -14,7 +14,7 @@ import boto3
 from botocore.exceptions import ClientError
 from django.conf import settings
 from django.contrib.auth import authenticate, login, logout
-from django.contrib.auth.hashers import make_password
+from django.contrib.auth.hashers import make_password, check_password
 from django.contrib.auth.models import User
 from django.core.exceptions import PermissionDenied, ValidationError
 from django.core.files.base import ContentFile

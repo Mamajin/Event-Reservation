@@ -104,6 +104,76 @@ class EmailVerification:
             logger.error("Failed to send verification email to %s: %s", user.email, str(e))
             return False
         
+    def send_password_reset_email(user, token):
+        """
+        Sends a password reset email to the given user.
+        """
+        if not user:
+            logger.error("Failed to send password reset email to user: %s", user)
+            return False
+        user_id = urlsafe_base64_encode(force_bytes(user.id))
+        site_url = settings.SITE_URL.rstrip('/') + '/'
+        verification_url = f"{site_url}reset-password/{user_id}/{token}/"
+        subject = 'EventEase - Reset Password'
+        plain_message = f"""
+            Hi {user.get_full_name() or user.email},
+            
+            Please verify your email address by clicking the link below:
+            {verification_url}
+            
+            This link will expire in 24 hours.
+            
+            If you didn't sign up for an account, please ignore this email.
+            
+            Best regards,
+            EventEase Team
+                    """
+        html_message = f"""
+        <html>
+            <body style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+                <h2 style="color: #333;">Reset Your Password</h2>
+                <p>Hi {user.get_full_name() or user.email},</p>
+                <p>Thank you for registering! Please verify your email address by clicking the button below:</p>
+                <div style="text-align: center; margin: 30px 0;">
+                    <a href="{verification_url}" 
+                       style="background-color: #4CAF50; color: white; padding: 12px 24px; 
+                              text-decoration: none; border-radius: 4px; display: inline-block;">
+                        Reset Password
+                    </a>
+                </div>
+                <p style="color: #666;">Or copy and paste this link in your browser:</p>
+                <p style="word-break: break-all; color: #666;">{verification_url}</p>
+                <p style="color: #666;">This link will expire in 24 hours.</p>
+                <p style="margin-top: 30px; font-size: 0.9em; color: #666;">
+                    If you didn't sign up for an account, please ignore this email.
+                </p>
+                <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee;">
+                    <p style="color: #666; font-size: 0.8em;">
+                        This is an automated message, please do not reply to this email.
+                    </p>
+                </div>
+            </body>
+        </html>
+        """
+        try:
+            msg = MIMEMultipart('alternative')
+            msg['From'] = settings.EMAIL_HOST_USER
+            msg['To'] = user.email
+            msg['Subject'] = subject
+            
+            msg.attach(MIMEText(plain_message, 'plain'))
+            msg.attach(MIMEText(html_message, 'html'))
+            
+            with smtplib.SMTP(settings.EMAIL_HOST, settings.EMAIL_PORT) as server:
+                server.starttls()
+                server.login(settings.EMAIL_HOST_USER, settings.EMAIL_HOST_PASSWORD)
+                server.sendmail(msg['From'], [msg['To']], msg.as_string())
+                logger.info("Reset password email sent successfully to %s", user.email)
+                return True
+        except Exception as e:
+            logger.error("Failed to send reset password email to %s: %s", user.email, str(e))
+            return False
+        
 
 class TicketEmailService:
     """

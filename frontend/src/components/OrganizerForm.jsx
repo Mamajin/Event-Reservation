@@ -41,16 +41,24 @@ function OrganizerForm() {
             console.error("Error applying to become an organizer", error);
             let errorMessage = "Failed to submit the application. Please try again.";
 
-            if (error.response) {
-                errorMessage = error.response.data?.error || errorMessage;
-            }
 
+            if (error.response) {
+                // Check if there are detailed error messages in the response
+                const errorDetail = error.response.data?.detail;
+                if (errorDetail && Array.isArray(errorDetail)) {
+                    // Look for the error related to the form field (e.g., "email")
+                    const emailError = errorDetail.find(e => e.loc.includes('email'));
+                    if (emailError) {
+                        // Set a more specific error message based on the email error
+                        errorMessage = emailError.msg || errorMessage;
+                    }
+                }
+            }
+        
             alert(errorMessage);
         } finally {
             setLoading(false);
-        }
-    };
-
+        }}
     return (
         <div className="flex justify-center items-start min-h-screen bg-white-100 p-0">
             <form
