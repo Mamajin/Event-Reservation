@@ -95,7 +95,7 @@ export default function CreateEvent() {
         console.error("Error response data:", error.response.data);
         errorMessage = error.response.data?.error || errorMessage;
       }
-      alert(errorMessage);
+      alert(error);
     } finally {
       setLoading(false);
     }

@@ -147,7 +147,53 @@ class EventTest(EventModelsTest):
 
 
         self.assertEqual(response.status_code, 403)
-        self.assertEqual(response.json()['detail'], "You are not an organizer.")
+        self.assertEqual(response.json()['error'], "You are not an organizer.")
+        
+    def test_organizer_create_event_with_event_name_empty_string(self):
+        user = self.create_user("become_organizer", "become_organizer")
+        organizer = self.become_organizer(user, "become_organizer")
+        token = self.get_token_for_user(user)
+        data = {
+            "category": "CONFERENCE",
+            "dress_code": "CASUAL",
+            "event_name": "",
+            "event_create_date": timezone.now().isoformat(),
+            "start_date_event": (timezone.now() + datetime.timedelta(days=2)).isoformat(),
+            "end_date_event": (timezone.now() + datetime.timedelta(days=3)).isoformat(),
+            "start_date_register": timezone.now().isoformat(),
+            "end_date_register": (timezone.now() + datetime.timedelta(days=1)).isoformat(),
+            "description": "A tech event for showcasing new innovations.",
+            "max_attendee": 100,
+            "address": "Tech Park, Downtown",
+            "latitude": 0.0,
+            "longitude": 0.0,
+            "is_free": True,
+            "ticket_price": 0.00,
+            "expected_price": 0.00,
+            "detailed_description": "Join us for an exciting event!",
+            "contact_email": "info@techconference.com",
+            "contact_phone": "+1234567890",
+            "updated_at": timezone.now().isoformat(),
+
+        }
+        response = self.client.post(
+            path = '/api/events/create-event',
+            data= data,
+            headers={'Authorization': f'Bearer {token}'}
+        )
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.json()['error'], "Event name is required.")
+        
+        
+    def test_organizer_edit_event_name_empty_string(self):
+        data = { 
+            "event_name": ""
+        }
+        token = self.get_token_for_user(self.test_user)
+        response = self.client.patch(f'/api/events/{self.event_test.id}/edit', data = json.dumps(data),headers={'Authorization': f'Bearer {token}'})
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.json()['error'], "Event name is required.")
+        
         
     
     def test_date_input_invalid(self):

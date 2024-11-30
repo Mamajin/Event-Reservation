@@ -8,8 +8,8 @@ export default function DateTimeDetails({ form }) {
           <DateTimeInput
             label="Registration Start Date"
             name="start_date_register"
-            value={form.getValues("start_date_register")}
-            onChange={(e) => form.setValue("start_date_register", e.target.value)}
+            value={form.watch("start_date_register")}
+            onChange={(e) => form.setValue("start_date_register", e.target.value, { shouldValidate: true })}
             required={true}
           />
         </div>
@@ -17,8 +17,8 @@ export default function DateTimeDetails({ form }) {
           <DateTimeInput
             label="Event Start Date"
             name="start_date_event"
-            value={form.getValues("start_date_event")}
-            onChange={(e) => form.setValue("start_date_event", e.target.value)}
+            value={form.watch("start_date_event")}
+            onChange={(e) => form.setValue("start_date_event", e.target.value, { shouldValidate: true })}
             required={true}
           />
         </div>
@@ -28,8 +28,8 @@ export default function DateTimeDetails({ form }) {
           <DateTimeInput
             label="Registration End Date"
             name="end_date_register"
-            value={form.getValues("end_date_register")}
-            onChange={(e) => form.setValue("end_date_register", e.target.value)}
+            value={form.watch("end_date_register")}
+            onChange={(e) => form.setValue("end_date_register", e.target.value, { shouldValidate: true })}
             required={true}
           />
         </div>
@@ -37,8 +37,8 @@ export default function DateTimeDetails({ form }) {
           <DateTimeInput
             label="Event End Date"
             name="end_date_event"
-            value={form.getValues("end_date_event")}
-            onChange={(e) => form.setValue("end_date_event", e.target.value)}
+            value={form.watch("end_date_event")}
+            onChange={(e) => form.setValue("end_date_event", e.target.value, { shouldValidate: true })}
             required={true}
           />
         </div>

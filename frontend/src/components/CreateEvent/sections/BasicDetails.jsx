@@ -139,7 +139,11 @@ export default function BasicDetails({ form }) {
             type="number"
             className="input input-bordered bg-white"
             placeholder="Enter minimum age"
-            {...form.register('min_age_requirement', { valueAsNumber: true })}
+            {...form.register('min_age_requirement', { 
+              valueAsNumber: true,
+              min: 0,
+            })}
+            min="0"
           />
         </div>
       </div>

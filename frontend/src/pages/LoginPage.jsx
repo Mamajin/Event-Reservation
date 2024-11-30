@@ -143,11 +143,11 @@ function Login() {
                                 className="input bg-white input-bordered" 
                                 onChange={(e) => setPassword(e.target.value)}
                             />
-                            <label className="label">
+                            {/* <label className="label">
                                 <a href="#" className="label-text-alt link link-hover">
                                     Forgot password?
                                 </a>
-                            </label>
+                            </label> */}
                         </div>
 
                         {/* Login Button */}

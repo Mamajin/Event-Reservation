@@ -145,7 +145,7 @@ class UserAPI:
         return strategy.execute(user_id, token)
 
     @route.post('/resend-verification', response={200: EmailVerificationResponseSchema, 400: ErrorResponseSchema})
-    def resend_verification(self,request, email: str):
+    def resend_verification(self, request, email: str):
         """
         Resend the verification email to the specified email address.
 
@@ -159,3 +159,53 @@ class UserAPI:
         
         strategy : UserStrategy = UserStrategy.get_strategy('user_resend_verification')
         return strategy.execute(email)
+    
+    @route.post('/forgot-password', response={200: ForgotPasswordSchema, 400: ErrorResponseSchema})
+    def forgot_password(self, data: ForgotPasswordSchema):
+        """
+        Send a password reset email to the specified email address.
+
+        Args:
+            request: The request object.
+            email (str): The email address to which the password reset email is to be sent.
+
+        Returns:
+            EmailVerificationResponseSchema: Password reset success message or error response.
+        """
+        strategy : UserStrategy = UserStrategy.get_strategy('user_forgot_password')
+        return strategy.execute(data)
+    
+    @route.get('/reset-password/{user_id}/{token}/', response={200: ResetPasswordValidationSchema})
+    def validate_reset_token(self, request, user_id: str, token: str):
+        """
+        Validates a password reset token for a given user.
+
+        Args:
+            request: The HTTP request object.
+            user_id (str): The ID of the user attempting to reset their password.
+            token (str): The password reset token to be validated.
+
+        Returns:
+            ResetPasswordValidationSchema: A schema containing the validation result.
+        """
+        strategy : UserStrategy = UserStrategy.get_strategy('user_reset_password')
+        return strategy.validate_reset_token(user_id, token)
+
+    @route.post('/reset-password', response={200: dict, 400: ErrorResponseSchema})
+    def reset_password(self, request, user_id: int, payload: ResetPasswordSchema):
+        """
+        Resets a user's password using the provided reset token and new password.
+
+        Args:
+            request: The HTTP request object.
+            payload (ResetPasswordSchema): A schema containing the user ID, reset token, new password, and confirmation of the new password.
+
+        Returns:
+            EmailVerificationResponseSchema: A schema containing the password reset success message or error response.
+        """
+        strategy : UserStrategy = UserStrategy.get_strategy('user_reset_password')
+        return strategy.execute(
+            user_id,
+            payload.new_password, 
+            payload.confirm_password
+        )

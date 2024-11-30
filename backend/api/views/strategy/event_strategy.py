@@ -169,7 +169,10 @@ class EventCreateStrategy(EventStrategy):
         try:
             organizer = Organizer.objects.get(user=self.user)
         except Organizer.DoesNotExist:
-            raise HttpError(status_code=403, message="You are not an organizer.")
+            return Response({'error': 'You are not an organizer.'}, status=403)
+        
+        if not data.event_name or data.event_name.strip() == "":
+            return Response({'error': 'Event name is required.'}, status=400)
         
         # Create event
         event = Event(**data.dict(), organizer=organizer)
@@ -290,6 +293,10 @@ class EventEditStrategy(EventStrategy):
             if event.organizer != organizer:
                 logger.warning(f"User {self.user.username} tried to edit an event they do not own.")
                 return Response({'error': 'You are not allowed to edit this event.'}, status=403)
+            
+            if not data.event_name or data.event_name.strip() == "":
+                return Response({'error': 'Event name is required.'}, status=400)
+            
             
             update_fields = data.dict(exclude_unset = True)
             for field, value in update_fields.items():
