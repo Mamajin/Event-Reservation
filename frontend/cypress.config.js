@@ -2,7 +2,9 @@ import { defineConfig } from "cypress";
 
 export default defineConfig({
   e2e: {
-    baseUrl: "https://event-reservation-isp.vercel.app/",
+    // Production URL https://event-reservation-isp.vercel.app/
+    // Local Host URL http://localhost:5173/
+    baseUrl: "http://localhost:5173/",
     defaultCommandTimeout: 10000,
     viewportWidth: 1280,
     viewportHeight: 720,
