@@ -50,6 +50,10 @@ export function CommentSection({ event }) {
     writeComment: async (content, eventId, parentId = null) => {
       try {
         const token = localStorage.getItem(ACCESS_TOKEN);
+        if (!token) {
+          alert('User is not authenticated. Please log in.');
+        } else {
+    
         const headers = {
           Authorization: `Bearer ${token}`,
         };
@@ -58,11 +62,13 @@ export function CommentSection({ event }) {
           { content, parent_id: parentId },
           { headers }
         );
-        return response.data;
+        return response.data;}
       } catch (error) {
-        throw new Error('Error creating comment: ' + (error.response?.data?.detail));
+        const errorMessage = error.response?.data?.detail || error.message || 'Error creating comment';
+        alert(errorMessage);
       }
     },
+    
 
     deleteComment: async (commentId) => {
       try {
@@ -73,7 +79,7 @@ export function CommentSection({ event }) {
         const response = await api.delete(`/comments/${commentId}/delete/`, { headers });
         return response.status === 204;
       } catch (error) {
-        throw new Error('Error deleting comment: ' + (error.response?.data?.detail));
+        alert('Error deleting comment: ' + (error.response?.data?.detail));
       }
     },
     editComment: async (commentId, content) => {
@@ -85,7 +91,7 @@ export function CommentSection({ event }) {
         const response = await api.put(`/comments/${commentId}/edit/`, { content }, { headers });
         return response.data;
       } catch (error) {
-        throw new Error('Error editing comment: ' + (error.response?.data?.detail));
+        alert('Error editing comment: ' + (error.response?.data?.detail));
       }
     }
   };
@@ -132,10 +138,37 @@ export function CommentSection({ event }) {
   const handleDelete = async (commentId) => {
     try {
       setIsLoading(true);
+      if (isLoading) return;
+  
+      // Check if the comment is a reply or a main comment
+      const isReply = comments.some(comment => 
+        comment.replies.some(reply => reply.id === commentId)
+      );
+  
+      if (isReply) {
+        // If it's a reply, update the specific comment replies
+        setComments(prev => 
+          prev.map(comment => ({
+            ...comment,
+            replies: comment.replies.filter(reply => reply.id !== commentId)
+          }))
+        );
+      } else {
+        // If it's a main comment, remove it from the main comments
+        setComments(prev => prev.filter(comment => comment.id !== commentId));
+      }
+  
       await end_point.deleteComment(commentId);
-      setComments(prev => prev.filter(comment => comment.id !== commentId));
     } catch (error) {
-      setError(error.message);
+      console.error('Error deleting comment:', error);
+      setError(error.message || 'An unknown error occurred');
+      if (isReply) {
+        const fetchedComments = await end_point.getEventComments(event.id);
+        setComments(fetchedComments);
+      } else {
+        const fetchedComments = await end_point.getEventComments(event.id);
+        setComments(fetchedComments);
+      }
     } finally {
       setIsLoading(false);
     }
@@ -197,6 +230,7 @@ export function CommentSection({ event }) {
     setReplyingTo(null);
     setReplyContent('');
   };
+ 
   const CommentContent = ({ comment, editingId, editContent, startEditing, saveEdit, cancelEditing }) => {
     return (
       <div className="flex items-start gap-3">
@@ -229,8 +263,8 @@ export function CommentSection({ event }) {
                     </button>
                   </li>
                   <li>
-                    <button onClick={() => handleDelete(comment.id)} className="flex items-center gap-2 text-red-600">
-                      <LuTrash2 className="w-4 h-4" /> Delete
+                    <button onClick={() => handleDelete(comment.id)} className="flex items-center gap-2 text-red-600" disabled={isLoading}>
+                      <LuTrash2 className="w-4 h-4" /> {isLoading ? "Deleting..." : "Delete"}
                     </button>
                   </li>
                 </ul>
