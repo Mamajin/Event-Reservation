@@ -27,7 +27,7 @@ function DateTimeInput({ label, name, value, onChange, required }) {
                 name={name}
                 defaultValue={formatDateForInput(value) || ""}
                 onChange={onChange}
-                className="input bg-gray-100 input-bordered w-full"
+                className="input bg-white hover:bg-gray-300 transition-colors duration-200text-dark-purple input-bordered focus:ring-2 focus:ring-purple-500 w-full"
                 required={required}
                 min={minDate}
                 max={maxDate}
