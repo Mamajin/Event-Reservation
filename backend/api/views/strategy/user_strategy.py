@@ -31,6 +31,8 @@ class UserStrategy(ABC):
             'user_upload_picture': UserUploadProfilePicture(),
             'user_verify_email' : UserVerifyEmail(),
             'user_resend_verification': UserResendVeification(),
+            'user_forgot_password': UserForgotPasswordStrategy(),
+            'user_reset_password': UserResetPasswordStrategy()
         }
         return strategies.get(strategy_name)
     
@@ -94,7 +96,11 @@ class UserRegisterStrategy(UserStrategy):
 
         if not form.phone_number.isdigit():
             raise ValidationError('Phone number must be digit')
-    
+
+        if form.birth_date:
+            today = timezone.now().date()
+            if form.birth_date > today:
+                raise ValidationError('Birth date cannot be in the future')
     
     
     def execute(self, form):
@@ -472,4 +478,131 @@ class UserResendVeification(UserStrategy):
             return Response({
                 "error": "User not found or already verified"
             }, status=400)
+            
+class UserForgotPasswordStrategy:
+    """
+    Strategy for handling forgot password process
+    """
+    
+    def execute(self, data):
+        """
+        Initiate password reset process by sending reset email
+        
+        Args:
+            email (str): Email address of the user
 
+        Returns:
+            Response: Success or error response
+        """
+        try:
+            user = AttendeeUser.objects.get(email=data.email)
+
+            token = EmailVerification.generate_verification_token(user)
+            sent = EmailVerification.send_password_reset_email(user, token)
+            
+            if sent:
+                return Response({
+                    "message": "Password reset link sent to your email"
+                }, status=200)
+            else:
+                return Response({
+                    "error": "Failed to send password reset email"
+                }, status=400)
+        
+        except AttendeeUser.DoesNotExist:
+            return Response({
+                "error": "No user found with this email address"
+            }, status=404)
+        except Exception as e:
+            logger.error(f"Forgot password error: {str(e)}")
+            return Response({
+                "error": "An unexpected error occurred"
+            }, status=500)
+            
+class UserResetPasswordStrategy:
+    """
+    Strategy for resetting user's password
+    """
+
+    def validate_reset_token(self, user_id: str, token: str):
+        """
+        Validate password reset token
+        
+        Args:
+            user_id (str): Base64 encoded user ID
+            token (str): Password reset token
+
+        Returns:
+            ResetPasswordValidationSchema: Validation result
+        """
+        try:
+            uid = urlsafe_base64_decode(user_id).decode()
+            user = AttendeeUser.objects.get(pk=uid)
+            
+            is_valid = default_token_generator.check_token(user, token)
+            
+            return Response({
+                "is_valid": is_valid,
+                "message": "Token is valid" if is_valid else "Invalid or expired reset token"
+            }, status=200)
+        
+        except AttendeeUser.DoesNotExist:
+            return Response({
+                "is_valid": False,
+                "message": "Invalid user"
+            }, status=404)
+        except Exception as e:
+            logger.error(f"Token validation error: {str(e)}")
+            return Response({
+                "is_valid": False,
+                "message": "An unexpected error occurred"
+            }, status=500)
+
+    def execute(self, user_id: int, new_password: str, confirm_password: str):
+        """
+        Reset user's password after verification
+        
+        Args:
+            user_id (str): Base64 encoded user ID
+            new_password (str): New password
+            confirm_password (str): Confirmation of new password
+
+        Returns:
+            Response: Success or error response
+        """
+        try:
+            user = AttendeeUser.objects.get(pk=user_id)
+            
+            # Validate passwords
+            if new_password is None or confirm_password is None:
+                return Response({
+                    "error": "Passwords cannot be empty"
+                }, status=400)
+            
+            if check_password(new_password, user.password):
+                return Response({
+                    "error": "New password cannot be the same as the old password"
+                }, status=400)
+            
+            if new_password != confirm_password:
+                return Response({
+                    "error": "Passwords do not match"
+                }, status=400)
+            
+            # Set and save new password
+            user.set_password(new_password)
+            user.save()
+            
+            return Response({
+                "message": f"Password reset successfully"
+            }, status=200)
+        
+        except AttendeeUser.DoesNotExist:
+            return Response({
+                "error": "Invalid user"
+            }, status=404)
+        except Exception as e:
+            logger.error(f"Password reset error: {str(e)}")
+            return Response({
+                "error": "An unexpected error occurred"
+            }, status=500)
