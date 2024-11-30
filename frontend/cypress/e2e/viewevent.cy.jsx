@@ -1,5 +1,5 @@
 describe('Login and View Event', () => {
-    it('should login and navigate to event details', () => {
+    it('Should login and navigate to event details', () => {
       cy.visit('/login');
   
       cy.get('input[placeholder="Username"]').type('testuser');
