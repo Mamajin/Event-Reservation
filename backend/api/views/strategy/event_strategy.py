@@ -169,7 +169,7 @@ class EventCreateStrategy(EventStrategy):
         try:
             organizer = Organizer.objects.get(user=self.user)
         except Organizer.DoesNotExist:
-            return Response({'error': 'You are not an organizer.'}, status=400)
+            return Response({'error': 'You are not an organizer.'}, status=403)
         
         if not data.event_name or data.event_name.strip() == "":
             return Response({'error': 'Event name is required.'}, status=400)
