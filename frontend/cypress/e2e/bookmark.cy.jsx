@@ -12,10 +12,9 @@ describe('Navigate to Bookmark Page', () => {
   it('should should display bookmarks if exist if non exist then show non', () => {
     cy.contains('Bookmarks').click();
   
-    // Verify navigation to the Bookmarks page
+
     cy.url().should('include', '/bookmarks');
   
-    // Check if the "Bookmarked Events" header is visible
     cy.get('h1').contains('Bookmarked Events').should('be.visible');
   
     // Flexible check for empty state or Bookmarks

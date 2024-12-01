@@ -12,7 +12,6 @@ describe('Navigate to MyTickets Page', () => {
     it('should should display tickets if exist if non exist then show non', () => {
         cy.contains('My Tickets').click();
       
-        // Verify navigation to the MyTickets page
         cy.url().should('include', '/my-tickets');
       
         // Check if the "My Tickets" header is visible
