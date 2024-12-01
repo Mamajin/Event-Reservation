@@ -98,6 +98,7 @@ export function EventHeader({ event }) {
           </button>
       </div>
       <div
+        data-testid="event-header"
         className="absolute inset-0 bg-cover bg-center"
         style={{
           backgroundImage: `url(${event.event_image || 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?q=80&w=2070'})`,
