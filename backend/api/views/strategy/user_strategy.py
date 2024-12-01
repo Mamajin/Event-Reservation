@@ -253,7 +253,7 @@ class UserGoogleAuthStrategy(UserStrategy):
                 email=email,
                 first_name=first_name,
                 last_name=last_name,
-                username=email.split('@')[0],  # Optionally use email prefix as username
+                username=email,  # Optionally use email prefix as username
                 password=make_password(get_random_string(8)),  # Generate a random password
             )
             user.send_verification_email()

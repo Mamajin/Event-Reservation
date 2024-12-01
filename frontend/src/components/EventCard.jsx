@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import LikeButton from './EventCardButton/LikeButton';
 import BookmarkButton from './EventCardButton/BookmarkButton';
 import ShareButton from './EventCardButton/ShareButton';
+import { ACCESS_TOKEN } from '../constants';
 import api from '../api';
 
 function EventCard({ event, onEdit, isEditable}) {
@@ -19,7 +20,11 @@ function EventCard({ event, onEdit, isEditable}) {
 
   const handleDelete = async (eventId) => {
     try {
-      await api.delete(`/organizers/delete-event/${eventId}`);
+      const token = localStorage.getItem(ACCESS_TOKEN);
+      await api.delete(`/organizers/delete-event/${eventId}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        }});
       window.location.reload();
     } catch (error) {
       console.error('Error deleting event:', error);
@@ -27,7 +32,10 @@ function EventCard({ event, onEdit, isEditable}) {
   };
 
   return (
-    <div className="flex bg-white shadow-lg p-4 mb-4 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer duration-200">
+    <div 
+    className="flex bg-white shadow-lg p-4 mb-4 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer duration-200"
+    data-testid="bookmark-card"
+    >
       <img
         className="w-1/3 h-48 object-cover rounded-lg"
         src={

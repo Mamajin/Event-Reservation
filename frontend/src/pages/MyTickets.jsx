@@ -91,8 +91,8 @@ function MyTickets() {
     return (
       <PageLayout>
         <div className="flex justify-center items-start min-h-screen p-4">
-          <div className="w-full max-w-[1400px] max-w-lg bg-white rounded-lg shadow-lg p-6 space-y-4">
-            <h2 className="text-2xl font-bold mb-4 text-center text-dark-purple">My Tickets</h2>
+          <div className="w-full max-w-[1400px] max-w-lg bg-white rounded-lg shadow-lg p-6 space-y-4" data-testid="empty-tickets-message">
+            <h1 className="text-2xl font-bold mb-4 text-center text-dark-purple">My Tickets</h1>
             <div className="grid grid-cols-1 gap-4">
               <div>You don't have any tickets at the moment.</div>
             </div>
@@ -104,7 +104,7 @@ function MyTickets() {
 
   return (
     <PageLayout>
-      <div className="max-w-4xl max-w-[1400px] mx-auto p-6 bg-white shadow-lg rounded-lg mt-8">
+      <div className="max-w-4xl max-w-[1400px] mx-auto p-6 bg-white shadow-lg rounded-lg mt-8" data-testid="virtual-ticket-exist">
         <h1 className="text-2xl text-dark-purple mb-5 font-bold text-center">My Tickets</h1>
         <div className="grid gap-6">
           {tickets.map((ticket) => {

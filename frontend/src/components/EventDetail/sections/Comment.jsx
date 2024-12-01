@@ -48,11 +48,18 @@ export function CommentSection({ event }) {
       }
     },
     writeComment: async (content, eventId, parentId = null) => {
+      const token = localStorage.getItem(ACCESS_TOKEN);
+      if (!token) {
+        const error = new Error('Authentication required');
+        error.name = 'AuthenticationError';
+        throw error;
+      }
+    
       try {
-        const token = localStorage.getItem(ACCESS_TOKEN);
         const headers = {
           Authorization: `Bearer ${token}`,
         };
+        
         const response = await api.post(
           `/comments/write-comment/${eventId}`,
           { content, parent_id: parentId },
@@ -60,9 +67,10 @@ export function CommentSection({ event }) {
         );
         return response.data;
       } catch (error) {
-        throw new Error('Error creating comment: ' + (error.response?.data?.detail));
+        throw error;
       }
     },
+    
 
     deleteComment: async (commentId) => {
       try {
@@ -73,7 +81,7 @@ export function CommentSection({ event }) {
         const response = await api.delete(`/comments/${commentId}/delete/`, { headers });
         return response.status === 204;
       } catch (error) {
-        throw new Error('Error deleting comment: ' + (error.response?.data?.detail));
+        alert('Error deleting comment: ' + (error.response?.data?.detail));
       }
     },
     editComment: async (commentId, content) => {
@@ -85,7 +93,7 @@ export function CommentSection({ event }) {
         const response = await api.put(`/comments/${commentId}/edit/`, { content }, { headers });
         return response.data;
       } catch (error) {
-        throw new Error('Error editing comment: ' + (error.response?.data?.detail));
+        alert('Error editing comment: ' + (error.response?.data?.detail));
       }
     }
   };
@@ -110,32 +118,123 @@ export function CommentSection({ event }) {
   // Handle form submission for new comment
   const onSubmit = async () => {
     if (!event?.id || !comment.trim()) return;
+    
     try {
       setIsLoading(true);
+      
+      // Check for authentication before attempting to post
+      const token = localStorage.getItem(ACCESS_TOKEN);
+      if (!token) {
+        console.error('No authentication token found');
+        alert('Please log in to post a comment');
+        window.location.href = '/login';
+        
+        return;
+      }
+  
       const newComment = await end_point.writeComment(
         replyingTo ? replyContent : comment,
         event.id,
         replyingTo ? replyingTo : null
       );
+  
+
       setComments(prev => [newComment, ...prev]);
-      setComment(''); // Clear comment field
-      setReplyContent(''); // Clear reply field
-      setReplyingTo(null); // Reset replyingTo
+      setComment('');
+      setReplyContent('');
+      setReplyingTo(null);
+      setError(null);
     } catch (error) {
-      setError(error.message);
+      console.error('Comment submission error:', {
+        message: error.message,
+        response: error.response,
+        fullError: error
+      });
+
+      if (error.response) {
+ 
+        const errorMessage = error.response.data?.detail 
+          || error.response.data?.message 
+          || 'An error occurred while posting the comment';
+        
+        alert(errorMessage);
+      } else if (error.request) {
+        // The request was made but no response was received
+        alert('No response received from server. Please check your connection.');
+      } else {
+        // Something happened in setting up the request
+        alert('Error: ' + error.message);
+      }
     } finally {
       setIsLoading(false);
     }
   };
+  
+  writeComment: async (content, eventId, parentId = null) => {
+    const token = localStorage.getItem(ACCESS_TOKEN);
+    if (!token) {
+      const error = new Error('Authentication required');
+      error.name = 'AuthenticationError';
+      throw error;
+    }
+  
+    try {
+      const headers = {
+        Authorization: `Bearer ${token}`,
+      };
+      
+      const response = await api.post(
+        `/comments/write-comment/${eventId}`,
+        { content, parent_id: parentId },
+        { headers }
+      );
+      return response.data;
+    } catch (error) {
+      console.error('Write comment API error:', {
+        message: error.message,
+        response: error.response,
+        fullError: error
+      });
+      throw error;
+    }
+  }
+
 
   // Handle delete
   const handleDelete = async (commentId) => {
     try {
       setIsLoading(true);
+      if (isLoading) return;
+  
+      // Check if the comment is a reply or a main comment
+      const isReply = comments.some(comment => 
+        comment.replies.some(reply => reply.id === commentId)
+      );
+  
+      if (isReply) {
+        // If it's a reply, update the specific comment replies
+        setComments(prev => 
+          prev.map(comment => ({
+            ...comment,
+            replies: comment.replies.filter(reply => reply.id !== commentId)
+          }))
+        );
+      } else {
+        // If it's a main comment, remove it from the main comments
+        setComments(prev => prev.filter(comment => comment.id !== commentId));
+      }
+  
       await end_point.deleteComment(commentId);
-      setComments(prev => prev.filter(comment => comment.id !== commentId));
     } catch (error) {
-      setError(error.message);
+      console.error('Error deleting comment:', error);
+      setError(error.message || 'An unknown error occurred');
+      if (isReply) {
+        const fetchedComments = await end_point.getEventComments(event.id);
+        setComments(fetchedComments);
+      } else {
+        const fetchedComments = await end_point.getEventComments(event.id);
+        setComments(fetchedComments);
+      }
     } finally {
       setIsLoading(false);
     }
@@ -197,6 +296,7 @@ export function CommentSection({ event }) {
     setReplyingTo(null);
     setReplyContent('');
   };
+ 
   const CommentContent = ({ comment, editingId, editContent, startEditing, saveEdit, cancelEditing }) => {
     return (
       <div className="flex items-start gap-3">
@@ -229,8 +329,8 @@ export function CommentSection({ event }) {
                     </button>
                   </li>
                   <li>
-                    <button onClick={() => handleDelete(comment.id)} className="flex items-center gap-2 text-red-600">
-                      <LuTrash2 className="w-4 h-4" /> Delete
+                    <button onClick={() => handleDelete(comment.id)} className="flex items-center gap-2 text-red-600" disabled={isLoading}>
+                      <LuTrash2 className="w-4 h-4" /> {isLoading ? "Deleting..." : "Delete"}
                     </button>
                   </li>
                 </ul>
@@ -277,7 +377,7 @@ export function CommentSection({ event }) {
   };
   // JSX rendering the component
   return (
-    <div className="bg-white rounded-xl shadow-sm flex flex-col h-[500px]">
+    <div className="bg-white rounded-xl shadow-sm flex flex-col h-[500px]" data-testid="event-comment">
       <div className="p-6 border-b">
         <div className="flex items-center gap-2">
           <FiMessageSquare className="w-5 h-5 text-dark-purple" />

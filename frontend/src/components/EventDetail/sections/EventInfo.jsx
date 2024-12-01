@@ -38,23 +38,30 @@ export function EventInfo({ event }) {
         }
       };
 
-      fetchTicket();
+      const fetchAttendees = async () => {
+        try {
+          const token = localStorage.getItem(ACCESS_TOKEN);
+          // Only fetch attendees if user is event owner or has applied to the event
+          if (event.user_id === userId || isApplied) {
+            const headers = token ? { Authorization: `Bearer ${token}` } : {};
+            const response = await api.get(`/events/${event.id}/attendee-list`, { headers });
+            const attendees = response.data;
+            setAttendees(attendees);
+          }
+        } catch (error) {
+          // Check if it's a 403 error and handle accordingly
+          if (error.response?.status === 403) {
+            console.warn("Not authorized to view attendee list");
+          } else {
+            console.error("Error fetching attendees:", error);
+          }
+        }
+      };
 
-    // Fetch attendees
-    const fetchAttendees = async () => {
-      try {
-        const token = localStorage.getItem(ACCESS_TOKEN);
-        const headers = token ? { Authorization: `Bearer ${token}` } : {};
-        const response = await api.get(`/events/${event.id}/attendee-list`, { headers });
-        const attendees = response.data;
-        setAttendees(attendees);
-      } catch (error) {
-        console.error("Error fetching attendees:", error);
-      }
-    };
-    fetchAttendees();
-  }
-}, [userId, event.id]);
+      fetchTicket();
+      fetchAttendees();
+    }
+  }, [userId, event.id, event.user_id, isApplied]);
 
   const socialLinks = [
     { icon: FaGlobe, url: event.website_url, label: 'Website' },
@@ -69,12 +76,11 @@ export function EventInfo({ event }) {
     try {
       const token = localStorage.getItem(ACCESS_TOKEN);
       const headers = token ? { Authorization: `Bearer ${token}` } : {};
-      const response = await api.post(`/tickets/event/${event.id}/register`, {}, { headers });
+      await api.post(`/tickets/event/${event.id}/register`, {}, { headers });
       alert("Event applied successfully!");
       setIsApplied(true);
       window.location.reload();
     } catch (error) {
-      console.error("Error applying for the event:", error);
       let errorMessage = "Failed to apply for the event.";
       if (error.response) {
         errorMessage = error.response.data?.error || errorMessage;
@@ -90,12 +96,11 @@ export function EventInfo({ event }) {
     try {
       const token = localStorage.getItem(ACCESS_TOKEN);
       const headers = token ? { Authorization: `Bearer ${token}` } : {};
-      const response = await api.delete(`/tickets/${ticketId}/cancel`, { headers });
+      await api.delete(`/tickets/${ticketId}/cancel`, { headers });
       alert("You have successfully unapplied from the event!");
       setIsApplied(false);
       window.location.reload();
     } catch (error) {
-      console.error("Error unapplying from event:", error);
       let errorMessage = "Failed to unapply from the event.";
       if (error.response) {
         errorMessage = error.response.data?.error || errorMessage;
@@ -106,14 +111,14 @@ export function EventInfo({ event }) {
     }
   };
   return (
-    <div className="container bg-gray-50 py-8 min-h-screen ">
+    <div className="container bg-gray-50 py-8 min-h-screen" data-testid="event-info">
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 h-full">
         {/* Main Content */}
         <div className="lg:col-span-2 space-y-8 flex flex-col">
           <div className="space-y-8">
             <div className="bg-white rounded-xl p-6 shadow-sm">
               <h2 className="text-2xl font-semibold mb-4 text-dark-purple">About the Event</h2>
-              <p className="text-gray-600 leading-relaxed break-words">
+              <p className="text-gray-600 leading-relaxed break-words" data-testid="event-info">
                 {event.detailed_description}
               </p>
             </div>

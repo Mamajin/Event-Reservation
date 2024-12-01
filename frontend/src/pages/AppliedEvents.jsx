@@ -16,7 +16,6 @@ function AppliedEvents() {
     useEffect(() => {
         const fetchAppliedEvents = async () => {
             try {
-                console.log('Fetching applied events...');
                 const token = localStorage.getItem(ACCESS_TOKEN);
                 if (!token || !userId) {
                     throw new Error('No access token or user ID found');
@@ -43,7 +42,6 @@ function AppliedEvents() {
                 const appliedEvents = eventsResponse.data.filter(event => eventIds.includes(event.id));
 
                 setEvents(appliedEvents);
-                console.log('Fetched applied events:', appliedEvents);
             } catch (err) {
                 console.error('Error fetching applied events:', err);
                 setError(err);

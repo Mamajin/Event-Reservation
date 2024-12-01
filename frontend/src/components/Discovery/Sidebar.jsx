@@ -36,6 +36,11 @@ const Sidebar = ({ events = [], selectedDate, onSelectDate }) => {
     setCurrentMonth(new Date(currentMonth.setMonth(currentMonth.getMonth() - 1)));
   };
 
+  const getUpcomingEvents = () => {
+    const currentDate = new Date();
+    return events.filter(event => new Date(event.start_date_event) > currentDate);
+  };
+
   const handleDateClick = (date) => {
     if (selectedDate?.toDateString() === date.toDateString()) {
       onSelectDate(null);
@@ -121,7 +126,7 @@ const Sidebar = ({ events = [], selectedDate, onSelectDate }) => {
         <div className="space-y-3">
           {(selectedDate
             ? getEventsForDate(selectedDate)
-            : events.slice(0, 3)
+            : getUpcomingEvents()
           ).map((event) => (
             <div
               key={event.id}

@@ -25,12 +25,15 @@ const EventCard = ({ event }) => {
       const headers = {
         Authorization: `Bearer ${token}`,
       };
+      const newLikeStatus = !isLiked;
+      setIsLiked(newLikeStatus);
+      setLikeCount((prev) => prev + (newLikeStatus ? 1 : -1));
       await api.put(`/likes/${eventId}/toggle-like`, {}, { headers });
-      setIsLiked(!isLiked);
-      setLikeCount((prev) => (isLiked ? prev - 1 : prev + 1));
     } catch (error) {
       console.error('Error liking event:', error);
       alert('Failed to like the event. Please try again.');
+      setIsLiked(isLiked);
+      setLikeCount((prev) => prev + (isLiked ? 1 : -1));
     }
   };
   
@@ -40,18 +43,18 @@ const EventCard = ({ event }) => {
       const headers = {
         Authorization: `Bearer ${token}`,
       };
-      const response = await api.put(`/bookmarks/${eventId}/toggle-bookmark`, {}, { headers });
-      setIsBookmarked(! isBookmarked);
-      setBookmarkCount((prev) => (isBookmarked ? prev - 1 : prev + 1));
-      console.log('Bookmarked:', response.data.message);
+      const newBookmarkStatus = !isBookmarked;
+      setIsBookmarked(newBookmarkStatus);
+      setBookmarkCount((prev) => prev + (newBookmarkStatus ? 1 : -1));
+      await api.put(`/bookmarks/${eventId}/toggle-bookmark`, {}, { headers });
     } catch (error) {
       console.error('Error bookmarking event:', error);
+      setIsBookmarked(isBookmarked);
+      setBookmarkCount((prev) => prev + (isBookmarked ? 1 : -1));
     }
-  };  
+  };
 
-  if (!event || !event.user_engaged) {
-    return null;
-  }
+
   const handleMoreDetailClick = () => {
     navigate(`/events/${event.id}`);
   };
@@ -69,6 +72,7 @@ const EventCard = ({ event }) => {
 
   return (
     <motion.div
+      data-testid="event-card"
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -20 }}
@@ -79,6 +83,7 @@ const EventCard = ({ event }) => {
           src={event?.event_image ||  "https://images.unsplash.com/photo-1513623935135-c896b59073c1?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTR8fGV2ZW50fGVufDB8fDB8fHww"} 
           alt={event.event_name}
           className="w-full h-48 object-cover transition-transform duration-300 group-hover:scale-105" onClick={handleMoreDetailClick}
+          data-testid="event-name"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
         <div className="absolute top-4 right-4 flex gap-2">
