@@ -132,8 +132,14 @@ class UserRegisterStrategy(UserStrategy):
             first_name=form.first_name,
             last_name=form.last_name
         )
-        user.save()
+        
         user.send_verification_email()
+        if not user.is_email_verified:
+            return Response(
+                {'message': 'Please verify your email to complete registration.'},
+                status=202
+            )
+        user.save()
         return Response(UserSchema.from_orm(user), status=201)
     
     
@@ -175,6 +181,8 @@ class UserloginStrategy(UserStrategy):
         """
         user = authenticate(request, username=form.username, password=form.password)
         if user is not None:
+            if not user.is_email_verified:
+                return Response({"error": "Please verify your email."}, status=202)
             login(request, user)
             access_token = AccessToken.for_user(user)
             refresh_token = RefreshToken.for_user(user)
@@ -248,7 +256,7 @@ class UserGoogleAuthStrategy(UserStrategy):
                 username=email.split('@')[0],  # Optionally use email prefix as username
                 password=make_password(get_random_string(8)),  # Generate a random password
             )
-
+            user.send_verification_email()
         access_token = AccessToken.for_user(user)
         refresh_token = RefreshToken.for_user(user)
         login(request,user)
@@ -418,7 +426,7 @@ class UserVerifyEmail(UserStrategy):
     """
     Strategy for verifying a user's email address.
     """
-    def execute(self,user_id,token):
+    def execute(self, user_id, token):
         """
         Verify a user's email address using a verification token.
 
@@ -436,8 +444,8 @@ class UserVerifyEmail(UserStrategy):
             if user is None:
                 raise AttendeeUser.DoesNotExist
             
-            if not default_token_generator.check_token(user, token):
-                raise ValueError("Invalid verification token")
+            if default_token_generator.check_token(user, token):
+                raise ValueError(f"Invalid verification token {user} {uid} {token}")
             
             user.is_email_verified = True
             user.is_active = True
