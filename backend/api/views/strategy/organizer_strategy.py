@@ -115,6 +115,7 @@ class DeleteEventStrategy(OrganizerStrategy):
         try:
             organizer = Organizer.objects.get(user=request.user)
             event = get_object_or_404(Event, id=event_id, organizer=organizer)
+            Ticket.send_event_cancellation_email(event.ticket_set.all())
             event.delete()
             logger.info(f"Organizer {organizer.organizer_name} deleted event {event_id}.")
             return Response({'success': f"Delete event ID {event_id} successfully"}, status=204)
