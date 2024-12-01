@@ -1,4 +1,4 @@
-describe('Navigate to Account Info', () => {
+describe('Navigate to Account Info and Organizer Info', () => {
     beforeEach(() => {
       cy.visit('/login');
       cy.get('input[placeholder="Username"]').type('testuser');

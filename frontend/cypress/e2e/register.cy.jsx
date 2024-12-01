@@ -5,7 +5,6 @@ describe('User Registration Flow', () => {
   });
 
   it('should load the registration page correctly', () => {
-    // Check that the page loads and initial step is visible
     cy.contains('Step 1: Account Info').should('be.visible');
     cy.get('input[placeholder="Username"]').should('be.visible');
     cy.get('input[placeholder="Password"]').should('be.visible');
