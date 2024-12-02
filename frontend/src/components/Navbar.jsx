@@ -27,7 +27,10 @@ function Navbar() {
         {isLoggedIn ? (
           <>
             {isOrganizer && (
-              <Link to="/create-event" className="btn ml-2 bg-gradient-to-r from-slate-300 to-amber-500  bg-amber-300 text-dark-purple">
+              <Link to="/create-event" 
+              className="btn ml-2 bg-gradient-to-r from-slate-300 to-amber-500  bg-amber-300 text-dark-purple"
+              data-testid="create-event-button"
+              >
                 Create Event +
               </Link>
             )}

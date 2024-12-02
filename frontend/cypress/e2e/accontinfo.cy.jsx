@@ -1,7 +1,7 @@
 describe('Navigate to Account Info and Organizer Info', () => {
     beforeEach(() => {
       cy.visit('/login');
-      cy.get('input[placeholder="Username"]').type('testuser');
+      cy.get('input[placeholder="Username"]').type('testuser2');
       cy.get('input[placeholder="Password"]').type('StrongPass123!');
       cy.get('button').contains('Login').click();
   

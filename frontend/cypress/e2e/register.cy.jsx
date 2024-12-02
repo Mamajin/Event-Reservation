@@ -13,7 +13,7 @@ describe('User Registration Flow', () => {
 
   it('should navigate through registration steps and display username taken', () => {
     // Step 1: Account Info
-    cy.get('input[placeholder="Username"]').type('testuser');
+    cy.get('input[placeholder="Username"]').type('testuser2');
     cy.get('input[placeholder="Password"]').type('StrongPass123!');
     cy.get('input[placeholder="Confirm Password"]').type('StrongPass123!');
     
@@ -32,7 +32,7 @@ describe('User Registration Flow', () => {
 
     // Step 3: Contact Info
     cy.get('input[placeholder="Phone Number"]').type('1234567890');
-    cy.get('input[placeholder="Email"]').type('johndoe@example.com');
+    cy.get('input[placeholder="Email"]').type('johndoe2@example.com');
 
     cy.contains('button', 'Submit').click();
 
