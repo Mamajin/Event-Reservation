@@ -12,7 +12,6 @@ import { ACCESS_TOKEN, USER_ID } from '../../../constants';
 import { useNavigate } from 'react-router-dom';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-import 'github-markdown-css/github-markdown-light.css';
 export function EventInfo({ event }) {
   const [loading, setLoading] = useState(false);
   const [isApplied, setIsApplied] = useState(false);
@@ -128,29 +127,31 @@ export function EventInfo({ event }) {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 h-full">
         {/* Main Content */}
         <div className="lg:col-span-2 space-y-8 flex flex-col">
-          <div className="space-y-8">
-            <div className="bg-white rounded-xl p-6 shadow-sm">
-              <h2 className="text-2xl font-semibold mb-4 text-dark-purple">About the Event</h2>
+<div className="bg-white rounded-xl p-6 shadow-sm w-full">
+  <h2 className="text-2xl font-semibold mb-4 text-dark-purple">About the Event</h2>
+  <div className="prose text-gray-800 leading-relaxed">
               <ReactMarkdown
                 remarkPlugins={[remarkGfm]}
-                className="prose prose-lg text-gray-800 leading-relaxed break-words"
+             
               >
                 {event.detailed_description}
               </ReactMarkdown>
             </div>
-          </div>
+</div>
 
-          {event.terms_and_conditions && (
-            <div className="bg-white rounded-xl p-6 shadow-sm">
-              <h2 className="text-2xl font-semibold mb-4 text-dark-purple">Terms & Conditions</h2>
-              <ReactMarkdown
-                remarkPlugins={[remarkGfm]}
-                className="text-gray-600 leading-relaxed  break-words"
-              >
-                {event.terms_and_conditions}
-              </ReactMarkdown>
-            </div>
-          )}
+{event.terms_and_conditions && (
+  <div className="bg-white rounded-xl p-6 shadow-sm mt-6 w-full">
+    <h2 className="text-2xl font-semibold mb-4 text-dark-purple">Terms & Conditions</h2>
+    <div className="prose text-gray-800 leading-relaxed">
+                <ReactMarkdown
+                  remarkPlugins={[remarkGfm]}
+                  
+                >
+                  {event.terms_and_conditions}
+                </ReactMarkdown>
+              </div>
+  </div>
+)}
 
 
           <CommentSection event={event} />
@@ -164,7 +165,7 @@ export function EventInfo({ event }) {
               <h3 className="font-semibold text-lg mb-4 text-dark-purple">Date & Time</h3>
               <div className="space-y-4">
                 <div className="flex items-start gap-3">
-                  <LuCalendarDays className="h-5 w-5 mt-1 text-blue-600" />
+                  <LuCalendarDays className="h-5 w-5 mt-1 text-dark-purple" />
                   <div>
                     <p className="font-medium text-dark-purple">Start</p>
                     <p className="text-sm text-gray-600">
@@ -177,7 +178,7 @@ export function EventInfo({ event }) {
                 </div>
                 <div className="divider my-2"></div>
                 <div className="flex items-start gap-3">
-                  <FaClock className="h-5 w-5 mt-1 text-blue-600" />
+                  <FaClock className="h-5 w-5 mt-1 text-dark-purple" />
                   <div>
                     <p className="font-medium text-dark-purple">End</p>
                     <p className="text-sm text-gray-600">
@@ -196,7 +197,7 @@ export function EventInfo({ event }) {
           <div className="bg-white rounded-xl p-6 shadow-sm">
             <h2 className="text-xl font-semibold mb-4 text-dark-purple">Dress Code</h2>
             <p className="flex items-center gap-2 text-gray-600">
-              <LuShirt className="h-5 w-5 text-blue-600" />
+              <LuShirt className="h-5 w-5 text-dark-purple" />
               {event.dress_code.charAt(0) + event.dress_code.slice(1).toLowerCase()}
             </p>
           </div>
@@ -211,7 +212,7 @@ export function EventInfo({ event }) {
                 className={`flex items-center gap-2 text-gray-600 ${attendees.length === 0 ? 'opacity-50' : 'hover:text-blue-600 transition-colors'
                   }`}
               >
-                <LuUsers className="w-5 h-5 text-blue-600" />
+                <LuUsers className="w-5 h-5 text-dark-purple" />
                 {attendees.length === 0 ? (
                   event.max_attendee === null ? (
                     'No attendee limit'
@@ -222,7 +223,7 @@ export function EventInfo({ event }) {
                   `View ${attendees.length} applicants`
                 )} </button>
               <p className="flex items-center gap-2 text-gray-600">
-                <LuCalendarDays className="w-5 h-5 text-blue-600" />
+                <LuCalendarDays className="w-5 h-5 text-dark-purple" />
                 Registration closes {new Date(event.end_date_register).toLocaleDateString()}
               </p>
             </div>
@@ -232,7 +233,7 @@ export function EventInfo({ event }) {
               className={`w-full py-3 px-4 rounded-lg flex items-center justify-center gap-2 transition-colors ${(loading || canceling)
                 ? 'bg-gray-300 text-gray-700 cursor-not-allowed'
                 : isApplied
-                  ? 'bg-red-600 hover:bg-red-700 text-white'
+                  ? 'bg-red-400 hover:bg-red-700 text-white'
                   : 'bg-dark-purple hover:bg-green-600 text-white'
                 }`}
             >
