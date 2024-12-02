@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import api from "../api";
 import { useNavigate } from "react-router-dom";
 import qs from "qs";
@@ -14,10 +14,25 @@ export default function Register() {
     const [email, setEmail] = useState("");
     const [loading, setLoading] = useState(false);
     const [currentStep, setCurrentStep] = useState(1);
+    const [maxDate, setMaxDate] = useState("");
     const navigate = useNavigate();
 
     const totalSteps = 3; // Number of steps in the form
-
+    
+    useEffect(() => {
+        const today = new Date();
+        const formattedDate = today.toISOString().split("T")[0];
+        setMaxDate(formattedDate);
+    }, []);
+    const handleDateChange = (e) => {
+        const selectedDate = e.target.value;
+        if (selectedDate > maxDate) {
+            alert("The date cannot be in the future.");
+            setBirthDate("");
+        } else {
+            setBirthDate(selectedDate);
+        }
+    };
     const handleNext = () => {
         if (currentStep < totalSteps) {
             setCurrentStep(currentStep + 1);
@@ -130,8 +145,9 @@ export default function Register() {
                                 className="input bg-white hover:bg-gray-300 transition-colors duration-200 input-bordered w-full mb-3"
                                 type="date"
                                 value={birthDate}
-                                onChange={(e) => setBirthDate(e.target.value)}
+                                onChange={handleDateChange}
                                 placeholder="Birth Date"
+                                max={maxDate}
                                 required
                             />
                         </div>
