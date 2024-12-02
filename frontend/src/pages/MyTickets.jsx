@@ -113,7 +113,7 @@ function MyTickets() {
               <div
                 key={ticket.id}
                 className="flex border-2 border-solid border-gray-400 rounded-lg p-5 hover:bg-gray-100 cursor-pointer transition duration-300"
-                // add on click here
+                data-testid="ticket-item"
               >
                 {/* Event Image */}
                 <div className="flex-shrink-0 w-30 h-32 mr-4">
