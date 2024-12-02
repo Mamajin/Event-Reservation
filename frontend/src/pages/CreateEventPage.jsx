@@ -11,6 +11,7 @@ import SocialMedia from '../components/CreateEvent/sections/SocialMedia';
 import { ACCESS_TOKEN } from '../constants';
 import api from '../api';
 import { useNavigate } from 'react-router-dom';
+import Loading from '../components/LoadingIndicator';
 
 export default function CreateEvent() {
   const [activeTab, setActiveTab] = useState('basic');
@@ -101,7 +102,11 @@ export default function CreateEvent() {
     }
   };
 
-
+  if (loading) {
+    return (
+      <Loading></Loading>
+  );
+  }
   const renderTabContent = () => {
     switch (activeTab) {
       case 'basic':

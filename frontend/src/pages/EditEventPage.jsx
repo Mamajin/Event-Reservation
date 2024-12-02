@@ -11,6 +11,7 @@ import SocialMedia from '../components/CreateEvent/sections/SocialMedia';
 import { ACCESS_TOKEN } from '../constants';
 import api from '../api';
 import { useNavigate, useParams } from 'react-router-dom';
+import Loading from '../components/LoadingIndicator';
 
 export default function EditEvent() {
   const { eventId } = useParams();
@@ -110,6 +111,7 @@ export default function EditEvent() {
     }
   };
 
+  
   const renderTabContent = () => {
     switch (activeTab) {
       case 'basic':
@@ -133,9 +135,11 @@ export default function EditEvent() {
   };
 
   if (isFetching) {
-    return <div>Loading event data...</div>;
+    return <Loading></Loading>
   }
 
+
+  
   return (
     <PageLayout>
     <div className="container mx-auto py-10">

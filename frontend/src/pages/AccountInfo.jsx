@@ -6,7 +6,7 @@ import Map from '../components/Map';
 import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 import { ACCESS_TOKEN, USER_STATUS, PROFILE_PICTURE } from "../constants";
-
+import Loading from '../components/LoadingIndicator';
 function AccountInfo() {
   const { register, setValue, handleSubmit, watch } = useForm();
   const [userData, setUserData] = useState(null);
@@ -149,13 +149,8 @@ function AccountInfo() {
 
   if (loading) {
     return (
-      <PageLayout>
-      <div className="text-center mt-8">Loading Accont Information...</div>
-      <div className="flex justify-center items-center h-screen -mt-24">
-          <span className="loading loading-spinner loading-lg"></span>
-      </div>
-      </PageLayout>
-    );
+      <Loading></Loading>
+  );
   }
 
   if (error) {

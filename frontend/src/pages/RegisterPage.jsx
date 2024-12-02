@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import api from "../api";
 import { useNavigate } from "react-router-dom";
 import qs from "qs";
-
+import Loading from "../components/LoadingIndicator";
 export default function Register() {
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
@@ -67,7 +67,7 @@ export default function Register() {
                     "Content-Type": "application/x-www-form-urlencoded",
                 },
             });
-
+            setLoading(false);
             navigate("/login");
         } catch (error) {
             console.error("Registration error:", error);

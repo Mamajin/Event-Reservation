@@ -7,6 +7,7 @@ import api from '../../../api';
 import { USER_ID } from '../../../constants';
 import { HiOutlineDotsVertical } from "react-icons/hi";
 import { ACCESS_TOKEN } from '../../../constants';
+import { useNavigate } from 'react-router-dom';
 
 export function CommentSection({ event }) {
   const [comments, setComments] = useState([]);
@@ -19,6 +20,7 @@ export function CommentSection({ event }) {
   const [error, setError] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const userId = localStorage.getItem(USER_ID);
+  const navigate = useNavigate();
   const {
     handleSubmit,
     reset,
@@ -126,8 +128,7 @@ export function CommentSection({ event }) {
       const token = localStorage.getItem(ACCESS_TOKEN);
       if (!token) {
         console.error('No authentication token found');
-        alert('Please log in to post a comment');
-        window.location.href = '/login';
+        navigate('/login');
         
         return;
       }
