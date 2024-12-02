@@ -169,35 +169,6 @@ export function CommentSection({ event }) {
       setIsLoading(false);
     }
   };
-  
-  writeComment: async (content, eventId, parentId = null) => {
-    const token = localStorage.getItem(ACCESS_TOKEN);
-    if (!token) {
-      const error = new Error('Authentication required');
-      error.name = 'AuthenticationError';
-      throw error;
-    }
-  
-    try {
-      const headers = {
-        Authorization: `Bearer ${token}`,
-      };
-      
-      const response = await api.post(
-        `/comments/write-comment/${eventId}`,
-        { content, parent_id: parentId },
-        { headers }
-      );
-      return response.data;
-    } catch (error) {
-      console.error('Write comment API error:', {
-        message: error.message,
-        response: error.response,
-        fullError: error
-      });
-      throw error;
-    }
-  }
 
 
   // Handle delete

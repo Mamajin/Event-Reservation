@@ -92,10 +92,10 @@ export default function CreateEvent() {
       console.error("Error creating event:", error);
       let errorMessage = "Failed to create event. Please try again.";
       if (error.response) {
-        console.error("Error response data:", error.response.data);
+        console.error("Error response data:", error.response.data.error);
         errorMessage = error.response.data?.error || errorMessage;
       }
-      alert(error);
+      alert(errorMessage);
     } finally {
       setLoading(false);
     }
