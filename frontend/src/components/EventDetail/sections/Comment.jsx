@@ -349,7 +349,7 @@ export function CommentSection({ event }) {
   };
   // JSX rendering the component
   return (
-    <div className="bg-white rounded-xl shadow-sm flex flex-col h-[500px]">
+    <div className="bg-white rounded-xl shadow-sm flex flex-col h-[500px]" data-testid="event-comment">
       <div className="p-6 border-b">
         <div className="flex items-center gap-2">
           <FiMessageSquare className="w-5 h-5 text-dark-purple" />

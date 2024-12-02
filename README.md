@@ -2,6 +2,7 @@
 
 [![Django CI](https://github.com/Mamajin/Event-Reservation/actions/workflows/django.yml/badge.svg)](https://github.com/Mamajin/Event-Reservation/actions/workflows/django.yml)
 [![codecov](https://codecov.io/gh/Mamajin/Event-Reservation/graph/badge.svg?token=UNKZKHCFVV)](https://codecov.io/gh/Mamajin/Event-Reservation)
+[![eventease](https://img.shields.io/endpoint?url=https://cloud.cypress.io/badge/simple/r6s82d&style=plastic&logo=cypress)](https://cloud.cypress.io/projects/r6s82d/runs)
 
 Welcome to the Event Reservation System! This web application allows users to create, manage, and participate in various events. 
 The project is built using Django for the backend and React for the frontend, aiming to provide a practical solution for event discovery, registration, and feedback.
@@ -64,16 +65,10 @@ pip install -r requirements.txt
 ```
 **5. Run the migrations**
 ```bash
-
 python manage.py migrate
 ```
 
-**6. Load data:**
-```bash
-py backend/manage.py loaddata data/data.json
-```
-
-**7.start the development server:**
+**6.start the development server:**
 ```bash
 python manage.py runserver
 ```

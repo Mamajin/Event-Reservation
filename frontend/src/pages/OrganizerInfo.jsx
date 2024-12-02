@@ -72,7 +72,6 @@ function OrganizerInfo() {
         },
       });
 
-      console.log("Organizer data updated successfully:", response.data);
       setIsEditing(false);  // Turn off editing mode after saving
     } catch (err) {
       const status = err.response?.status;

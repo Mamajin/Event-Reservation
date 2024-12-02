@@ -123,13 +123,13 @@ export function EventInfo({ event }) {
     }
   };
   return (
-    <div className="container bg-gray-50 py-8 min-h-screen ">
+    <div className="container bg-gray-50 py-8 min-h-screen" data-testid="event-info">
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 h-full">
         {/* Main Content */}
         <div className="lg:col-span-2 space-y-8 flex flex-col">
-<div className="bg-white rounded-xl p-6 shadow-sm w-full">
+        <div className="bg-white rounded-xl p-6 shadow-sm w-full">
   <h2 className="text-2xl font-semibold mb-4 text-dark-purple">About the Event</h2>
-  <div className="prose text-gray-800 leading-relaxed">
+  <div className="prose text-gray-800 leading-relaxed" data-testid="event-info">
               <ReactMarkdown
                 remarkPlugins={[remarkGfm]}
              

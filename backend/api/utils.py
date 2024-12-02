@@ -37,7 +37,7 @@ class EmailVerification:
         site_url = settings.SITE_URL.rstrip('/') + '/'
         
         # Construct verification URL
-        verification_url = f"{site_url}api/users/verify-email/{user_id}/{token}/"
+        verification_url = f"{site_url}verify-email/{user_id}/{token}/"
         
         subject = 'EventEase - Verify your email address'
         
@@ -283,6 +283,22 @@ class TicketNotificationManager:
             self.ticket.email_sent = False
             self.ticket.save(update_fields=['email_sent'])
         return success
+    
+    def send_event_cancellation_notification(self) -> bool:
+        """
+        Sends a cancellation notification email to the attendee due to event cancelled.
+        
+        Returns:
+            bool: True if the email was sent successfully, False otherwise
+        """  
+        html_content = self._generate_event_cancellation_html()
+        subject = f"Event Cancelled - {self.event.event_name}"
+        
+        return self.email_service.send_email(
+            to_email=self.attendee.email,
+            subject=subject,
+            html_content=html_content
+        )
 
     def _generate_reminder_html(self) -> str:
         """
@@ -373,6 +389,37 @@ class TicketNotificationManager:
             </div>
         </div>
         """
+        
+    def _generate_event_cancellation_html(self) -> str:
+        """
+        Generate HTML content for the event cancellation email.
+
+        Returns:
+            str: The rendered HTML content
+        """
+        return f"""
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+            <h2 style="color: #333;">Event Cancellation Notice</h2>
+            <p>Dear {self.attendee.full_name},</p>
+            <p>We regret to inform you that the event <strong>{self.event.event_name}</strong>, for which you have registered, has been cancelled by the organizer.</p>
+            <p><strong>Reason:</strong> The organizer has decided to cancel the event.</p>
+            
+            <div style="background-color: #f8f9fa; padding: 20px; margin: 20px 0; border-radius: 5px;">
+                <h3 style="margin-top: 0;">Cancellation Details</h3>
+                <p><strong>Event:</strong> {self.event.event_name}</p>
+                <p><strong>Ticket Number:</strong> {self.ticket.ticket_number}</p>
+                <p><strong>Cancellation Date:</strong> {timezone.now().strftime('%B %d, %Y')}</p>
+            </div>
+            
+            <p>We understand this may be disappointing and apologize for any inconvenience caused. If you have any questions or require further assistance, please feel free to contact our support team.</p>
+            <p>Thank you for your understanding and we hope to see you at future events.</p>
+            
+            <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee;">
+                <small style="color: #666;">This is an automated message, please do not reply directly to this email. For assistance, please contact our support team.</small>
+            </div>
+        </div>
+        """
+
 
 @shared_task
 def send_reminder_emails():

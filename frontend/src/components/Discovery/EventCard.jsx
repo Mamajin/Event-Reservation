@@ -72,6 +72,7 @@ const EventCard = ({ event }) => {
 
   return (
     <motion.div
+      data-testid="event-card"
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -20 }}
@@ -82,6 +83,7 @@ const EventCard = ({ event }) => {
           src={event?.event_image ||  "https://images.unsplash.com/photo-1513623935135-c896b59073c1?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTR8fGV2ZW50fGVufDB8fDB8fHww"} 
           alt={event.event_name}
           className="w-full h-48 object-cover transition-transform duration-300 group-hover:scale-105" onClick={handleMoreDetailClick}
+          data-testid="event-name"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
         <div className="absolute top-4 right-4 flex gap-2">
