@@ -188,7 +188,8 @@ class TicketRegisterStrategy(TicketStrategy):
         try:
             ticket.clean()
             ticket.save()
-
+            ticket.email_sent = True
+            
             notification_manager = TicketNotificationManager(ticket)
             notification_manager.send_registration_confirmation()
             return Response(TicketResponseSchema(

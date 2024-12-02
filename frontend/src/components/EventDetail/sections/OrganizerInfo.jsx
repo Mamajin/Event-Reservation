@@ -2,7 +2,7 @@ import { LuBadgeCheck } from "react-icons/lu";
 
 export function OrganizerInfo({ organizer }) {
   return (
-    <div className="container bg-white rounded">
+    <div className="container bg-white rounded" data-testid="event-organizer-info">
       <div className="card bg-white">
         <div className="card-body">
           <div className="flex items-center gap-4">

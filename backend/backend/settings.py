@@ -205,6 +205,8 @@ REST_FRAMEWORK = {
     ],
 }
 
+CSRF_TRUSTED_ORIGINS = ['https://event-reservation-1-lpob.onrender.com', 'http://127.0.0.1']
+
 
 NINJA_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(minutes=30),

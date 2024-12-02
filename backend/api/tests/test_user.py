@@ -28,7 +28,7 @@ class UserAPITests(UserModelsTest):
             'password2': 'password123',
             'email': "jane@example.com"
         })
-        self.assertEqual(response.status_code, 201)
+        self.assertEqual(response.status_code, 202)
         user = AttendeeUser.objects.get(username = 'attendeeuser1')
         self.assertTrue(AttendeeUser.objects.filter(username = user.username).exists())
         

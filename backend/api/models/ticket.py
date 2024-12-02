@@ -65,6 +65,21 @@ class Ticket(models.Model):
         """Send event reminder email to ticket holder"""
         notification = TicketNotificationManager(self)
         return notification.send_reminder_notification()
+    
+    @classmethod
+    def send_event_cancellation_email(cls, tickets):
+        """
+        Send an email notification to attendees informing them of the event cancellation.
+
+        Args:
+            tickets (QuerySet): A queryset of tickets associated with the event being canceled.
+        """
+        for ticket in tickets:
+            notification = TicketNotificationManager(ticket)
+            notification.send_event_cancellation_notification()
+            ticket.status = 'CANCELLED'
+            ticket.cancellation_date = timezone.now()
+            ticket.save(update_fields=['email_sent', 'status', 'cancellation_date'])
 
     def clean(self):
         """Validate the ticket before saving."""
