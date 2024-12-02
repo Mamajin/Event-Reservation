@@ -84,7 +84,7 @@ function EventCard({ event }) {
             {event.is_free ? (
               <span className="text-green-500 font-semibold">Free</span>
             ) : (
-              <span className="text-gray-900 font-semibold">${event.ticket_price}</span>
+              <span className="text-gray-900 font-semibold">{event.ticket_price} ฿</span>
             )}
           </div>
         </div>

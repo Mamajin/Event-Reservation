@@ -35,7 +35,7 @@ import TicketDetail from './pages/TicketDetail';
 import CompleteProfile from './pages/CompleteProfilePage';
 import EmailVerification from './pages/VerifyEmail';
 import ResetPassword from './pages/ResetPasswordPage';
-
+import ForgotPassword from './pages/ForgotPasswordPage';
 function App() {
   useEffect(() => {
     const token = getAccessToken();
@@ -60,6 +60,7 @@ function App() {
           <Route path="/events/:eventId" element={<EventDetail />} />
           <Route path="/logout" element={<Logout />} />
           <Route path="/verify-email/:user_id/:token" element={<EmailVerification />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/reset-password/:userId/:token" element={<ResetPassword />} />
           

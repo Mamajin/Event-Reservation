@@ -63,10 +63,9 @@ function Login() {
                     "Content-Type": "application/x-www-form-urlencoded",
                 },
             });
-            const token = await api.post("/token/pair", payload, {
-                headers: {
-                    'Content-Type': 'application/json',
-                }});
+            if (res.data.error) {
+                throw new Error(res.data.error);
+            }
             localStorage.setItem(PROFILE_PICTURE, res.data.image_url);
             localStorage.setItem(ACCESS_TOKEN, res.data.access_token);
             localStorage.setItem(REFRESH_TOKEN, res.data.refresh_token);
@@ -76,14 +75,11 @@ function Login() {
             navigate("/");
         } catch (error) {
             console.error("Login error:", error);
-            let errorMessage = "Login failed. Please try again.";
-            if (error.response) {
-                errorMessage = error.response.data.error || errorMessage; // Adjust this to look for "error"
-            }
-    
-            alert(errorMessage); // Show the alert with error message
+            const errorMessage =
+                error.response?.data?.error || error.message || "Login failed. Please try again.";
+            alert(errorMessage);
         } finally {
-            setIsLoading(false); // Reset loading state
+            setIsLoading(false);
         }
     };
     return (
@@ -144,14 +140,14 @@ function Login() {
                                 onChange={(e) => setPassword(e.target.value)}
                             />
                             <label className="label">
-                                <a href="reset-password" className="label-text-alt link link-hover">
+                                <a href="/forgot-password" className="label-text-alt link link-hover">
                                     Forgot password?
                                 </a>
                             </label>
                         </div>
 
                         {/* Login Button */}
-                        <button className="btn bg-dark-purple w-full" onClick={handleSubmit}>
+                        <button className="btn bg-dark-purple text-white w-full" onClick={handleSubmit}>
                             Login
                         </button>
 

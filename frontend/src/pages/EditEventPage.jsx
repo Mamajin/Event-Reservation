@@ -79,17 +79,19 @@ export default function EditEvent() {
       if (formValues.event_image !== undefined && formValues.event_image !== null && formValues.event_image instanceof File) {
         const imageFormData = new FormData();
         imageFormData.append('file', formValues.event_image);
-  
+        
+        const token = localStorage.getItem(ACCESS_TOKEN);
         const imageResponse = await api.post(
           `/events/${eventId}/upload/event-image/`,
           imageFormData,
-          { headers: { 'Content-Type': 'multipart/form-data' } }
+          { headers: { 'Content-Type': 'multipart/form-data',
+            'Authorization': `Bearer ${token}`
+           } }
         );
   
         console.log('Image uploaded:', imageResponse.data);
       }
 
-      const token = localStorage.getItem(ACCESS_TOKEN);
       const headers = {
         'Content-Type': "application/json",
         'Authorization': `Bearer ${token}`,

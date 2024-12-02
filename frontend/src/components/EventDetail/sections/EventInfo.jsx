@@ -127,31 +127,31 @@ export function EventInfo({ event }) {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 h-full">
         {/* Main Content */}
         <div className="lg:col-span-2 space-y-8 flex flex-col">
-        <div className="bg-white rounded-xl p-6 shadow-sm w-full">
-  <h2 className="text-2xl font-semibold mb-4 text-dark-purple">About the Event</h2>
-  <div className="prose text-gray-800 leading-relaxed" data-testid="event-info">
+          <div className="bg-white rounded-xl p-6 shadow-sm w-full">
+            <h2 className="text-2xl font-semibold mb-4 text-dark-purple">About the Event</h2>
+            <div className="prose text-gray-800 leading-relaxed" data-testid="event-info">
               <ReactMarkdown
                 remarkPlugins={[remarkGfm]}
-             
+
               >
                 {event.detailed_description}
               </ReactMarkdown>
             </div>
-</div>
+          </div>
 
-{event.terms_and_conditions && (
-  <div className="bg-white rounded-xl p-6 shadow-sm mt-6 w-full">
-    <h2 className="text-2xl font-semibold mb-4 text-dark-purple">Terms & Conditions</h2>
-    <div className="prose text-gray-800 leading-relaxed">
+          {event.terms_and_conditions && (
+            <div className="bg-white rounded-xl p-6 shadow-sm mt-6 w-full">
+              <h2 className="text-2xl font-semibold mb-4 text-dark-purple">Terms & Conditions</h2>
+              <div className="prose text-gray-800 leading-relaxed">
                 <ReactMarkdown
                   remarkPlugins={[remarkGfm]}
-                  
+
                 >
                   {event.terms_and_conditions}
                 </ReactMarkdown>
               </div>
-  </div>
-)}
+            </div>
+          )}
 
 
           <CommentSection event={event} />

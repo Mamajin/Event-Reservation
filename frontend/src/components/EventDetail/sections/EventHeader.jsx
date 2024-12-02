@@ -207,7 +207,7 @@ export function EventHeader({ event }) {
               </div>
               <div className="flex items-center gap-2">
                 <FaTicketAlt className="h-5 w-5" />
-                <span className="text-lg">{isFreeEvent ? 'Free' : `$${event.ticket_price}`}</span>
+                <span className="text-lg">{isFreeEvent ? 'Free' : `${event.ticket_price} ฿`}</span>
               </div>
             </div>
           </div>
