@@ -151,7 +151,7 @@ function Login() {
                         </div>
 
                         {/* Login Button */}
-                        <button className="btn btn-dark-purple w-full" onClick={handleSubmit}>
+                        <button className="btn bg-dark-purple w-full" onClick={handleSubmit}>
                             Login
                         </button>
 

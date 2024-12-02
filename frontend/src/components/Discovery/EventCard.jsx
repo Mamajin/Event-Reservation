@@ -113,8 +113,11 @@ const EventCard = ({ event }) => {
             <span className="text-sm font-medium">{bookmarkCount}</span>
           </motion.button>
         </div>
-        <div className="absolute top-4 text-white left-4 badge bg-dark-purple">
+        <div className="absolute top-4 bg-indigo-100 text-indigo-800 border-gray-200 left-4 badge">
           {event.status.charAt(0) + event.status.slice(1).toLowerCase()}
+        </div>
+        <div className="absolute top-4 bg-green-100 text-green-800 border-gray-200 left-28 badge">
+          {event.visibility.charAt(0)+ event.visibility.slice(1).toLowerCase()}
         </div>
         <div className="absolute bottom-4 left-4 right-4 cursor-pointer">
           <h3 className="text-xl font-semibold text-white mb-2" onClick={handleMoreDetailClick}>{event.event_name}</h3>
@@ -155,14 +158,14 @@ const EventCard = ({ event }) => {
         <p className="text-gray-600 mb-6 line-clamp-6 text-sm">{event.description}</p>
       <div className="space-y-4">
           <div className="flex gap-2 overflow-x-auto scrollbar-hide">
-            <span className="badge bg-dark-purple text-white" variant={event.is_free ? 'success' : 'default'}>
+            <span className="badge bg-amber-100 text-amber-800 flex-shrink-0 border-gray-200" variant={event.is_free ? 'success' : 'default'}>
               {event.is_free ? 'Free' : 'Paid'}
             </span>
-            <span className="badge bg-dark-purple text-white" variant="secondary">
+            <span className="badge bg-blue-100 text-blue-800 flex-shrink-0 border-gray-200" variant="secondary">
               {event.category.charAt(0) + event.category.slice(1).toLowerCase()}
             </span>
             {tags.map((tag) => (
-              <span className="badge bg-dark-purple text-white flex-shrink-0" key={tag} variant="default">
+              <span className="badge bg-indigo-100 text-indigo-800 flex-shrink-0 border-gray-200" key={tag} variant="default">
                 <LuTag className="h-3 w-3 mr-1" />
                 {tag.trim()}
               </span>

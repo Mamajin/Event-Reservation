@@ -284,7 +284,7 @@ export default function Discover() {
                                 onClick={() => paginate(index + 1)}
                                 className={`join-item btn btn-sm ${
                                   currentPage === index + 1 
-                                    ? 'btn-active bg-dark-purple text-white' 
+                                    ? 'btn-active border-gray-200 bg-dark-purple text-white' 
                                     : 'btn-ghost'
                                 }`}
                               >
