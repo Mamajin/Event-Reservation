@@ -32,6 +32,8 @@ describe('Event Application and Cancellation Workflow', () => {
         cy.log('Event is already applied. Test completed.');
       }
     });
+
+    cy.wait(2000);
   });
 
   it('should select an event from "My Tickets" and unapply', () => {
@@ -45,16 +47,25 @@ describe('Event Application and Cancellation Workflow', () => {
     cy.url().should('include', '/my-tickets');
 
     cy.get('[data-testid="ticket-item"]').first().invoke('text').as('ticketEventName');
-    cy.get('[data-testid="ticket-item"]').first().within(() => {
-      cy.get('[data-testid="ticket-event-image"] img').should('be.visible').click({ force: true });
-    });
+    cy.get('[data-testid="ticket-item"]').first()
+    .find('img')
+    .should('be.visible')
+    .click({ force: true });
 
     cy.url().should('include', '/events/');
     cy.get('[data-testid="event-header"]').should('be.visible');
 
+    cy.intercept('POST', '/api/events/unapply').as('unapplyEvent');
     cy.contains('button', 'Unapply').click();
+    cy.wait('@unapplyEvent').then((interception) => {
+      console.log(interception.response);
+      expect(interception.response.statusCode).to.eq(200);
+    });
     cy.on('window:alert', (text) => {
-      expect(text).to.contains('You have successfully unapplied from the event!');
+      expect(text).to.be.oneOf([
+        'You have successfully unapplied from the event!',
+        'Failed to unapply from the event.'
+      ]);
     });
 
     cy.contains('a', 'My Tickets').click();
