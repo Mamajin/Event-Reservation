@@ -1,12 +1,12 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import api from '../api';
 import EventCard from '../components/Discovery/EventCard';
 import PageLayout from '../components/PageLayout';
 import Sidebar from '../components/Discovery/Sidebar';
 import { MdOutlineCategory } from "react-icons/md";
-import { LuSearch, LuTag, LuClock,LuChevronUp, LuChevronDown, LuListFilter, LuGlobe2 } from "react-icons/lu";
+import { LuSearch, LuTag, LuClock, LuChevronUp, LuChevronDown, LuListFilter, LuGlobe2, LuChevronLeft, LuChevronRight } from "react-icons/lu";
 import { ACCESS_TOKEN } from '../constants';
-
+import Loading from '../components/LoadingIndicator';
 export default function Discover() {
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -18,7 +18,13 @@ export default function Discover() {
   const [selectedCategory, setSelectedCategory] = useState('');
   const [selectedvisibility, setSelectedVisibility] = useState('');
   const [showAllTags, setShowAllTags] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const EVENTS_PER_PAGE = 6;
   const MAX_VISIBLE_TAGS = 6;
+  const eventListRef = useRef(null);
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, selectedTags, selectedStatus, selectedCategory, selectedvisibility, selectedDate]);
 
   useEffect(() => {
     const fetchEvents = async () => {
@@ -38,14 +44,18 @@ export default function Discover() {
     fetchEvents();
   }, []);
 
+  useEffect(() => {
+    if (eventListRef.current) {
+      eventListRef.current.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+      });
+    }
+  }, [currentPage]);
+
   if (loading) {
     return (
-      <PageLayout>
-      <div className="text-center mt-8">Loading Discover...  Prepare to be amazed!</div>
-      <div className="flex justify-center items-center h-screen -mt-24">
-          <span className="loading loading-spinner loading-lg"></span>
-      </div>
-    </PageLayout>
+      <Loading></Loading>
   );
   }
 
@@ -91,7 +101,13 @@ export default function Discover() {
     );
   })
 
+  const indexOfLastEvent = currentPage * EVENTS_PER_PAGE;
+  const indexOfFirstEvent = indexOfLastEvent - EVENTS_PER_PAGE;
+  const currentEvents = filteredEvents.slice(indexOfFirstEvent, indexOfLastEvent);
 
+  const paginate = (pageNumber) => setCurrentPage(pageNumber);
+
+  const totalPages = Math.ceil(filteredEvents.length / EVENTS_PER_PAGE);
   return (
     <PageLayout>
       <div className="min-h-screen bg-gray-50 w-full relative overflow-hidden">
@@ -238,13 +254,55 @@ export default function Discover() {
                       </button>
                     )}
                 </div>
-                  <div className='flex flex-col h-[800px] overflow-y-auto z-0'>
+                <div 
+                  ref={eventListRef}
+                  className='flex flex-col h-[900px] overflow-y-auto z-0 relative'
+                >
                   {filteredEvents.length > 0 ? (
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      {filteredEvents.map((event) => (
-                        <EventCard key={event.id} event={event} />
-                      ))}
-                    </div>
+                    <>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        {currentEvents.map((event) => (
+                          <EventCard key={event.id} event={event} />
+                        ))}
+                      </div>
+                      
+                      {/* Pagination */}
+                      <div className="sticky bottom-0 bg-white/90 backdrop-blur-sm py-4 z-50">
+                        <div className="flex justify-center items-center space-x-4">
+                          <button 
+                            onClick={() => paginate(currentPage - 1)} 
+                            disabled={currentPage === 1}
+                            className="btn btn-ghost btn-sm disabled:opacity-0"
+                          >
+                            <LuChevronLeft className="h-5 w-5" />
+                          </button>
+                          
+                          <div className="join">
+                            {[...Array(totalPages)].map((_, index) => (
+                              <button
+                                key={index}
+                                onClick={() => paginate(index + 1)}
+                                className={`join-item btn btn-sm ${
+                                  currentPage === index + 1 
+                                    ? 'btn-active bg-dark-purple text-white' 
+                                    : 'btn-ghost'
+                                }`}
+                              >
+                                {index + 1}
+                              </button>
+                            ))}
+                          </div>
+                          
+                          <button 
+                            onClick={() => paginate(currentPage + 1)} 
+                            disabled={currentPage === totalPages}
+                            className="btn btn-ghost btn-sm disabled:opacity-0"
+                          >
+                            <LuChevronRight className="h-5 w-5" />
+                          </button>
+                        </div>
+                      </div>
+                    </>
                   ) : (
                     <h2 className="flex items-center font-bold justify-center h-64 text-4xl text-dark-purple">
                       No events found

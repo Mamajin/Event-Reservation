@@ -5,7 +5,7 @@ import EventCard from '../components/EventCard';
 import { ACCESS_TOKEN } from "../constants";
 import useUserProfile from '../hooks/useUserProfile';
 import api from '../api';
-
+import Loading from '../components/LoadingIndicator';
 function Bookmark() {
     const [events, setEvents] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -48,12 +48,7 @@ function Bookmark() {
 
     if (loading || userLoading) {
         return (
-            <PageLayout>
-            <div className="text-center mt-8">Loading your Bookmarks...</div>
-            <div className="flex justify-center items-center h-screen -mt-24">
-                <span className="loading loading-spinner loading-lg"></span>
-            </div>
-          </PageLayout>
+            <Loading></Loading>
         );
     }
 
