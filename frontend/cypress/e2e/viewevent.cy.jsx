@@ -10,7 +10,7 @@ describe('Login and View Event', () => {
       // Wait for login to complete and navigate to home/discover
       cy.url().should('include', '/');
   
-      cy.contains('a', 'Explore Events').click();
+      cy.contains('a', 'Discover').click();
   
       cy.intercept('GET', '/api/events/events').as('getEvents');
       cy.wait('@getEvents');

@@ -1,5 +1,5 @@
-describe('Apply for Event and Cancel Registration', () => {
-  it('should register for an event, verify it in tickets, and cancel registration', () => {
+describe('Event Application and Cancellation Workflow', () => {
+  it('should check if an event is already applied and apply if not', () => {
     cy.visit('/login');
     cy.get('input[placeholder="Username"]').type('testuser2');
     cy.get('input[placeholder="Password"]').type('StrongPass123!');
@@ -28,23 +28,37 @@ describe('Apply for Event and Cancel Registration', () => {
         cy.get('@selectedEventName').then((eventName) => {
           cy.get('[data-testid="ticket-item"]').should('contain', eventName.trim());
         });
-
-        cy.contains('a', 'Explore Events').click();
-        cy.get('[data-testid="event-name"]').first().click({ force: true });
-        cy.contains('button', 'Unapply').click();
-        cy.on('window:alert', (text) => {
-          expect(text).to.contains('You have successfully unapplied from the event!');
-        });
       } else if ($button.text().includes('Unapply')) {
-        $button.click();
-        cy.on('window:alert', (text) => {
-          expect(text).to.contains('You have successfully unapplied from the event!');
-        });
+        cy.log('Event is already applied. Test completed.');
       }
+    });
+  });
+
+  it('should select an event from "My Tickets" and unapply', () => {
+    cy.visit('/login');
+    cy.get('input[placeholder="Username"]').type('testuser2');
+    cy.get('input[placeholder="Password"]').type('StrongPass123!');
+    cy.get('button').contains('Login').click();
+    cy.url().should('include', '/');
+
+    cy.contains('a', 'My Tickets').click();
+    cy.url().should('include', '/my-tickets');
+
+    cy.get('[data-testid="ticket-item"]').first().invoke('text').as('ticketEventName');
+    cy.get('[data-testid="ticket-item"]').first().within(() => {
+      cy.get('[data-testid="ticket-event-image"] img').should('be.visible').click({ force: true });
+    });
+
+    cy.url().should('include', '/events/');
+    cy.get('[data-testid="event-header"]').should('be.visible');
+
+    cy.contains('button', 'Unapply').click();
+    cy.on('window:alert', (text) => {
+      expect(text).to.contains('You have successfully unapplied from the event!');
     });
 
     cy.contains('a', 'My Tickets').click();
-    cy.get('@selectedEventName').then((eventName) => {
+    cy.get('@ticketEventName').then((eventName) => {
       cy.get('[data-testid="ticket-item"]').should('not.contain', eventName.trim());
     });
   });
