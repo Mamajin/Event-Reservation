@@ -1,5 +1,5 @@
 
-import { FaGlobe, FaFacebook, FaTwitter, FaInstagram, FaClock, FaRegCheckCircle  } from 'react-icons/fa';
+import { FaGlobe, FaFacebook, FaTwitter, FaInstagram, FaClock, FaRegCheckCircle } from 'react-icons/fa';
 import { CiMail } from "react-icons/ci";
 import { FiPhone } from "react-icons/fi";
 import { LuCalendarDays, LuUsers, LuShirt } from "react-icons/lu";
@@ -9,7 +9,10 @@ import { useState, useEffect } from 'react';
 import api from '../../../api';
 import ApplicantsList from './ApplicantsList';
 import { ACCESS_TOKEN, USER_ID } from '../../../constants';
-
+import { useNavigate } from 'react-router-dom';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
+import 'github-markdown-css/github-markdown-light.css';
 export function EventInfo({ event }) {
   const [loading, setLoading] = useState(false);
   const [isApplied, setIsApplied] = useState(false);
@@ -18,48 +21,53 @@ export function EventInfo({ event }) {
   const [attendees, setAttendees] = useState([]);
   const [showApplicants, setShowApplicants] = useState(false);
   const userId = localStorage.getItem(USER_ID);
+  const navigate = useNavigate();
 
   useEffect(() => {
-    if (event?.user_engaged) {
-      setIsApplied(event.user_engaged.is_applied);
-      const fetchTicket = async () => {
-        try {
-          const token = localStorage.getItem(ACCESS_TOKEN);
-          const headers = token ? { Authorization: `Bearer ${token}` } : {};
-          const response = await api.get(`/tickets/user/${userId}`, { headers });
-          const tickets = response.data;
-
-          const ticket = tickets.find(ticket => ticket.event_id === event.id);
-          if (ticket) {
-            setTicketId(ticket.id);
-          }
-        } catch (error) {
-          console.error("Error fetching tickets:", error);
-        }
-      };
-
-      const fetchAttendees = async () => {
-        try {
-          const token = localStorage.getItem(ACCESS_TOKEN);
-          // Only fetch attendees if user is event owner or has applied to the event
-          if (event.user_id === userId || isApplied) {
+    const token = localStorage.getItem(ACCESS_TOKEN);
+    if (token) {
+      if (event?.user_engaged) {
+        setIsApplied(event.user_engaged.is_applied);
+        const fetchTicket = async () => {
+          try {
+            const token = localStorage.getItem(ACCESS_TOKEN);
             const headers = token ? { Authorization: `Bearer ${token}` } : {};
-            const response = await api.get(`/events/${event.id}/attendee-list`, { headers });
-            const attendees = response.data;
-            setAttendees(attendees);
-          }
-        } catch (error) {
-          // Check if it's a 403 error and handle accordingly
-          if (error.response?.status === 403) {
-            console.warn("Not authorized to view attendee list");
-          } else {
-            console.error("Error fetching attendees:", error);
-          }
-        }
-      };
+            const response = await api.get(`/tickets/user/${userId}`, { headers });
+            const tickets = response.data;
 
-      fetchTicket();
-      fetchAttendees();
+            const ticket = tickets.find(ticket => ticket.event_id === event.id);
+            if (ticket) {
+              setTicketId(ticket.id);
+            }
+          } catch (error) {
+            console.error("Error fetching tickets:", error);
+          }
+        };
+
+
+        const fetchAttendees = async () => {
+          try {
+            const token = localStorage.getItem(ACCESS_TOKEN);
+            // Only fetch attendees if user is event owner or has applied to the event
+            if (event.user_id === userId || isApplied) {
+              const headers = token ? { Authorization: `Bearer ${token}` } : {};
+              const response = await api.get(`/events/${event.id}/attendee-list`, { headers });
+              const attendees = response.data;
+              setAttendees(attendees);
+            }
+          } catch (error) {
+            // Check if it's a 403 error and handle accordingly
+            if (error.response?.status === 403) {
+              console.warn("Not authorized to view attendee list");
+            } else {
+              console.error("Error fetching attendees:", error);
+            }
+          }
+        };
+
+        fetchTicket();
+        fetchAttendees();
+      }
     }
   }, [userId, event.id, event.user_id, isApplied]);
 
@@ -71,10 +79,15 @@ export function EventInfo({ event }) {
   ].filter(link => link.url);
 
   const handleApplyEvent = async () => {
+    const token = localStorage.getItem(ACCESS_TOKEN);
+    if (!token) {
+      navigate('/login');
+      return;
+    }
     setLoading(true);
-  
+
     try {
-      const token = localStorage.getItem(ACCESS_TOKEN);
+
       const headers = token ? { Authorization: `Bearer ${token}` } : {};
       await api.post(`/tickets/event/${event.id}/register`, {}, { headers });
       alert("Event applied successfully!");
@@ -90,7 +103,7 @@ export function EventInfo({ event }) {
       setLoading(false);
     }
   };
-  
+
   const handleUnapplyEvent = async () => {
     setCanceling(true);
     try {
@@ -118,18 +131,24 @@ export function EventInfo({ event }) {
           <div className="space-y-8">
             <div className="bg-white rounded-xl p-6 shadow-sm">
               <h2 className="text-2xl font-semibold mb-4 text-dark-purple">About the Event</h2>
-              <p className="text-gray-600 leading-relaxed break-words">
+              <ReactMarkdown
+                remarkPlugins={[remarkGfm]}
+                className="prose prose-lg text-gray-800 leading-relaxed break-words"
+              >
                 {event.detailed_description}
-              </p>
+              </ReactMarkdown>
             </div>
           </div>
 
           {event.terms_and_conditions && (
             <div className="bg-white rounded-xl p-6 shadow-sm">
               <h2 className="text-2xl font-semibold mb-4 text-dark-purple">Terms & Conditions</h2>
-              <p className="text-gray-600 leading-relaxed whitespace-pre-wrap break-words">
+              <ReactMarkdown
+                remarkPlugins={[remarkGfm]}
+                className="text-gray-600 leading-relaxed  break-words"
+              >
                 {event.terms_and_conditions}
-              </p>
+              </ReactMarkdown>
             </div>
           )}
 
@@ -176,12 +195,12 @@ export function EventInfo({ event }) {
           {/* Dress Code */}
           <div className="bg-white rounded-xl p-6 shadow-sm">
             <h2 className="text-xl font-semibold mb-4 text-dark-purple">Dress Code</h2>
-              <p className="flex items-center gap-2 text-gray-600">
-                <LuShirt className="h-5 w-5 text-blue-600" />
-                {event.dress_code.charAt(0) + event.dress_code.slice(1).toLowerCase()}
-              </p>
+            <p className="flex items-center gap-2 text-gray-600">
+              <LuShirt className="h-5 w-5 text-blue-600" />
+              {event.dress_code.charAt(0) + event.dress_code.slice(1).toLowerCase()}
+            </p>
           </div>
-            
+
           {/* Registration */}
           <div className="bg-white rounded-xl p-6 shadow-sm">
             <h3 className="text-xl font-semibold mb-4 text-dark-purple">Registration Details</h3>
@@ -189,9 +208,8 @@ export function EventInfo({ event }) {
               <button
                 onClick={() => setShowApplicants(true)}
                 disabled={attendees.length === 0}
-                className={`flex items-center gap-2 text-gray-600 ${
-                  attendees.length === 0 ? 'opacity-50' : 'hover:text-blue-600 transition-colors'
-                }`}
+                className={`flex items-center gap-2 text-gray-600 ${attendees.length === 0 ? 'opacity-50' : 'hover:text-blue-600 transition-colors'
+                  }`}
               >
                 <LuUsers className="w-5 h-5 text-blue-600" />
                 {attendees.length === 0 ? (
@@ -211,13 +229,12 @@ export function EventInfo({ event }) {
             <button
               onClick={isApplied ? handleUnapplyEvent : handleApplyEvent}
               disabled={loading || canceling}
-              className={`w-full py-3 px-4 rounded-lg flex items-center justify-center gap-2 transition-colors ${
-                (loading || canceling)
-                  ? 'bg-gray-300 text-gray-700 cursor-not-allowed'
-                  : isApplied
+              className={`w-full py-3 px-4 rounded-lg flex items-center justify-center gap-2 transition-colors ${(loading || canceling)
+                ? 'bg-gray-300 text-gray-700 cursor-not-allowed'
+                : isApplied
                   ? 'bg-red-600 hover:bg-red-700 text-white'
                   : 'bg-dark-purple hover:bg-green-600 text-white'
-              }`}
+                }`}
             >
               {loading || canceling ? (
                 <>
@@ -242,30 +259,30 @@ export function EventInfo({ event }) {
           </div>
 
           {/* Contact Information */}
-          {(event.contact_email || event.contact_phone) &&(
-          <div className="card bg-white">
-            <div className="card-body">
-              <h3 className="font-semibold text-dark-purple text-lg mb-4">Contact Information</h3>
-              <div className="space-y-4">
-                {event.contact_email && (
-                  <div className="flex items-center gap-3">
-                    <CiMail className="h-5 w-5 text-dark-purple" />
-                    <a href={`mailto:${event.contact_email}`} className="link link-dark-purple">
-                      {event.contact_email}
-                    </a>
-                  </div>
-                )}
-                {event.contact_phone && (
-                  <div className="flex items-center gap-3">
-                    <FiPhone className="h-5 w-5 text-dark-purple" />
-                    <a href={`tel:${event.contact_phone}`} className="link link-dark-purple">
-                      {event.contact_phone}
-                    </a>
-                  </div>
-                )}
+          {(event.contact_email || event.contact_phone) && (
+            <div className="card bg-white">
+              <div className="card-body">
+                <h3 className="font-semibold text-dark-purple text-lg mb-4">Contact Information</h3>
+                <div className="space-y-4">
+                  {event.contact_email && (
+                    <div className="flex items-center gap-3">
+                      <CiMail className="h-5 w-5 text-dark-purple" />
+                      <a href={`mailto:${event.contact_email}`} className="link link-dark-purple">
+                        {event.contact_email}
+                      </a>
+                    </div>
+                  )}
+                  {event.contact_phone && (
+                    <div className="flex items-center gap-3">
+                      <FiPhone className="h-5 w-5 text-dark-purple" />
+                      <a href={`tel:${event.contact_phone}`} className="link link-dark-purple">
+                        {event.contact_phone}
+                      </a>
+                    </div>
+                  )}
+                </div>
               </div>
-            </div>
-          </div>)}
+            </div>)}
           {/* Social Links */}
           {socialLinks.length > 0 || event.other_url && (
             <div className="card bg-white">
