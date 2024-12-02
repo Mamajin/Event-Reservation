@@ -77,7 +77,6 @@ class Ticket(models.Model):
         for ticket in tickets:
             notification = TicketNotificationManager(ticket)
             notification.send_event_cancellation_notification()
-            ticket.email_sent = True
             ticket.status = 'CANCELLED'
             ticket.cancellation_date = timezone.now()
             ticket.save(update_fields=['email_sent', 'status', 'cancellation_date'])
