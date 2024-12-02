@@ -65,16 +65,10 @@ pip install -r requirements.txt
 ```
 **5. Run the migrations**
 ```bash
-
 python manage.py migrate
 ```
 
-**6. Load data:**
-```bash
-py backend/manage.py loaddata data/data.json
-```
-
-**7.start the development server:**
+**6.start the development server:**
 ```bash
 python manage.py runserver
 ```

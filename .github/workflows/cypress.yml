@@ -84,12 +84,13 @@ jobs:
           npm start &
         env:
           REACT_APP_API_URL: ${{ secrets.REACT_APP_API_URL }}  # Example of frontend environment variables
+          VITE_GOOGLE_MAPS_API_KEY: ${{ secrets.VITE_GOOGLE_MAPS_API_KEY }}
 
       # Wait for both servers to be ready
       - name: Wait for Servers
         run: |
-          npx wait-on http://localhost:3000  # Frontend server URL
-          npx wait-on http://localhost:8000  # Backend server URL (adjust if different)
+          npx wait-on {{ secret.SITE_URL }}  # Frontend server URL
+          npx wait-on {{ secret.VITE_API_URL }}  # Backend server URL (adjust if different)
 
       # Run Cypress tests
       - name: Cypress run
