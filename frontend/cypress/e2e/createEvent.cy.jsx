@@ -69,8 +69,6 @@ describe('Create Event Page and delete it', () => {
            
         cy.contains('Cypress Test Event').should('not.exist');
       });
-      
-      
 
   });
   
