@@ -6,6 +6,7 @@ import { ACCESS_TOKEN } from '../constants';
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import api from '../api';
+import Loading from '../components/LoadingIndicator';
 
 export default function EventDetail() {
   const { eventId } = useParams();
@@ -31,15 +32,14 @@ export default function EventDetail() {
     fetchEvent();
   }, [eventId]);
 
-  if (loading) 
+  if (loading) {
     return (
-      <PageLayout>
-      <div className="text-center mt-8">Loading Event Detail!</div>
-      <div className="flex justify-center items-center h-screen -mt-24">
-          <span className="loading loading-spinner loading-lg"></span>
-      </div>
-    </PageLayout>)
-  if (error) return <div>Error loading event details.</div>;
+      <Loading />
+    );
+  }
+  if (error) {
+    return <div>Error fetching data: {error.message}</div>;
+  }
   if (!event) return <div>No event found.</div>;
 
   return (

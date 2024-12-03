@@ -1,12 +1,15 @@
 import React, { useEffect, useState } from 'react';
 import api from '../api';
-import EventCard from '../components/Discovery/EventCard';
 import PageLayout from '../components/PageLayout';
 import { useNavigate,Link } from 'react-router-dom';
 import {USER_STATUS} from '../constants'
-
+import EventScroller from '../components/Home/EventScroller';
+import HeroCarousel from '../components/Home/Hero';
+import Loading from '../components/LoadingIndicator';
 export default function Home() {
+  const [popularEvents, setPopularEvents] = useState([]);
   const [latestEvents, setLatestEvents] = useState([]);
+  const [upcomingEvents, setUpcomingEvents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const isOrganizer = localStorage.getItem(USER_STATUS) === "Organizer";
@@ -15,10 +18,19 @@ export default function Home() {
 
   useEffect(() => {
     const fetchEvents = async () => {
+      
       try {
         const response = await api.get('/events/events');
         const sortedEvents = response.data.slice().sort((a, b) => new Date(b.start_date_event) - new Date(a.start_date_event));
-        setLatestEvents(sortedEvents.slice(0, 3));
+        setLatestEvents(sortedEvents.slice(0, 8));
+
+        const sortedByLikes = response.data.sort((a, b) => 
+          b.current_attendees - a.current_attendees
+        );
+        setPopularEvents(sortedByLikes.slice(0, 8));
+
+        const sortedUpcoming = response.data.filter(event => new Date(event.start_date_event) > new Date());
+        setUpcomingEvents(sortedUpcoming.sort((a, b) => new Date(a.start_date_event) - new Date(b.start_date_event)).slice(0, 8)); 
       } catch (err) {
         setError(err);
       } finally {
@@ -35,51 +47,58 @@ export default function Home() {
       navigate('/become-organizer');
     }
   };
+  if (loading) {
+    return (
+      <Loading />
+    );
+  }
+  if (error) {
+    return <div>Error fetching data: {error.message}</div>;
+  }
   return (
     <PageLayout>
-      <div className='pr-6 pt-4'>
-      <div className="hero h-screen bg-cover bg-center h-[500px]" style={{ backgroundImage: `url('https://i.pinimg.com/564x/92/57/6b/92576be9601f00886b03e58363369647.jpg')` }}>
-        <div className="hero-overlay bg-opacity-60 bg-black"></div>
-        <div className="hero-content text-center text-neutral-content">
-          <div className="max-w-md">
-            <h1 className="text-5xl font-bold text-white mb-4">Welcome to EventEase!</h1>
-            <p className="py-4 text-white text-lg">
-              Discover amazing events, meet new people, and experience unforgettable moments. 
-              Start exploring now and find the events that suit your interests.
-            </p>
-            <Link to="/discover" className="btn bg-amber-300 text-dark-purple mt-6 px-8 py-3 text-lg">Explore Events</Link>
-          </div>
-        </div>
+      <HeroCarousel  slides={popularEvents}/>
+      <div className='bg-white pt-6'>
+      <div className=''>
+      <EventScroller
+        title="Popular Events"
+        description="Join the most attended events in your area"
+        events={popularEvents}
+      />
+      </div>
+      <div className='bg-white'>
+      <EventScroller
+        title="Upcoming Events"
+        description="Don't miss out on the events coming soon!"
+        events={upcomingEvents}
+      />
+      </div>
+      <div className='bg-white'>
+      <EventScroller
+        title="Latest Events"
+        description="Discover newly added events"
+        events={latestEvents}
+      />
       </div>
 
-      <div className="p-10 bg-white">
-        <h2 className="text-4xl text-amber-300 font-semibold mb-10 text-center">Latest Events</h2>
-        {loading ? (
-          <div className="text-center">Loading...</div>
-        ) : error ? (
-          <div className="text-center text-bold text-red-500">Error fetching events: {error.message}</div>
-        ) : latestEvents.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {latestEvents.map(event => (
-              <EventCard 
-                key={event.id} 
-                event={event} 
-                className="text-xs"
-              />
-            ))}
-          </div>
-        ) : (
-          <div className="text-center text-lg font-semibold">No events found</div>
-        )}
-      </div>
-
-      <div className="bg-white text-primary-content p-10 text-center">
-        <h2 className="text-3xl font-semibold mb-4">Want to organize your own event?</h2>
-        <p className="mb-6">Become an organizer and start creating events that bring people together.</p>
-        <button className="btn text-dark-purple bg-amber-300 px-8 py-3 text-lg" onClick={handleCreateEventClick}>
-          Create Event
+    <div className="bg-gradient-to-r from-amber-400 to-amber-500 py-16">    
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+        <h2 className="text-3xl font-bold text-gray-900 mb-4">
+          Ready to Create Your Own Event?
+        </h2>
+        <p className="text-xl text-gray-800 mb-8 max-w-2xl mx-auto">
+          {isOrganizer
+            ? "Share your passion with the world. Start planning your next event today!"
+            : "Become an organizer and start creating events that bring people together."}
+        </p>
+        <button
+          onClick={handleCreateEventClick}
+          className="bg-gray-900 text-white px-8 py-3 rounded-full text-lg font-semibold hover:bg-gray-800 transition-colors"
+        >
+          {isOrganizer ? "Create Event" : "Become an Organizer"}
         </button>
       </div>
+    </div>
       </div>
     </PageLayout>
   );

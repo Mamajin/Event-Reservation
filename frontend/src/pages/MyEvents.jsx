@@ -5,7 +5,7 @@ import EventCard from '../components/EventCard';
 import { ACCESS_TOKEN } from "../constants";
 import useUserProfile from '../hooks/useUserProfile';
 import api from '../api';
-
+import Loading from '../components/LoadingIndicator';
 function MyEvents() {
     const [events, setEvents] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -16,7 +16,6 @@ function MyEvents() {
     const handleEdit = (eventId) => {
         navigate(`/events/${eventId}/edit`);
     };
-
     useEffect(() => {
         const fetchOrganizerEvents = async () => {
             try {
@@ -51,12 +50,7 @@ function MyEvents() {
 
     if (loading || userLoading) {
         return (
-            <PageLayout>
-            <div className="text-center mt-8">Loading your events...</div>
-            <div className="flex justify-center items-center h-screen -mt-24">
-                <span className="loading loading-spinner loading-lg"></span>
-            </div>
-          </PageLayout>
+            <Loading />
         );
     }
 

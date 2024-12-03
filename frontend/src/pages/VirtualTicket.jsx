@@ -5,6 +5,7 @@ import { FaArrowLeft } from 'react-icons/fa';
 import PageLayout from '../components/PageLayout';
 import QRCode from 'react-qr-code';
 import { PROFILE_PICTURE } from '../constants';
+import Loading from '../components/LoadingIndicator';
 
 function VirtualTicket() {
   const { ticketId } = useParams();
@@ -53,13 +54,8 @@ function VirtualTicket() {
 
   if (loading) {
     return (
-      <PageLayout>
-        <div className="text-center mt-8">Loading virtual ticket...</div>
-        <div className="flex justify-center items-center h-screen -mt-24">
-          <span className="loading loading-spinner loading-lg"></span>
-        </div>
-      </PageLayout>
-    );
+      <Loading></Loading>
+  );
   }
 
   if (error) {

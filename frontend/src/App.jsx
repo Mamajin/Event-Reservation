@@ -34,6 +34,8 @@ import MyTickets from './pages/MyTickets';
 import TicketDetail from './pages/TicketDetail';
 import CompleteProfile from './pages/CompleteProfilePage';
 import EmailVerification from './pages/VerifyEmail';
+import ResetPassword from './pages/ResetPasswordPage';
+import ForgotPassword from './pages/ForgotPasswordPage';
 function App() {
   useEffect(() => {
     const token = getAccessToken();
@@ -55,10 +57,12 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/complete-profile" element={<CompleteProfile />} />
-          <Route path="/become-organizer" element={<ApplyOrganizer />} />
           <Route path="/events/:eventId" element={<EventDetail />} />
           <Route path="/logout" element={<Logout />} />
           <Route path="/verify-email/:user_id/:token" element={<EmailVerification />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
+          <Route path="/reset-password/:userId/:token" element={<ResetPassword />} />
           
           {/* Footer Pages */}
           <Route path="/legal/terms-of-use" element={<TermsOfUse />} />
@@ -76,6 +80,7 @@ function App() {
           <Route path="/services/advertisement" element={<Advertisement />} />
           
           {/* Protected Routes */}
+          <Route path="/become-organizer" element={<ProtectedRoute><ApplyOrganizer /></ProtectedRoute>} />
           <Route path="/account-info" element={<ProtectedRoute><AccountInfo /></ProtectedRoute>} />
           <Route path="/organizer-info" element={<ProtectedRoute><OrganizerInfo /></ProtectedRoute>} />
           <Route path="/create-event" element={<ProtectedRoute><CreateEvent /></ProtectedRoute>} />

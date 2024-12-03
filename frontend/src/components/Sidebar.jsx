@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import { useState, useEffect } from 'react';
+import { useTheme } from '../style/ThemeContext';
 import { ArrowLeftCircleIcon, MagnifyingGlassIcon } from '@heroicons/react/24/solid';
 import { ACCESS_TOKEN, USER_STATUS } from '../constants';
 
@@ -8,7 +9,7 @@ function Sidebar() {
         const savedState = localStorage.getItem('sidebarOpen');
         return savedState !== null ? JSON.parse(savedState) : true;
     });
-
+    const { theme } = useTheme();
     const [searchQuery, setSearchQuery] = useState('');
 
     const isLoggedIn = localStorage.getItem(ACCESS_TOKEN) !== null;
@@ -32,22 +33,26 @@ function Sidebar() {
 
     return (
         <div className="flex">
-            <div 
-                className={`bg-dark-purple h-screen p-5 pt-20 fixed ${open ? "w-72" : "w-20"} duration-500 transition-all`} 
+            <div
+                className={`h-screen p-5 pt-20 fixed ${open ? "w-72" : "w-20"} duration-500 transition-all`}
+                style={{ backgroundColor: theme?.primary }}
                 onMouseEnter={() => setOpen(true)}
                 onMouseLeave={() => setOpen(false)}
             >
-                <ArrowLeftCircleIcon 
-                    className={`bg-white text-dark-purple w-9 h-9 rounded-full absolute -right-5 top-40 border-dark-purple cursor-pointer ${!open && "rotate-180"}`} 
-                    onClick={() => setOpen(!open)} 
-                />
+            <ArrowLeftCircleIcon
+                className={`bg-white w-9 h-9 rounded-full absolute -right-5 top-40 border-dark-purple cursor-pointer ${!open && "rotate-180"}`}
+                style={{ color: theme?.secondary }}
+                onClick={() => setOpen(!open)}
+            />
+
+
                 <div className={`input input-bordered bg-light-white rounded-md flex items-center gap-2 ${!open ? "px-2.5 w-10 h-10" : "px-4"} py-2 mt-4`}>
-                    <input 
-                        type="search" 
+                    <input
+                        type="search"
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
-                        className={`grow border-none bg-transparent w-full focus:outline-none ${!open && "hidden"}`}
-                        placeholder="Search" 
+                        className={`grow text-black border-none bg-transparent w-full focus:outline-none ${!open && "hidden"}`}
+                        placeholder="Search"
                     />
                     <MagnifyingGlassIcon className={`text-white text-lg w-5 h-5 cursor-pointer ${open && "mr-2"}`} />
                 </div>
@@ -55,15 +60,12 @@ function Sidebar() {
                     {filteredMenus.map((menu, index) => (
                         <li
                             key={index}
-                            className="text-white text-md flex items-center gap-x-4 cursor-pointer p-6"
+                            className="text-black text-md flex items-center gap-x-4 cursor-pointer p-6"
                         >
                             <Link to={menu.path} className="flex items-center w-full">
                                 <span
-                                    className={`text-base font-medium flex-1 ${
-                                        !open
-                                            ? "opacity-0 translate-x-4"
-                                            : "opacity-100 translate-x-0 transition-all duration-1000 ease-out"
-                                    }`}
+                                    className={`text-base font-bold flex-1 ${!open ? "opacity-0 translate-x-4" : "opacity-100 translate-x-0 transition-all duration-1000 ease-out"}`}
+                                    style={{ color: theme?.black }}
                                 >
                                     {menu.title}
                                 </span>
@@ -76,6 +78,6 @@ function Sidebar() {
             </div>
         </div>
     );
-}
+};
 
 export default Sidebar;
