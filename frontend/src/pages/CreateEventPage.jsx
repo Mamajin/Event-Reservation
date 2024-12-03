@@ -11,6 +11,7 @@ import SocialMedia from '../components/CreateEvent/sections/SocialMedia';
 import { ACCESS_TOKEN } from '../constants';
 import api from '../api';
 import { useNavigate } from 'react-router-dom';
+import Loading from '../components/LoadingIndicator';
 
 export default function CreateEvent() {
   const [activeTab, setActiveTab] = useState('basic');
@@ -92,16 +93,20 @@ export default function CreateEvent() {
       console.error("Error creating event:", error);
       let errorMessage = "Failed to create event. Please try again.";
       if (error.response) {
-        console.error("Error response data:", error.response.data);
+        console.error("Error response data:", error.response.data.error);
         errorMessage = error.response.data?.error || errorMessage;
       }
-      alert(error);
+      alert(errorMessage);
     } finally {
       setLoading(false);
     }
   };
 
-
+  if (loading) {
+    return (
+      <Loading></Loading>
+  );
+  }
   const renderTabContent = () => {
     switch (activeTab) {
       case 'basic':

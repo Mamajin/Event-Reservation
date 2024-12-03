@@ -3,6 +3,7 @@ import api from '../api';
 import PageLayout from '../components/PageLayout';
 import { useNavigate } from 'react-router-dom';
 import { ACCESS_TOKEN } from "../constants";
+import Loading from '../components/LoadingIndicator';
 
 function OrganizerInfo() {
   const [organizerData, setOrganizerData] = useState(null);
@@ -122,13 +123,8 @@ function OrganizerInfo() {
 
   if (loading) {
     return (
-      <PageLayout>
-      <div className="text-center mt-8">Loading Organizer Information...</div>
-      <div className="flex justify-center items-center h-screen -mt-24">
-          <span className="loading loading-spinner loading-lg"></span>
-      </div>
-      </PageLayout>
-    );
+      <Loading></Loading>
+  );
   }
 
   if (error) {

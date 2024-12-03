@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { FaTicketAlt } from 'react-icons/fa';
 import api from '../api';
 import PageLayout from '../components/PageLayout';
-
+import Loading from '../components/LoadingIndicator';
 function MyTickets() {
   const [tickets, setTickets] = useState([]);
   const [events, setEvents] = useState({});
@@ -70,12 +70,7 @@ function MyTickets() {
 
   if (loading) {
     return (
-      <PageLayout>
-        <div className="text-center mt-8">Loading your tickets...</div>
-        <div className="flex justify-center items-center h-screen -mt-24">
-          <span className="loading loading-spinner loading-lg"></span>
-        </div>
-      </PageLayout>
+      <Loading />
     );
   }
 

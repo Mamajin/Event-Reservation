@@ -47,7 +47,7 @@ export default function TicketingDetails({ form }) {
             <input
               type="number"
               className="input input-bordered bg-white"
-              placeholder="Enter ticket price"
+              placeholder="Enter ticket price (Baht)"
               {...form.register('ticket_price', { 
                 valueAsNumber: true,
                 min: 0,
@@ -56,19 +56,19 @@ export default function TicketingDetails({ form }) {
             />
           </div>
 
-          <div className="form-control">
+          {/* <div className="form-control">
             <label className="label font-medium text-dark-purple">Expected Price</label>
             <input
               type="number"
               className="input input-bordered bg-white"
-              placeholder="Enter expected price"
+              placeholder="Enter expected price (Baht)"
               {...form.register('expected_price',{ 
                 valueAsNumber: true,
                 min: 0,
               })}
               min="0"
             />
-          </div>
+          </div> */}
         </div>
       )}
 
