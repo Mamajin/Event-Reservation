@@ -217,29 +217,47 @@ class EventOrganizerStrategy(EventStrategy):
     
 class EventListStrategy(EventStrategy):
     """
-    Strategy for retrieving all public events.
+    Strategy for retrieving all public events with pagination.
     """
-    def execute(self):
+    def execute(self, page: int = 1):
         """
-        Retrieve all public events for the homepage.
+        Retrieve paginated public events for the homepage.
 
         Args:
-            None
+            page (int, optional): The page number for pagination. Defaults to 1.
 
         Returns:
-            Response: List of all public events, ordered by event creation date in descending order.
-            ErrorResponseSchema: Error message with status code 400 in case of other errors.
+            Response: Pagination response containing:
+            - List of events for the current page
+            - Total number of events
+            - Total number of pages
+            - Current page number
         """
+        EVENTS_PER_PAGE = 8
         events = Event.objects.filter(event_create_date__lte=timezone.now()).order_by("-event_create_date")
-        event_list = []
+        
+        total_events = events.count()
+        total_pages = (total_events + EVENTS_PER_PAGE - 1) // EVENTS_PER_PAGE
+        
+        page = max(1, min(page, total_pages))
+        
+        start_index = (page - 1) * EVENTS_PER_PAGE
+        end_index = start_index + EVENTS_PER_PAGE
+        paginated_events = events[start_index:end_index]
+        
         self.autheticate_user()
+        event_list = []
+        self.add_event(event_list, paginated_events)
 
-        self.add_event(event_list,events)
+        pagination_response = {
+            'events': event_list,
+            'total_events': total_events,
+            'total_pages': total_pages,
+            'current_page': page
+        }
 
-        # Conditionally add user-specific engagement data
-
-        logger.info("Retrieved all public events for the homepage.")
-        return Response(event_list, status=200)
+        logger.info(f"Retrieved paginated public events. Page {page} of {total_pages}")
+        return Response(pagination_response, status=200)
     
     
 class EventDetailStrategy(EventStrategy):
