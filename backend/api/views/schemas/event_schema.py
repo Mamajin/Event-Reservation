@@ -60,6 +60,7 @@ class EventResponseSchema(ModelSchema):
     user_engaged: Optional[Dict] = None
     current_attendees: Optional[int] = 0
     status_registeration: Optional[str] = None
+    is_organizer: Optional[bool] = False
     
     @classmethod
     def resolve_engagement(cls, event: Event) -> Dict:
