@@ -5,7 +5,8 @@ import SelectInput from "../../SelectInput";
 export default function BasicDetails({ form }) {
   const { watch, setValue } = form;
   const [eventImage, setEventImage] = useState(null);
-
+  const eventName = watch('event_name');
+  const eventDescription = watch('description');
   const CATEGORY_OPTION = [
     { value: 'CONFERENCE', label: "Conference" },
     { value: 'WORKSHOP', label: "Workshop" },
@@ -79,9 +80,13 @@ export default function BasicDetails({ form }) {
         <input
           type="text"
           className="input input-bordered bg-white"
-          placeholder="Enter event name"
+          placeholder="Enter event name"  
           {...form.register('event_name', { required: true })}
+          maxLength={50}
         />
+        <p className="text-sm text-gray-500 pl-2 mt-1">
+          {eventName?.length}/{50} characters
+        </p>
       </div>
       <div className="grid grid-cols-2 gap-4">
         <div className="form-control">
@@ -112,6 +117,9 @@ export default function BasicDetails({ form }) {
           {...form.register('description', { required: true })}
           maxLength={350}
         />
+          <p className="text-sm text-gray-500 pl-2 mt-1">
+          {eventDescription?.length}/{350} characters
+        </p>
       </div>
 
       <div className="form-control">
@@ -121,7 +129,11 @@ export default function BasicDetails({ form }) {
           placeholder="Provide detailed information about your event"
           {...form.register('detailed_description', { required: true })}
         />
+        <p className="text-sm text-gray-500 mt-2">
+          Supports <a href="https://commonmark.org/help/" target="_blank" rel="noopener noreferrer" className="text-blue-500 underline">Markdown</a> syntax for formatting.
+        </p>
       </div>
+
       <div className="grid grid-cols-2 gap-4">
         <div className="form-control">
           <label className="label font-medium text-dark-purple">Tags</label>

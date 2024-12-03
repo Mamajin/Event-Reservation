@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import api from '../api';
 import { PROFILE_PICTURE } from '../constants';
+import Loading from '../components/LoadingIndicator';
 
 function TicketDetail() {
   const { ticketId } = useParams();
@@ -44,9 +45,10 @@ function TicketDetail() {
   }, [ticketId]);
 
   if (loading) {
-    return <div>Loading...</div>;
+    return (
+      <Loading></Loading>
+  );
   }
-
   if (error) {
     return <div>{error}</div>;
   }

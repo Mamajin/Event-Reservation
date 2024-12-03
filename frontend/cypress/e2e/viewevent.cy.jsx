@@ -2,7 +2,7 @@ describe('Login and View Event', () => {
     it('should login and navigate to event details', () => {
       cy.visit('/login');
   
-      cy.get('input[placeholder="Username"]').type('testuser');
+      cy.get('input[placeholder="Username"]').type('testuser2');
       cy.get('input[placeholder="Password"]').type('StrongPass123!');
   
       cy.get('button').contains('Login').click();
@@ -10,7 +10,7 @@ describe('Login and View Event', () => {
       // Wait for login to complete and navigate to home/discover
       cy.url().should('include', '/');
   
-      cy.contains('a', 'Explore Events').click();
+      cy.contains('a', 'Discover').click();
   
       cy.intercept('GET', '/api/events/events').as('getEvents');
       cy.wait('@getEvents');

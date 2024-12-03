@@ -2,10 +2,11 @@ import React from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { ACCESS_TOKEN, USER_STATUS, USER_NAME, PROFILE_PICTURE } from '../constants';
 import { StarIcon } from '@heroicons/react/24/solid';
+import { useTheme } from '../style/ThemeContext';
 
 function Navbar() {
   const navigate = useNavigate();
-
+  const { theme } = useTheme();
   const handleLogout = () => {
     navigate('/logout');
   };
@@ -16,7 +17,12 @@ function Navbar() {
   const profilePicture = localStorage.getItem(PROFILE_PICTURE);
 
   return (
-    <nav className="navbar bg-dark-purple fixed top-0 left-0 right-0 z-50">
+    <nav className="navbar bg-dark-purple fixed top-0 left-0 right-0 z-50"
+    style={{ 
+      color: theme?.primary,
+      backgroundColor: theme?.secondary
+    }}>
+      
       <StarIcon className="bg-amber-300 text-xl h-8 w-9 text-dark-purple rounded cursor-pointer mr-2" />
       <div className="navbar-start">
         <Link to="/" className="btn btn-ghost text-white text-xl p-0">
@@ -27,7 +33,10 @@ function Navbar() {
         {isLoggedIn ? (
           <>
             {isOrganizer && (
-              <Link to="/create-event" className="btn ml-2 bg-gradient-to-r from-slate-300 to-amber-500  bg-amber-300 text-dark-purple">
+              <Link to="/create-event" 
+              className="btn ml-2 bg-gradient-to-r from-slate-300 to-amber-500  bg-amber-300 text-dark-purple"
+              data-testid="create-event-button"
+              >
                 Create Event +
               </Link>
             )}
