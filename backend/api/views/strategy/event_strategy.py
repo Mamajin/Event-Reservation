@@ -147,7 +147,27 @@ class EventStrategy(ABC):
                     self.user = user
         else:
             self.user = self.request.user
-        
+            
+    def add_event(self, event_list: list, events : list):
+        """
+        Add event data to a list, including engagement information, user engagement status, 
+        and organizer status.
+
+        Args:
+            event_list (list): The list to which event data will be added.
+            events (QuerySet): The events for which data will be added to the list.
+        """
+        for event in events:
+            engagement = EventResponseSchema.resolve_engagement(event)
+            user_engaged = EventResponseSchema.resolve_user_engagement(event, self.user)
+            EventResponseSchema.set_status_event(event)
+            
+            event_data = EventResponseSchema.from_orm(event)
+            event_data.engagement = engagement
+            event_data.user_engaged = user_engaged
+            event_data.is_organizer = event.organizer.user == self.user
+            
+            event_list.append(event_data)
     
     
 class EventCreateStrategy(EventStrategy):
@@ -285,6 +305,7 @@ class EventDetailStrategy(EventStrategy):
         event_data = EventResponseSchema.from_orm(event)
         event_data.engagement = engagement_data
         event_data.user_engaged = user_engaged
+        event_data.is_organizer = event.organizer.user == self.user
         return event_data
     
     
