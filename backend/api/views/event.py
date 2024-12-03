@@ -46,7 +46,7 @@ class EventAPI(ControllerBase):
         return strategy.execute()
 
     @route.get('/events', response=List[EventResponseSchema])
-    def list_all_events(self,request: HttpRequest):
+    def list_all_events(self, request: HttpRequest, page: int = 1):
         """
         Retrieve all public events for the homepage.
 
@@ -58,7 +58,7 @@ class EventAPI(ControllerBase):
         """
         
         strategy : EventStrategy = EventStrategy.get_strategy('list_event', request)
-        return strategy.execute()
+        return strategy.execute(page)
     
     @route.patch('/{event_id}/edit', response={200: EventUpdateSchema, 401: ErrorResponseSchema, 404: ErrorResponseSchema}, auth=JWTAuth())
     def edit_event(self,request: HttpRequest, event_id: int, data: EventUpdateSchema):
