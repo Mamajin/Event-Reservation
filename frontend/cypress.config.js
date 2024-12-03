@@ -6,7 +6,7 @@ export default defineConfig({
   e2e: {
     // Production URL https://event-reservation-isp.vercel.app/
     // Local Host URL http://localhost:5173/
-    baseUrl: "http://localhost:5173/",
+    baseUrl: "https://event-reservation-isp.vercel.app/",
     defaultCommandTimeout: 10000,
     viewportWidth: 1280,
     viewportHeight: 720,

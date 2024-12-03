@@ -2,7 +2,7 @@ describe('Navigate to MyTickets Page', () => {
     beforeEach(() => {
       cy.visit('/login');
   
-      cy.get('input[placeholder="Username"]').type('testuser');
+      cy.get('input[placeholder="Username"]').type('testuser2');
       cy.get('input[placeholder="Password"]').type('StrongPass123!');
       cy.get('button').contains('Login').click();
   
@@ -14,10 +14,8 @@ describe('Navigate to MyTickets Page', () => {
       
         cy.url().should('include', '/my-tickets');
       
-        // Check if the "My Tickets" header is visible
         cy.get('h1').contains('My Tickets').should('be.visible');
       
-        // Flexible check for empty state or tickets
         cy.get('[data-testid="empty-tickets-message"], [data-testid="virtual-ticket-exist"]')
           .should('exist')
           .then(($el) => {
